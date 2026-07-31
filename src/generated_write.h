@@ -249,4 +249,3 @@ void chip_set_scribe_line_west(const OdbDb& db, rust::Str chip, int32_t scribe_l
 void chip_set_scribe_line_north(const OdbDb& db, rust::Str chip, int32_t scribe_line_north);
 void chip_set_scribe_line_south(const OdbDb& db, rust::Str chip, int32_t scribe_line_south);
 void chip_set_tsv(const OdbDb& db, rust::Str chip, bool tsv);
-void chipinst_set_orient(const OdbDb& db, rust::Str chip, rust::Str inst, rust::Str orient);

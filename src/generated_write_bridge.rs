@@ -254,7 +254,6 @@ mod ffi_gen_write {
         fn chip_set_scribe_line_north(db: &OdbDb, chip: &str, scribe_line_north: i32) -> Result<()>;
         fn chip_set_scribe_line_south(db: &OdbDb, chip: &str, scribe_line_south: i32) -> Result<()>;
         fn chip_set_tsv(db: &OdbDb, chip: &str, tsv: bool) -> Result<()>;
-        fn chipinst_set_orient(db: &OdbDb, chip: &str, inst: &str, orient: &str) -> Result<()>;
     }
 }
 
@@ -313,7 +312,6 @@ pub use ffi_gen_write::{
     chip_set_thickness,
     chip_set_tsv,
     chip_set_width,
-    chipinst_set_orient,
     inst_clear_user_flag1,
     inst_clear_user_flag2,
     inst_clear_user_flag3,

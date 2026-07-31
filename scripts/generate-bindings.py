@@ -99,7 +99,16 @@ TARGETS = {
     # by (parent chip name, inst name): dbDatabase::getChipInsts() is flat and inst names are only
     # unique within their parent chip, so the parent is part of the key.
     "dbChip":     {"key": "chip",     "args": ["chip"],         "resolve": "gen_chip(h, chip)"},
-    "dbChipInst": {"key": "chipinst", "args": ["chip", "inst"], "resolve": "gen_chipinst(h, chip, inst)"},
+    # skip_setters(setOrient): setOrient and setLoc are COUPLED, and we can only marshal one of
+    # them. dbChipInst::setLoc does not store the point it is given -- it orients the master
+    # chip's cuboid and stores the delta that lands its lower-left-lower corner on that point;
+    # getLoc() is getCuboid().lll(), which re-applies the CURRENT orientation. So re-orienting an
+    # already-placed chip inst silently MOVES it. setLoc takes a Point3D, which is not a
+    # marshallable setter param, so a caller who tripped that could not put the chip back.
+    # Exposing only the destructive half is worse than exposing neither.
+    # TODO: marshal Point3D as a setter param, then expose BOTH and document orient-before-loc.
+    "dbChipInst": {"key": "chipinst", "args": ["chip", "inst"], "resolve": "gen_chipinst(h, chip, inst)",
+                   "skip_setters": ["setOrient"]},
 }
 
 
@@ -294,6 +303,10 @@ class Emit:
         key, resolve = spec["key"], spec["resolve"]
         name = m["name"]
         if not (name.startswith("set") or name.startswith("clear")):
+            return False
+        # setters this target deliberately withholds -- see `skip_setters` in TARGETS. Used when
+        # emitting one HALF of a coupled pair would be a hazard rather than a partial feature.
+        if name in spec.get("skip_setters", ()):
             return False
         fn = f"{key}_{snake(name)}"
         if fn in seen or fn in reserved_fn or fn in reserved_db:
