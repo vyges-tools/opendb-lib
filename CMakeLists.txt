@@ -117,9 +117,25 @@ target_compile_options(odb PRIVATE $<$<CXX_COMPILER_ID:GNU>:-Wno-class-memaccess
 #
 # Everything else 3D — the dbChip* schema, the unfolded model, and check_3dblox — needs neither
 # and is built unconditionally above.
-option(VYGES_ODB_3DBLOX_IO "Build the 3Dblox .3dbv/.3dbx reader/writer (needs yaml-cpp + OpenSTA)" OFF)
+#
+# COST OF TURNING THIS ON, measured (Ubuntu 24.04, 2026-07-31):
+#   + yaml-cpp                     (the .3dbv/.3dbx parsers/writers)
+#   + OpenSTA, AT OPENROAD'S PIN   (3dblox.cpp's Verilog/Liberty front end)
+#   + Tcl                          (OpenSTA links it; libodb otherwise has none)
+#
+# The OpenSTA coupling is a version pin, not just a dependency: 3dblox.cpp calls
+# `sta::Sta::cmdScene()`, which does not exist in released OpenSTA 2.7.0 (that has `cmdCorner()`
+# and no Scene concept at all). It needs the OpenSTA submodule OpenROAD itself pins — for
+# openroad-pin.yaml's b562480 that is parallaxsw/OpenSTA @ 3ab3337d. Point OPENSTA_ROOT at a
+# build of THAT, not at a distro package.
+#
+# Tcl is the sharpest cost: "no Tcl, no SWIG, no engines" is this library's whole premise, and
+# this option breaks it. That is precisely why it is opt-in and why nothing else in the 3D
+# surface depends on it.
+option(VYGES_ODB_3DBLOX_IO "Build the 3Dblox .3dbv/.3dbx reader/writer (needs yaml-cpp + OpenSTA + Tcl)" OFF)
 if(VYGES_ODB_3DBLOX_IO)
   find_package(yaml-cpp REQUIRED)
+  find_package(TCL REQUIRED)   # OpenSTA is a Tcl application; its archive references Tcl_*
   find_path(OPENSTA_INCLUDE_DIR sta/Sta.hh HINTS ${OPENSTA_ROOT}/include /usr/local/include)
   find_library(OPENSTA_LIBRARY NAMES OpenSTA HINTS ${OPENSTA_ROOT}/lib /usr/local/lib)
   if(NOT OPENSTA_INCLUDE_DIR OR NOT OPENSTA_LIBRARY)
@@ -146,9 +162,9 @@ if(VYGES_ODB_3DBLOX_IO)
     endif()
   endif()
   target_include_directories(odb PRIVATE "${OPENSTA_INCLUDE_DIR}")
-  target_link_libraries(odb PUBLIC ${YAMLCPP_TGT} "${OPENSTA_LIBRARY}")
+  target_link_libraries(odb PUBLIC ${YAMLCPP_TGT} "${OPENSTA_LIBRARY}" ${TCL_LIBRARY})
   target_compile_definitions(odb PUBLIC VYGES_ODB_3DBLOX_IO=1)
-  message(STATUS "3Dblox I/O: ON (OpenSTA=${OPENSTA_LIBRARY})")
+  message(STATUS "3Dblox I/O: ON (OpenSTA=${OPENSTA_LIBRARY}, Tcl=${TCL_LIBRARY})")
 
   # Round-trip smoke: .odb -> .3dbv/.3dbx -> fresh .odb. Writing first is what gives us a real
   # 3Dblox input to read, since we have no third-party one.
