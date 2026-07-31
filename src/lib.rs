@@ -73,6 +73,10 @@ mod ffi {
 
         /// Capture libodb diagnostics rather than letting them reach its default stdout sink,
         /// so callers whose stdout is machine-readable stay parseable. End returns the captured text.
+        /// Replace an instance's library cell in place (resize / Vt-swap). `false` if odb
+        /// refuses (hierarchy-bound); errors on unknown inst/master or a don't-touch instance.
+        fn swap_master(db: &OdbDb, inst: &str, master: &str) -> Result<bool>;
+
         /// ECO journal — speculative edits with a real rollback. Sequence:
         /// `eco_begin` -> edits -> `eco_commit` | `eco_undo`.
         fn eco_begin(db: &OdbDb) -> Result<()>;
@@ -135,6 +139,7 @@ pub use ffi::{
     connect, create_inst, create_net, disconnect, find_master, first_master_name, input_pin,
     inst_master, inst_x, inst_y, log_capture_begin, log_capture_end, net_of, nth_bterm_name, nth_inst_name, nth_iterm_name, num_bterms,
     num_insts, num_iterms, num_nets, num_obstructions, open_db, output_pin, place_bterm,
+    swap_master,
     net_is_special, net_sigtype, nth_net_bterm, nth_net_iterm, nth_net_name, num_net_bterms,
     num_net_iterms, read_def, set_inst_location, set_inst_orient, total_wire_length, write_db,
     write_def, OdbDb,

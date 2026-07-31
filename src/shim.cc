@@ -381,3 +381,14 @@ void eco_end(const OdbDb& h) { odb::dbDatabase::endEco(require_block(h)); }
 void eco_commit(const OdbDb& h) { odb::dbDatabase::commitEco(require_block(h)); }
 void eco_undo(const OdbDb& h) { odb::dbDatabase::undoEco(require_block(h)); }
 bool eco_empty(const OdbDb& h) { return odb::dbDatabase::ecoEmpty(require_block(h)); }
+bool swap_master(const OdbDb& h, rust::Str inst, rust::Str master) {
+  dbInst* i = require_inst(h, inst);
+  std::string want = s(master);
+  dbMaster* m = nullptr;
+  for (odb::dbLib* lib : h.db->getLibs()) {
+    if ((m = lib->findMaster(want.c_str()))) break;
+  }
+  if (!m) throw std::runtime_error("vyges-opendb: master not found: " + want);
+  // odb throws (utl::Logger::error) on a dont_touch instance; let that propagate as a Result.
+  return i->swapMaster(m);
+}

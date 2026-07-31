@@ -78,6 +78,25 @@ rust::String nth_net_bterm(const OdbDb& db, rust::Str net, std::size_t i);  // i
 // the design. Nothing is persisted unless the caller writes the database out.
 std::size_t check_3dblox(const OdbDb& db);
 
+// ---- resize / Vt-swap --------------------------------------------------------
+// Replace an instance's library cell in place — the setup-repair move (upsize a critical
+// driver), and equally the Vt-swap and downsize moves.
+//
+// Returns false when odb refuses the swap because the instance is bound to a block hierarchy.
+// THROWS when the instance or master is unknown, and when the instance is marked don't-touch
+// (odb raises there rather than returning false, and a don't-touch instance being silently
+// resized is exactly the failure that flag exists to prevent).
+//
+// odb DOES check pin compatibility: the new master must have the same number of MTerms with
+// exactly the same names (sorted pairwise strcmp), else it warns and returns false. So a swap
+// cannot silently strand connections.
+//
+// It does NOT check LOGICAL equivalence — same pins does not mean same function. Picking a
+// replacement that actually computes the same thing is the caller's problem.
+//
+// The swap is journaled (dbJournal kSwapObject), so it rolls back with the ECO journal below.
+bool swap_master(const OdbDb& db, rust::Str inst, rust::Str master);
+
 // ---- ECO journal: speculative edits with a real undo -------------------------
 // odb records block edits (create/delete object, connect/disconnect, swap, field updates) into
 // a journal, so a batch of ECO changes can be rolled back. This is what lets a timing-driven
