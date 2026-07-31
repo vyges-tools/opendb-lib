@@ -125,3 +125,10 @@ inline odb::dbTechAntennaPinModel* gen_antennapinmodel(const OdbDb& h, rust::Str
 inline odb::dbViaParams* gen_via_params(const OdbDb& h, rust::Str via) {
   thread_local odb::dbViaParams vp;
   odb::dbVia* v = gen_via(h, via); if (!v) return nullptr; vp = v->getViaParams(); return &vp; }
+// 3D / chiplet. These resolve from h.db directly -- a dbChip sits ABOVE dbBlock, so unlike
+// every resolver above they do not route through gen_block(). findChip takes const char*;
+// findChipInst takes std::string, hence gs(n) without .c_str().
+inline odb::dbChip* gen_chip(const OdbDb& h, rust::Str n) {
+  return h.db->findChip(gs(n).c_str()); }
+inline odb::dbChipInst* gen_chipinst(const OdbDb& h, rust::Str chip, rust::Str n) {
+  odb::dbChip* c = gen_chip(h, chip); return c ? c->findChipInst(gs(n)) : nullptr; }

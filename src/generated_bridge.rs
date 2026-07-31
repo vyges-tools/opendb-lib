@@ -746,6 +746,55 @@ mod ffi_gen {
         fn via_params_get_top_layer(db: &OdbDb, via: &str) -> String;
         fn via_params_get_cut_layer(db: &OdbDb, via: &str) -> String;
         fn via_params_get_bottom_layer(db: &OdbDb, via: &str) -> String;
+        fn chip_get_name(db: &OdbDb, chip: &str) -> String;
+        fn chip_get_offset_x(db: &OdbDb, chip: &str) -> i32;
+        fn chip_get_offset_y(db: &OdbDb, chip: &str) -> i32;
+        fn chip_get_width(db: &OdbDb, chip: &str) -> i32;
+        fn chip_get_height(db: &OdbDb, chip: &str) -> i32;
+        fn chip_get_thickness(db: &OdbDb, chip: &str) -> i32;
+        fn chip_get_shrink(db: &OdbDb, chip: &str) -> f32;
+        fn chip_get_seal_ring_east(db: &OdbDb, chip: &str) -> i32;
+        fn chip_get_seal_ring_west(db: &OdbDb, chip: &str) -> i32;
+        fn chip_get_seal_ring_north(db: &OdbDb, chip: &str) -> i32;
+        fn chip_get_seal_ring_south(db: &OdbDb, chip: &str) -> i32;
+        fn chip_get_scribe_line_east(db: &OdbDb, chip: &str) -> i32;
+        fn chip_get_scribe_line_west(db: &OdbDb, chip: &str) -> i32;
+        fn chip_get_scribe_line_north(db: &OdbDb, chip: &str) -> i32;
+        fn chip_get_scribe_line_south(db: &OdbDb, chip: &str) -> i32;
+        fn chip_is_tsv(db: &OdbDb, chip: &str) -> bool;
+        fn num_chip_get_chip_regions(db: &OdbDb, chip: &str) -> usize;
+        fn nth_chip_get_chip_regions(db: &OdbDb, chip: &str, i: usize) -> String;
+        fn num_chip_get_marker_categories(db: &OdbDb, chip: &str) -> usize;
+        fn nth_chip_get_marker_categories(db: &OdbDb, chip: &str, i: usize) -> String;
+        fn num_chip_get_chip_paths(db: &OdbDb, chip: &str) -> usize;
+        fn nth_chip_get_chip_paths(db: &OdbDb, chip: &str, i: usize) -> String;
+        fn chip_get_block(db: &OdbDb, chip: &str) -> String;
+        fn num_chip_get_chip_insts(db: &OdbDb, chip: &str) -> usize;
+        fn nth_chip_get_chip_insts(db: &OdbDb, chip: &str, i: usize) -> String;
+        fn num_chip_get_chip_conns(db: &OdbDb, chip: &str) -> usize;
+        fn nth_chip_get_chip_conns(db: &OdbDb, chip: &str, i: usize) -> String;
+        fn num_chip_get_chip_nets(db: &OdbDb, chip: &str) -> usize;
+        fn nth_chip_get_chip_nets(db: &OdbDb, chip: &str, i: usize) -> String;
+        fn chip_get_tech(db: &OdbDb, chip: &str) -> String;
+        fn chip_get_b_box_x_min(db: &OdbDb, chip: &str) -> i32;
+        fn chip_get_b_box_y_min(db: &OdbDb, chip: &str) -> i32;
+        fn chip_get_b_box_x_max(db: &OdbDb, chip: &str) -> i32;
+        fn chip_get_b_box_y_max(db: &OdbDb, chip: &str) -> i32;
+        fn chip_get_b_box_dx(db: &OdbDb, chip: &str) -> i32;
+        fn chip_get_b_box_dy(db: &OdbDb, chip: &str) -> i32;
+        fn chipinst_get_name(db: &OdbDb, chip: &str, inst: &str) -> String;
+        fn chipinst_get_orient(db: &OdbDb, chip: &str, inst: &str) -> String;
+        fn chipinst_get_master_chip(db: &OdbDb, chip: &str, inst: &str) -> String;
+        fn chipinst_get_parent_chip(db: &OdbDb, chip: &str, inst: &str) -> String;
+        fn chipinst_get_loc_x(db: &OdbDb, chip: &str, inst: &str) -> i32;
+        fn chipinst_get_loc_y(db: &OdbDb, chip: &str, inst: &str) -> i32;
+        fn chipinst_get_loc_z(db: &OdbDb, chip: &str, inst: &str) -> i32;
+        fn chipinst_get_b_box_x_min(db: &OdbDb, chip: &str, inst: &str) -> i32;
+        fn chipinst_get_b_box_y_min(db: &OdbDb, chip: &str, inst: &str) -> i32;
+        fn chipinst_get_b_box_x_max(db: &OdbDb, chip: &str, inst: &str) -> i32;
+        fn chipinst_get_b_box_y_max(db: &OdbDb, chip: &str, inst: &str) -> i32;
+        fn chipinst_get_b_box_dx(db: &OdbDb, chip: &str, inst: &str) -> i32;
+        fn chipinst_get_b_box_dy(db: &OdbDb, chip: &str, inst: &str) -> i32;
     }
 }
 
@@ -866,6 +915,43 @@ pub use ffi_gen::{
     ccseg_get_target_net,
     ccseg_get_target_node_num,
     ccseg_is_marked,
+    chip_get_b_box_dx,
+    chip_get_b_box_dy,
+    chip_get_b_box_x_max,
+    chip_get_b_box_x_min,
+    chip_get_b_box_y_max,
+    chip_get_b_box_y_min,
+    chip_get_block,
+    chip_get_height,
+    chip_get_name,
+    chip_get_offset_x,
+    chip_get_offset_y,
+    chip_get_scribe_line_east,
+    chip_get_scribe_line_north,
+    chip_get_scribe_line_south,
+    chip_get_scribe_line_west,
+    chip_get_seal_ring_east,
+    chip_get_seal_ring_north,
+    chip_get_seal_ring_south,
+    chip_get_seal_ring_west,
+    chip_get_shrink,
+    chip_get_tech,
+    chip_get_thickness,
+    chip_get_width,
+    chip_is_tsv,
+    chipinst_get_b_box_dx,
+    chipinst_get_b_box_dy,
+    chipinst_get_b_box_x_max,
+    chipinst_get_b_box_x_min,
+    chipinst_get_b_box_y_max,
+    chipinst_get_b_box_y_min,
+    chipinst_get_loc_x,
+    chipinst_get_loc_y,
+    chipinst_get_loc_z,
+    chipinst_get_master_chip,
+    chipinst_get_name,
+    chipinst_get_orient,
+    chipinst_get_parent_chip,
     fill_get_tech_layer,
     fill_mask_number,
     fill_needs_o_p_c,
@@ -1228,6 +1314,12 @@ pub use ffi_gen::{
     nth_block_get_regions,
     nth_block_get_rows,
     nth_block_get_vias,
+    nth_chip_get_chip_conns,
+    nth_chip_get_chip_insts,
+    nth_chip_get_chip_nets,
+    nth_chip_get_chip_paths,
+    nth_chip_get_chip_regions,
+    nth_chip_get_marker_categories,
     nth_group_get_ground_nets,
     nth_group_get_groups,
     nth_group_get_insts,
@@ -1290,6 +1382,12 @@ pub use ffi_gen::{
     num_block_get_regions,
     num_block_get_rows,
     num_block_get_vias,
+    num_chip_get_chip_conns,
+    num_chip_get_chip_insts,
+    num_chip_get_chip_nets,
+    num_chip_get_chip_paths,
+    num_chip_get_chip_regions,
+    num_chip_get_marker_categories,
     num_group_get_ground_nets,
     num_group_get_groups,
     num_group_get_insts,

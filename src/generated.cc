@@ -743,3 +743,52 @@ int32_t via_params_get_y_bottom_offset(const OdbDb& h, rust::Str via) { auto* p 
 rust::String via_params_get_top_layer(const OdbDb& h, rust::Str via) { auto* p = gen_via_params(h, via); if (!p) return rust::String(); auto* t = p->getTopLayer(); return t ? rust::String(t->getConstName()) : rust::String(); }
 rust::String via_params_get_cut_layer(const OdbDb& h, rust::Str via) { auto* p = gen_via_params(h, via); if (!p) return rust::String(); auto* t = p->getCutLayer(); return t ? rust::String(t->getConstName()) : rust::String(); }
 rust::String via_params_get_bottom_layer(const OdbDb& h, rust::Str via) { auto* p = gen_via_params(h, via); if (!p) return rust::String(); auto* t = p->getBottomLayer(); return t ? rust::String(t->getConstName()) : rust::String(); }
+rust::String chip_get_name(const OdbDb& h, rust::Str chip) { auto* p = gen_chip(h, chip); if (!p) return rust::String(); const char* v = p->getName(); return rust::String(v ? v : ""); }
+int32_t chip_get_offset_x(const OdbDb& h, rust::Str chip) { auto* p = gen_chip(h, chip); return p ? p->getOffset().getX() : 0; }
+int32_t chip_get_offset_y(const OdbDb& h, rust::Str chip) { auto* p = gen_chip(h, chip); return p ? p->getOffset().getY() : 0; }
+int32_t chip_get_width(const OdbDb& h, rust::Str chip) { auto* p = gen_chip(h, chip); return p ? p->getWidth() : 0; }
+int32_t chip_get_height(const OdbDb& h, rust::Str chip) { auto* p = gen_chip(h, chip); return p ? p->getHeight() : 0; }
+int32_t chip_get_thickness(const OdbDb& h, rust::Str chip) { auto* p = gen_chip(h, chip); return p ? p->getThickness() : 0; }
+float chip_get_shrink(const OdbDb& h, rust::Str chip) { auto* p = gen_chip(h, chip); return p ? p->getShrink() : 0.0f; }
+int32_t chip_get_seal_ring_east(const OdbDb& h, rust::Str chip) { auto* p = gen_chip(h, chip); return p ? p->getSealRingEast() : 0; }
+int32_t chip_get_seal_ring_west(const OdbDb& h, rust::Str chip) { auto* p = gen_chip(h, chip); return p ? p->getSealRingWest() : 0; }
+int32_t chip_get_seal_ring_north(const OdbDb& h, rust::Str chip) { auto* p = gen_chip(h, chip); return p ? p->getSealRingNorth() : 0; }
+int32_t chip_get_seal_ring_south(const OdbDb& h, rust::Str chip) { auto* p = gen_chip(h, chip); return p ? p->getSealRingSouth() : 0; }
+int32_t chip_get_scribe_line_east(const OdbDb& h, rust::Str chip) { auto* p = gen_chip(h, chip); return p ? p->getScribeLineEast() : 0; }
+int32_t chip_get_scribe_line_west(const OdbDb& h, rust::Str chip) { auto* p = gen_chip(h, chip); return p ? p->getScribeLineWest() : 0; }
+int32_t chip_get_scribe_line_north(const OdbDb& h, rust::Str chip) { auto* p = gen_chip(h, chip); return p ? p->getScribeLineNorth() : 0; }
+int32_t chip_get_scribe_line_south(const OdbDb& h, rust::Str chip) { auto* p = gen_chip(h, chip); return p ? p->getScribeLineSouth() : 0; }
+bool chip_is_tsv(const OdbDb& h, rust::Str chip) { auto* p = gen_chip(h, chip); return p ? p->isTsv() : false; }
+std::size_t num_chip_get_chip_regions(const OdbDb& h, rust::Str chip) { auto* p = gen_chip(h, chip); return p ? p->getChipRegions().size() : 0; }
+rust::String nth_chip_get_chip_regions(const OdbDb& h, rust::Str chip, std::size_t i) { auto* p = gen_chip(h, chip); if (!p) return rust::String(); std::size_t k = 0; for (auto* e : p->getChipRegions()) { if (k++ == i) return rust::String(e->getName()); } return rust::String(); }
+std::size_t num_chip_get_marker_categories(const OdbDb& h, rust::Str chip) { auto* p = gen_chip(h, chip); return p ? p->getMarkerCategories().size() : 0; }
+rust::String nth_chip_get_marker_categories(const OdbDb& h, rust::Str chip, std::size_t i) { auto* p = gen_chip(h, chip); if (!p) return rust::String(); std::size_t k = 0; for (auto* e : p->getMarkerCategories()) { if (k++ == i) return rust::String(e->getName()); } return rust::String(); }
+std::size_t num_chip_get_chip_paths(const OdbDb& h, rust::Str chip) { auto* p = gen_chip(h, chip); return p ? p->getChipPaths().size() : 0; }
+rust::String nth_chip_get_chip_paths(const OdbDb& h, rust::Str chip, std::size_t i) { auto* p = gen_chip(h, chip); if (!p) return rust::String(); std::size_t k = 0; for (auto* e : p->getChipPaths()) { if (k++ == i) return rust::String(e->getName()); } return rust::String(); }
+rust::String chip_get_block(const OdbDb& h, rust::Str chip) { auto* p = gen_chip(h, chip); if (!p) return rust::String(); auto* t = p->getBlock(); return t ? rust::String(t->getConstName()) : rust::String(); }
+std::size_t num_chip_get_chip_insts(const OdbDb& h, rust::Str chip) { auto* p = gen_chip(h, chip); return p ? p->getChipInsts().size() : 0; }
+rust::String nth_chip_get_chip_insts(const OdbDb& h, rust::Str chip, std::size_t i) { auto* p = gen_chip(h, chip); if (!p) return rust::String(); std::size_t k = 0; for (auto* e : p->getChipInsts()) { if (k++ == i) return rust::String(e->getName()); } return rust::String(); }
+std::size_t num_chip_get_chip_conns(const OdbDb& h, rust::Str chip) { auto* p = gen_chip(h, chip); return p ? p->getChipConns().size() : 0; }
+rust::String nth_chip_get_chip_conns(const OdbDb& h, rust::Str chip, std::size_t i) { auto* p = gen_chip(h, chip); if (!p) return rust::String(); std::size_t k = 0; for (auto* e : p->getChipConns()) { if (k++ == i) return rust::String(e->getName()); } return rust::String(); }
+std::size_t num_chip_get_chip_nets(const OdbDb& h, rust::Str chip) { auto* p = gen_chip(h, chip); return p ? p->getChipNets().size() : 0; }
+rust::String nth_chip_get_chip_nets(const OdbDb& h, rust::Str chip, std::size_t i) { auto* p = gen_chip(h, chip); if (!p) return rust::String(); std::size_t k = 0; for (auto* e : p->getChipNets()) { if (k++ == i) return rust::String(e->getName()); } return rust::String(); }
+rust::String chip_get_tech(const OdbDb& h, rust::Str chip) { auto* p = gen_chip(h, chip); if (!p) return rust::String(); auto* t = p->getTech(); return t ? rust::String(t->getName()) : rust::String(); }
+int32_t chip_get_b_box_x_min(const OdbDb& h, rust::Str chip) { auto* p = gen_chip(h, chip); return p ? p->getBBox().xMin() : 0; }
+int32_t chip_get_b_box_y_min(const OdbDb& h, rust::Str chip) { auto* p = gen_chip(h, chip); return p ? p->getBBox().yMin() : 0; }
+int32_t chip_get_b_box_x_max(const OdbDb& h, rust::Str chip) { auto* p = gen_chip(h, chip); return p ? p->getBBox().xMax() : 0; }
+int32_t chip_get_b_box_y_max(const OdbDb& h, rust::Str chip) { auto* p = gen_chip(h, chip); return p ? p->getBBox().yMax() : 0; }
+int32_t chip_get_b_box_dx(const OdbDb& h, rust::Str chip) { auto* p = gen_chip(h, chip); return p ? p->getBBox().dx() : 0; }
+int32_t chip_get_b_box_dy(const OdbDb& h, rust::Str chip) { auto* p = gen_chip(h, chip); return p ? p->getBBox().dy() : 0; }
+rust::String chipinst_get_name(const OdbDb& h, rust::Str chip, rust::Str inst) { auto* p = gen_chipinst(h, chip, inst); return p ? rust::String(p->getName()) : rust::String(); }
+rust::String chipinst_get_orient(const OdbDb& h, rust::Str chip, rust::Str inst) { auto* p = gen_chipinst(h, chip, inst); return p ? rust::String(p->getOrient().getString()) : rust::String(); }
+rust::String chipinst_get_master_chip(const OdbDb& h, rust::Str chip, rust::Str inst) { auto* p = gen_chipinst(h, chip, inst); if (!p) return rust::String(); auto* t = p->getMasterChip(); return t ? rust::String(t->getName()) : rust::String(); }
+rust::String chipinst_get_parent_chip(const OdbDb& h, rust::Str chip, rust::Str inst) { auto* p = gen_chipinst(h, chip, inst); if (!p) return rust::String(); auto* t = p->getParentChip(); return t ? rust::String(t->getName()) : rust::String(); }
+int32_t chipinst_get_loc_x(const OdbDb& h, rust::Str chip, rust::Str inst) { auto* p = gen_chipinst(h, chip, inst); return p ? p->getLoc().x() : 0; }
+int32_t chipinst_get_loc_y(const OdbDb& h, rust::Str chip, rust::Str inst) { auto* p = gen_chipinst(h, chip, inst); return p ? p->getLoc().y() : 0; }
+int32_t chipinst_get_loc_z(const OdbDb& h, rust::Str chip, rust::Str inst) { auto* p = gen_chipinst(h, chip, inst); return p ? p->getLoc().z() : 0; }
+int32_t chipinst_get_b_box_x_min(const OdbDb& h, rust::Str chip, rust::Str inst) { auto* p = gen_chipinst(h, chip, inst); return p ? p->getBBox().xMin() : 0; }
+int32_t chipinst_get_b_box_y_min(const OdbDb& h, rust::Str chip, rust::Str inst) { auto* p = gen_chipinst(h, chip, inst); return p ? p->getBBox().yMin() : 0; }
+int32_t chipinst_get_b_box_x_max(const OdbDb& h, rust::Str chip, rust::Str inst) { auto* p = gen_chipinst(h, chip, inst); return p ? p->getBBox().xMax() : 0; }
+int32_t chipinst_get_b_box_y_max(const OdbDb& h, rust::Str chip, rust::Str inst) { auto* p = gen_chipinst(h, chip, inst); return p ? p->getBBox().yMax() : 0; }
+int32_t chipinst_get_b_box_dx(const OdbDb& h, rust::Str chip, rust::Str inst) { auto* p = gen_chipinst(h, chip, inst); return p ? p->getBBox().dx() : 0; }
+int32_t chipinst_get_b_box_dy(const OdbDb& h, rust::Str chip, rust::Str inst) { auto* p = gen_chipinst(h, chip, inst); return p ? p->getBBox().dy() : 0; }

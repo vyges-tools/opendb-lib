@@ -93,6 +93,13 @@ TARGETS = {
     # read_only: the resolver hands back a pointer to a COPY, so setters wouldn't persist to the via
     # (a value-struct is written via via->setViaParams(...)); emit getters only.
     "dbViaParams": {"key": "via_params", "args": ["via"], "resolve": "gen_via_params(h, via)", "read_only": True},
+    # ---- 3D / chiplet (ODB 3D-IC support; see src/odb/doc/3dic.md upstream).
+    # These sit at CHIP level, ABOVE dbBlock, so their resolvers key off h.db directly rather than
+    # going through gen_block() — the first targets in this table that do. A dbChipInst is addressed
+    # by (parent chip name, inst name): dbDatabase::getChipInsts() is flat and inst names are only
+    # unique within their parent chip, so the parent is part of the key.
+    "dbChip":     {"key": "chip",     "args": ["chip"],         "resolve": "gen_chip(h, chip)"},
+    "dbChipInst": {"key": "chipinst", "args": ["chip", "inst"], "resolve": "gen_chipinst(h, chip, inst)"},
 }
 
 
@@ -114,16 +121,22 @@ SCALAR = {
     "float": ("f32", "float", "0.0f"),
     "double": ("f64", "double", "0.0"),
 }
-# enum types that expose `const char* getString() const` (odb/dbTypes.h) AND a `dbFoo(const char*)`
-# constructor — so they marshal both ways (getter → string, setter param ← string).
-ENUMS = {"dbSigType", "dbIoType", "dbPlacementStatus", "dbOrientType", "dbSourceType", "dbWireType"}
+# enum types that expose `getString() const` (odb/dbTypes.h) AND a single-string constructor —
+# so they marshal both ways (getter → string, setter param ← string). Either flavour works:
+# `const char*` (the six 2D types) or `std::string` (dbOrientType3D) — rust::String accepts a
+# std::string return, and a const char* argument reaches a `const std::string&` parameter through
+# one user-defined conversion, which direct-initialisation permits.
+ENUMS = {"dbSigType", "dbIoType", "dbPlacementStatus", "dbOrientType", "dbSourceType", "dbWireType",
+         "dbOrientType3D"}
 
 # geometry structs returned by value — expanded into scalar (int) sub-fields (suffix, accessor),
 # so `Rect getBBox()` becomes get_b_box_{x_min,y_min,x_max,y_max,dx,dy}. Reuses the scalar path.
+# Point3D (geom.h) uses lowercase x()/y()/z() accessors, unlike Point's getX()/getY().
 STRUCT_FIELDS = {
     "Point": [("x", "getX"), ("y", "getY")],
     "Rect": [("x_min", "xMin"), ("y_min", "yMin"), ("x_max", "xMax"), ("y_max", "yMax"),
              ("dx", "dx"), ("dy", "dy")],
+    "Point3D": [("x", "x"), ("y", "y"), ("z", "z")],
 }
 
 # setter param scalar -> (cxx type, rust type)
@@ -735,6 +748,13 @@ def main() -> int:
         "static odb::dbViaParams* gen_via_params(const OdbDb& h, rust::Str via) {\n"
         "  thread_local odb::dbViaParams vp;\n"  # block-scope thread_local is already static storage
         "  odb::dbVia* v = gen_via(h, via); if (!v) return nullptr; vp = v->getViaParams(); return &vp; }\n"
+        "// 3D / chiplet. These resolve from h.db directly -- a dbChip sits ABOVE dbBlock, so unlike\n"
+        "// every resolver above they do not route through gen_block(). findChip takes const char*;\n"
+        "// findChipInst takes std::string, hence gs(n) without .c_str().\n"
+        "static odb::dbChip* gen_chip(const OdbDb& h, rust::Str n) {\n"
+        "  return h.db->findChip(gs(n).c_str()); }\n"
+        "static odb::dbChipInst* gen_chipinst(const OdbDb& h, rust::Str chip, rust::Str n) {\n"
+        "  odb::dbChip* c = gen_chip(h, chip); return c ? c->findChipInst(gs(n)) : nullptr; }\n"
         "}  // namespace\n")
 
     # ---- generated_resolvers.h (shared by the read + write .cc) -----------------

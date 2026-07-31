@@ -236,3 +236,17 @@ void layerantenna_set_diff_p_a_r(const OdbDb& db, rust::Str layer, double ratio)
 void layerantenna_set_diff_c_a_r(const OdbDb& db, rust::Str layer, double ratio);
 void layerantenna_set_diff_p_s_r(const OdbDb& db, rust::Str layer, double ratio);
 void layerantenna_set_diff_c_s_r(const OdbDb& db, rust::Str layer, double ratio);
+void chip_set_width(const OdbDb& db, rust::Str chip, int32_t width);
+void chip_set_height(const OdbDb& db, rust::Str chip, int32_t height);
+void chip_set_thickness(const OdbDb& db, rust::Str chip, int32_t thickness);
+void chip_set_shrink(const OdbDb& db, rust::Str chip, float shrink);
+void chip_set_seal_ring_east(const OdbDb& db, rust::Str chip, int32_t seal_ring_east);
+void chip_set_seal_ring_west(const OdbDb& db, rust::Str chip, int32_t seal_ring_west);
+void chip_set_seal_ring_north(const OdbDb& db, rust::Str chip, int32_t seal_ring_north);
+void chip_set_seal_ring_south(const OdbDb& db, rust::Str chip, int32_t seal_ring_south);
+void chip_set_scribe_line_east(const OdbDb& db, rust::Str chip, int32_t scribe_line_east);
+void chip_set_scribe_line_west(const OdbDb& db, rust::Str chip, int32_t scribe_line_west);
+void chip_set_scribe_line_north(const OdbDb& db, rust::Str chip, int32_t scribe_line_north);
+void chip_set_scribe_line_south(const OdbDb& db, rust::Str chip, int32_t scribe_line_south);
+void chip_set_tsv(const OdbDb& db, rust::Str chip, bool tsv);
+void chipinst_set_orient(const OdbDb& db, rust::Str chip, rust::Str inst, rust::Str orient);

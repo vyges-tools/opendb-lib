@@ -241,6 +241,20 @@ mod ffi_gen_write {
         fn layerantenna_set_diff_c_a_r(db: &OdbDb, layer: &str, ratio: f64) -> Result<()>;
         fn layerantenna_set_diff_p_s_r(db: &OdbDb, layer: &str, ratio: f64) -> Result<()>;
         fn layerantenna_set_diff_c_s_r(db: &OdbDb, layer: &str, ratio: f64) -> Result<()>;
+        fn chip_set_width(db: &OdbDb, chip: &str, width: i32) -> Result<()>;
+        fn chip_set_height(db: &OdbDb, chip: &str, height: i32) -> Result<()>;
+        fn chip_set_thickness(db: &OdbDb, chip: &str, thickness: i32) -> Result<()>;
+        fn chip_set_shrink(db: &OdbDb, chip: &str, shrink: f32) -> Result<()>;
+        fn chip_set_seal_ring_east(db: &OdbDb, chip: &str, seal_ring_east: i32) -> Result<()>;
+        fn chip_set_seal_ring_west(db: &OdbDb, chip: &str, seal_ring_west: i32) -> Result<()>;
+        fn chip_set_seal_ring_north(db: &OdbDb, chip: &str, seal_ring_north: i32) -> Result<()>;
+        fn chip_set_seal_ring_south(db: &OdbDb, chip: &str, seal_ring_south: i32) -> Result<()>;
+        fn chip_set_scribe_line_east(db: &OdbDb, chip: &str, scribe_line_east: i32) -> Result<()>;
+        fn chip_set_scribe_line_west(db: &OdbDb, chip: &str, scribe_line_west: i32) -> Result<()>;
+        fn chip_set_scribe_line_north(db: &OdbDb, chip: &str, scribe_line_north: i32) -> Result<()>;
+        fn chip_set_scribe_line_south(db: &OdbDb, chip: &str, scribe_line_south: i32) -> Result<()>;
+        fn chip_set_tsv(db: &OdbDb, chip: &str, tsv: bool) -> Result<()>;
+        fn chipinst_set_orient(db: &OdbDb, chip: &str, inst: &str, orient: &str) -> Result<()>;
     }
 }
 
@@ -286,6 +300,20 @@ pub use ffi_gen_write::{
     capnode_set_sort_index,
     ccseg_set_capacitance,
     ccseg_set_mark,
+    chip_set_height,
+    chip_set_scribe_line_east,
+    chip_set_scribe_line_north,
+    chip_set_scribe_line_south,
+    chip_set_scribe_line_west,
+    chip_set_seal_ring_east,
+    chip_set_seal_ring_north,
+    chip_set_seal_ring_south,
+    chip_set_seal_ring_west,
+    chip_set_shrink,
+    chip_set_thickness,
+    chip_set_tsv,
+    chip_set_width,
+    chipinst_set_orient,
     inst_clear_user_flag1,
     inst_clear_user_flag2,
     inst_clear_user_flag3,
