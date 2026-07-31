@@ -39,6 +39,23 @@
 // the master chip's regions and bumps. The UNFOLDED classes are not written either: they are
 // rebuilt by constructUnfoldedModel(), which _dbDatabase::operator>> runs on read whenever the
 // database holds more than one chip.
+//
+// THE STACK IS DELIBERATELY DEFECTIVE, and check_3dblox is expected to report exactly two
+// violations on it. A linter fixture that lints clean proves almost nothing — "found 0" is also
+// what a broken checker returns — so this one carries a realistic modelling error:
+//
+//   u_top is mirrored in Z (MZ_R90), so top_die's FRONT region ends up facing BOTTOM. It is
+//   bonded to base_die's BACK region, which also faces BOTTOM. Two surfaces pointing the same
+//   way cannot mate, so:
+//     1. "Connection regions"  -> bond0 is invalid (both faces BOTTOM)
+//     2. "Floating chips"      -> u_base is an isolated set, BECAUSE its only bond is invalid
+//
+//   The second follows from the first, which is what makes it a good test: the checker is
+//   reasoning over the assembled geometry, not counting objects.
+//
+// Do not "fix" the orientation to make it lint clean — the read tests assert MZ_R90 and the
+// lint tests assert these two findings. A clean-path check is covered separately by running
+// the linter over the flat 2D fixtures, which correctly report 0.
 #include <fstream>
 #include <iostream>
 

@@ -78,7 +78,38 @@ other, so they need no special build. Bound so far:
 type, so it would contribute no fields. The same information is reachable through `dbChipBump`
 (folded) or `dbUnfoldedChipBumpInst` (absolute positions).
 
-Four things here will trip you up if they are not written down.
+### `check_3dblox` — the 3D structural linter
+
+odb's own 3D checker is built in and reachable as `check_3dblox`. It covers logical
+connectivity, floating chips, overlapping dies, unused `INTERNAL_EXT` regions, connection-region
+overlap and mating-surface gap versus connection thickness, bump physical alignment, and
+alignment markers.
+
+It reports the way odb reports every other violation — as `dbMarker` objects under a `3DBlox`
+category on the top chip, one sub-category per check — so findings are read back through the
+ordinary marker accessors, no new read path required. It also logs each finding through
+`utl::Logger`.
+
+One consequence worth knowing: `utl::Logger`'s default sink writes to **stdout**, so a caller
+emitting machine-readable output on stdout will have it corrupted. `log_capture_begin` /
+`log_capture_end` wrap a call with the diagnostics captured to a string instead, leaving stdout
+to the caller. Capture detaches every sink for the duration (including the events forwarder) and
+restores them afterwards, so messages emitted while captured reach the events trail only through
+what the caller does with the returned text.
+
+Only **`checker.cpp`** is compiled from `src/3dblox`. The rest of that directory links
+`yaml-cpp` (the `.3dbv`/`.3dbx` parsers) and `OpenSTA` (`3dblox.cpp`'s Verilog/Liberty path),
+neither of which belongs in an engine-free `libodb`. `checker.cpp` itself needs nothing beyond
+`odb` + `utl` + spdlog/fmt + Boost geometry, all already linked.
+
+The entry point is `src/lint3d.{h,cpp}`, which is **ours** and is the one file of ours compiled
+by `CMakeLists` rather than by the cxx build. `checker.h` is an internal odb header, not part of
+the public `include/` tree, so a shim that reached into `src/3dblox` would break the
+prebuilt-bundle path (which ships only `include/{odb,utl}`) — and constructing `odb::Checker`
+directly would put its object layout in the caller's stack frame. Keeping it inside `libodb`
+avoids both.
+
+Four more things here will trip you up if they are not written down.
 
 ### `dbChip::ChipType` — we generate the string mapping, and it is UPPERCASE
 

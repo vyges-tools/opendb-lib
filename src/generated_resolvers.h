@@ -64,7 +64,25 @@ inline odb::dbTrackGrid* gen_trackgrid(const OdbDb& h, std::size_t i) {
   odb::dbBlock* b = gen_block(h); if (!b) return nullptr;
   std::size_t k = 0; for (odb::dbTrackGrid* x : b->getTrackGrids()) { if (k++ == i) return x; } return nullptr; }
 inline odb::dbMarkerCategory* gen_marker_cat(const OdbDb& h, rust::Str n) {
-  odb::dbBlock* b = gen_block(h); return b ? b->findMarkerCategory(gs(n).c_str()) : nullptr; }
+  const std::string path = gs(n); if (path.empty()) return nullptr;
+  odb::dbMarkerCategory* cat = nullptr;
+  for (std::size_t start = 0; start <= path.size();) {
+    const std::size_t slash = path.find('/', start);
+    const std::string part = path.substr(
+        start, slash == std::string::npos ? std::string::npos : slash - start);
+    if (cat == nullptr) {
+      odb::dbBlock* b = gen_block(h);
+      if (b) cat = b->findMarkerCategory(part.c_str());
+      if (!cat) { odb::dbChip* c = h.db->getChip();
+                  if (c) cat = c->findMarkerCategory(part.c_str()); }
+    } else {
+      cat = cat->findMarkerCategory(part.c_str());
+    }
+    if (cat == nullptr) return nullptr;
+    if (slash == std::string::npos) break;
+    start = slash + 1;
+  }
+  return cat; }
 inline odb::dbMarker* gen_marker(const OdbDb& h, rust::Str cat, std::size_t i) {
   odb::dbMarkerCategory* c = gen_marker_cat(h, cat); if (!c) return nullptr;
   std::size_t k = 0; for (odb::dbMarker* m : c->getMarkers()) { if (k++ == i) return m; } return nullptr; }

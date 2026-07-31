@@ -75,8 +75,23 @@ file(GLOB IO_SRC CONFIGURE_DEPENDS
      "${ODB}/lef/lef/*.cpp" "${ODB}/lef/lefzlib/*.cpp"
      "${ODB}/def/def/*.cpp" "${ODB}/def/defzlib/*.cpp")
 
-add_library(odb STATIC ${DB_SRC} ${UTL_SRC} ${IO_SRC}
+# The 3D structural linter (check_3dblox). ONLY checker.cpp from src/3dblox — the rest of that
+# directory links yaml-cpp (the .3dbv/.3dbx parsers) and OpenSTA (3dblox.cpp's Verilog/Liberty
+# path), neither of which belongs in an engine-free libodb. checker.cpp itself needs nothing
+# beyond odb + utl (Logger, spatialIndex, unionFind) + spdlog/fmt + Boost geometry, all already
+# linked here, and it reports through ordinary dbMarker objects.
+#
+# src/lint3d.cpp is OURS, and is the one file of ours compiled here rather than by the cxx
+# build: it is the only place that needs odb's internal 3dblox headers, so keeping it inside
+# libodb means the shim (and the prebuilt-bundle path, which ships only include/) never has to
+# reach into src/3dblox. See src/lint3d.h.
+set(LINT_SRC "${ODB}/3dblox/checker.cpp" "${CMAKE_CURRENT_SOURCE_DIR}/src/lint3d.cpp")
+
+add_library(odb STATIC ${DB_SRC} ${UTL_SRC} ${IO_SRC} ${LINT_SRC}
             ${BISON_lef_parser_OUTPUT_SOURCE} ${BISON_def_parser_OUTPUT_SOURCE})
+# internal 3dblox headers (checker.h) + our own src/, for LINT_SRC only — PRIVATE, so nothing
+# downstream inherits a dependency on odb's internal layout.
+target_include_directories(odb PRIVATE "${ODB}/3dblox" "${CMAKE_CURRENT_SOURCE_DIR}/src")
 target_include_directories(odb PUBLIC
   "${OPENROAD_SRC}/src/odb/include"
   "${OPENROAD_SRC}/src/utl/include"

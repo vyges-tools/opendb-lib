@@ -768,8 +768,31 @@ def main() -> int:
         "static odb::dbTrackGrid* gen_trackgrid(const OdbDb& h, std::size_t i) {\n"
         "  odb::dbBlock* b = gen_block(h); if (!b) return nullptr;\n"
         "  std::size_t k = 0; for (odb::dbTrackGrid* x : b->getTrackGrids()) { if (k++ == i) return x; } return nullptr; }\n"
+        # Marker categories NEST, and they hang off either a dbBlock or a dbChip: 2D DRC lands on
+        # the block, while the 3D linter files under a "3DBlox" category on the CHIP. So the key
+        # is a SLASH PATH -- "drc" as before, or "3DBlox/Overlapping chips" for a nested one --
+        # resolved block-first then chip, with each further component looked up on the category
+        # found so far. Category names may contain spaces but not slashes.
         "static odb::dbMarkerCategory* gen_marker_cat(const OdbDb& h, rust::Str n) {\n"
-        "  odb::dbBlock* b = gen_block(h); return b ? b->findMarkerCategory(gs(n).c_str()) : nullptr; }\n"
+        "  const std::string path = gs(n); if (path.empty()) return nullptr;\n"
+        "  odb::dbMarkerCategory* cat = nullptr;\n"
+        "  for (std::size_t start = 0; start <= path.size();) {\n"
+        "    const std::size_t slash = path.find('/', start);\n"
+        "    const std::string part = path.substr(\n"
+        "        start, slash == std::string::npos ? std::string::npos : slash - start);\n"
+        "    if (cat == nullptr) {\n"
+        "      odb::dbBlock* b = gen_block(h);\n"
+        "      if (b) cat = b->findMarkerCategory(part.c_str());\n"
+        "      if (!cat) { odb::dbChip* c = h.db->getChip();\n"
+        "                  if (c) cat = c->findMarkerCategory(part.c_str()); }\n"
+        "    } else {\n"
+        "      cat = cat->findMarkerCategory(part.c_str());\n"
+        "    }\n"
+        "    if (cat == nullptr) return nullptr;\n"
+        "    if (slash == std::string::npos) break;\n"
+        "    start = slash + 1;\n"
+        "  }\n"
+        "  return cat; }\n"
         "static odb::dbMarker* gen_marker(const OdbDb& h, rust::Str cat, std::size_t i) {\n"
         "  odb::dbMarkerCategory* c = gen_marker_cat(h, cat); if (!c) return nullptr;\n"
         "  std::size_t k = 0; for (odb::dbMarker* m : c->getMarkers()) { if (k++ == i) return m; } return nullptr; }\n"

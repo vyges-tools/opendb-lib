@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 #include "shim.h"
 
+#include "lint3d.h"      // 3D structural lint (compiled into libodb; see that header)
 #include "odb/defin.h"   // LEF/DEF I/O (libodb v1)
 #include "odb/defout.h"
 #include "spdlog/sinks/callback_sink.h"   // forward libodb's utl::Logger -> Rust -> vyges-events
@@ -8,6 +9,7 @@
 
 #include <cstdint>
 #include <fstream>
+#include <iostream>
 #include <memory>
 #include <stdexcept>
 #include <string>
@@ -356,4 +358,21 @@ void connect(const OdbDb& h, rust::Str inst, rust::Str pin, rust::Str net) {
 }
 void disconnect(const OdbDb& h, rust::Str inst, rust::Str pin) {
   require_iterm(h, inst, pin)->disconnect();
+}
+std::size_t check_3dblox(const OdbDb& h) {
+  if (!h.db->getChip()) throw std::runtime_error("vyges-opendb: no top chip to check");
+  // Delegates to vyges::check_3dblox, which is compiled into libodb — see src/lint3d.h for why
+  // odb::Checker is not constructed here.
+  return vyges::check_3dblox(h.db, const_cast<utl::Logger*>(&h.logger));
+}
+void log_capture_begin(const OdbDb& h) {
+  // libodb's default sink writes to STDOUT, which corrupts any caller whose stdout is
+  // machine-readable (our JSON subcommands). Capture instead, so the caller decides where the
+  // human-readable text goes. utl::Logger's redirect detaches every sink for the duration --
+  // including our events forwarder -- and restores them on end, so diagnostics emitted while
+  // captured reach the events trail only via whatever the caller does with the returned text.
+  const_cast<utl::Logger&>(h.logger).redirectStringBegin();
+}
+rust::String log_capture_end(const OdbDb& h) {
+  return rust::String(const_cast<utl::Logger&>(h.logger).redirectStringEnd());
 }

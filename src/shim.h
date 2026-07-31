@@ -65,6 +65,23 @@ rust::String nth_net_iterm(const OdbDb& db, rust::Str net, std::size_t i);  // i
 std::size_t num_net_bterms(const OdbDb& db, rust::Str net);       // block ports on the net
 rust::String nth_net_bterm(const OdbDb& db, rust::Str net, std::size_t i);  // i-th port name ("" out of range)
 
+// ---- 3D structural lint (check_3dblox) ---------------------------------------
+// Runs odb's own 3D checker over the chiplet assembly: logical connectivity, floating chips,
+// overlapping dies, unused internal_ext regions, connection-region overlap and mating-surface
+// gap vs connection thickness, bump physical alignment, and alignment markers.
+//
+// Results are reported the way odb reports every other violation — as dbMarker objects, under a
+// "3DBlox" category on the top chip with one sub-category per check — so they are read back
+// through the ordinary marker accessors. Returns the total marker count (0 == clean).
+//
+// This ANNOTATES the in-memory database (it creates the marker categories); it does not modify
+// the design. Nothing is persisted unless the caller writes the database out.
+std::size_t check_3dblox(const OdbDb& db);
+
+// Capture libodb diagnostics instead of letting them hit stdout; end returns the captured text.
+void log_capture_begin(const OdbDb& db);
+rust::String log_capture_end(const OdbDb& db);
+
 void place_bterm(const OdbDb& db, rust::Str bterm, rust::Str layer, int32_t x1, int32_t y1, int32_t x2, int32_t y2);  // place a port pin box on a layer
 void connect(const OdbDb& db, rust::Str inst, rust::Str pin, rust::Str net);    // iterm -> net
 void disconnect(const OdbDb& db, rust::Str inst, rust::Str pin);               // iterm -> (none)
