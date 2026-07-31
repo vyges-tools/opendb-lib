@@ -14,7 +14,7 @@
 #include <iostream>
 #include <string>
 
-#include "3dblox.h"
+#include "odb/3dblox.h"
 #include "odb/db.h"
 #include "utl/Logger.h"
 
