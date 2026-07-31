@@ -108,6 +108,42 @@ target_link_libraries(odb PUBLIC
 # The si2 parser C code trips -Wclass-memaccess on GCC (not an error — no -Werror); silence it.
 target_compile_options(odb PRIVATE $<$<CXX_COMPILER_ID:GNU>:-Wno-class-memaccess>)
 
+# ---- OPT-IN: 3Dblox file I/O (.3dbv / .3dbx) ---------------------------------
+# OFF by default, and it must stay that way: this is the ONE part of the 3D story that breaks
+# the engine-free guarantee. The parsers/writers need yaml-cpp, and 3dblox.cpp needs OpenSTA —
+# not as a timer, but as a Verilog parser + netlist container + Liberty reader
+# (sta::ConcreteNetwork, sta::VerilogReader, readLibertyFile). That is a LINK-time dependency
+# even when the ThreeDBlox ctor is handed a null Sta*, so it cannot be stubbed away cheaply.
+#
+# Everything else 3D — the dbChip* schema, the unfolded model, and check_3dblox — needs neither
+# and is built unconditionally above.
+option(VYGES_ODB_3DBLOX_IO "Build the 3Dblox .3dbv/.3dbx reader/writer (needs yaml-cpp + OpenSTA)" OFF)
+if(VYGES_ODB_3DBLOX_IO)
+  find_package(yaml-cpp REQUIRED)
+  find_path(OPENSTA_INCLUDE_DIR sta/Sta.hh HINTS ${OPENSTA_ROOT}/include /usr/local/include)
+  find_library(OPENSTA_LIBRARY NAMES OpenSTA HINTS ${OPENSTA_ROOT}/lib /usr/local/lib)
+  if(NOT OPENSTA_INCLUDE_DIR OR NOT OPENSTA_LIBRARY)
+    message(FATAL_ERROR
+      "VYGES_ODB_3DBLOX_IO=ON needs OpenSTA (sta/Sta.hh + libOpenSTA). "
+      "Set -DOPENSTA_ROOT=<prefix>, or leave the option OFF — the rest of the 3D surface "
+      "(dbChip* schema, unfolded model, check_3dblox) does not need it.")
+  endif()
+  # checker.cpp is already in LINT_SRC above; adding it again would duplicate symbols.
+  file(GLOB BLOX_SRC CONFIGURE_DEPENDS "${ODB}/3dblox/*.cpp")
+  list(REMOVE_ITEM BLOX_SRC "${ODB}/3dblox/checker.cpp")
+  target_sources(odb PRIVATE ${BLOX_SRC})
+  target_include_directories(odb PRIVATE "${OPENSTA_INCLUDE_DIR}")
+  target_link_libraries(odb PUBLIC yaml-cpp "${OPENSTA_LIBRARY}")
+  target_compile_definitions(odb PUBLIC VYGES_ODB_3DBLOX_IO=1)
+  message(STATUS "3Dblox I/O: ON (OpenSTA=${OPENSTA_LIBRARY})")
+
+  # Round-trip smoke: .odb -> .3dbv/.3dbx -> fresh .odb. Writing first is what gives us a real
+  # 3Dblox input to read, since we have no third-party one.
+  add_executable(odb_blox_roundtrip test/blox-roundtrip.cpp)
+  target_include_directories(odb_blox_roundtrip PRIVATE "${ODB}/3dblox" "${OPENSTA_INCLUDE_DIR}")
+  target_link_libraries(odb_blox_roundtrip PRIVATE odb)
+endif()
+
 # ---- smoke test: round-trip a real .odb --------------------------------------
 option(VYGES_ODB_SMOKE "Build the .odb round-trip smoke test" OFF)
 if(VYGES_ODB_SMOKE)
