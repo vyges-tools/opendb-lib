@@ -132,8 +132,21 @@ if(VYGES_ODB_3DBLOX_IO)
   file(GLOB BLOX_SRC CONFIGURE_DEPENDS "${ODB}/3dblox/*.cpp")
   list(REMOVE_ITEM BLOX_SRC "${ODB}/3dblox/checker.cpp")
   target_sources(odb PRIVATE ${BLOX_SRC})
+  # yaml-cpp exports different target names across versions/distros: modern releases give
+  # yaml-cpp::yaml-cpp, older ones a bare `yaml-cpp` that may carry no INTERFACE include dir at
+  # all (which fails at "yaml-cpp/yaml.h: No such file", not at link). Prefer the namespaced
+  # target, and fall back to the discovered include dir so either shape works.
+  if(TARGET yaml-cpp::yaml-cpp)
+    set(YAMLCPP_TGT yaml-cpp::yaml-cpp)
+  else()
+    set(YAMLCPP_TGT yaml-cpp)
+    find_path(YAMLCPP_INCLUDE_DIR yaml-cpp/yaml.h HINTS ${YAML_CPP_INCLUDE_DIR})
+    if(YAMLCPP_INCLUDE_DIR)
+      target_include_directories(odb PRIVATE "${YAMLCPP_INCLUDE_DIR}")
+    endif()
+  endif()
   target_include_directories(odb PRIVATE "${OPENSTA_INCLUDE_DIR}")
-  target_link_libraries(odb PUBLIC yaml-cpp "${OPENSTA_LIBRARY}")
+  target_link_libraries(odb PUBLIC ${YAMLCPP_TGT} "${OPENSTA_LIBRARY}")
   target_compile_definitions(odb PUBLIC VYGES_ODB_3DBLOX_IO=1)
   message(STATUS "3Dblox I/O: ON (OpenSTA=${OPENSTA_LIBRARY})")
 
