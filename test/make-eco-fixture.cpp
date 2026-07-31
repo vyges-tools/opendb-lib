@@ -85,14 +85,22 @@ int main(int argc, char** argv)
   tech->setLefUnits(1000);  // dbTech::create takes no DBU; set it explicitly
   dbLib* lib = dbLib::create(db, "eco_demo_lib", tech);
 
-  make_master(lib, "INV", {{"A", dbIoType::INPUT}, {"Y", dbIoType::OUTPUT}}, false);
-  // Unused by the design on purpose — this is what a hold repair inserts, and the applier can
-  // only insert a master the library actually holds.
-  make_master(lib, "BUF", {{"A", dbIoType::INPUT}, {"Y", dbIoType::OUTPUT}}, false);
-  make_master(lib,
-              "DFF",
-              {{"CK", dbIoType::INPUT}, {"D", dbIoType::INPUT}, {"Q", dbIoType::OUTPUT}},
-              true);
+  // The master set MUST mirror the Liberty the planner reads (sta-si examples/eco_demo.lib).
+  // A repair plan names cells, so a cell the timer can propose but the database does not hold
+  // makes the plan unapplicable — and the failure surfaces in the applier, far from the cause.
+  // Drive-strength ladders and the high-Vt variant are here for exactly that reason, even
+  // though the design instantiates none of them.
+  const std::vector<std::pair<const char*, dbIoType>> comb
+      = {{"A", dbIoType::INPUT}, {"Y", dbIoType::OUTPUT}};
+  const std::vector<std::pair<const char*, dbIoType>> seq
+      = {{"CK", dbIoType::INPUT}, {"D", dbIoType::INPUT}, {"Q", dbIoType::OUTPUT}};
+
+  for (const char* n : {"INV", "INV_X2", "INV_X4", "INV_X4_HVT", "BUF", "BUF_X2"}) {
+    make_master(lib, n, comb, false);
+  }
+  for (const char* n : {"DFF", "DFF_X2"}) {
+    make_master(lib, n, seq, true);
+  }
 
   dbChip* chip = dbChip::create(db, tech, "eco_demo");
   dbBlock* block = dbBlock::create(chip, "eco_demo");
@@ -187,7 +195,7 @@ int main(int argc, char** argv)
     out << "endmodule\n";
   }
 
-  std::cout << "wrote " << odb << " and " << v << ": " << insts.size() << " instances, masters "
-            << "INV/BUF/DFF\n";
+  std::cout << "wrote " << odb << " and " << v << ": " << insts.size() << " instances, "
+            << lib->getMasters().size() << " masters\n";
   return 0;
 }
