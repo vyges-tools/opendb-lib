@@ -20,13 +20,25 @@
 //   stack : dbChip HIER, no tech
 //     |- u_top  : dbChipInst -> top_die  (DIE)       loc (1000, 2000, 3000)  orient MZ_R90
 //     |- u_base : dbChipInst -> base_die (SUBSTRATE) loc (0, 0, 0)           orient R0
+//     |- bond0  : dbChipConn  u_top/front <-> u_base/back, thickness 25
+//     |- vdd_3d : dbChipNet
+//     |- path0  : dbChipPath
 //
 //   top_die  : width 50000, height 40000, thickness 700,  tsv true
+//              block "top_die_blk" with inst "bump_pad0"
+//              region "front" (FRONT), box (0,0)-(50000,40000), one dbChipBump on bump_pad0
 //   base_die : width 60000, height 50000, thickness 1500, tsv false
+//              region "back" (BACK), box (0,0)-(60000,50000)
 //
-// The two die chips deliberately carry DIFFERENT ChipTypes: odb ships no getString() for
-// dbChip::ChipType, so the generator emits the mapping, and a fixture where every chip was a
-// DIE could not tell a working mapping from one that returns a constant.
+// The two die chips deliberately carry DIFFERENT ChipTypes, and the two regions different
+// Sides: odb ships no getString() for dbChip::ChipType or dbChipRegion::Side, so the generator
+// emits those mappings, and a fixture where every value was the same could not tell a working
+// mapping from one that returns a constant.
+//
+// dbChipRegionInst / dbChipBumpInst are NOT created here — dbChipInst::create derives them from
+// the master chip's regions and bumps. The UNFOLDED classes are not written either: they are
+// rebuilt by constructUnfoldedModel(), which _dbDatabase::operator>> runs on read whenever the
+// database holds more than one chip.
 #include <fstream>
 #include <iostream>
 
@@ -63,7 +75,11 @@ int main(int argc, char** argv)
     return 1;
   }
 
-  dbChip* stack = dbChip::create(db, nullptr, "stack", dbChip::ChipType::HIER);
+  // The design top. 3Dblox builds this with no tech, but we give it one so it can carry a block:
+  // db->setTopChip(stack) below is what roots the unfolded model, and dbDatabase::getChip() is
+  // also what our block-level accessors resolve through, so the top chip must have a block.
+  dbChip* stack = dbChip::create(db, tech, "stack", dbChip::ChipType::HIER);
+  dbBlock::create(stack, "stack_blk");
 
   dbChip* top_die = dbChip::create(db, tech, "top_die", dbChip::ChipType::DIE);
   top_die->setWidth(50000);
@@ -78,11 +94,51 @@ int main(int argc, char** argv)
   base_die->setThickness(1500);
   base_die->setTsv(false);
 
-  // ORDER MATTERS: setOrient BEFORE setLoc. dbChipInst::setLoc does not store the point it is
-  // given — it orients the master chip's cuboid, then stores the delta that puts that cuboid's
-  // lower-left-lower corner at the requested point. getLoc() is getCuboid().lll(), which
-  // re-applies the *current* orientation. So setting the location first and rotating afterwards
-  // silently moves the chip: the stored delta was computed against the old orientation.
+  // --- bonding surfaces, and something real for a bump to sit on ------------------------------
+  // A dbChipBump wraps a placed dbInst, so top_die needs its own block with an instance in it.
+  // Per-chip blocks are exactly the point of the 3D model: each die carries its own design.
+  dbTechLayer* layer = nullptr;
+  for (dbTechLayer* l : tech->getLayers()) {
+    layer = l;
+    break;
+  }
+  dbMaster* master = nullptr;
+  for (dbLib* lib : db->getLibs()) {
+    for (dbMaster* m : lib->getMasters()) {
+      master = m;
+      break;
+    }
+    if (master) {
+      break;
+    }
+  }
+  if (!layer || !master) {
+    std::cerr << "need at least one tech layer and one master in " << argv[1] << "\n";
+    return 1;
+  }
+
+  dbBlock* top_blk = dbBlock::create(top_die, "top_die_blk");
+  dbInst* pad = dbInst::create(top_blk, master, "bump_pad0");
+
+  // ORDER MATTERS (2): regions and their bumps must exist on the MASTER chip before any
+  // dbChipInst of it is created. dbChipInst::create walks the master's regions and bumps to
+  // build the matching dbChipRegionInst / dbChipBumpInst; regions added afterwards are simply
+  // not instantiated, silently, for that inst.
+  dbChipRegion* top_front = dbChipRegion::create(
+      top_die, "front", dbChipRegion::Side::FRONT, layer);
+  top_front->setBox(Rect(0, 0, 50000, 40000));
+  dbChipBump::create(top_front, pad);
+
+  dbChipRegion* base_back = dbChipRegion::create(
+      base_die, "back", dbChipRegion::Side::BACK, layer);
+  base_back->setBox(Rect(0, 0, 60000, 50000));
+
+  // ORDER MATTERS (1): setOrient BEFORE setLoc. dbChipInst::setLoc does not store the point it
+  // is given — it orients the master chip's cuboid, then stores the delta that puts that
+  // cuboid's lower-left-lower corner at the requested point. getLoc() is getCuboid().lll(),
+  // which re-applies the *current* orientation. So setting the location first and rotating
+  // afterwards silently moves the chip: the stored delta was computed against the old
+  // orientation.
   dbChipInst* u_top = dbChipInst::create(stack, top_die, "u_top");
   // MZ_R90: mirrored in Z and rotated 90. Exercises both halves of dbOrientType3D, which a
   // plain R0 would not — R0 with no mirror is also the default-constructed value.
@@ -93,9 +149,36 @@ int main(int argc, char** argv)
   u_base->setOrient(dbOrientType3D(dbOrientType::R0, false));
   u_base->setLoc(Point3D(0, 0, 0));
 
-  // NOTE: deliberately NOT calling db->setTopChip(stack). gen_block() resolves the top block
-  // via db->getChip()->getBlock(), so repointing the top chip at a block-less HIER chip would
-  // strand every existing 2D accessor on this fixture.
+  // --- bonding connection, 3D net and path ----------------------------------------------------
+  // The region insts were created for us by dbChipInst::create above, so look them up by the
+  // master region's name rather than trying to construct them.
+  dbChipRegionInst* top_ri = u_top->findChipRegionInst("front");
+  dbChipRegionInst* base_ri = u_base->findChipRegionInst("back");
+  if (!top_ri || !base_ri) {
+    std::cerr << "region insts were not created — regions must precede dbChipInst::create\n";
+    return 1;
+  }
+
+  dbChipConn* bond = dbChipConn::create(
+      "bond0", stack, {u_top}, top_ri, {u_base}, base_ri);
+  bond->setThickness(25);
+
+  dbChipNet::create(stack, "vdd_3d");
+  dbChipPath::create(stack, "path0");
+
+  // Root the stack. This is REQUIRED for the unfolded model: dbUnfoldedBuilder::build() starts
+  // from dbDatabase::getChip() and walks its chip insts, so with the top chip left pointing at
+  // the flat design we read in, the unfolded tables come back empty.
+  //
+  // The UNFOLDED model itself is not written and does not need to be — _dbDatabase's operator>>
+  // calls constructUnfoldedModel() on read whenever the database holds more than one chip, so
+  // it is rebuilt on load. That is why the unfolded accessors have data to answer from despite
+  // being derived rather than serialised.
+  //
+  // Consequence: on THIS fixture the block-level accessors resolve through stack's own
+  // (near-empty) block, not the counter design's. That is correct for a 3D database and is why
+  // the flat 2D tests keep using counter.odb / hier.odb.
+  db->setTopChip(stack);
 
   std::ofstream out(argv[2], std::ios::binary);
   if (!out) {

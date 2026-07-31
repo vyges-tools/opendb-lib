@@ -132,10 +132,61 @@ inline odb::dbChip* gen_chip(const OdbDb& h, rust::Str n) {
   return h.db->findChip(gs(n).c_str()); }
 inline odb::dbChipInst* gen_chipinst(const OdbDb& h, rust::Str chip, rust::Str n) {
   odb::dbChip* c = gen_chip(h, chip); return c ? c->findChipInst(gs(n)) : nullptr; }
+inline odb::dbChipRegion* gen_chipregion(const OdbDb& h, rust::Str chip, rust::Str n) {
+  odb::dbChip* c = gen_chip(h, chip); return c ? c->findChipRegion(gs(n)) : nullptr; }
+inline odb::dbChipRegionInst* gen_chipregioninst(const OdbDb& h, rust::Str chip,
+                                                 rust::Str inst, rust::Str n) {
+  odb::dbChipInst* ci = gen_chipinst(h, chip, inst);
+  return ci ? ci->findChipRegionInst(gs(n)) : nullptr; }
+inline odb::dbChipBump* gen_chipbump(const OdbDb& h, rust::Str chip, rust::Str region,
+                                     std::size_t i) {
+  odb::dbChipRegion* r = gen_chipregion(h, chip, region); if (!r) return nullptr;
+  std::size_t k = 0; for (odb::dbChipBump* b : r->getChipBumps()) { if (k++ == i) return b; }
+  return nullptr; }
+inline odb::dbChipConn* gen_chipconn(const OdbDb& h, rust::Str chip, rust::Str n) {
+  odb::dbChip* c = gen_chip(h, chip); if (!c) return nullptr; std::string name = gs(n);
+  for (odb::dbChipConn* x : c->getChipConns()) { if (x->getName() == name) return x; }
+  return nullptr; }
+inline odb::dbChipNet* gen_chipnet(const OdbDb& h, rust::Str chip, rust::Str n) {
+  odb::dbChip* c = gen_chip(h, chip); if (!c) return nullptr; std::string name = gs(n);
+  for (odb::dbChipNet* x : c->getChipNets()) { if (x->getName() == name) return x; }
+  return nullptr; }
+inline odb::dbChipPath* gen_chippath(const OdbDb& h, rust::Str chip, rust::Str n) {
+  odb::dbChip* c = gen_chip(h, chip); return c ? c->findChipPath(gs(n).c_str()) : nullptr; }
+inline odb::dbUnfoldedChipInst* gen_unfoldedchip(const OdbDb& h, rust::Str path) {
+  return h.db->findUnfoldedChip(gs(path)); }
+inline odb::dbUnfoldedChipRegionInst* gen_unfoldedregion(const OdbDb& h, rust::Str path,
+                                                         std::size_t i) {
+  odb::dbUnfoldedChipInst* u = gen_unfoldedchip(h, path); if (!u) return nullptr;
+  std::size_t k = 0; for (odb::dbUnfoldedChipRegionInst* r : u->getRegions()) {
+    if (k++ == i) return r; } return nullptr; }
+inline odb::dbUnfoldedChipBumpInst* gen_unfoldedbump(const OdbDb& h, rust::Str path,
+                                                     std::size_t ri, std::size_t i) {
+  odb::dbUnfoldedChipRegionInst* r = gen_unfoldedregion(h, path, ri); if (!r) return nullptr;
+  std::size_t k = 0; for (odb::dbUnfoldedChipBumpInst* b : r->getBumps()) {
+    if (k++ == i) return b; } return nullptr; }
+inline odb::dbUnfoldedChipConn* gen_unfoldedconn(const OdbDb& h, std::size_t i) {
+  std::size_t k = 0; for (odb::dbUnfoldedChipConn* x : h.db->getUnfoldedChipConns()) {
+    if (k++ == i) return x; } return nullptr; }
+inline odb::dbUnfoldedChipNet* gen_unfoldednet(const OdbDb& h, std::size_t i) {
+  std::size_t k = 0; for (odb::dbUnfoldedChipNet* x : h.db->getUnfoldedChipNets()) {
+    if (k++ == i) return x; } return nullptr; }
 inline const char* chip_type_str(odb::dbChip::ChipType v) {
   if (v == odb::dbChip::ChipType::DIE) return "DIE";
   if (v == odb::dbChip::ChipType::RDL) return "RDL";
   if (v == odb::dbChip::ChipType::IP) return "IP";
   if (v == odb::dbChip::ChipType::SUBSTRATE) return "SUBSTRATE";
   if (v == odb::dbChip::ChipType::HIER) return "HIER";
+  return ""; }
+inline const char* chip_region_side_str(odb::dbChipRegion::Side v) {
+  if (v == odb::dbChipRegion::Side::FRONT) return "FRONT";
+  if (v == odb::dbChipRegion::Side::BACK) return "BACK";
+  if (v == odb::dbChipRegion::Side::INTERNAL) return "INTERNAL";
+  if (v == odb::dbChipRegion::Side::INTERNAL_EXT) return "INTERNAL_EXT";
+  return ""; }
+inline const char* unfolded_side_str(odb::dbUnfoldedChipRegionInst::EffectiveSide v) {
+  if (v == odb::dbUnfoldedChipRegionInst::EffectiveSide::TOP) return "TOP";
+  if (v == odb::dbUnfoldedChipRegionInst::EffectiveSide::BOTTOM) return "BOTTOM";
+  if (v == odb::dbUnfoldedChipRegionInst::EffectiveSide::INTERNAL) return "INTERNAL";
+  if (v == odb::dbUnfoldedChipRegionInst::EffectiveSide::INTERNAL_EXT) return "INTERNAL_EXT";
   return ""; }

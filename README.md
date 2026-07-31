@@ -54,11 +54,31 @@ Deps: a C++20 compiler + `cmake boost zlib abseil spdlog fmt` (apt `lib*-dev`, o
 
 ## 3D / chiplet (ODB 3D-IC)
 
-The pinned ODB carries the 3D chiplet schema — `dbChip`, `dbChipInst` and friends, where one
-design is multiple dies bonded together, each with its own `dbTech`. These classes are in
-`db.h` and compile into `libodb.a` like any other, so they need no special build.
+The pinned ODB carries the 3D chiplet schema — one design is multiple dies bonded together,
+each with its own `dbTech`. These classes are in `db.h` and compile into `libodb.a` like any
+other, so they need no special build. Bound so far:
 
-Two things here will trip you up if they are not written down.
+| Folded | Keyed by |
+| --- | --- |
+| `dbChip` | chip name |
+| `dbChipInst` | parent chip, inst |
+| `dbChipRegion` | chip, region |
+| `dbChipRegionInst` | chip, inst, region |
+| `dbChipBump` | chip, region, index |
+| `dbChipConn` / `dbChipNet` / `dbChipPath` | chip, name |
+
+| Unfolded (derived) | Keyed by |
+| --- | --- |
+| `dbUnfoldedChipInst` | slash-joined chip-inst path |
+| `dbUnfoldedChipRegionInst` | path, index |
+| `dbUnfoldedChipBumpInst` | path, region index, index |
+| `dbUnfoldedChipConn` / `dbUnfoldedChipNet` | index |
+
+`dbChipBumpInst` is deliberately **not** bound: every accessor it has returns an unnameable
+type, so it would contribute no fields. The same information is reachable through `dbChipBump`
+(folded) or `dbUnfoldedChipBumpInst` (absolute positions).
+
+Four things here will trip you up if they are not written down.
 
 ### `dbChip::ChipType` — we generate the string mapping, and it is UPPERCASE
 
@@ -110,6 +130,26 @@ hand the footgun back.
 
 **TODO:** marshal `Point3D` as a setter param, then expose both `setLoc` and `setOrient`
 together and document the orient-before-loc ordering at the API surface.
+
+### Regions and bumps must exist before the chip inst that uses them
+
+A second, unrelated ordering trap. `dbChipInst::create` walks the **master chip's** regions and
+bumps and derives the matching `dbChipRegionInst` / `dbChipBumpInst` there and then. Regions
+added to the master *afterwards* are simply not instantiated for that inst — silently, with no
+error. Build a chip's surfaces first, then instantiate it.
+
+### The unfolded model is derived, but it is rebuilt for you on read
+
+`dbUnfolded*` is `constructUnfoldedModel()`'s output — the hierarchy flattened to absolute
+positions, which is what linting, the 3D viewer and full-chip analysis consume. It is **never
+serialised**. You do not have to call anything, though: `_dbDatabase::operator>>` runs
+`constructUnfoldedModel()` on read whenever the database holds more than one chip, so the
+unfolded accessors answer straight after a plain open.
+
+The one prerequisite is that the database's **top chip** is the assembly. `dbUnfoldedBuilder`
+starts from `dbDatabase::getChip()` and walks its chip insts, so if the top chip is still some
+flat design that has no chip insts, every unfolded table comes back empty and nothing tells you
+why.
 
 ## Notes
 

@@ -109,6 +109,45 @@ TARGETS = {
     # TODO: marshal Point3D as a setter param, then expose BOTH and document orient-before-loc.
     "dbChipInst": {"key": "chipinst", "args": ["chip", "inst"], "resolve": "gen_chipinst(h, chip, inst)",
                    "skip_setters": ["setOrient"]},
+    # bonding surfaces + bumps. A dbChipRegion is named within its chip; a dbChipRegionInst is
+    # the per-chip-inst instance of one, so it needs the chip inst's key plus the region name.
+    "dbChipRegion":     {"key": "chipregion", "args": ["chip", "region"],
+                         "resolve": "gen_chipregion(h, chip, region)"},
+    "dbChipRegionInst": {"key": "chipregioninst", "args": ["chip", "inst", "region"],
+                         "resolve": "gen_chipregioninst(h, chip, inst, region)"},
+    # dbChipBump has no name and no find* — addressed by position within its region. Its value is
+    # the bump -> inst/net/bterm mapping, which is how a chiplet's face ties to its netlist.
+    "dbChipBump": {"key": "chipbump",
+                   "args": ["chip", "region", {"name": "idx", "type": "idx"}],
+                   "resolve": "gen_chipbump(h, chip, region, idx)"},
+    # conns and nets are named but have no find* on dbChip, so their resolvers scan by name.
+    "dbChipConn": {"key": "chipconn", "args": ["chip", "conn"], "resolve": "gen_chipconn(h, chip, conn)"},
+    "dbChipNet":  {"key": "chipnet",  "args": ["chip", "net"],  "resolve": "gen_chipnet(h, chip, net)"},
+    "dbChipPath": {"key": "chippath", "args": ["chip", "path"], "resolve": "gen_chippath(h, chip, path)"},
+    # ---- the UNFOLDED model: the hierarchy flattened to absolute positions, which is what
+    # linting, the 3D viewer and full-chip analysis read. Derived, never serialised — so these
+    # only answer after constructUnfoldedModel() has run.
+    # dbDatabase::findUnfoldedChip takes the slash-joined chip-inst path, giving this family a
+    # single natural string key that the folded classes cannot offer.
+    "dbUnfoldedChipInst": {"key": "unfoldedchip", "args": ["path"],
+                           "resolve": "gen_unfoldedchip(h, path)"},
+    "dbUnfoldedChipRegionInst": {"key": "unfoldedregion",
+                                 "args": ["path", {"name": "idx", "type": "idx"}],
+                                 "resolve": "gen_unfoldedregion(h, path, idx)"},
+    # getGlobalPosition() is the payoff of the whole unfolded model: a bump's ABSOLUTE x/y/z.
+    "dbUnfoldedChipBumpInst": {"key": "unfoldedbump",
+                               "args": ["path", {"name": "region_idx", "type": "idx"},
+                                        {"name": "idx", "type": "idx"}],
+                               "resolve": "gen_unfoldedbump(h, path, region_idx, idx)"},
+    # these two carry a single relation each (back to the named folded object), but that is what
+    # makes the flat db-level sets enumerable and mappable back to the folded model.
+    "dbUnfoldedChipConn": {"key": "unfoldedconn", "args": [{"name": "idx", "type": "idx"}],
+                           "resolve": "gen_unfoldedconn(h, idx)"},
+    "dbUnfoldedChipNet":  {"key": "unfoldednet",  "args": [{"name": "idx", "type": "idx"}],
+                           "resolve": "gen_unfoldednet(h, idx)"},
+    # NOT bound: dbChipBumpInst. Every one of its accessors returns an unnameable type
+    # (dbChipBump, dbChipRegionInst), so it would generate zero fields. Reach the same
+    # information through dbChipBump (folded) or dbUnfoldedChipBumpInst (absolute positions).
 }
 
 
@@ -143,15 +182,23 @@ ENUMS = {"dbSigType", "dbIoType", "dbPlacementStatus", "dbOrientType", "dbSource
 # Python SWIG typemap in swig/python/dbenums.i), so doing the same here is the sanctioned
 # pattern rather than a workaround. The generator emits a small enum->string helper per entry.
 #
-# Keyed by the return type spelled as db.h spells it (a nested enum is unqualified at its use
-# site) -> (qualified C++ type, helper name, enumerators).
+# Keyed by (OWNING CLASS, return type as db.h spells it) -> (qualified C++ type, helper name,
+# enumerators). A nested enum is unqualified at its use site, so the return type alone is not a
+# safe key: "Side" is unique across today's db.h but an odb bump could add another, and a
+# collision would silently map one enum through the other's helper. The owning class removes
+# that risk and documents where each enum lives.
 #
 # Vocabulary is UPPERCASE, matching both our other enums (dbSigType -> "SIGNAL") and upstream's
 # Python bindings. Note the 3Dblox *file format* uses lowercase ("die"/"hier"): that is the
 # 3dbv writer's representation of the value, not the database API's, and this is a DB binding.
 ENUM_MAPPED = {
-    "ChipType": ("odb::dbChip::ChipType", "chip_type_str",
-                 ["DIE", "RDL", "IP", "SUBSTRATE", "HIER"]),
+    ("dbChip", "ChipType"): ("odb::dbChip::ChipType", "chip_type_str",
+                             ["DIE", "RDL", "IP", "SUBSTRATE", "HIER"]),
+    ("dbChipRegion", "Side"): ("odb::dbChipRegion::Side", "chip_region_side_str",
+                               ["FRONT", "BACK", "INTERNAL", "INTERNAL_EXT"]),
+    ("dbUnfoldedChipRegionInst", "EffectiveSide"):
+        ("odb::dbUnfoldedChipRegionInst::EffectiveSide", "unfolded_side_str",
+         ["TOP", "BOTTOM", "INTERNAL", "INTERNAL_EXT"]),
 }
 
 # geometry structs returned by value — expanded into scalar (int) sub-fields (suffix, accessor),
@@ -510,9 +557,9 @@ class Emit:
                 reg_kind = "string"
                 self._string(fn, name, resolve, c_params, r_params, rust_args_sig, rust_fwd,
                              f"rust::String(p->{name}().getString())")
-            elif ret in ENUM_MAPPED:
+            elif (cls, ret) in ENUM_MAPPED:
                 # no getString() on the type — route through the generated enum->string helper
-                helper = ENUM_MAPPED[ret][1]
+                helper = ENUM_MAPPED[(cls, ret)][1]
                 reg_kind = "string"
                 self._string(fn, name, resolve, c_params, r_params, rust_args_sig, rust_fwd,
                              f"rust::String({helper}(p->{name}()))")
@@ -790,6 +837,47 @@ def main() -> int:
         "  return h.db->findChip(gs(n).c_str()); }\n"
         "static odb::dbChipInst* gen_chipinst(const OdbDb& h, rust::Str chip, rust::Str n) {\n"
         "  odb::dbChip* c = gen_chip(h, chip); return c ? c->findChipInst(gs(n)) : nullptr; }\n"
+        "static odb::dbChipRegion* gen_chipregion(const OdbDb& h, rust::Str chip, rust::Str n) {\n"
+        "  odb::dbChip* c = gen_chip(h, chip); return c ? c->findChipRegion(gs(n)) : nullptr; }\n"
+        "static odb::dbChipRegionInst* gen_chipregioninst(const OdbDb& h, rust::Str chip,\n"
+        "                                                 rust::Str inst, rust::Str n) {\n"
+        "  odb::dbChipInst* ci = gen_chipinst(h, chip, inst);\n"
+        "  return ci ? ci->findChipRegionInst(gs(n)) : nullptr; }\n"
+        "static odb::dbChipBump* gen_chipbump(const OdbDb& h, rust::Str chip, rust::Str region,\n"
+        "                                     std::size_t i) {\n"
+        "  odb::dbChipRegion* r = gen_chipregion(h, chip, region); if (!r) return nullptr;\n"
+        "  std::size_t k = 0; for (odb::dbChipBump* b : r->getChipBumps()) { if (k++ == i) return b; }\n"
+        "  return nullptr; }\n"
+        # dbChip has no findChipConn/findChipNet, so scan the set by name.
+        "static odb::dbChipConn* gen_chipconn(const OdbDb& h, rust::Str chip, rust::Str n) {\n"
+        "  odb::dbChip* c = gen_chip(h, chip); if (!c) return nullptr; std::string name = gs(n);\n"
+        "  for (odb::dbChipConn* x : c->getChipConns()) { if (x->getName() == name) return x; }\n"
+        "  return nullptr; }\n"
+        "static odb::dbChipNet* gen_chipnet(const OdbDb& h, rust::Str chip, rust::Str n) {\n"
+        "  odb::dbChip* c = gen_chip(h, chip); if (!c) return nullptr; std::string name = gs(n);\n"
+        "  for (odb::dbChipNet* x : c->getChipNets()) { if (x->getName() == name) return x; }\n"
+        "  return nullptr; }\n"
+        "static odb::dbChipPath* gen_chippath(const OdbDb& h, rust::Str chip, rust::Str n) {\n"
+        "  odb::dbChip* c = gen_chip(h, chip); return c ? c->findChipPath(gs(n).c_str()) : nullptr; }\n"
+        # unfolded model -- derived by constructUnfoldedModel(), addressed by slash-joined path.
+        "static odb::dbUnfoldedChipInst* gen_unfoldedchip(const OdbDb& h, rust::Str path) {\n"
+        "  return h.db->findUnfoldedChip(gs(path)); }\n"
+        "static odb::dbUnfoldedChipRegionInst* gen_unfoldedregion(const OdbDb& h, rust::Str path,\n"
+        "                                                         std::size_t i) {\n"
+        "  odb::dbUnfoldedChipInst* u = gen_unfoldedchip(h, path); if (!u) return nullptr;\n"
+        "  std::size_t k = 0; for (odb::dbUnfoldedChipRegionInst* r : u->getRegions()) {\n"
+        "    if (k++ == i) return r; } return nullptr; }\n"
+        "static odb::dbUnfoldedChipBumpInst* gen_unfoldedbump(const OdbDb& h, rust::Str path,\n"
+        "                                                     std::size_t ri, std::size_t i) {\n"
+        "  odb::dbUnfoldedChipRegionInst* r = gen_unfoldedregion(h, path, ri); if (!r) return nullptr;\n"
+        "  std::size_t k = 0; for (odb::dbUnfoldedChipBumpInst* b : r->getBumps()) {\n"
+        "    if (k++ == i) return b; } return nullptr; }\n"
+        "static odb::dbUnfoldedChipConn* gen_unfoldedconn(const OdbDb& h, std::size_t i) {\n"
+        "  std::size_t k = 0; for (odb::dbUnfoldedChipConn* x : h.db->getUnfoldedChipConns()) {\n"
+        "    if (k++ == i) return x; } return nullptr; }\n"
+        "static odb::dbUnfoldedChipNet* gen_unfoldednet(const OdbDb& h, std::size_t i) {\n"
+        "  std::size_t k = 0; for (odb::dbUnfoldedChipNet* x : h.db->getUnfoldedChipNets()) {\n"
+        "    if (k++ == i) return x; } return nullptr; }\n"
         # enum->string helpers for enums odb gives no getString() for (see ENUM_MAPPED). An
         # if-chain, not a switch: an unrecognised value falls through to "" instead of tripping
         # -Wswitch, which matters because these are plain enums an odb bump can extend.

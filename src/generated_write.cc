@@ -253,3 +253,4 @@ void chip_set_scribe_line_west(const OdbDb& h, rust::Str chip, int32_t scribe_li
 void chip_set_scribe_line_north(const OdbDb& h, rust::Str chip, int32_t scribe_line_north) { auto* p = gen_chip(h, chip); if (!p) throw std::runtime_error("vyges-opendb: dbChip not found"); p->setScribeLineNorth(scribe_line_north); }
 void chip_set_scribe_line_south(const OdbDb& h, rust::Str chip, int32_t scribe_line_south) { auto* p = gen_chip(h, chip); if (!p) throw std::runtime_error("vyges-opendb: dbChip not found"); p->setScribeLineSouth(scribe_line_south); }
 void chip_set_tsv(const OdbDb& h, rust::Str chip, bool tsv) { auto* p = gen_chip(h, chip); if (!p) throw std::runtime_error("vyges-opendb: dbChip not found"); p->setTsv(tsv); }
+void chipconn_set_thickness(const OdbDb& h, rust::Str chip, rust::Str conn, int32_t thickness) { auto* p = gen_chipconn(h, chip, conn); if (!p) throw std::runtime_error("vyges-opendb: dbChipConn not found"); p->setThickness(thickness); }

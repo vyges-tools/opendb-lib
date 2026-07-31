@@ -796,6 +796,50 @@ mod ffi_gen {
         fn chipinst_get_b_box_y_max(db: &OdbDb, chip: &str, inst: &str) -> i32;
         fn chipinst_get_b_box_dx(db: &OdbDb, chip: &str, inst: &str) -> i32;
         fn chipinst_get_b_box_dy(db: &OdbDb, chip: &str, inst: &str) -> i32;
+        fn chipregion_get_name(db: &OdbDb, chip: &str, region: &str) -> String;
+        fn chipregion_get_box_x_min(db: &OdbDb, chip: &str, region: &str) -> i32;
+        fn chipregion_get_box_y_min(db: &OdbDb, chip: &str, region: &str) -> i32;
+        fn chipregion_get_box_x_max(db: &OdbDb, chip: &str, region: &str) -> i32;
+        fn chipregion_get_box_y_max(db: &OdbDb, chip: &str, region: &str) -> i32;
+        fn chipregion_get_box_dx(db: &OdbDb, chip: &str, region: &str) -> i32;
+        fn chipregion_get_box_dy(db: &OdbDb, chip: &str, region: &str) -> i32;
+        fn chipregion_get_chip(db: &OdbDb, chip: &str, region: &str) -> String;
+        fn chipregion_get_side(db: &OdbDb, chip: &str, region: &str) -> String;
+        fn chipregion_get_layer(db: &OdbDb, chip: &str, region: &str) -> String;
+        fn chipregioninst_get_chip_inst(db: &OdbDb, chip: &str, inst: &str, region: &str) -> String;
+        fn chipregioninst_get_chip_region(db: &OdbDb, chip: &str, inst: &str, region: &str) -> String;
+        fn chipbump_get_chip(db: &OdbDb, chip: &str, region: &str, idx: usize) -> String;
+        fn chipbump_get_chip_region(db: &OdbDb, chip: &str, region: &str, idx: usize) -> String;
+        fn chipbump_get_inst(db: &OdbDb, chip: &str, region: &str, idx: usize) -> String;
+        fn chipbump_get_net(db: &OdbDb, chip: &str, region: &str, idx: usize) -> String;
+        fn chipbump_get_b_term(db: &OdbDb, chip: &str, region: &str, idx: usize) -> String;
+        fn chipconn_get_name(db: &OdbDb, chip: &str, conn: &str) -> String;
+        fn chipconn_get_thickness(db: &OdbDb, chip: &str, conn: &str) -> i32;
+        fn chipconn_get_parent_chip(db: &OdbDb, chip: &str, conn: &str) -> String;
+        fn num_chipconn_get_top_region_path(db: &OdbDb, chip: &str, conn: &str) -> usize;
+        fn nth_chipconn_get_top_region_path(db: &OdbDb, chip: &str, conn: &str, i: usize) -> String;
+        fn num_chipconn_get_bottom_region_path(db: &OdbDb, chip: &str, conn: &str) -> usize;
+        fn nth_chipconn_get_bottom_region_path(db: &OdbDb, chip: &str, conn: &str, i: usize) -> String;
+        fn chipnet_get_name(db: &OdbDb, chip: &str, net: &str) -> String;
+        fn chipnet_get_chip(db: &OdbDb, chip: &str, net: &str) -> String;
+        fn chipnet_get_num_bump_insts(db: &OdbDb, chip: &str, net: &str) -> u32;
+        fn chippath_get_name(db: &OdbDb, chip: &str, path: &str) -> String;
+        fn chippath_get_chip(db: &OdbDb, chip: &str, path: &str) -> String;
+        fn unfoldedchip_get_name(db: &OdbDb, path: &str) -> String;
+        fn num_unfoldedchip_get_chip_inst_path(db: &OdbDb, path: &str) -> usize;
+        fn nth_unfoldedchip_get_chip_inst_path(db: &OdbDb, path: &str, i: usize) -> String;
+        fn unfoldedregion_get_parent_chip(db: &OdbDb, path: &str, idx: usize) -> String;
+        fn unfoldedregion_get_effective_side(db: &OdbDb, path: &str, idx: usize) -> String;
+        fn unfoldedregion_is_top(db: &OdbDb, path: &str, idx: usize) -> bool;
+        fn unfoldedregion_is_bottom(db: &OdbDb, path: &str, idx: usize) -> bool;
+        fn unfoldedregion_is_internal(db: &OdbDb, path: &str, idx: usize) -> bool;
+        fn unfoldedregion_is_internal_ext(db: &OdbDb, path: &str, idx: usize) -> bool;
+        fn unfoldedregion_get_surface_z(db: &OdbDb, path: &str, idx: usize) -> i32;
+        fn unfoldedbump_get_global_position_x(db: &OdbDb, path: &str, region_idx: usize, idx: usize) -> i32;
+        fn unfoldedbump_get_global_position_y(db: &OdbDb, path: &str, region_idx: usize, idx: usize) -> i32;
+        fn unfoldedbump_get_global_position_z(db: &OdbDb, path: &str, region_idx: usize, idx: usize) -> i32;
+        fn unfoldedconn_get_chip_conn(db: &OdbDb, idx: usize) -> String;
+        fn unfoldednet_get_chip_net(db: &OdbDb, idx: usize) -> String;
     }
 }
 
@@ -941,6 +985,14 @@ pub use ffi_gen::{
     chip_get_thickness,
     chip_get_width,
     chip_is_tsv,
+    chipbump_get_b_term,
+    chipbump_get_chip,
+    chipbump_get_chip_region,
+    chipbump_get_inst,
+    chipbump_get_net,
+    chipconn_get_name,
+    chipconn_get_parent_chip,
+    chipconn_get_thickness,
     chipinst_get_b_box_dx,
     chipinst_get_b_box_dy,
     chipinst_get_b_box_x_max,
@@ -954,6 +1006,23 @@ pub use ffi_gen::{
     chipinst_get_name,
     chipinst_get_orient,
     chipinst_get_parent_chip,
+    chipnet_get_chip,
+    chipnet_get_name,
+    chipnet_get_num_bump_insts,
+    chippath_get_chip,
+    chippath_get_name,
+    chipregion_get_box_dx,
+    chipregion_get_box_dy,
+    chipregion_get_box_x_max,
+    chipregion_get_box_x_min,
+    chipregion_get_box_y_max,
+    chipregion_get_box_y_min,
+    chipregion_get_chip,
+    chipregion_get_layer,
+    chipregion_get_name,
+    chipregion_get_side,
+    chipregioninst_get_chip_inst,
+    chipregioninst_get_chip_region,
     fill_get_tech_layer,
     fill_mask_number,
     fill_needs_o_p_c,
@@ -1322,6 +1391,8 @@ pub use ffi_gen::{
     nth_chip_get_chip_paths,
     nth_chip_get_chip_regions,
     nth_chip_get_marker_categories,
+    nth_chipconn_get_bottom_region_path,
+    nth_chipconn_get_top_region_path,
     nth_group_get_ground_nets,
     nth_group_get_groups,
     nth_group_get_insts,
@@ -1362,6 +1433,7 @@ pub use ffi_gen::{
     nth_tech_get_via_generate_rules,
     nth_tech_get_via_rules,
     nth_tech_get_vias,
+    nth_unfoldedchip_get_chip_inst_path,
     num_block_get_b_terms,
     num_block_get_children,
     num_block_get_component_mask_shift,
@@ -1390,6 +1462,8 @@ pub use ffi_gen::{
     num_chip_get_chip_paths,
     num_chip_get_chip_regions,
     num_chip_get_marker_categories,
+    num_chipconn_get_bottom_region_path,
+    num_chipconn_get_top_region_path,
     num_group_get_ground_nets,
     num_group_get_groups,
     num_group_get_insts,
@@ -1430,6 +1504,7 @@ pub use ffi_gen::{
     num_tech_get_via_generate_rules,
     num_tech_get_via_rules,
     num_tech_get_vias,
+    num_unfoldedchip_get_chip_inst_path,
     obs_get_block,
     obs_get_effective_width,
     obs_get_instance,
@@ -1551,6 +1626,19 @@ pub use ffi_gen::{
     trackgrid_get_num_grid_patterns_x,
     trackgrid_get_num_grid_patterns_y,
     trackgrid_get_tech_layer,
+    unfoldedbump_get_global_position_x,
+    unfoldedbump_get_global_position_y,
+    unfoldedbump_get_global_position_z,
+    unfoldedchip_get_name,
+    unfoldedconn_get_chip_conn,
+    unfoldednet_get_chip_net,
+    unfoldedregion_get_effective_side,
+    unfoldedregion_get_parent_chip,
+    unfoldedregion_get_surface_z,
+    unfoldedregion_is_bottom,
+    unfoldedregion_is_internal,
+    unfoldedregion_is_internal_ext,
+    unfoldedregion_is_top,
     via_get_block,
     via_get_block_via,
     via_get_bottom_layer,
