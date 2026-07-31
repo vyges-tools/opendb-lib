@@ -151,16 +151,19 @@ inst->setLoc(Point3D(1000, 2000, 3000));                    // correct
 // getLoc() reads (1000, 2000, 3000)
 ```
 
-Because of this coupling, **`dbChipInst` deliberately exposes no setters at all** in the
-generated write surface. `setLoc` takes a `Point3D`, which is not a marshallable setter param,
-so we could only have emitted `setOrient` — and a caller who re-oriented a placed chip inst
-would have silently moved it with no way to put it back. Exposing only the destructive half of
-a coupled pair is worse than exposing neither, so `TARGETS` withholds it via `skip_setters`.
-`tests/generated_write.rs` in the sibling crate pins that decision so a regeneration cannot
-hand the footgun back.
+**Both setters now ship, and the safe API composes them in the right order.** `STRUCT_IN`
+expands a geometry struct param into its constructor's scalar components — the mirror of
+`STRUCT_FIELDS` on the read side — so `setLoc(const Point3D&)` becomes
+`set_loc(x, y, z)` (and `dbChip::setOffset(const Point&)` becomes `set_offset(x, y)`).
 
-**TODO:** marshal `Point3D` as a setter param, then expose both `setLoc` and `setOrient`
-together and document the orient-before-loc ordering at the API surface.
+Before that, `setLoc` was unmarshallable and only `setOrient` could be emitted — the
+*destructive* half of the pair, with no way for a caller to put the chip back. `dbChipInst`
+therefore exposed no setters at all. That restriction is now lifted.
+
+Prefer **`Db::place_chip_inst(chip, inst, orient, x, y, z)`** in the sibling crate over calling
+the two setters yourself: it orients then places, so the location reads back exactly as passed.
+`tests/generated_write.rs` asserts both that guarantee and that the wrong order really does move
+the chip — if the latter ever stops failing, odb changed and the ordering needs revisiting.
 
 ### Regions and bumps must exist before the chip inst that uses them
 

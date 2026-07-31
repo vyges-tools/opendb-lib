@@ -99,16 +99,14 @@ TARGETS = {
     # by (parent chip name, inst name): dbDatabase::getChipInsts() is flat and inst names are only
     # unique within their parent chip, so the parent is part of the key.
     "dbChip":     {"key": "chip",     "args": ["chip"],         "resolve": "gen_chip(h, chip)"},
-    # skip_setters(setOrient): setOrient and setLoc are COUPLED, and we can only marshal one of
-    # them. dbChipInst::setLoc does not store the point it is given -- it orients the master
-    # chip's cuboid and stores the delta that lands its lower-left-lower corner on that point;
-    # getLoc() is getCuboid().lll(), which re-applies the CURRENT orientation. So re-orienting an
-    # already-placed chip inst silently MOVES it. setLoc takes a Point3D, which is not a
-    # marshallable setter param, so a caller who tripped that could not put the chip back.
-    # Exposing only the destructive half is worse than exposing neither.
-    # TODO: marshal Point3D as a setter param, then expose BOTH and document orient-before-loc.
-    "dbChipInst": {"key": "chipinst", "args": ["chip", "inst"], "resolve": "gen_chipinst(h, chip, inst)",
-                   "skip_setters": ["setOrient"]},
+    # setOrient and setLoc are COUPLED: setLoc does not store the point it is given -- it orients
+    # the master chip's cuboid and stores the delta landing its lower-left-lower corner there,
+    # and getLoc() re-applies the CURRENT orientation, so re-orienting a placed chip inst MOVES
+    # it. We used to withhold setOrient (skip_setters) because Point3D was not a marshallable
+    # setter param, leaving only the destructive half of the pair exposed. STRUCT_IN now expands
+    # Point3D, so BOTH ship and a caller can always recover -- and the safe API composes them in
+    # the correct order (see Db::place_chip_inst).
+    "dbChipInst": {"key": "chipinst", "args": ["chip", "inst"], "resolve": "gen_chipinst(h, chip, inst)"},
     # bonding surfaces + bumps. A dbChipRegion is named within its chip; a dbChipRegionInst is
     # the per-chip-inst instance of one, so it needs the chip inst's key plus the region name.
     "dbChipRegion":     {"key": "chipregion", "args": ["chip", "region"],
@@ -209,6 +207,16 @@ STRUCT_FIELDS = {
     "Rect": [("x_min", "xMin"), ("y_min", "yMin"), ("x_max", "xMax"), ("y_max", "yMax"),
              ("dx", "dx"), ("dy", "dy")],
     "Point3D": [("x", "x"), ("y", "y"), ("z", "z")],
+}
+
+# Geometry structs accepted as SETTER params, expanded into their constructor's scalar args:
+# one C++/Rust param per component, reassembled into the struct at the call. The mirror image of
+# STRUCT_FIELDS on the read side, so `void setLoc(const Point3D&)` becomes
+# `set_loc(x: i32, y: i32, z: i32)`. Order must match the constructor.
+STRUCT_IN = {
+    "Point3D": ("odb::Point3D", [("x", "int32_t", "i32"), ("y", "int32_t", "i32"),
+                                 ("z", "int32_t", "i32")]),
+    "Point":   ("odb::Point",   [("x", "int32_t", "i32"), ("y", "int32_t", "i32")]),
 }
 
 # setter param scalar -> (cxx type, rust type)
@@ -364,6 +372,21 @@ class Emit:
         # marshal each value param; bail if any is a pointer/struct/unknown type
         cxx_vals, rust_vals, cpp_args = [], [], []
         for i, p in enumerate(m["params"]):
+            # A geometry struct param expands into its constructor's scalar components, so one
+            # C++ param becomes N Rust args reassembled at the call site (see STRUCT_IN).
+            base = norm(p["type"]).lstrip("const").strip("&").replace("const", "")
+            if base in STRUCT_IN:
+                cxx_type, comps = STRUCT_IN[base]
+                parts = []
+                for suffix, cxx_c, rust_c in comps:
+                    pn = suffix if suffix not in used else f"a{i}_{suffix}"
+                    used.add(pn)
+                    cxx_vals.append(f"{cxx_c} {pn}")
+                    rust_vals.append(f"{pn}: {rust_c}")
+                    parts.append(pn)
+                cpp_args.append(f"{cxx_type}({', '.join(parts)})")
+                continue
+
             mp = marshal_param(p["type"], f"a{i}")
             if mp is None:
                 return False

@@ -236,6 +236,7 @@ void layerantenna_set_diff_p_a_r(const OdbDb& db, rust::Str layer, double ratio)
 void layerantenna_set_diff_c_a_r(const OdbDb& db, rust::Str layer, double ratio);
 void layerantenna_set_diff_p_s_r(const OdbDb& db, rust::Str layer, double ratio);
 void layerantenna_set_diff_c_s_r(const OdbDb& db, rust::Str layer, double ratio);
+void chip_set_offset(const OdbDb& db, rust::Str chip, int32_t x, int32_t y);
 void chip_set_width(const OdbDb& db, rust::Str chip, int32_t width);
 void chip_set_height(const OdbDb& db, rust::Str chip, int32_t height);
 void chip_set_thickness(const OdbDb& db, rust::Str chip, int32_t thickness);
@@ -249,4 +250,6 @@ void chip_set_scribe_line_west(const OdbDb& db, rust::Str chip, int32_t scribe_l
 void chip_set_scribe_line_north(const OdbDb& db, rust::Str chip, int32_t scribe_line_north);
 void chip_set_scribe_line_south(const OdbDb& db, rust::Str chip, int32_t scribe_line_south);
 void chip_set_tsv(const OdbDb& db, rust::Str chip, bool tsv);
+void chipinst_set_orient(const OdbDb& db, rust::Str chip, rust::Str inst, rust::Str orient);
+void chipinst_set_loc(const OdbDb& db, rust::Str chip, rust::Str inst, int32_t x, int32_t y, int32_t z);
 void chipconn_set_thickness(const OdbDb& db, rust::Str chip, rust::Str conn, int32_t thickness);

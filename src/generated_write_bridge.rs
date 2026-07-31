@@ -241,6 +241,7 @@ mod ffi_gen_write {
         fn layerantenna_set_diff_c_a_r(db: &OdbDb, layer: &str, ratio: f64) -> Result<()>;
         fn layerantenna_set_diff_p_s_r(db: &OdbDb, layer: &str, ratio: f64) -> Result<()>;
         fn layerantenna_set_diff_c_s_r(db: &OdbDb, layer: &str, ratio: f64) -> Result<()>;
+        fn chip_set_offset(db: &OdbDb, chip: &str, x: i32, y: i32) -> Result<()>;
         fn chip_set_width(db: &OdbDb, chip: &str, width: i32) -> Result<()>;
         fn chip_set_height(db: &OdbDb, chip: &str, height: i32) -> Result<()>;
         fn chip_set_thickness(db: &OdbDb, chip: &str, thickness: i32) -> Result<()>;
@@ -254,6 +255,8 @@ mod ffi_gen_write {
         fn chip_set_scribe_line_north(db: &OdbDb, chip: &str, scribe_line_north: i32) -> Result<()>;
         fn chip_set_scribe_line_south(db: &OdbDb, chip: &str, scribe_line_south: i32) -> Result<()>;
         fn chip_set_tsv(db: &OdbDb, chip: &str, tsv: bool) -> Result<()>;
+        fn chipinst_set_orient(db: &OdbDb, chip: &str, inst: &str, orient: &str) -> Result<()>;
+        fn chipinst_set_loc(db: &OdbDb, chip: &str, inst: &str, x: i32, y: i32, z: i32) -> Result<()>;
         fn chipconn_set_thickness(db: &OdbDb, chip: &str, conn: &str, thickness: i32) -> Result<()>;
     }
 }
@@ -301,6 +304,7 @@ pub use ffi_gen_write::{
     ccseg_set_capacitance,
     ccseg_set_mark,
     chip_set_height,
+    chip_set_offset,
     chip_set_scribe_line_east,
     chip_set_scribe_line_north,
     chip_set_scribe_line_south,
@@ -314,6 +318,8 @@ pub use ffi_gen_write::{
     chip_set_tsv,
     chip_set_width,
     chipconn_set_thickness,
+    chipinst_set_loc,
+    chipinst_set_orient,
     inst_clear_user_flag1,
     inst_clear_user_flag2,
     inst_clear_user_flag3,
