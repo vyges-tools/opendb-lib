@@ -129,6 +129,22 @@ SCALAR = {
 ENUMS = {"dbSigType", "dbIoType", "dbPlacementStatus", "dbOrientType", "dbSourceType", "dbWireType",
          "dbOrientType3D"}
 
+# Enum types that expose NO getString() -- odb leaves the mapping to the caller. Upstream
+# hand-writes it in three separate places (3dblox/dbvWriter.cpp, the 3dblox parser, and its own
+# Python SWIG typemap in swig/python/dbenums.i), so doing the same here is the sanctioned
+# pattern rather than a workaround. The generator emits a small enum->string helper per entry.
+#
+# Keyed by the return type spelled as db.h spells it (a nested enum is unqualified at its use
+# site) -> (qualified C++ type, helper name, enumerators).
+#
+# Vocabulary is UPPERCASE, matching both our other enums (dbSigType -> "SIGNAL") and upstream's
+# Python bindings. Note the 3Dblox *file format* uses lowercase ("die"/"hier"): that is the
+# 3dbv writer's representation of the value, not the database API's, and this is a DB binding.
+ENUM_MAPPED = {
+    "ChipType": ("odb::dbChip::ChipType", "chip_type_str",
+                 ["DIE", "RDL", "IP", "SUBSTRATE", "HIER"]),
+}
+
 # geometry structs returned by value — expanded into scalar (int) sub-fields (suffix, accessor),
 # so `Rect getBBox()` becomes get_b_box_{x_min,y_min,x_max,y_max,dx,dy}. Reuses the scalar path.
 # Point3D (geom.h) uses lowercase x()/y()/z() accessors, unlike Point's getX()/getY().
@@ -481,6 +497,12 @@ class Emit:
                 reg_kind = "string"
                 self._string(fn, name, resolve, c_params, r_params, rust_args_sig, rust_fwd,
                              f"rust::String(p->{name}().getString())")
+            elif ret in ENUM_MAPPED:
+                # no getString() on the type — route through the generated enum->string helper
+                helper = ENUM_MAPPED[ret][1]
+                reg_kind = "string"
+                self._string(fn, name, resolve, c_params, r_params, rust_args_sig, rust_fwd,
+                             f"rust::String({helper}(p->{name}()))")
             elif ret.replace("odb::", "").strip() in STRUCT_FIELDS \
                     and not any(c in ret for c in "<&*"):
                 # a geometry struct (Point/Rect) returned by value -> N scalar (int) sub-fields.
@@ -755,7 +777,15 @@ def main() -> int:
         "  return h.db->findChip(gs(n).c_str()); }\n"
         "static odb::dbChipInst* gen_chipinst(const OdbDb& h, rust::Str chip, rust::Str n) {\n"
         "  odb::dbChip* c = gen_chip(h, chip); return c ? c->findChipInst(gs(n)) : nullptr; }\n"
-        "}  // namespace\n")
+        # enum->string helpers for enums odb gives no getString() for (see ENUM_MAPPED). An
+        # if-chain, not a switch: an unrecognised value falls through to "" instead of tripping
+        # -Wswitch, which matters because these are plain enums an odb bump can extend.
+        + "".join(
+            f"static const char* {helper}({cxx_t} v) {{\n"
+            + "".join(f'  if (v == {cxx_t}::{e}) return "{e}";\n' for e in vals)
+            + '  return ""; }\n'
+            for (cxx_t, helper, vals) in ENUM_MAPPED.values())
+        + "}  // namespace\n")
 
     # ---- generated_resolvers.h (shared by the read + write .cc) -----------------
     # inline (not static-in-anon-namespace) so a resolver unused in one TU doesn't warn.

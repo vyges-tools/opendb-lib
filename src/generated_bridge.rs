@@ -768,6 +768,7 @@ mod ffi_gen {
         fn nth_chip_get_marker_categories(db: &OdbDb, chip: &str, i: usize) -> String;
         fn num_chip_get_chip_paths(db: &OdbDb, chip: &str) -> usize;
         fn nth_chip_get_chip_paths(db: &OdbDb, chip: &str, i: usize) -> String;
+        fn chip_get_chip_type(db: &OdbDb, chip: &str) -> String;
         fn chip_get_block(db: &OdbDb, chip: &str) -> String;
         fn num_chip_get_chip_insts(db: &OdbDb, chip: &str) -> usize;
         fn nth_chip_get_chip_insts(db: &OdbDb, chip: &str, i: usize) -> String;
@@ -922,6 +923,7 @@ pub use ffi_gen::{
     chip_get_b_box_y_max,
     chip_get_b_box_y_min,
     chip_get_block,
+    chip_get_chip_type,
     chip_get_height,
     chip_get_name,
     chip_get_offset_x,

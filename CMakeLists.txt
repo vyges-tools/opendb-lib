@@ -107,6 +107,13 @@ if(VYGES_ODB_MKFIXTURE)
   target_link_libraries(odb_mkfixture PRIVATE odb)
 endif()
 
+# ---- fixture generator: synthesize a 3D / chiplet .odb for the Rust tests -------------------
+option(VYGES_ODB_MK3DFIXTURE "Build the 3D-chiplet-fixture generator (odb_mk3dfixture)" OFF)
+if(VYGES_ODB_MK3DFIXTURE)
+  add_executable(odb_mk3dfixture test/make-3d-fixture.cpp)
+  target_link_libraries(odb_mk3dfixture PRIVATE odb)
+endif()
+
 # ---- conformance gate: OpenROAD's OWN odb C++ GTests, run against OUR libodb --
 # Proves our standalone/no-Tcl build is behaviorally OpenROAD, and catches drift on a pin bump.
 # Only the tests needing nothing beyond libodb build here: OpenROAD's tst/ framework pulls STA +

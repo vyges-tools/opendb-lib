@@ -763,6 +763,7 @@ std::size_t num_chip_get_marker_categories(const OdbDb& db, rust::Str chip);
 rust::String nth_chip_get_marker_categories(const OdbDb& db, rust::Str chip, std::size_t i);
 std::size_t num_chip_get_chip_paths(const OdbDb& db, rust::Str chip);
 rust::String nth_chip_get_chip_paths(const OdbDb& db, rust::Str chip, std::size_t i);
+rust::String chip_get_chip_type(const OdbDb& db, rust::Str chip);
 rust::String chip_get_block(const OdbDb& db, rust::Str chip);
 std::size_t num_chip_get_chip_insts(const OdbDb& db, rust::Str chip);
 rust::String nth_chip_get_chip_insts(const OdbDb& db, rust::Str chip, std::size_t i);

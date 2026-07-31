@@ -132,3 +132,10 @@ inline odb::dbChip* gen_chip(const OdbDb& h, rust::Str n) {
   return h.db->findChip(gs(n).c_str()); }
 inline odb::dbChipInst* gen_chipinst(const OdbDb& h, rust::Str chip, rust::Str n) {
   odb::dbChip* c = gen_chip(h, chip); return c ? c->findChipInst(gs(n)) : nullptr; }
+inline const char* chip_type_str(odb::dbChip::ChipType v) {
+  if (v == odb::dbChip::ChipType::DIE) return "DIE";
+  if (v == odb::dbChip::ChipType::RDL) return "RDL";
+  if (v == odb::dbChip::ChipType::IP) return "IP";
+  if (v == odb::dbChip::ChipType::SUBSTRATE) return "SUBSTRATE";
+  if (v == odb::dbChip::ChipType::HIER) return "HIER";
+  return ""; }
