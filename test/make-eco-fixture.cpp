@@ -98,7 +98,7 @@ int main(int argc, char** argv)
   for (const char* n : {"INV", "INV_X2", "INV_X4", "INV_X4_HVT", "BUF", "BUF_X2"}) {
     make_master(lib, n, comb, false);
   }
-  for (const char* n : {"DFF", "DFF_X2"}) {
+  for (const char* n : {"DFF", "DFF_X2", "DFF_HVT"}) {
     make_master(lib, n, seq, true);
   }
 
