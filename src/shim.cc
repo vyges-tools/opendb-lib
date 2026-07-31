@@ -365,6 +365,13 @@ std::size_t check_3dblox(const OdbDb& h) {
   // odb::Checker is not constructed here.
   return vyges::check_3dblox(h.db, const_cast<utl::Logger*>(&h.logger));
 }
+void construct_unfolded_model(const OdbDb& h) {
+  if (!h.db->getChip()) throw std::runtime_error("vyges-opendb: no top chip to unfold");
+  // The unfolded tables are derived, not stored: _dbDatabase::operator>> calls this on read.
+  // A caller that moves a dbChipInst must call it again, or every unfolded query -- and the
+  // 3D linter, which reads through them -- answers from the placement before the move.
+  h.db->constructUnfoldedModel();
+}
 void log_capture_begin(const OdbDb& h) {
   // libodb's default sink writes to STDOUT, which corrupts any caller whose stdout is
   // machine-readable (our JSON subcommands). Capture instead, so the caller decides where the

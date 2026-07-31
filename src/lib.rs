@@ -71,6 +71,16 @@ mod ffi {
         /// top chip. Annotates the in-memory database; does not modify the design.
         fn check_3dblox(db: &OdbDb) -> Result<usize>;
 
+        /// Rebuild the derived 3D tables (`dbUnfoldedChipInst` / region / bump) from the folded
+        /// chip hierarchy.
+        ///
+        /// These are DERIVED and never serialised — the reader builds them on open, and nothing
+        /// rebuilds them when a `dbChipInst` moves, so the unfolded accessors keep answering
+        /// from the previous placement until this is called. `check_3dblox` rebuilds the model
+        /// itself and is NOT affected; this is for callers reading the unfolded geometry
+        /// directly. Errors if there is no top chip.
+        fn construct_unfolded_model(db: &OdbDb) -> Result<()>;
+
         /// Capture libodb diagnostics rather than letting them reach its default stdout sink,
         /// so callers whose stdout is machine-readable stay parseable. End returns the captured text.
         /// Replace an instance's library cell in place (resize / Vt-swap). `false` if odb
@@ -135,7 +145,7 @@ pub use generated_write_bridge::*;
 pub use ffi::{
     add_obstruction, block_name, bterm_direction, bterm_net, bterm_x, bterm_y, check_3dblox,
     eco_begin, eco_commit, eco_empty, eco_end, eco_undo,
-    clear_obstructions,
+    clear_obstructions, construct_unfolded_model,
     connect, create_inst, create_net, disconnect, find_master, first_master_name, input_pin,
     inst_master, inst_x, inst_y, log_capture_begin, log_capture_end, net_of, nth_bterm_name, nth_inst_name, nth_iterm_name, num_bterms,
     num_insts, num_iterms, num_nets, num_obstructions, open_db, output_pin, place_bterm,

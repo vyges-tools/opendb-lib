@@ -78,6 +78,18 @@ rust::String nth_net_bterm(const OdbDb& db, rust::Str net, std::size_t i);  // i
 // the design. Nothing is persisted unless the caller writes the database out.
 std::size_t check_3dblox(const OdbDb& db);
 
+// Rebuild the derived 3D tables (dbUnfoldedChipInst / dbUnfoldedChipRegionInst /
+// dbUnfoldedChipBumpInst) from the folded chip hierarchy.
+//
+// They are DERIVED and never serialised: _dbDatabase::operator>> calls this on read. Nothing
+// rebuilds them when a dbChipInst moves or is reoriented, so every unfolded query answers from
+// the placement before the move until this is called. No error, no warning, just stale geometry.
+//
+// MEASURED, because the obvious assumption is wrong: check_3dblox above rebuilds the model
+// itself, so the LINTER is not affected. This is for callers that read the unfolded accessors
+// (surface_z, effective_side, bump global positions) after a move.
+void construct_unfolded_model(const OdbDb& db);
+
 // ---- resize / Vt-swap --------------------------------------------------------
 // Replace an instance's library cell in place — the setup-repair move (upsize a critical
 // driver), and equally the Vt-swap and downsize moves.
