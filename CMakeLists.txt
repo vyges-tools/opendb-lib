@@ -135,7 +135,16 @@ target_compile_options(odb PRIVATE $<$<CXX_COMPILER_ID:GNU>:-Wno-class-memaccess
 option(VYGES_ODB_3DBLOX_IO "Build the 3Dblox .3dbv/.3dbx reader/writer (needs yaml-cpp + OpenSTA + Tcl)" OFF)
 if(VYGES_ODB_3DBLOX_IO)
   find_package(yaml-cpp REQUIRED)
-  find_package(TCL REQUIRED)   # OpenSTA is a Tcl application; its archive references Tcl_*
+  # OpenSTA is a Tcl application: its archive references Tcl_* even when nothing calls into the
+  # interpreter. Find the LIBRARY directly rather than find_package(TCL), whose FindTCL module
+  # also demands TK -- a GUI toolkit this has no use for, and which is usually absent on a
+  # headless build host.
+  find_library(TCL_LIBRARY NAMES tcl8.6 tcl86 tcl8.7 tcl87 tcl
+               HINTS ${TCL_ROOT}/lib /usr/lib/x86_64-linux-gnu /usr/lib /usr/local/lib)
+  if(NOT TCL_LIBRARY)
+    message(FATAL_ERROR "VYGES_ODB_3DBLOX_IO=ON needs Tcl (OpenSTA links it). "
+                        "Install tcl-dev, or set -DTCL_ROOT=<prefix>.")
+  endif()
   find_path(OPENSTA_INCLUDE_DIR sta/Sta.hh HINTS ${OPENSTA_ROOT}/include /usr/local/include)
   find_library(OPENSTA_LIBRARY NAMES OpenSTA HINTS ${OPENSTA_ROOT}/lib /usr/local/lib)
   if(NOT OPENSTA_INCLUDE_DIR OR NOT OPENSTA_LIBRARY)
