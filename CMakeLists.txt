@@ -203,6 +203,15 @@ if(VYGES_ODB_MK3DFIXTURE)
   target_link_libraries(odb_mk3dfixture PRIVATE odb)
 endif()
 
+# ---- fixture generator: ONE design in BOTH forms, for the timing-driven ECO loop ------------
+# Emits <prefix>.odb (what the applier edits) and <prefix>.v (what the planner times) from the
+# same statements, so instance/pin/cell names cannot drift between the two halves of the loop.
+option(VYGES_ODB_MKECOFIXTURE "Build the shared ECO-loop fixture generator (odb_mkecofixture)" OFF)
+if(VYGES_ODB_MKECOFIXTURE)
+  add_executable(odb_mkecofixture test/make-eco-fixture.cpp)
+  target_link_libraries(odb_mkecofixture PRIVATE odb)
+endif()
+
 # ---- conformance gate: OpenROAD's OWN odb C++ GTests, run against OUR libodb --
 # Proves our standalone/no-Tcl build is behaviorally OpenROAD, and catches drift on a pin bump.
 # Only the tests needing nothing beyond libodb build here: OpenROAD's tst/ framework pulls STA +
