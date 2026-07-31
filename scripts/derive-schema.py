@@ -239,8 +239,14 @@ def main() -> int:
     out_path.parent.mkdir(parents=True, exist_ok=True)
     out_path.write_text(json.dumps(out, indent=2) + "\n")
 
-    print(f"derived schema: {len(classes)} classes, {total_methods} public methods "
-          f"({total_bridged} already bridged) -> {out_path.relative_to(root)}")
+    # relative_to raises when --out points outside the repo (e.g. /tmp for a scratch compare),
+    # which would crash AFTER the file was written. Report the absolute path instead.
+    try:
+        shown = out_path.relative_to(root)
+    except ValueError:
+        shown = out_path
+    print(f"derived schema [{out['scope']}]: {len(classes)} classes, {total_methods} public "
+          f"methods ({total_bridged} already bridged) -> {shown}")
     # top classes by surface size, for a quick sense of the work
     for c in sorted(classes, key=lambda c: len(c["methods"]), reverse=True)[:8]:
         kinds = {}

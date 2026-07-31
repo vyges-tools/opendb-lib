@@ -18,9 +18,14 @@ if [ ! -f "$here/vendor/OpenROAD/src/odb/include/odb/db.h" ]; then
   "$here/scripts/fetch-odb-src.sh"
 fi
 
-echo "== regenerating bindings + coverage map =="
+echo "== regenerating bindings + coverage maps =="
 python3 "$here/scripts/generate-bindings.py"
+# Two coverage maps, deliberately. The CORE one is the headline metric and its denominator is
+# stable by construction (odb's hand-written classes only), so coverage is comparable release to
+# release. The FULL one adds the ~75 classes that have an upstream codeGenerator schema — which
+# is where the 3D/chiplet surface lives — so anything we bind outside the core is still visible.
 python3 "$here/scripts/derive-schema.py"
+python3 "$here/scripts/derive-schema.py" --all --out docs/derived-full-schema.json
 
 fail=0
 for repo in "$here" "$opendb"; do
