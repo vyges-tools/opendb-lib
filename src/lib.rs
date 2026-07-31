@@ -73,6 +73,14 @@ mod ffi {
 
         /// Capture libodb diagnostics rather than letting them reach its default stdout sink,
         /// so callers whose stdout is machine-readable stay parseable. End returns the captured text.
+        /// ECO journal — speculative edits with a real rollback. Sequence:
+        /// `eco_begin` -> edits -> `eco_commit` | `eco_undo`.
+        fn eco_begin(db: &OdbDb) -> Result<()>;
+        fn eco_end(db: &OdbDb) -> Result<()>;
+        fn eco_commit(db: &OdbDb) -> Result<()>;
+        fn eco_undo(db: &OdbDb) -> Result<()>;
+        fn eco_empty(db: &OdbDb) -> Result<bool>;
+
         fn log_capture_begin(db: &OdbDb);
         fn log_capture_end(db: &OdbDb) -> String;
     }
@@ -122,6 +130,7 @@ pub use generated_write_bridge::*;
 #[cfg(unix)]
 pub use ffi::{
     add_obstruction, block_name, bterm_direction, bterm_net, bterm_x, bterm_y, check_3dblox,
+    eco_begin, eco_commit, eco_empty, eco_end, eco_undo,
     clear_obstructions,
     connect, create_inst, create_net, disconnect, find_master, first_master_name, input_pin,
     inst_master, inst_x, inst_y, log_capture_begin, log_capture_end, net_of, nth_bterm_name, nth_inst_name, nth_iterm_name, num_bterms,

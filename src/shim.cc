@@ -376,3 +376,8 @@ void log_capture_begin(const OdbDb& h) {
 rust::String log_capture_end(const OdbDb& h) {
   return rust::String(const_cast<utl::Logger&>(h.logger).redirectStringEnd());
 }
+void eco_begin(const OdbDb& h) { odb::dbDatabase::beginEco(require_block(h)); }
+void eco_end(const OdbDb& h) { odb::dbDatabase::endEco(require_block(h)); }
+void eco_commit(const OdbDb& h) { odb::dbDatabase::commitEco(require_block(h)); }
+void eco_undo(const OdbDb& h) { odb::dbDatabase::undoEco(require_block(h)); }
+bool eco_empty(const OdbDb& h) { return odb::dbDatabase::ecoEmpty(require_block(h)); }

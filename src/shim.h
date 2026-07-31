@@ -78,6 +78,23 @@ rust::String nth_net_bterm(const OdbDb& db, rust::Str net, std::size_t i);  // i
 // the design. Nothing is persisted unless the caller writes the database out.
 std::size_t check_3dblox(const OdbDb& db);
 
+// ---- ECO journal: speculative edits with a real undo -------------------------
+// odb records block edits (create/delete object, connect/disconnect, swap, field updates) into
+// a journal, so a batch of ECO changes can be rolled back. This is what lets a timing-driven
+// optimizer TRY a fix, re-time, and put the design back if it did not help.
+//
+// Sequence: eco_begin -> ...edits... -> eco_commit | eco_undo. Journals nest (odb keeps a
+// stack), and undo/commit work whether or not eco_end was called first.
+//
+// Upstream's own note is worth heeding: the mechanism was built for replicating deltas from a
+// "remote" database onto an unchanged "master". We use it for local speculate/rollback, which
+// is within its semantics, but only edits the journal actually records can be undone.
+void eco_begin(const OdbDb& db);   // start recording (throws if there is no top block)
+void eco_end(const OdbDb& db);     // stop recording, push onto the ECO stack
+void eco_commit(const OdbDb& db);  // keep the recorded changes
+void eco_undo(const OdbDb& db);    // roll the recorded changes back
+bool eco_empty(const OdbDb& db);   // true when the current ECO recorded nothing
+
 // Capture libodb diagnostics instead of letting them hit stdout; end returns the captured text.
 void log_capture_begin(const OdbDb& db);
 rust::String log_capture_end(const OdbDb& db);
