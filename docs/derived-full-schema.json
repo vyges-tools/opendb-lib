@@ -5,7 +5,7 @@
   "scope": "all",
   "class_count": 119,
   "method_count": 2622,
-  "bridged_count": 1095,
+  "bridged_count": 1097,
   "classes": [
     {
       "name": "dbAccessPoint",
@@ -5094,7 +5094,7 @@
           ],
           "const": false,
           "kind": "setter",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "getDbuPerMicron",
@@ -5102,7 +5102,7 @@
           "params": [],
           "const": true,
           "kind": "getter",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "getAlignmentMarkerRules",

@@ -107,6 +107,10 @@ void chip_conn_create(const OdbDb& db, rust::Str name, rust::Str parent_chip,
                       rust::Str bottom_inst, rust::Str bottom_region, int32_t thickness);
 void chip_net_create(const OdbDb& db, rust::Str chip, rust::Str name);
 void chip_path_create(const OdbDb& db, rust::Str chip, rust::Str name);
+std::unique_ptr<OdbDb> new_db();   // an empty database, for building rather than reading
+void tech_create(const OdbDb& db, rust::Str name);
+int32_t dbu_per_micron(const OdbDb& db);
+void set_dbu_per_micron(const OdbDb& db, int32_t dbu);
 void chip_net_add_bump(const OdbDb& db, rust::Str chip, rust::Str net, rust::Str chip_inst, rust::Str region, std::size_t bump_index);
 void alignment_marker_rule_create(const OdbDb& db, rust::Str master_a, rust::Str master_b, int32_t tolerance);
 void set_top_chip(const OdbDb& db, rust::Str chip);

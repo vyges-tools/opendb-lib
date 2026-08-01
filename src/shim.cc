@@ -414,9 +414,15 @@ void chip_create(const OdbDb& h, rust::Str name, rust::Str tech, rust::Str chip_
   // Per-chip dbTech is the load-bearing fact of the 3D model — it is what lets dies from
   // different processes coexist — so the tech is selectable by name. Empty means the database's
   // default, which is the single-process case.
-  odb::dbTech* t = tech.empty() ? h.db->getTech() : h.db->findTech(s(tech).c_str());
-  if (!t) throw std::runtime_error("vyges-opendb: tech not found: "
-                                   + (tech.empty() ? std::string("<default>") : s(tech)));
+  odb::dbTech* t = nullptr;
+  if (tech.empty()) {
+    // A chip may legitimately have no tech — upstream creates the design top that way
+    // (3dblox.cpp createDesignTopChiplet), and a geometry-only read has no LEF to give it one.
+    t = h.db->getTech();
+  } else {
+    t = h.db->findTech(s(tech).c_str());
+    if (!t) throw std::runtime_error("vyges-opendb: tech not found: " + s(tech));
+  }
   if (!odb::dbChip::create(h.db, t, s(name), chip_type_of(chip_type)))
     throw std::runtime_error("vyges-opendb: chip_create failed (duplicate name?): " + s(name));
 }
@@ -507,6 +513,28 @@ void chip_net_create(const OdbDb& h, rust::Str chip, rust::Str name) {
 void chip_path_create(const OdbDb& h, rust::Str chip, rust::Str name) {
   if (!odb::dbChipPath::create(require_chip(h, chip), s(name).c_str()))
     throw std::runtime_error("vyges-opendb: chip_path_create failed: " + s(name));
+}
+
+std::unique_ptr<OdbDb> new_db() { return std::make_unique<OdbDb>(); }
+
+void tech_create(const OdbDb& h, rust::Str name) {
+  // odb refuses to create a DIE chip without a technology, which is why a .3dbv points each
+  // chiplet at its own APR_tech_file. A geometry-only read has no LEF to give it one, so it
+  // needs a placeholder: no layers, no rules, only the precision the coordinates are in.
+  odb::dbTech* t = odb::dbTech::create(h.db, s(name).c_str());
+  if (!t) throw std::runtime_error("vyges-opendb: tech_create failed (one already exists?): "
+                                   + s(name));
+  // Precision is a database-level property (dbTech only exposes a getter), so the caller sets
+  // it via set_dbu_per_micron BEFORE creating the tech.
+}
+
+int32_t dbu_per_micron(const OdbDb& h) { return h.db->getDbuPerMicron(); }
+
+void set_dbu_per_micron(const OdbDb& h, int32_t dbu) {
+  // A 3Dblox header declares the precision its coordinates are written at, and odb validates
+  // the database's dbu against it. Coordinates in those files are microns, so this is what
+  // makes the conversion to DBU well defined rather than assumed.
+  h.db->setDbuPerMicron(dbu);
 }
 
 void chip_net_add_bump(const OdbDb& h, rust::Str chip, rust::Str net, rust::Str chip_inst,

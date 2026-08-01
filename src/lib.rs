@@ -100,6 +100,15 @@ mod ffi {
         /// rule between two masters. Both exist because the checks that consume them are inert
         /// without them: logical connectivity compares the nets of aligned bump pairs, and the
         /// alignment-marker check returns immediately when no rule is defined.
+        /// Database precision. A 3Dblox header declares the precision its (micron) coordinates
+        /// are written at; reading one has to reconcile that with the database's own.
+        /// An empty database — the starting point when a design is being built rather than read.
+        fn new_db() -> UniquePtr<OdbDb>;
+        /// A technology carrying only a precision. odb refuses to create a DIE chip without one.
+        fn tech_create(db: &OdbDb, name: &str) -> Result<()>;
+        fn dbu_per_micron(db: &OdbDb) -> i32;
+        fn set_dbu_per_micron(db: &OdbDb, dbu: i32);
+
         fn chip_net_add_bump(db: &OdbDb, chip: &str, net: &str, chip_inst: &str, region: &str, bump_index: usize) -> Result<()>;
         fn alignment_marker_rule_create(db: &OdbDb, master_a: &str, master_b: &str, tolerance: i32) -> Result<()>;
 
@@ -175,6 +184,7 @@ pub use ffi::{
     chip_block_create, chip_bump_create, chip_conn_create, chip_create, chip_inst_create,
     chip_net_create, chip_net_add_bump, chip_path_create, chip_region_create,
     chip_region_set_box, alignment_marker_rule_create, set_top_chip,
+    dbu_per_micron, set_dbu_per_micron, new_db, tech_create,
     connect, create_inst, create_net, disconnect, find_master, first_master_name, input_pin,
     inst_master, inst_x, inst_y, log_capture_begin, log_capture_end, net_of, nth_bterm_name, nth_inst_name, nth_iterm_name, num_bterms,
     num_insts, num_iterms, num_nets, num_obstructions, open_db, output_pin, place_bterm,
