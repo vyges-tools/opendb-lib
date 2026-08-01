@@ -365,6 +365,157 @@ std::size_t check_3dblox(const OdbDb& h) {
   // odb::Checker is not constructed here.
   return vyges::check_3dblox(h.db, const_cast<utl::Logger*>(&h.logger));
 }
+// ---- 3D / chiplet construction ---------------------------------------------------------------
+// odb's dbChip* creation statics. Unlike the read surface these cannot be generated: the
+// signatures are heterogeneous (dbChipConn takes two std::vector<dbChipInst*> paths), so they
+// follow the hand-written pattern of create_inst/create_net above. Objects are addressed by
+// name in and out, so no odb pointer crosses the boundary.
+
+static odb::dbChip::ChipType chip_type_of(rust::Str t) {
+  const std::string v = s(t);
+  if (v == "DIE") return odb::dbChip::ChipType::DIE;
+  if (v == "RDL") return odb::dbChip::ChipType::RDL;
+  if (v == "IP") return odb::dbChip::ChipType::IP;
+  if (v == "SUBSTRATE") return odb::dbChip::ChipType::SUBSTRATE;
+  if (v == "HIER") return odb::dbChip::ChipType::HIER;
+  throw std::runtime_error("vyges-opendb: unknown chip type: " + v
+                           + " (DIE|RDL|IP|SUBSTRATE|HIER)");
+}
+
+static odb::dbChipRegion::Side region_side_of(rust::Str t) {
+  const std::string v = s(t);
+  if (v == "FRONT") return odb::dbChipRegion::Side::FRONT;
+  if (v == "BACK") return odb::dbChipRegion::Side::BACK;
+  if (v == "INTERNAL") return odb::dbChipRegion::Side::INTERNAL;
+  if (v == "INTERNAL_EXT") return odb::dbChipRegion::Side::INTERNAL_EXT;
+  throw std::runtime_error("vyges-opendb: unknown region side: " + v
+                           + " (FRONT|BACK|INTERNAL|INTERNAL_EXT)");
+}
+
+// Local lookups rather than the generated resolvers: this file is hand-written and should not
+// depend on generator output, and each is one call on the public API.
+static odb::dbChipRegion* find_region(const OdbDb& h, rust::Str chip, rust::Str region);
+static odb::dbChipInst* find_chip_inst(const OdbDb& h, rust::Str chip, rust::Str inst);
+
+static odb::dbChip* require_chip(const OdbDb& h, rust::Str name) {
+  odb::dbChip* c = h.db->findChip(s(name).c_str());
+  if (!c) throw std::runtime_error("vyges-opendb: chip not found: " + s(name));
+  return c;
+}
+
+static odb::dbChipRegion* find_region(const OdbDb& h, rust::Str chip, rust::Str region) {
+  return require_chip(h, chip)->findChipRegion(s(region));
+}
+static odb::dbChipInst* find_chip_inst(const OdbDb& h, rust::Str chip, rust::Str inst) {
+  return require_chip(h, chip)->findChipInst(s(inst));
+}
+
+void chip_create(const OdbDb& h, rust::Str name, rust::Str tech, rust::Str chip_type) {
+  // Per-chip dbTech is the load-bearing fact of the 3D model — it is what lets dies from
+  // different processes coexist — so the tech is selectable by name. Empty means the database's
+  // default, which is the single-process case.
+  odb::dbTech* t = tech.empty() ? h.db->getTech() : h.db->findTech(s(tech).c_str());
+  if (!t) throw std::runtime_error("vyges-opendb: tech not found: "
+                                   + (tech.empty() ? std::string("<default>") : s(tech)));
+  if (!odb::dbChip::create(h.db, t, s(name), chip_type_of(chip_type)))
+    throw std::runtime_error("vyges-opendb: chip_create failed (duplicate name?): " + s(name));
+}
+
+void chip_block_create(const OdbDb& h, rust::Str chip, rust::Str name) {
+  // A chip carries its own dbBlock — the die's design. The TOP chip needs one for the
+  // block-level accessors to resolve through it, and a die needs one to hold the instances its
+  // bumps wrap. Separate from chip_create because not every chip needs one.
+  if (!odb::dbBlock::create(require_chip(h, chip), s(name).c_str()))
+    throw std::runtime_error("vyges-opendb: chip_block_create failed: " + s(name));
+}
+
+void chip_inst_create(const OdbDb& h, rust::Str parent_chip, rust::Str master_chip,
+                      rust::Str name) {
+  // ORDER MATTERS: dbChipInst::create derives the region and bump instances from the MASTER
+  // chip's regions and bumps as they exist right now. Regions added to the master afterwards
+  // are silently not instantiated for this inst.
+  odb::dbChip* parent = require_chip(h, parent_chip);
+  odb::dbChip* master = require_chip(h, master_chip);
+  if (!odb::dbChipInst::create(parent, master, s(name)))
+    throw std::runtime_error("vyges-opendb: chip_inst_create failed: " + s(name));
+}
+
+void chip_region_create(const OdbDb& h, rust::Str chip, rust::Str name, rust::Str side,
+                        rust::Str layer) {
+  odb::dbChip* c = require_chip(h, chip);
+  odb::dbTech* t = c->getTech();
+  odb::dbTechLayer* l = nullptr;
+  if (!layer.empty()) {
+    if (!t) throw std::runtime_error("vyges-opendb: chip has no tech to resolve a layer against");
+    l = t->findLayer(s(layer).c_str());
+    if (!l) throw std::runtime_error("vyges-opendb: tech layer not found: " + s(layer));
+  }
+  if (!odb::dbChipRegion::create(c, s(name), region_side_of(side), l))
+    throw std::runtime_error("vyges-opendb: chip_region_create failed: " + s(name));
+}
+
+void chip_region_set_box(const OdbDb& h, rust::Str chip, rust::Str region, int32_t x1, int32_t y1,
+                         int32_t x2, int32_t y2) {
+  // setBox takes a Rect, which the generated setter surface cannot marshal; without it a region
+  // has no footprint and the bump-alignment and connection-region checks have nothing to test.
+  odb::dbChipRegion* r = find_region(h, chip, region);
+  if (!r) throw std::runtime_error("vyges-opendb: chip region not found: " + s(region));
+  r->setBox(odb::Rect(x1, y1, x2, y2));
+}
+
+void chip_bump_create(const OdbDb& h, rust::Str chip, rust::Str region, rust::Str inst) {
+  // A bump wraps a placed dbInst living in the OWNING CHIP's block, not the top block.
+  odb::dbChipRegion* r = find_region(h, chip, region);
+  if (!r) throw std::runtime_error("vyges-opendb: chip region not found: " + s(region));
+  odb::dbBlock* b = require_chip(h, chip)->getBlock();
+  if (!b) throw std::runtime_error("vyges-opendb: chip has no block to hold bump instances: "
+                                   + s(chip));
+  odb::dbInst* i = b->findInst(s(inst).c_str());
+  if (!i) throw std::runtime_error("vyges-opendb: instance not found in chip block: " + s(inst));
+  if (!odb::dbChipBump::create(r, i))
+    throw std::runtime_error("vyges-opendb: chip_bump_create failed: " + s(inst));
+}
+
+void chip_conn_create(const OdbDb& h, rust::Str name, rust::Str parent_chip, rust::Str top_inst,
+                      rust::Str top_region, rust::Str bottom_inst, rust::Str bottom_region,
+                      int32_t thickness) {
+  // odb takes a PATH of chip insts on each side, to name a region inside a nested assembly.
+  // This binds the direct case — one hop per side — which is what a bond between two chips in
+  // the same parent needs. Deeper paths are expressible upstream and not yet here; that wants a
+  // list-valued parameter, and no caller has needed one.
+  odb::dbChip* parent = require_chip(h, parent_chip);
+  odb::dbChipInst* ti = find_chip_inst(h, parent_chip, top_inst);
+  odb::dbChipInst* bi = find_chip_inst(h, parent_chip, bottom_inst);
+  if (!ti) throw std::runtime_error("vyges-opendb: chip inst not found: " + s(top_inst));
+  if (!bi) throw std::runtime_error("vyges-opendb: chip inst not found: " + s(bottom_inst));
+  odb::dbChipRegionInst* tr = ti->findChipRegionInst(s(top_region));
+  odb::dbChipRegionInst* br = bi->findChipRegionInst(s(bottom_region));
+  if (!tr) throw std::runtime_error("vyges-opendb: region inst not found on " + s(top_inst)
+                                    + ": " + s(top_region));
+  if (!br) throw std::runtime_error("vyges-opendb: region inst not found on " + s(bottom_inst)
+                                    + ": " + s(bottom_region));
+  odb::dbChipConn* c = odb::dbChipConn::create(s(name), parent, {ti}, tr, {bi}, br);
+  if (!c) throw std::runtime_error("vyges-opendb: chip_conn_create failed: " + s(name));
+  c->setThickness(thickness);
+}
+
+void chip_net_create(const OdbDb& h, rust::Str chip, rust::Str name) {
+  if (!odb::dbChipNet::create(require_chip(h, chip), s(name)))
+    throw std::runtime_error("vyges-opendb: chip_net_create failed: " + s(name));
+}
+
+void chip_path_create(const OdbDb& h, rust::Str chip, rust::Str name) {
+  if (!odb::dbChipPath::create(require_chip(h, chip), s(name).c_str()))
+    throw std::runtime_error("vyges-opendb: chip_path_create failed: " + s(name));
+}
+
+void set_top_chip(const OdbDb& h, rust::Str chip) {
+  // Roots the assembly. dbUnfoldedBuilder::build() starts from dbDatabase::getChip() and walks
+  // its chip insts, so with the top chip left pointing elsewhere every unfolded table reads
+  // empty and nothing says why.
+  h.db->setTopChip(require_chip(h, chip));
+}
+
 void construct_unfolded_model(const OdbDb& h) {
   if (!h.db->getChip()) throw std::runtime_error("vyges-opendb: no top chip to unfold");
   // The unfolded tables are derived, not stored: _dbDatabase::operator>> calls this on read.

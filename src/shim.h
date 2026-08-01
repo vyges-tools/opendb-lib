@@ -88,6 +88,27 @@ std::size_t check_3dblox(const OdbDb& db);
 // MEASURED, because the obvious assumption is wrong: check_3dblox above rebuilds the model
 // itself, so the LINTER is not affected. This is for callers that read the unfolded accessors
 // (surface_z, effective_side, bump global positions) after a move.
+// ---- 3D / chiplet construction -----------------------------------------------
+// odb's dbChip* creation statics. Not generated: the signatures are heterogeneous (dbChipConn
+// takes two std::vector<dbChipInst*> paths), so these follow the hand-written create_inst /
+// create_net pattern. Everything is addressed by name; no odb pointer crosses the boundary.
+// All throw on failure -> Rust Result.
+//
+// Without these the 3D surface is read-only in practice: a design could be inspected and its
+// chips moved, but not brought into existence at all.
+void chip_create(const OdbDb& db, rust::Str name, rust::Str tech, rust::Str chip_type);  // tech "" = default
+void chip_block_create(const OdbDb& db, rust::Str chip, rust::Str name);
+void chip_inst_create(const OdbDb& db, rust::Str parent_chip, rust::Str master_chip, rust::Str name);
+void chip_region_create(const OdbDb& db, rust::Str chip, rust::Str name, rust::Str side, rust::Str layer);
+void chip_region_set_box(const OdbDb& db, rust::Str chip, rust::Str region, int32_t x1, int32_t y1, int32_t x2, int32_t y2);
+void chip_bump_create(const OdbDb& db, rust::Str chip, rust::Str region, rust::Str inst);
+void chip_conn_create(const OdbDb& db, rust::Str name, rust::Str parent_chip,
+                      rust::Str top_inst, rust::Str top_region,
+                      rust::Str bottom_inst, rust::Str bottom_region, int32_t thickness);
+void chip_net_create(const OdbDb& db, rust::Str chip, rust::Str name);
+void chip_path_create(const OdbDb& db, rust::Str chip, rust::Str name);
+void set_top_chip(const OdbDb& db, rust::Str chip);
+
 void construct_unfolded_model(const OdbDb& db);
 
 // ---- resize / Vt-swap --------------------------------------------------------

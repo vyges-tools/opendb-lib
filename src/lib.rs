@@ -79,6 +79,25 @@ mod ffi {
         /// from the previous placement until this is called. `check_3dblox` rebuilds the model
         /// itself and is NOT affected; this is for callers reading the unfolded geometry
         /// directly. Errors if there is no top chip.
+        /// 3D / chiplet construction — odb's `dbChip*` creation statics, hand-bound because
+        /// their signatures are heterogeneous. Without these the 3D surface is read-only in
+        /// practice: a design can be inspected and its chips moved, but not created.
+        /// `tech` empty selects the database's default; naming one is what lets dies from
+        /// different processes coexist.
+        fn chip_create(db: &OdbDb, name: &str, tech: &str, chip_type: &str) -> Result<()>;
+        fn chip_block_create(db: &OdbDb, chip: &str, name: &str) -> Result<()>;
+        fn chip_inst_create(db: &OdbDb, parent_chip: &str, master_chip: &str, name: &str) -> Result<()>;
+        fn chip_region_create(db: &OdbDb, chip: &str, name: &str, side: &str, layer: &str) -> Result<()>;
+        fn chip_region_set_box(db: &OdbDb, chip: &str, region: &str, x1: i32, y1: i32, x2: i32, y2: i32) -> Result<()>;
+        fn chip_bump_create(db: &OdbDb, chip: &str, region: &str, inst: &str) -> Result<()>;
+        fn chip_conn_create(db: &OdbDb, name: &str, parent_chip: &str, top_inst: &str, top_region: &str, bottom_inst: &str, bottom_region: &str, thickness: i32) -> Result<()>;
+        fn chip_net_create(db: &OdbDb, chip: &str, name: &str) -> Result<()>;
+        fn chip_path_create(db: &OdbDb, chip: &str, name: &str) -> Result<()>;
+
+        /// Root the assembly. The unfolded builder starts from the top chip and walks its chip
+        /// insts, so with it left pointing elsewhere every unfolded table reads empty.
+        fn set_top_chip(db: &OdbDb, chip: &str) -> Result<()>;
+
         fn construct_unfolded_model(db: &OdbDb) -> Result<()>;
 
         /// Capture libodb diagnostics rather than letting them reach its default stdout sink,
@@ -146,6 +165,8 @@ pub use ffi::{
     add_obstruction, block_name, bterm_direction, bterm_net, bterm_x, bterm_y, check_3dblox,
     eco_begin, eco_commit, eco_empty, eco_end, eco_undo,
     clear_obstructions, construct_unfolded_model,
+    chip_block_create, chip_bump_create, chip_conn_create, chip_create, chip_inst_create,
+    chip_net_create, chip_path_create, chip_region_create, chip_region_set_box, set_top_chip,
     connect, create_inst, create_net, disconnect, find_master, first_master_name, input_pin,
     inst_master, inst_x, inst_y, log_capture_begin, log_capture_end, net_of, nth_bterm_name, nth_inst_name, nth_iterm_name, num_bterms,
     num_insts, num_iterms, num_nets, num_obstructions, open_db, output_pin, place_bterm,

@@ -5,7 +5,7 @@
   "scope": "all",
   "class_count": 119,
   "method_count": 2622,
-  "bridged_count": 1084,
+  "bridged_count": 1092,
   "classes": [
     {
       "name": "dbAccessPoint",
@@ -4517,7 +4517,7 @@
           ],
           "const": true,
           "kind": "relation",
-          "bridged": false,
+          "bridged": true,
           "target": "dbChipInst"
         },
         {
@@ -4531,7 +4531,7 @@
           ],
           "const": true,
           "kind": "relation",
-          "bridged": false,
+          "bridged": true,
           "target": "dbChipRegion"
         },
         {
@@ -4874,7 +4874,7 @@
           ],
           "const": true,
           "kind": "relation",
-          "bridged": false,
+          "bridged": true,
           "target": "dbChipRegionInst"
         },
         {
@@ -4888,7 +4888,7 @@
           ],
           "const": true,
           "kind": "relation",
-          "bridged": false,
+          "bridged": true,
           "target": "dbChipRegionInst"
         }
       ],
@@ -4981,7 +4981,7 @@
           ],
           "const": false,
           "kind": "setter",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "getBox",
@@ -5133,7 +5133,7 @@
           ],
           "const": true,
           "kind": "relation",
-          "bridged": false,
+          "bridged": true,
           "target": "dbChip"
         },
         {
@@ -5275,7 +5275,7 @@
           ],
           "const": false,
           "kind": "setter",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "getLibs",
@@ -5320,7 +5320,7 @@
           ],
           "const": false,
           "kind": "relation",
-          "bridged": false,
+          "bridged": true,
           "target": "dbTech"
         },
         {
