@@ -96,6 +96,13 @@ mod ffi {
 
         /// Root the assembly. The unfolded builder starts from the top chip and walks its chip
         /// insts, so with it left pointing elsewhere every unfolded table reads empty.
+        /// Associate a bump instance with a logical 3D net, and declare an alignment-marker
+        /// rule between two masters. Both exist because the checks that consume them are inert
+        /// without them: logical connectivity compares the nets of aligned bump pairs, and the
+        /// alignment-marker check returns immediately when no rule is defined.
+        fn chip_net_add_bump(db: &OdbDb, chip: &str, net: &str, chip_inst: &str, region: &str, bump_index: usize) -> Result<()>;
+        fn alignment_marker_rule_create(db: &OdbDb, master_a: &str, master_b: &str, tolerance: i32) -> Result<()>;
+
         fn set_top_chip(db: &OdbDb, chip: &str) -> Result<()>;
 
         fn construct_unfolded_model(db: &OdbDb) -> Result<()>;
@@ -166,7 +173,8 @@ pub use ffi::{
     eco_begin, eco_commit, eco_empty, eco_end, eco_undo,
     clear_obstructions, construct_unfolded_model,
     chip_block_create, chip_bump_create, chip_conn_create, chip_create, chip_inst_create,
-    chip_net_create, chip_path_create, chip_region_create, chip_region_set_box, set_top_chip,
+    chip_net_create, chip_net_add_bump, chip_path_create, chip_region_create,
+    chip_region_set_box, alignment_marker_rule_create, set_top_chip,
     connect, create_inst, create_net, disconnect, find_master, first_master_name, input_pin,
     inst_master, inst_x, inst_y, log_capture_begin, log_capture_end, net_of, nth_bterm_name, nth_inst_name, nth_iterm_name, num_bterms,
     num_insts, num_iterms, num_nets, num_obstructions, open_db, output_pin, place_bterm,

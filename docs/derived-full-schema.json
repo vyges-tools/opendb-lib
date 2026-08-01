@@ -5,7 +5,7 @@
   "scope": "all",
   "class_count": 119,
   "method_count": 2622,
-  "bridged_count": 1092,
+  "bridged_count": 1095,
   "classes": [
     {
       "name": "dbAccessPoint",
@@ -225,7 +225,7 @@
           ],
           "const": false,
           "kind": "setter",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "getTolerance",
@@ -5073,7 +5073,7 @@
           "params": [],
           "const": true,
           "kind": "iterator",
-          "bridged": false,
+          "bridged": true,
           "element": "dbChipBumpInst"
         }
       ],
@@ -5178,7 +5178,7 @@
           "params": [],
           "const": true,
           "kind": "iterator",
-          "bridged": false,
+          "bridged": true,
           "element": "dbChipBumpInst"
         },
         {

@@ -509,6 +509,42 @@ void chip_path_create(const OdbDb& h, rust::Str chip, rust::Str name) {
     throw std::runtime_error("vyges-opendb: chip_path_create failed: " + s(name));
 }
 
+void chip_net_add_bump(const OdbDb& h, rust::Str chip, rust::Str net, rust::Str chip_inst,
+                       rust::Str region, std::size_t bump_index) {
+  // Associates a bump INSTANCE with a logical 3D net. The logical-connectivity check compares
+  // the nets of physically aligned bump pairs, so without this the check has nothing to
+  // disagree about and silently passes on any design.
+  odb::dbChip* c = require_chip(h, chip);
+  odb::dbChipNet* n = nullptr;
+  for (odb::dbChipNet* cand : c->getChipNets()) {
+    if (cand->getName() == s(net)) { n = cand; break; }
+  }
+  if (!n) throw std::runtime_error("vyges-opendb: chip net not found: " + s(net));
+  odb::dbChipInst* ci = find_chip_inst(h, chip, chip_inst);
+  if (!ci) throw std::runtime_error("vyges-opendb: chip inst not found: " + s(chip_inst));
+  odb::dbChipRegionInst* ri = ci->findChipRegionInst(s(region));
+  if (!ri) throw std::runtime_error("vyges-opendb: region inst not found: " + s(region));
+  std::size_t i = 0;
+  for (odb::dbChipBumpInst* b : ri->getChipBumpInsts()) {
+    if (i++ == bump_index) { n->addBumpInst(b, {ci}); return; }
+  }
+  throw std::runtime_error("vyges-opendb: bump index out of range on " + s(chip_inst) + "/"
+                           + s(region));
+}
+
+void alignment_marker_rule_create(const OdbDb& h, rust::Str master_a, rust::Str master_b,
+                                  int32_t tolerance) {
+  // The alignment-marker check returns immediately when no rules exist, so a design without
+  // one is not "clean" so much as unexamined.
+  odb::dbMaster* a = h.db->findMaster(s(master_a).c_str());
+  odb::dbMaster* b = h.db->findMaster(s(master_b).c_str());
+  if (!a) throw std::runtime_error("vyges-opendb: master not found: " + s(master_a));
+  if (!b) throw std::runtime_error("vyges-opendb: master not found: " + s(master_b));
+  odb::dbAlignmentMarkerRule* r = odb::dbAlignmentMarkerRule::create(a, b);
+  if (!r) throw std::runtime_error("vyges-opendb: alignment_marker_rule_create failed");
+  r->setTolerance(tolerance);
+}
+
 void set_top_chip(const OdbDb& h, rust::Str chip) {
   // Roots the assembly. dbUnfoldedBuilder::build() starts from dbDatabase::getChip() and walks
   // its chip insts, so with the top chip left pointing elsewhere every unfolded table reads
