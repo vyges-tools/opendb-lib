@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: Apache-2.0
 #include "shim.h"
+#include "odb/lefin.h"
 
 #include "lint3d.h"      // 3D structural lint (compiled into libodb; see that header)
 #include "odb/defin.h"   // LEF/DEF I/O (libodb v1)
@@ -516,6 +517,16 @@ void chip_path_create(const OdbDb& h, rust::Str chip, rust::Str name) {
 }
 
 std::unique_ptr<OdbDb> new_db() { return std::make_unique<OdbDb>(); }
+
+void tech_from_lef(const OdbDb& h, rust::Str name, rust::Str lef_path) {
+  // A .3dbv points each chiplet at its own APR_tech_file, and a per-chip dbTech is the whole
+  // point of the 3D model — it is what lets dies from different processes coexist. lefin is
+  // already compiled into this library; it was simply never exposed.
+  odb::lefin reader(h.db, const_cast<utl::Logger*>(&h.logger), /*ignore_non_routing_layers=*/false);
+  if (!reader.createTech(s(name).c_str(), s(lef_path).c_str()))
+    throw std::runtime_error("vyges-opendb: could not create tech `" + s(name) + "` from "
+                             + s(lef_path));
+}
 
 void tech_create(const OdbDb& h, rust::Str name) {
   // odb refuses to create a DIE chip without a technology, which is why a .3dbv points each
