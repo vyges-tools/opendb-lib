@@ -5,7 +5,7 @@
   "scope": "hand-written core only",
   "class_count": 44,
   "method_count": 1137,
-  "bridged_count": 674,
+  "bridged_count": 675,
   "classes": [
     {
       "name": "dbBPin",
@@ -5615,7 +5615,7 @@
           ],
           "const": false,
           "kind": "setter",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "setBacksideBridge",
