@@ -528,6 +528,42 @@ void tech_from_lef(const OdbDb& h, rust::Str name, rust::Str lef_path) {
                              + s(lef_path));
 }
 
+void lib_from_lef(const OdbDb& h, rust::Str lib_name, rust::Str tech_name, rust::Str lef_path) {
+  // `createTech` reads a LEF's LAYERs and stops there; the cell MACROs need `createLib`. A bump
+  // map names cell types (MICROBUMP, C4, ...) and those masters live in the `LEF_file` a .3dbv
+  // already points at, so loading bumps means reading that LEF rather than inventing geometry.
+  odb::dbTech* t = h.db->findTech(s(tech_name).c_str());
+  if (!t) throw std::runtime_error("vyges-opendb: tech not found: " + s(tech_name));
+  if (h.db->findLib(s(lib_name).c_str())) return;  // idempotent: a LEF read twice is not an error
+  odb::lefin reader(h.db, const_cast<utl::Logger*>(&h.logger), /*ignore_non_routing_layers=*/false);
+  if (!reader.createLib(t, s(lib_name).c_str(), s(lef_path).c_str()))
+    throw std::runtime_error("vyges-opendb: could not create lib `" + s(lib_name) + "` from "
+                             + s(lef_path));
+}
+
+void bump_master_create(const OdbDb& h, rust::Str name, int32_t width, int32_t height) {
+  // The fallback when no LEF defines a bump cell the map references. Deliberately ZERO-SIZED by
+  // default, and that is not laziness: odb takes a bump's position from
+  // `inst->getBBox()->getBox().center()` while a bump map records `inst->getOrigin()`. With any
+  // other size the two disagree by half the master, so a map written out and read back moves.
+  // A zero-sized master makes centre and origin the same point, so the loaded bump sits exactly
+  // where the file says.
+  odb::dbLib* lib = h.db->findLib("vyges_bumps");
+  if (!lib) {
+    odb::dbTech* t = h.db->getTech();
+    if (!t) throw std::runtime_error("vyges-opendb: no technology to attach a bump library to");
+    lib = odb::dbLib::create(h.db, "vyges_bumps", t, '/');
+    if (!lib) throw std::runtime_error("vyges-opendb: could not create the bump library");
+  }
+  if (lib->findMaster(s(name).c_str())) return;  // idempotent
+  odb::dbMaster* m = odb::dbMaster::create(lib, s(name).c_str());
+  if (!m) throw std::runtime_error("vyges-opendb: bump_master_create failed: " + s(name));
+  m->setWidth(width);
+  m->setHeight(height);
+  m->setType(odb::dbMasterType::COVER_BUMP);
+  m->setFrozen();
+}
+
 void tech_create(const OdbDb& h, rust::Str name) {
   // odb refuses to create a DIE chip without a technology, which is why a .3dbv points each
   // chiplet at its own APR_tech_file. A geometry-only read has no LEF to give it one, so it

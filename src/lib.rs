@@ -109,6 +109,15 @@ mod ffi {
         /// library all along; a per-chip tech read from a chiplet's own `APR_tech_file` is what
         /// the 3D model exists to express.
         fn tech_from_lef(db: &OdbDb, name: &str, lef_path: &str) -> Result<()>;
+        /// Read the cell MACROs from a LEF into a named library. `createTech` reads LAYERs and
+        /// stops; a bump map names cell types, and those masters come from the `LEF_file` a
+        /// .3dbv already points at. Idempotent on the library name.
+        fn lib_from_lef(db: &OdbDb, lib_name: &str, tech_name: &str, lef_path: &str) -> Result<()>;
+        /// A placeholder bump master, for a cell type no LEF on hand defines. Pass 0 x 0 unless
+        /// you know the real geometry: odb reads a bump position from the instance bbox CENTRE
+        /// while a bump map records its ORIGIN, so any other size moves the bump by half the
+        /// master on a round trip.
+        fn bump_master_create(db: &OdbDb, name: &str, width: i32, height: i32) -> Result<()>;
         fn tech_create(db: &OdbDb, name: &str) -> Result<()>;
         fn dbu_per_micron(db: &OdbDb) -> i32;
         fn set_dbu_per_micron(db: &OdbDb, dbu: i32);
@@ -188,7 +197,8 @@ pub use ffi::{
     chip_block_create, chip_bump_create, chip_conn_create, chip_create, chip_inst_create,
     chip_net_create, chip_net_add_bump, chip_path_create, chip_region_create,
     chip_region_set_box, alignment_marker_rule_create, set_top_chip,
-    dbu_per_micron, set_dbu_per_micron, new_db, tech_create, tech_from_lef,
+    bump_master_create, dbu_per_micron, set_dbu_per_micron, lib_from_lef, new_db, tech_create,
+    tech_from_lef,
     connect, create_inst, create_net, disconnect, find_master, first_master_name, input_pin,
     inst_master, inst_x, inst_y, log_capture_begin, log_capture_end, net_of, nth_bterm_name, nth_inst_name, nth_iterm_name, num_bterms,
     num_insts, num_iterms, num_nets, num_obstructions, open_db, output_pin, place_bterm,

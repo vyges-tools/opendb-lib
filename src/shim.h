@@ -109,6 +109,8 @@ void chip_net_create(const OdbDb& db, rust::Str chip, rust::Str name);
 void chip_path_create(const OdbDb& db, rust::Str chip, rust::Str name);
 std::unique_ptr<OdbDb> new_db();   // an empty database, for building rather than reading
 void tech_from_lef(const OdbDb& db, rust::Str name, rust::Str lef_path);
+void lib_from_lef(const OdbDb& db, rust::Str lib_name, rust::Str tech_name, rust::Str lef_path);
+void bump_master_create(const OdbDb& db, rust::Str name, int32_t width, int32_t height);
 void tech_create(const OdbDb& db, rust::Str name);
 int32_t dbu_per_micron(const OdbDb& db);
 void set_dbu_per_micron(const OdbDb& db, int32_t dbu);
