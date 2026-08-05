@@ -12,6 +12,7 @@
 #include <cstdint>
 #include <fstream>
 #include <iostream>
+#include <algorithm>
 #include <map>
 #include <memory>
 #include <stdexcept>
@@ -757,11 +758,12 @@ double mterm_antenna_gate_area(const OdbDb& h, rust::Str master, rust::Str term)
   if (!pm) return 0.0;
   std::vector<std::pair<double, dbTechLayer*>> data;
   pm->getGateArea(data);
-  // Entries may be layer-qualified (LEF ANTENNAGATEAREA ... LAYER). Summing is correct for
-  // the ratio's denominator: the gate is one physical area, reported per reference layer.
-  double total = 0.0;
-  for (const auto& d : data) total += d.first;
-  return total;
+  // MAX, not sum. Entries may be layer-qualified (LEF ANTENNAGATEAREA ... LAYER) and describe
+  // the SAME physical gate measured against different reference layers, so adding them counts
+  // one gate several times. This matches OpenROAD's AntennaChecker::gateArea.
+  double best = 0.0;
+  for (const auto& d : data) best = std::max(best, d.first);
+  return best;
 }
 
 double mterm_antenna_diff_area(const OdbDb& h, rust::Str master, rust::Str term) {
@@ -769,9 +771,10 @@ double mterm_antenna_diff_area(const OdbDb& h, rust::Str master, rust::Str term)
   if (!mt) return 0.0;
   std::vector<std::pair<double, dbTechLayer*>> data;
   mt->getDiffArea(data);
-  double total = 0.0;
-  for (const auto& d : data) total += d.first;
-  return total;
+  // MAX for the same reason as gate area — matches OpenROAD's AntennaChecker::diffArea.
+  double best = 0.0;
+  for (const auto& d : data) best = std::max(best, d.first);
+  return best;
 }
 
 // ---- routed-wire shape graph -------------------------------------------------
