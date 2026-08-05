@@ -774,6 +774,66 @@ double mterm_antenna_diff_area(const OdbDb& h, rust::Str master, rust::Str term)
   return total;
 }
 
+// ---- routed-wire shape graph -------------------------------------------------
+// See shim.h for the encoding and why it is returned flat.
+
+rust::Vec<std::int64_t> net_wire_shapes(const OdbDb& h, rust::Str net) {
+  rust::Vec<std::int64_t> out;
+  dbNet* n = find_net(h, net);
+  if (!n) return out;
+  odb::dbWire* w = n->getWire();
+  if (!w) return out;  // unrouted: no shapes, not an error
+
+  odb::dbWireShapeItr it;
+  odb::dbShape shape;
+  for (it.begin(w); it.next(shape);) {
+    std::int64_t layer_num = -1, bot = -1, top = -1;
+    const bool is_via = shape.isVia();
+    if (is_via) {
+      // A via's own "layer" is its cut; what matters to connectivity is the pair it joins.
+      if (odb::dbTechVia* tv = shape.getTechVia()) {
+        if (auto* b = tv->getBottomLayer()) bot = b->getNumber();
+        if (auto* t = tv->getTopLayer()) top = t->getNumber();
+      } else if (odb::dbVia* bv = shape.getVia()) {
+        if (auto* b = bv->getBottomLayer()) bot = b->getNumber();
+        if (auto* t = bv->getTopLayer()) top = t->getNumber();
+      }
+    } else if (odb::dbTechLayer* l = shape.getTechLayer()) {
+      layer_num = l->getNumber();
+    }
+    out.push_back(layer_num);
+    out.push_back(shape.xMin());
+    out.push_back(shape.yMin());
+    out.push_back(shape.xMax());
+    out.push_back(shape.yMax());
+    out.push_back(is_via ? 1 : 0);
+    out.push_back(bot);
+    out.push_back(top);
+  }
+  return out;
+}
+
+rust::String layer_name_by_number(const OdbDb& h, std::int64_t number) {
+  odb::dbTech* t = h.db->getTech();
+  if (!t || number < 0) return rust::String();
+  dbTechLayer* l = t->findLayer(static_cast<int>(number));
+  return l ? rust::String(l->getName()) : rust::String();
+}
+
+bool iterm_avg_xy(const OdbDb& h, rust::Str inst, rust::Str pin, std::int32_t& x, std::int32_t& y) {
+  dbBlock* b = block_of(h);
+  if (!b) return false;
+  dbInst* i = b->findInst(s(inst).c_str());
+  if (!i) return false;
+  odb::dbITerm* t = i->findITerm(s(pin).c_str());
+  if (!t) return false;
+  int px = 0, py = 0;
+  if (!t->getAvgXY(&px, &py)) return false;  // unplaced pin: say so rather than answer (0,0)
+  x = px;
+  y = py;
+  return true;
+}
+
 // ---- antenna diff-ratio PWL --------------------------------------------------
 // See shim.h for why these are hand-written and what the vector-size convention means.
 

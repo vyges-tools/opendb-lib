@@ -206,6 +206,31 @@ double mterm_antenna_diff_area(const OdbDb& db, rust::Str master, rust::Str term
 // `which` selects the curve: "par" | "car" | "psr" | "csr" | "area_diff_reduce" |
 // "gate_plus_diff". An unrecognised value throws rather than returning zero, so a typo
 // surfaces as an error instead of a silently empty rule that reads like "no limit".
+// ---- routed-wire shape graph -------------------------------------------------
+// The per-layer area accessors above answer "how much metal does this NET have on this layer",
+// which is the wrong question for an antenna check: the charge a given gate collects comes only
+// from the metal reachable FROM THAT GATE over layers at or below the one being deposited. Two
+// gates on one net can sit on different branches and see very different metal until a higher
+// layer joins them. Answering per gate needs the shapes plus their connectivity, not a sum.
+//
+// Returned flat so one call yields a whole net — a per-shape accessor would re-walk the wire on
+// every query, which is quadratic on the nets that matter most (the big ones).
+//
+// Layout: 8 entries per shape, in wire order.
+//   [0] layer number (odb dbTechLayer::getNumber), -1 if none
+//   [1..4] x0, y0, x1, y1 in DBU
+//   [5] 1 when the shape is a via (cut geometry), else 0
+//   [6] via bottom layer number, -1 when not a via
+//   [7] via top layer number, -1 when not a via
+// Vias carry their two layer numbers because they are what makes the graph three-dimensional:
+// without them every layer would look like a separate net.
+rust::Vec<std::int64_t> net_wire_shapes(const OdbDb& db, rust::Str net);
+rust::String layer_name_by_number(const OdbDb& db, std::int64_t number);  // "" if unknown
+
+// Where an instance pin sits, for anchoring a gate to the shape graph. Returns false when odb
+// cannot place the pin, which the caller must treat as "cannot attribute", never as (0,0).
+bool iterm_avg_xy(const OdbDb& db, rust::Str inst, rust::Str pin, std::int32_t& x, std::int32_t& y);
+
 std::size_t layerantenna_num_diff_pwl(const OdbDb& db, rust::Str layer, rust::Str which);
 double layerantenna_diff_pwl_index(const OdbDb& db, rust::Str layer, rust::Str which, std::size_t i);  // diffusion area at point i
 double layerantenna_diff_pwl_ratio(const OdbDb& db, rust::Str layer, rust::Str which, std::size_t i);  // ratio limit at point i

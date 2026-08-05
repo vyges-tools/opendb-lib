@@ -76,6 +76,15 @@ mod ffi {
         fn mterm_antenna_gate_area(db: &OdbDb, master: &str, term: &str) -> f64;
         fn mterm_antenna_diff_area(db: &OdbDb, master: &str, term: &str) -> f64;
 
+        // Routed-wire shape graph: 8 i64 per shape (layer, x0,y0,x1,y1, is_via, via_bot,
+        // via_top). Flat so one call yields a whole net — per-shape accessors would re-walk
+        // the wire per query, which is quadratic on the big nets that matter most. Needed
+        // because the antenna ratio is per GATE: the charge a gate collects comes only from
+        // the metal reachable from it, not from the net's total on a layer.
+        fn net_wire_shapes(db: &OdbDb, net: &str) -> Vec<i64>;
+        fn layer_name_by_number(db: &OdbDb, number: i64) -> String;
+        fn iterm_avg_xy(db: &OdbDb, inst: &str, pin: &str, x: &mut i32, y: &mut i32) -> bool;
+
         // Diffusion-dependent (PWL) antenna limits — the form sky130 actually states. `which`
         // is "par"|"car"|"psr"|"csr"|"area_diff_reduce"|"gate_plus_diff"; an unknown value
         // throws rather than reading as "no limit". indices.len()==0 means unset, ==1 means a
@@ -228,4 +237,5 @@ pub use ffi::{
     nth_net_wire_layer, num_net_wire_layers,
     mterm_antenna_diff_area, layerantenna_diff_pwl_index, layerantenna_diff_pwl_ratio,
     layerantenna_num_diff_pwl,
+    iterm_avg_xy, layer_name_by_number, net_wire_shapes,
 };
