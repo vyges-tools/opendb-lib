@@ -66,6 +66,15 @@ mod ffi {
         fn connect(db: &OdbDb, inst: &str, pin: &str, net: &str) -> Result<()>;
         fn disconnect(db: &OdbDb, inst: &str, pin: &str) -> Result<()>;
 
+        // antenna inputs (odb substrate) — numerator per routing layer, denominator per pin.
+        // Consumed by vyges-ant; see shim.h for the v0 double-counting bound.
+        fn num_net_wire_layers(db: &OdbDb, net: &str) -> usize;
+        fn nth_net_wire_layer(db: &OdbDb, net: &str, i: usize) -> String;
+        fn net_wire_area_on_layer(db: &OdbDb, net: &str, layer: &str) -> i64;
+        fn net_wire_perimeter_on_layer(db: &OdbDb, net: &str, layer: &str) -> i64;
+        fn layer_thickness(db: &OdbDb, layer: &str) -> i32;
+        fn mterm_antenna_gate_area(db: &OdbDb, master: &str, term: &str) -> f64;
+
         /// 3D structural lint. Files violations as dbMarker objects under a "3DBlox" category
         /// on the top chip and returns the total count (0 == clean). Errors if there is no
         /// top chip. Annotates the in-memory database; does not modify the design.
@@ -206,4 +215,6 @@ pub use ffi::{
     net_is_special, net_sigtype, nth_net_bterm, nth_net_iterm, nth_net_name, num_net_bterms,
     num_net_iterms, read_def, set_inst_location, set_inst_orient, total_wire_length, write_db,
     write_def, OdbDb,
+    layer_thickness, mterm_antenna_gate_area, net_wire_area_on_layer, net_wire_perimeter_on_layer,
+    nth_net_wire_layer, num_net_wire_layers,
 };

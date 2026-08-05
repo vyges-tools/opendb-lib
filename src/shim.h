@@ -163,3 +163,26 @@ rust::String log_capture_end(const OdbDb& db);
 void place_bterm(const OdbDb& db, rust::Str bterm, rust::Str layer, int32_t x1, int32_t y1, int32_t x2, int32_t y2);  // place a port pin box on a layer
 void connect(const OdbDb& db, rust::Str inst, rust::Str pin, rust::Str net);    // iterm -> net
 void disconnect(const OdbDb& db, rust::Str inst, rust::Str pin);               // iterm -> (none)
+
+// ---- antenna inputs (odb substrate) ------------------------------------------
+// The numerator and denominator of the antenna ratio, read off the ROUTED database — the
+// substrate OpenROAD's `ant` uses, and the one where RepairAntennas can still act. (The
+// GDS-substrate antenna check in vyges-drc is the same ratio computed post-stream.)
+// Consumed by vyges-ant; see vyges-tools-internal/docs/loom/flow-ir-crate-roadmap.md.
+//
+// Metal is grouped by routing layer because the charge model is per-layer and cumulative:
+// a net legal on its own worst layer can still violate the cumulative ratio. Callers that
+// only sum are computing something else and should say so.
+//
+// v0 bound, stated rather than discovered later: shapes are accumulated as raw rectangles,
+// so overlapping metal on one layer is DOUBLE-COUNTED. Router output on a single layer
+// rarely self-overlaps except at junctions, and the error is conservative (over-reports
+// area, hence over-reports the ratio, hence never hides a violation) — but it is a real
+// difference from a union-area computation, and correlation against `check_antennas` will
+// show it. Fix by unioning per layer if it proves material.
+std::size_t num_net_wire_layers(const OdbDb& db, rust::Str net);                 // routing layers this net has metal on
+rust::String nth_net_wire_layer(const OdbDb& db, rust::Str net, std::size_t i);  // i-th such layer name ("" out of range)
+int64_t net_wire_area_on_layer(const OdbDb& db, rust::Str net, rust::Str layer);       // metal area on that layer (DBU^2)
+int64_t net_wire_perimeter_on_layer(const OdbDb& db, rust::Str net, rust::Str layer);  // metal perimeter (DBU); side area = perimeter * layer_thickness
+int32_t layer_thickness(const OdbDb& db, rust::Str layer);                       // DBU, 0 if the LEF does not state one
+double mterm_antenna_gate_area(const OdbDb& db, rust::Str master, rust::Str term);  // pin-model gate area (denominator); 0.0 if the pin has no model

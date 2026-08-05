@@ -3,6 +3,7 @@
 #include "odb/lefin.h"
 
 #include "lint3d.h"      // 3D structural lint (compiled into libodb; see that header)
+#include "odb/dbShape.h"  // dbShape + dbWireShapeItr — db.h only forward-declares dbShape
 #include "odb/defin.h"   // LEF/DEF I/O (libodb v1)
 #include "odb/defout.h"
 #include "spdlog/sinks/callback_sink.h"   // forward libodb's utl::Logger -> Rust -> vyges-events
@@ -11,6 +12,7 @@
 #include <cstdint>
 #include <fstream>
 #include <iostream>
+#include <map>
 #include <memory>
 #include <stdexcept>
 #include <string>
@@ -660,4 +662,92 @@ bool swap_master(const OdbDb& h, rust::Str inst, rust::Str master) {
   if (!m) throw std::runtime_error("vyges-opendb: master not found: " + want);
   // odb throws (utl::Logger::error) on a dont_touch instance; let that propagate as a Result.
   return i->swapMaster(m);
+}
+
+// ---- antenna inputs (odb substrate) -----------------------------------------
+// See shim.h for the contract and the double-counting bound.
+
+// (area, perimeter) per routing-layer name, for one net's routed metal. Each entry point
+// re-walks the net rather than caching, so cost is bounded by that net's shape count —
+// not the block. Callers iterating every net pay per-net, which is what they want anyway.
+static void wire_metal_by_layer(
+    dbNet* n,
+    std::map<std::string, std::pair<std::int64_t, std::int64_t>>& out) {
+  if (!n) return;
+  odb::dbWire* w = n->getWire();
+  if (!w) return;  // unrouted net: no metal, not an error
+  odb::dbWireShapeItr it;
+  odb::dbShape shape;
+  for (it.begin(w); it.next(shape);) {
+    // Vias are cut geometry on a cut layer; the antenna numerator is metal. Via metal
+    // ENCLOSURES (TECH_VIA_BOX) are on a routing layer and do count, and isVia() is false
+    // for them, so they land here correctly.
+    if (shape.isVia()) continue;
+    odb::dbTechLayer* l = shape.getTechLayer();
+    if (!l) continue;
+    const std::int64_t dx = static_cast<std::int64_t>(shape.xMax()) - shape.xMin();
+    const std::int64_t dy = static_cast<std::int64_t>(shape.yMax()) - shape.yMin();
+    if (dx <= 0 || dy <= 0) continue;  // degenerate shape contributes nothing
+    auto& e = out[l->getName()];
+    e.first += dx * dy;
+    e.second += 2 * (dx + dy);
+  }
+}
+
+std::size_t num_net_wire_layers(const OdbDb& h, rust::Str net) {
+  std::map<std::string, std::pair<std::int64_t, std::int64_t>> m;
+  wire_metal_by_layer(find_net(h, net), m);
+  return m.size();
+}
+
+rust::String nth_net_wire_layer(const OdbDb& h, rust::Str net, std::size_t i) {
+  std::map<std::string, std::pair<std::int64_t, std::int64_t>> m;
+  wire_metal_by_layer(find_net(h, net), m);
+  std::size_t k = 0;
+  for (const auto& e : m) {
+    if (k++ == i) return rust::String(e.first);
+  }
+  return rust::String();
+}
+
+std::int64_t net_wire_area_on_layer(const OdbDb& h, rust::Str net, rust::Str layer) {
+  std::map<std::string, std::pair<std::int64_t, std::int64_t>> m;
+  wire_metal_by_layer(find_net(h, net), m);
+  auto it = m.find(s(layer));
+  return it == m.end() ? 0 : it->second.first;
+}
+
+std::int64_t net_wire_perimeter_on_layer(const OdbDb& h, rust::Str net, rust::Str layer) {
+  std::map<std::string, std::pair<std::int64_t, std::int64_t>> m;
+  wire_metal_by_layer(find_net(h, net), m);
+  auto it = m.find(s(layer));
+  return it == m.end() ? 0 : it->second.second;
+}
+
+std::int32_t layer_thickness(const OdbDb& h, rust::Str layer) {
+  odb::dbTech* t = h.db->getTech();
+  if (!t) return 0;
+  dbTechLayer* l = t->findLayer(s(layer).c_str());
+  if (!l) return 0;
+  std::uint32_t thk = 0;
+  // Returns false when the LEF states no THICKNESS; 0 then means "not stated", which the
+  // caller must not confuse with a zero-thickness layer.
+  return l->getThickness(thk) ? static_cast<std::int32_t>(thk) : 0;
+}
+
+double mterm_antenna_gate_area(const OdbDb& h, rust::Str master, rust::Str term) {
+  dbMaster* m = h.db->findMaster(s(master).c_str());
+  if (!m) return 0.0;
+  odb::dbMTerm* mt = m->findMTerm(s(term).c_str());
+  if (!mt) return 0.0;
+  if (!mt->hasDefaultAntennaModel()) return 0.0;  // no model: not applicable, not zero-area
+  odb::dbTechAntennaPinModel* pm = mt->getDefaultAntennaModel();
+  if (!pm) return 0.0;
+  std::vector<std::pair<double, dbTechLayer*>> data;
+  pm->getGateArea(data);
+  // Entries may be layer-qualified (LEF ANTENNAGATEAREA ... LAYER). Summing is correct for
+  // the ratio's denominator: the gate is one physical area, reported per reference layer.
+  double total = 0.0;
+  for (const auto& d : data) total += d.first;
+  return total;
 }
