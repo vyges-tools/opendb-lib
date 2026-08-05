@@ -84,6 +84,10 @@ mod ffi {
         fn net_wire_shapes(db: &OdbDb, net: &str) -> Vec<i64>;
         fn layer_name_by_number(db: &OdbDb, number: i64) -> String;
         fn iterm_avg_xy(db: &OdbDb, inst: &str, pin: &str, x: &mut i32, y: &mut i32) -> bool;
+        /// The pin's own ROUTING-layer boxes in placed coordinates: 5 i64 each
+        /// (layer, x0, y0, x1, y1). What the pin physically touches, rather than where it
+        /// roughly is — proximity merges conductors that are electrically separate.
+        fn iterm_pin_boxes(db: &OdbDb, inst: &str, pin: &str) -> Vec<i64>;
 
         // Diffusion-dependent (PWL) antenna limits — the form sky130 actually states. `which`
         // is "par"|"car"|"psr"|"csr"|"area_diff_reduce"|"gate_plus_diff"; an unknown value
@@ -237,5 +241,5 @@ pub use ffi::{
     nth_net_wire_layer, num_net_wire_layers,
     mterm_antenna_diff_area, layerantenna_diff_pwl_index, layerantenna_diff_pwl_ratio,
     layerantenna_num_diff_pwl,
-    iterm_avg_xy, layer_name_by_number, net_wire_shapes,
+    iterm_avg_xy, iterm_pin_boxes, layer_name_by_number, net_wire_shapes,
 };

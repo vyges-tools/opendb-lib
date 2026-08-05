@@ -231,6 +231,20 @@ rust::String layer_name_by_number(const OdbDb& db, std::int64_t number);  // "" 
 // cannot place the pin, which the caller must treat as "cannot attribute", never as (0,0).
 bool iterm_avg_xy(const OdbDb& db, rust::Str inst, rust::Str pin, std::int32_t& x, std::int32_t& y);
 
+// The pin's actual metal, in placed coordinates: every ROUTING-layer box of every dbMPin of the
+// terminal, with the instance's transform applied.
+//
+// A terminal's average point says where a pin roughly is; these say what it physically touches,
+// which is what decides the conductor it joins. Matching a pin to routing by proximity instead
+// merges conductors that are electrically separate — measured on a real block, it put a gate and
+// its protection diode on one conductor and suppressed a real violation.
+//
+// Non-routing (cut) boxes are skipped: a pin joins the wire through metal, and OpenROAD's
+// AntennaChecker::saveGates filters the same way.
+//
+// Layout: 5 entries per box — [layer number, x0, y0, x1, y1], DBU.
+rust::Vec<std::int64_t> iterm_pin_boxes(const OdbDb& db, rust::Str inst, rust::Str pin);
+
 std::size_t layerantenna_num_diff_pwl(const OdbDb& db, rust::Str layer, rust::Str which);
 double layerantenna_diff_pwl_index(const OdbDb& db, rust::Str layer, rust::Str which, std::size_t i);  // diffusion area at point i
 double layerantenna_diff_pwl_ratio(const OdbDb& db, rust::Str layer, rust::Str which, std::size_t i);  // ratio limit at point i

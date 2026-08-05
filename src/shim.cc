@@ -837,6 +837,37 @@ bool iterm_avg_xy(const OdbDb& h, rust::Str inst, rust::Str pin, std::int32_t& x
   return true;
 }
 
+rust::Vec<std::int64_t> iterm_pin_boxes(const OdbDb& h, rust::Str inst, rust::Str pin) {
+  rust::Vec<std::int64_t> out;
+  dbBlock* b = block_of(h);
+  if (!b) return out;
+  dbInst* i = b->findInst(s(inst).c_str());
+  if (!i) return out;
+  odb::dbITerm* t = i->findITerm(s(pin).c_str());
+  if (!t) return out;
+  odb::dbMTerm* mt = t->getMTerm();
+  if (!mt) return out;
+
+  // Master geometry is in cell coordinates; the instance transform places it.
+  const odb::dbTransform xform = i->getTransform();
+  for (odb::dbMPin* mp : mt->getMPins()) {
+    for (odb::dbBox* box : mp->getGeometry()) {
+      odb::dbTechLayer* l = box->getTechLayer();
+      if (!l || l->getType() != odb::dbTechLayerType::ROUTING) {
+        continue;  // a pin joins the wire through metal, not through a cut
+      }
+      odb::Rect r = box->getBox();
+      xform.apply(r);
+      out.push_back(l->getNumber());
+      out.push_back(r.xMin());
+      out.push_back(r.yMin());
+      out.push_back(r.xMax());
+      out.push_back(r.yMax());
+    }
+  }
+  return out;
+}
+
 // ---- antenna diff-ratio PWL --------------------------------------------------
 // See shim.h for why these are hand-written and what the vector-size convention means.
 
