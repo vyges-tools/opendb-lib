@@ -735,13 +735,25 @@ std::int32_t layer_thickness(const OdbDb& h, rust::Str layer) {
   return l->getThickness(thk) ? static_cast<std::int32_t>(thk) : 0;
 }
 
-double mterm_antenna_gate_area(const OdbDb& h, rust::Str master, rust::Str term) {
+static odb::dbMTerm* find_mterm(const OdbDb& h, rust::Str master, rust::Str term) {
   dbMaster* m = h.db->findMaster(s(master).c_str());
-  if (!m) return 0.0;
-  odb::dbMTerm* mt = m->findMTerm(s(term).c_str());
-  if (!mt) return 0.0;
-  if (!mt->hasDefaultAntennaModel()) return 0.0;  // no model: not applicable, not zero-area
-  odb::dbTechAntennaPinModel* pm = mt->getDefaultAntennaModel();
+  return m ? m->findMTerm(s(term).c_str()) : nullptr;
+}
+
+// NOTE the asymmetry in odb, which is easy to assume away: GATE area lives on the pin's
+// antenna MODEL (dbTechAntennaPinModel::getGateArea), while DIFFUSION area lives directly on
+// the dbMTerm (dbMTerm::getDiffArea) — there is no getDiffArea on the model. So a pin can
+// carry a diffusion area while having no antenna model at all.
+static odb::dbTechAntennaPinModel* pin_antenna_model(const OdbDb& h, rust::Str master, rust::Str term) {
+  odb::dbMTerm* mt = find_mterm(h, master, term);
+  // No model means "not applicable", which the callers below render as 0.0 — never as an
+  // assertion that the pin has zero gate area.
+  if (!mt || !mt->hasDefaultAntennaModel()) return nullptr;
+  return mt->getDefaultAntennaModel();
+}
+
+double mterm_antenna_gate_area(const OdbDb& h, rust::Str master, rust::Str term) {
+  odb::dbTechAntennaPinModel* pm = pin_antenna_model(h, master, term);
   if (!pm) return 0.0;
   std::vector<std::pair<double, dbTechLayer*>> data;
   pm->getGateArea(data);
@@ -750,4 +762,60 @@ double mterm_antenna_gate_area(const OdbDb& h, rust::Str master, rust::Str term)
   double total = 0.0;
   for (const auto& d : data) total += d.first;
   return total;
+}
+
+double mterm_antenna_diff_area(const OdbDb& h, rust::Str master, rust::Str term) {
+  odb::dbMTerm* mt = find_mterm(h, master, term);  // on the MTerm, not the model — see above
+  if (!mt) return 0.0;
+  std::vector<std::pair<double, dbTechLayer*>> data;
+  mt->getDiffArea(data);
+  double total = 0.0;
+  for (const auto& d : data) total += d.first;
+  return total;
+}
+
+// ---- antenna diff-ratio PWL --------------------------------------------------
+// See shim.h for why these are hand-written and what the vector-size convention means.
+
+static odb::dbTechLayerAntennaRule* antenna_rule(const OdbDb& h, rust::Str layer) {
+  odb::dbTech* t = h.db->getTech();
+  if (!t) return nullptr;
+  dbTechLayer* l = t->findLayer(s(layer).c_str());
+  if (!l || !l->hasDefaultAntennaRule()) return nullptr;
+  return l->getDefaultAntennaRule();
+}
+
+// `pwl_pair` holds references into the rule, so the copy returned here stays valid for as long
+// as the rule does — which is the whole call.
+static odb::dbTechLayerAntennaRule::pwl_pair diff_curve(odb::dbTechLayerAntennaRule* r,
+                                                        const std::string& which) {
+  if (which == "par") return r->getDiffPAR();
+  if (which == "car") return r->getDiffCAR();
+  if (which == "psr") return r->getDiffPSR();
+  if (which == "csr") return r->getDiffCSR();
+  if (which == "area_diff_reduce") return r->getAreaDiffReduce();
+  if (which == "gate_plus_diff") return r->getGatePlusDiffPWL();
+  // Loud rather than empty: an unrecognised selector returning 0 points would be
+  // indistinguishable from "this layer states no such limit", i.e. a silent pass.
+  throw std::runtime_error("vyges-opendb: unknown antenna diff curve: " + which);
+}
+
+std::size_t layerantenna_num_diff_pwl(const OdbDb& h, rust::Str layer, rust::Str which) {
+  odb::dbTechLayerAntennaRule* r = antenna_rule(h, layer);
+  if (!r) return 0;
+  return diff_curve(r, s(which)).indices.size();
+}
+
+double layerantenna_diff_pwl_index(const OdbDb& h, rust::Str layer, rust::Str which, std::size_t i) {
+  odb::dbTechLayerAntennaRule* r = antenna_rule(h, layer);
+  if (!r) return 0.0;
+  const auto p = diff_curve(r, s(which));
+  return i < p.indices.size() ? p.indices[i] : 0.0;
+}
+
+double layerantenna_diff_pwl_ratio(const OdbDb& h, rust::Str layer, rust::Str which, std::size_t i) {
+  odb::dbTechLayerAntennaRule* r = antenna_rule(h, layer);
+  if (!r) return 0.0;
+  const auto p = diff_curve(r, s(which));
+  return i < p.ratios.size() ? p.ratios[i] : 0.0;
 }

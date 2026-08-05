@@ -74,6 +74,15 @@ mod ffi {
         fn net_wire_perimeter_on_layer(db: &OdbDb, net: &str, layer: &str) -> i64;
         fn layer_thickness(db: &OdbDb, layer: &str) -> i32;
         fn mterm_antenna_gate_area(db: &OdbDb, master: &str, term: &str) -> f64;
+        fn mterm_antenna_diff_area(db: &OdbDb, master: &str, term: &str) -> f64;
+
+        // Diffusion-dependent (PWL) antenna limits — the form sky130 actually states. `which`
+        // is "par"|"car"|"psr"|"csr"|"area_diff_reduce"|"gate_plus_diff"; an unknown value
+        // throws rather than reading as "no limit". indices.len()==0 means unset, ==1 means a
+        // single constant ratio rather than a curve.
+        fn layerantenna_num_diff_pwl(db: &OdbDb, layer: &str, which: &str) -> Result<usize>;
+        fn layerantenna_diff_pwl_index(db: &OdbDb, layer: &str, which: &str, i: usize) -> Result<f64>;
+        fn layerantenna_diff_pwl_ratio(db: &OdbDb, layer: &str, which: &str, i: usize) -> Result<f64>;
 
         /// 3D structural lint. Files violations as dbMarker objects under a "3DBlox" category
         /// on the top chip and returns the total count (0 == clean). Errors if there is no
@@ -217,4 +226,6 @@ pub use ffi::{
     write_def, OdbDb,
     layer_thickness, mterm_antenna_gate_area, net_wire_area_on_layer, net_wire_perimeter_on_layer,
     nth_net_wire_layer, num_net_wire_layers,
+    mterm_antenna_diff_area, layerantenna_diff_pwl_index, layerantenna_diff_pwl_ratio,
+    layerantenna_num_diff_pwl,
 };

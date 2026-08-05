@@ -126,8 +126,8 @@ fn probe_fixture_routing() {
         layers_seen
     );
 
-    // Denominator availability: how many instance pins carry a gate area?
-    let (mut pins, mut with_area) = (0usize, 0usize);
+    // Denominator availability: how many instance pins carry a gate or diffusion area?
+    let (mut pins, mut with_gate, mut with_diff) = (0usize, 0usize, 0usize);
     for i in 0..odb::num_insts(&db) {
         let inst = odb::nth_inst_name(&db, i);
         let master = odb::inst_master(&db, &inst);
@@ -135,9 +135,45 @@ fn probe_fixture_routing() {
             let pin = odb::nth_iterm_name(&db, &inst, k);
             pins += 1;
             if odb::mterm_antenna_gate_area(&db, &master, &pin) > 0.0 {
-                with_area += 1;
+                with_gate += 1;
+            }
+            if odb::mterm_antenna_diff_area(&db, &master, &pin) > 0.0 {
+                with_diff += 1;
             }
         }
     }
-    println!("gate area: {with_area} of {pins} instance pins report one");
+    println!("of {pins} instance pins: {with_gate} report a gate area, {with_diff} a diff area");
+
+    // The diff-ratio PWL curves — the form sky130 states its limits in. Prints the actual
+    // curve so the checker's limits can be read against the LEF rather than trusted.
+    for l in &layers_seen {
+        for which in ["par", "car", "psr", "csr", "area_diff_reduce", "gate_plus_diff"] {
+            let n = odb::layerantenna_num_diff_pwl(&db, l, which).expect("known curve");
+            if n == 0 {
+                continue;
+            }
+            let pts: Vec<String> = (0..n)
+                .map(|i| {
+                    format!(
+                        "({:.4}, {:.4})",
+                        odb::layerantenna_diff_pwl_index(&db, l, which, i).unwrap(),
+                        odb::layerantenna_diff_pwl_ratio(&db, l, which, i).unwrap()
+                    )
+                })
+                .collect();
+            println!("  {l} diff-{which}: {n} pt(s) {}", pts.join(" "));
+        }
+    }
+}
+
+/// An unknown curve selector must throw, not answer zero — zero points is indistinguishable
+/// from "this layer states no such limit", which would read as a silent pass.
+#[test]
+fn unknown_diff_curve_is_an_error() {
+    let db = odb::open_db(FIXTURE).expect("read .odb");
+    assert!(odb::layerantenna_num_diff_pwl(&db, "met1", "not_a_curve").is_err());
+    assert!(odb::layerantenna_diff_pwl_index(&db, "met1", "not_a_curve", 0).is_err());
+    assert!(odb::layerantenna_diff_pwl_ratio(&db, "met1", "not_a_curve", 0).is_err());
+    // A known curve on a layer with no antenna rule is 0 points, not an error.
+    assert_eq!(odb::layerantenna_num_diff_pwl(&db, "no_such_layer", "par").unwrap(), 0);
 }

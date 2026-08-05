@@ -186,3 +186,26 @@ int64_t net_wire_area_on_layer(const OdbDb& db, rust::Str net, rust::Str layer);
 int64_t net_wire_perimeter_on_layer(const OdbDb& db, rust::Str net, rust::Str layer);  // metal perimeter (DBU); side area = perimeter * layer_thickness
 int32_t layer_thickness(const OdbDb& db, rust::Str layer);                       // DBU, 0 if the LEF does not state one
 double mterm_antenna_gate_area(const OdbDb& db, rust::Str master, rust::Str term);  // pin-model gate area (denominator); 0.0 if the pin has no model
+double mterm_antenna_diff_area(const OdbDb& db, rust::Str master, rust::Str term);  // pin-model diffusion area; indexes the diff-ratio PWL below
+
+// ---- antenna diff-ratio PWL --------------------------------------------------
+// LEF states antenna limits two ways: plain ratios (ANTENNAAREARATIO), reachable through the
+// generated `layerantenna_get_*` accessors, and DIFFUSION-DEPENDENT ratios
+// (ANTENNADIFFAREARATIO), where the limit is a piecewise-linear function of the diffusion area
+// connected to the net. sky130 states ONLY the latter — `dbTechLayerAntennaRule::isValid()` is
+// false on every sky130 routing layer, and that predicate is exactly "does any plain ratio
+// exceed zero" — so without these accessors there is nothing to check on sky130 at all.
+//
+// They return odb's `pwl_pair` (two parallel `std::vector<double>&`), which the schema
+// generator skips because it is not a cxx-friendly scalar. Hence a hand shim.
+//
+// odb's own convention for the vectors, which callers must honour:
+//   indices.size() == 0  -> the ratio is UNSET
+//   indices.size() == 1  -> a single constant ratio, NOT a piecewise-linear curve
+//
+// `which` selects the curve: "par" | "car" | "psr" | "csr" | "area_diff_reduce" |
+// "gate_plus_diff". An unrecognised value throws rather than returning zero, so a typo
+// surfaces as an error instead of a silently empty rule that reads like "no limit".
+std::size_t layerantenna_num_diff_pwl(const OdbDb& db, rust::Str layer, rust::Str which);
+double layerantenna_diff_pwl_index(const OdbDb& db, rust::Str layer, rust::Str which, std::size_t i);  // diffusion area at point i
+double layerantenna_diff_pwl_ratio(const OdbDb& db, rust::Str layer, rust::Str which, std::size_t i);  // ratio limit at point i
