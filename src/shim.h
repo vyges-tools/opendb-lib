@@ -227,6 +227,25 @@ double mterm_antenna_diff_area(const OdbDb& db, rust::Str master, rust::Str term
 rust::Vec<std::int64_t> net_wire_shapes(const OdbDb& db, rust::Str net);
 rust::String layer_name_by_number(const OdbDb& db, std::int64_t number);  // "" if unknown
 
+// Every routed box of a net, with vias DECOMPOSED onto the layers they occupy.
+//
+// `net_wire_shapes` above reports a via as one bounding box tagged with the pair it joins. That
+// loses the thing that matters for an antenna check: a via is not a box in mid-air, it is a cut
+// plus an enclosure on the layer below and another on the layer above. `dbShape::getViaBoxes`
+// gives all three, and OpenROAD's wiresToPolygonSetMap files each on its OWN layer.
+//
+// This is load-bearing, not cosmetic. Standard-cell pins sit on the lowest routing layer (li1 on
+// sky130) and a net routed on met1 and above has no li1 WIRE at all — its only li1 metal is the
+// enclosure of the li1->met1 via. Without decomposition there is no geometry on the layer where
+// pins live, so nothing can attach to them and nothing can be cut by them. Measured: a net whose
+// terminals all reported "attached to nothing" until vias were decomposed.
+//
+// Layout: 7 entries per box — [layer number, x0, y0, x1, y1, is_routing_layer, came_from_via].
+// `is_routing_layer` separates metal (ratios apply) from cut layers (their own ratios apply);
+// `came_from_via` is kept for diagnosis, since via enclosures behave like wire but arrive
+// differently.
+rust::Vec<std::int64_t> net_wire_boxes(const OdbDb& db, rust::Str net);
+
 // Where an instance pin sits, for anchoring a gate to the shape graph. Returns false when odb
 // cannot place the pin, which the caller must treat as "cannot attribute", never as (0,0).
 bool iterm_avg_xy(const OdbDb& db, rust::Str inst, rust::Str pin, std::int32_t& x, std::int32_t& y);

@@ -816,6 +816,41 @@ rust::Vec<std::int64_t> net_wire_shapes(const OdbDb& h, rust::Str net) {
   return out;
 }
 
+rust::Vec<std::int64_t> net_wire_boxes(const OdbDb& h, rust::Str net) {
+  rust::Vec<std::int64_t> out;
+  dbNet* n = find_net(h, net);
+  if (!n) return out;
+  odb::dbWire* w = n->getWire();
+  if (!w) return out;
+
+  auto emit = [&out](odb::dbTechLayer* l, const odb::Rect& r, bool from_via) {
+    if (!l) return;
+    out.push_back(l->getNumber());
+    out.push_back(r.xMin());
+    out.push_back(r.yMin());
+    out.push_back(r.xMax());
+    out.push_back(r.yMax());
+    out.push_back(l->getType() == odb::dbTechLayerType::ROUTING ? 1 : 0);
+    out.push_back(from_via ? 1 : 0);
+  };
+
+  odb::dbWireShapeItr it;
+  odb::dbShape shape;
+  std::vector<odb::dbShape> via_boxes;
+  for (it.begin(w); it.next(shape);) {
+    if (shape.isVia()) {
+      // lower enclosure + cut + upper enclosure, each on its own layer.
+      odb::dbShape::getViaBoxes(shape, via_boxes);
+      for (const odb::dbShape& b : via_boxes) {
+        emit(b.getTechLayer(), b.getBox(), true);
+      }
+    } else {
+      emit(shape.getTechLayer(), shape.getBox(), false);
+    }
+  }
+  return out;
+}
+
 rust::String layer_name_by_number(const OdbDb& h, std::int64_t number) {
   odb::dbTech* t = h.db->getTech();
   if (!t || number < 0) return rust::String();

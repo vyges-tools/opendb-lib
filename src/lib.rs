@@ -83,6 +83,11 @@ mod ffi {
         // the metal reachable from it, not from the net's total on a layer.
         fn net_wire_shapes(db: &OdbDb, net: &str) -> Vec<i64>;
         fn layer_name_by_number(db: &OdbDb, number: i64) -> String;
+        /// Every routed box with vias DECOMPOSED onto the layers they occupy: 7 i64 each
+        /// (layer, x0, y0, x1, y1, is_routing_layer, came_from_via). A via is a cut plus an
+        /// enclosure above and below, and on a net routed at met1 and up the via enclosure is
+        /// the ONLY metal on li1 — where the standard-cell pins are.
+        fn net_wire_boxes(db: &OdbDb, net: &str) -> Vec<i64>;
         fn iterm_avg_xy(db: &OdbDb, inst: &str, pin: &str, x: &mut i32, y: &mut i32) -> bool;
         /// The pin's own ROUTING-layer boxes in placed coordinates: 5 i64 each
         /// (layer, x0, y0, x1, y1). What the pin physically touches, rather than where it
@@ -241,5 +246,5 @@ pub use ffi::{
     nth_net_wire_layer, num_net_wire_layers,
     mterm_antenna_diff_area, layerantenna_diff_pwl_index, layerantenna_diff_pwl_ratio,
     layerantenna_num_diff_pwl,
-    iterm_avg_xy, iterm_pin_boxes, layer_name_by_number, net_wire_shapes,
+    iterm_avg_xy, iterm_pin_boxes, layer_name_by_number, net_wire_boxes, net_wire_shapes,
 };
