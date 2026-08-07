@@ -5,7 +5,7 @@
   "scope": "all",
   "class_count": 119,
   "method_count": 2622,
-  "bridged_count": 1103,
+  "bridged_count": 1133,
   "classes": [
     {
       "name": "dbAccessPoint",
@@ -4815,7 +4815,7 @@
           "params": [],
           "const": true,
           "kind": "getter",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "setLoc",
@@ -6000,7 +6000,7 @@
           "params": [],
           "const": true,
           "kind": "getter",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "setNumRows",
@@ -6554,7 +6554,7 @@
           "params": [],
           "const": true,
           "kind": "getter",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "getStructure",
@@ -6778,7 +6778,7 @@
           "params": [],
           "const": true,
           "kind": "getter",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "setText",
@@ -6944,7 +6944,7 @@
           "params": [],
           "const": true,
           "kind": "getter",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "addModInst",
@@ -7538,7 +7538,7 @@
           ],
           "const": true,
           "kind": "other",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "getGeometries",
@@ -7766,7 +7766,7 @@
           "params": [],
           "const": false,
           "kind": "getter",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "setTransform",
@@ -9244,7 +9244,7 @@
           ],
           "const": false,
           "kind": "iterator",
-          "bridged": false,
+          "bridged": true,
           "element": "dbBox"
         },
         {
@@ -9419,7 +9419,7 @@
           "params": [],
           "const": false,
           "kind": "iterator",
-          "bridged": false,
+          "bridged": true,
           "element": "dbMPin"
         },
         {
@@ -9538,7 +9538,7 @@
           "params": [],
           "const": true,
           "kind": "relation",
-          "bridged": false,
+          "bridged": true,
           "target": "dbTechAntennaPinModel"
         },
         {
@@ -9561,7 +9561,7 @@
           ],
           "const": false,
           "kind": "setter",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "getPartialMetalArea",
@@ -10205,7 +10205,7 @@
           "params": [],
           "const": true,
           "kind": "getter",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "isBlock",
@@ -10410,7 +10410,7 @@
           ],
           "const": false,
           "kind": "relation",
-          "bridged": false,
+          "bridged": true,
           "target": "dbMTerm"
         },
         {
@@ -10428,7 +10428,7 @@
           ],
           "const": false,
           "kind": "relation",
-          "bridged": false,
+          "bridged": true,
           "target": "dbMTerm"
         },
         {
@@ -13725,7 +13725,7 @@
           "params": [],
           "const": false,
           "kind": "iterator",
-          "bridged": false,
+          "bridged": true,
           "element": "dbBox"
         },
         {
@@ -14123,7 +14123,7 @@
           "params": [],
           "const": false,
           "kind": "getter",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "getName",
@@ -16358,7 +16358,7 @@
           ],
           "const": false,
           "kind": "setter",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "getMaxAreaCAR",
@@ -17226,7 +17226,7 @@
           "params": [],
           "const": true,
           "kind": "relation",
-          "bridged": false,
+          "bridged": true,
           "target": "dbTechLayerAntennaRule"
         },
         {
@@ -17678,7 +17678,7 @@
           "params": [],
           "const": false,
           "kind": "getter",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "getDirection",
@@ -18103,7 +18103,7 @@
           "params": [],
           "const": true,
           "kind": "getter",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "getDiffCAR",
@@ -18111,7 +18111,7 @@
           "params": [],
           "const": true,
           "kind": "getter",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "getDiffPSR",
@@ -18119,7 +18119,7 @@
           "params": [],
           "const": true,
           "kind": "getter",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "getDiffCSR",
@@ -18127,7 +18127,7 @@
           "params": [],
           "const": true,
           "kind": "getter",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "getAreaDiffReduce",
@@ -18135,7 +18135,7 @@
           "params": [],
           "const": true,
           "kind": "getter",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "getGatePlusDiffPWL",
@@ -18143,7 +18143,7 @@
           "params": [],
           "const": true,
           "kind": "getter",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "setDiffPAR",
@@ -19062,7 +19062,7 @@
           "params": [],
           "const": true,
           "kind": "getter",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "addSpacing",
@@ -20119,7 +20119,7 @@
           "params": [],
           "const": true,
           "kind": "getter",
-          "bridged": false
+          "bridged": true
         }
       ],
       "hand_written": false
@@ -21439,7 +21439,7 @@
           "params": [],
           "const": true,
           "kind": "getter",
-          "bridged": false
+          "bridged": true
         }
       ],
       "hand_written": false
@@ -27497,7 +27497,7 @@
           ],
           "const": false,
           "kind": "relation",
-          "bridged": false,
+          "bridged": true,
           "target": "dbTechVia"
         },
         {
@@ -27743,7 +27743,7 @@
           "params": [],
           "const": true,
           "kind": "getter",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "getCuboid",
