@@ -374,3 +374,44 @@ fn masters_can_be_enumerated_and_report_their_lef_type() {
         .unwrap()
         .is_empty());
 }
+
+#[test]
+fn rows_are_addressable_by_index_because_their_names_are_not_unique() {
+    // ⚠️ The reason this exists: odb row names REPEAT. Two rows created with the same name both
+    // survive, and every generated `row_get_*` accessor resolves by name and returns the FIRST —
+    // so walking rows by name silently reads one row's geometry for another and loses the rest.
+    let db = odb::open_db(FIXTURE).expect("read");
+    let site = first_site(&db).expect("site");
+    let (w, h) = (
+        odb::site_get_width(&db, &site),
+        odb::site_get_height(&db, &site),
+    );
+    odb::clear_rows(&db).unwrap();
+    odb::block_set_die_area(&db, 0, 0, w * 200, h * 8).unwrap();
+
+    // Two DIFFERENT rows, same name.
+    odb::row_create(&db, "DUP", &site, 0, 0, "R0", "HORIZONTAL", 10, w).unwrap();
+    odb::row_create(&db, "DUP", &site, 0, h, "MX", "HORIZONTAL", 20, w).unwrap();
+    assert_eq!(odb::num_rows(&db).unwrap(), 2, "both exist");
+
+    let b0 = odb::nth_row_bbox(&db, 0).unwrap();
+    let b1 = odb::nth_row_bbox(&db, 1).unwrap();
+    assert_eq!(b0.len(), 4);
+    assert_ne!(b0, b1, "by index the two rows are distinguishable...");
+    // ...whereas by name they are not: both lookups return whichever odb finds first.
+    assert_eq!(
+        odb::row_get_b_box_y_min(&db, "DUP"),
+        odb::row_get_b_box_y_min(&db, "DUP")
+    );
+
+    assert_eq!(odb::nth_row_site(&db, 0).unwrap(), site);
+    let orients = [
+        odb::nth_row_orient(&db, 0).unwrap(),
+        odb::nth_row_orient(&db, 1).unwrap(),
+    ];
+    assert!(orients.contains(&"R0".to_string()) && orients.contains(&"MX".to_string()));
+    assert!(
+        odb::nth_row_bbox(&db, 9).unwrap().is_empty(),
+        "out of range is empty"
+    );
+}

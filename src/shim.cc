@@ -1105,3 +1105,31 @@ rust::String master_get_type(const OdbDb& h, rust::Str master) {
   odb::dbMaster* m = h.db->findMaster(s(master).c_str());
   return m ? rust::String(m->getType().getString()) : rust::String();
 }
+static odb::dbRow* nth_row(const OdbDb& h, std::size_t i) {
+  dbBlock* b = block_of(h);
+  if (!b) return nullptr;
+  std::size_t n = 0;
+  for (odb::dbRow* r : b->getRows())
+    if (n++ == i) return r;
+  return nullptr;
+}
+rust::Vec<int32_t> nth_row_bbox(const OdbDb& h, std::size_t i) {
+  rust::Vec<int32_t> out;
+  odb::dbRow* r = nth_row(h, i);
+  if (!r) return out;
+  const odb::Rect b = r->getBBox();
+  out.push_back(b.xMin());
+  out.push_back(b.yMin());
+  out.push_back(b.xMax());
+  out.push_back(b.yMax());
+  return out;
+}
+rust::String nth_row_site(const OdbDb& h, std::size_t i) {
+  odb::dbRow* r = nth_row(h, i);
+  odb::dbSite* st = r ? r->getSite() : nullptr;
+  return st ? rust::String(st->getName()) : rust::String();
+}
+rust::String nth_row_orient(const OdbDb& h, std::size_t i) {
+  odb::dbRow* r = nth_row(h, i);
+  return r ? rust::String(r->getOrient().getString()) : rust::String();
+}

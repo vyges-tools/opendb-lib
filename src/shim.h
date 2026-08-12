@@ -346,3 +346,12 @@ rust::Vec<int32_t> inst_bbox(const OdbDb& db, rust::Str inst);
 std::size_t num_masters(const OdbDb& db);
 rust::String nth_master_name(const OdbDb& db, std::size_t i);
 rust::String master_get_type(const OdbDb& db, rust::Str master);
+
+// Row geometry BY INDEX. ⚠️ ROW NAMES ARE NOT UNIQUE. `cut_rows` splits a row into pieces that
+// can collide with another family's names, and a design read from DEF may simply repeat them --
+// 699 rows over 692 distinct names in one upstream test case. Every generated `row_get_*`
+// accessor resolves by name and therefore returns the FIRST match, silently reading one row's
+// geometry for another and losing the rest. Anything that walks all rows must use these.
+rust::Vec<int32_t> nth_row_bbox(const OdbDb& db, std::size_t i);   // [x_min,y_min,x_max,y_max]
+rust::String nth_row_site(const OdbDb& db, std::size_t i);
+rust::String nth_row_orient(const OdbDb& db, std::size_t i);
