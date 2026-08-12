@@ -410,3 +410,16 @@ rust::Vec<int32_t> track_grid_y(const OdbDb& db, rust::Str layer);
 // values through out-parameters, so the schema generator cannot express it.
 rust::Vec<int32_t> track_patterns_x(const OdbDb& db, rust::Str layer);
 rust::Vec<int32_t> track_patterns_y(const OdbDb& db, rust::Str layer);
+
+// A block port's CONSTRAINT REGION: 4 i32 (x0, y0, x1, y1), or empty when the port has none.
+//
+// This is how `set_io_pin_constraint -region` reaches an engine: the constraint is stored on the
+// port in the database, not passed as a command argument, so it survives a write/read cycle and
+// has to be read back rather than re-supplied.
+//
+// A **degenerate** rectangle — zero width or zero height — is an interval on one die edge, which
+// is the common case. A rectangle with real area is a top-layer region instead. The distinction is
+// the rectangle's own shape, so callers must check it rather than assume.
+//
+// `getConstraintRegion` returns `std::optional<Rect>`, which the schema generator has no shape for.
+rust::Vec<int32_t> bterm_constraint_region(const OdbDb& db, rust::Str bterm);

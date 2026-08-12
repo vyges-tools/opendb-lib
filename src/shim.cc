@@ -1300,3 +1300,16 @@ rust::Vec<int32_t> track_patterns_x(const OdbDb& h, rust::Str layer) {
 rust::Vec<int32_t> track_patterns_y(const OdbDb& h, rust::Str layer) {
   return track_patterns(h, layer, true);
 }
+rust::Vec<int32_t> bterm_constraint_region(const OdbDb& h, rust::Str bterm) {
+  rust::Vec<int32_t> out;
+  dbBlock* b = block_of(h);
+  dbBTerm* bt = b ? b->findBTerm(s(bterm).c_str()) : nullptr;
+  if (!bt) return out;
+  auto region = bt->getConstraintRegion();
+  if (!region) return out;
+  out.push_back(region->xMin());
+  out.push_back(region->yMin());
+  out.push_back(region->xMax());
+  out.push_back(region->yMax());
+  return out;
+}

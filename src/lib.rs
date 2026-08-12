@@ -122,6 +122,7 @@ mod ffi {
         // Routing track coordinates (vyges-ppl) -- see shim.h.
         fn track_grid_x(db: &OdbDb, layer: &str) -> Result<Vec<i32>>;
         fn track_grid_y(db: &OdbDb, layer: &str) -> Result<Vec<i32>>;
+        fn bterm_constraint_region(db: &OdbDb, bterm: &str) -> Result<Vec<i32>>;
         fn track_patterns_x(db: &OdbDb, layer: &str) -> Result<Vec<i32>>;
         fn track_patterns_y(db: &OdbDb, layer: &str) -> Result<Vec<i32>>;
 
@@ -308,7 +309,7 @@ pub use ffi::{
     nth_row_bbox, nth_row_site, nth_row_orient, destroy_inst,
     inst_shapes, obstruction_boxes, swire_boxes, fill_create, num_fills, clear_fills,
     num_layers, nth_layer_name, layer_direction, track_grid_x, track_grid_y,
-    track_patterns_x, track_patterns_y,
+    track_patterns_x, track_patterns_y, bterm_constraint_region,
     layer_thickness, mterm_antenna_gate_area, net_wire_area_on_layer, net_wire_perimeter_on_layer,
     nth_net_wire_layer, num_net_wire_layers,
     mterm_antenna_diff_area, layerantenna_diff_pwl_index, layerantenna_diff_pwl_ratio,
