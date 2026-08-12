@@ -1,5 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 #include "shim.h"
+
+#include "odb/util.h"  // odb::cutRows / odb::hasOneSiteMaster (tap delegates row cutting)
 #include "odb/lefin.h"
 
 #include "lint3d.h"      // 3D structural lint (compiled into libodb; see that header)
@@ -1040,3 +1042,18 @@ rust::String site_row_pattern_orient(const OdbDb& h, rust::Str site, std::size_t
                              " on site " + s(site));
   return rust::String((*rp)[i].orientation.getString());
 }
+void block_cut_rows(const OdbDb& h, int32_t min_row_width,
+                    rust::Slice<const rust::String> blockage_insts,
+                    int32_t halo_x, int32_t halo_y) {
+  dbBlock* b = require_block(h);
+  std::vector<odb::dbBox*> blockages;
+  blockages.reserve(blockage_insts.size());
+  for (const rust::String& name : blockage_insts) {
+    std::string n(name);
+    odb::dbInst* inst = b->findInst(n.c_str());
+    if (!inst) throw std::runtime_error("vyges-opendb: no such instance: " + n);
+    blockages.push_back(inst->getBBox());
+  }
+  odb::cutRows(b, min_row_width, blockages, halo_x, halo_y, const_cast<utl::Logger*>(&h.logger));
+}
+bool has_one_site_master(const OdbDb& h) { return odb::hasOneSiteMaster(h.db); }

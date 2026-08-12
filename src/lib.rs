@@ -85,6 +85,11 @@ mod ffi {
         fn site_row_pattern_len(db: &OdbDb, site: &str) -> Result<usize>;
         fn site_row_pattern_site(db: &OdbDb, site: &str, i: usize) -> Result<String>;
         fn site_row_pattern_orient(db: &OdbDb, site: &str, i: usize) -> Result<String>;
+        // Row cutting around macros (vyges-tap). odb's OWN algorithm from odb/util.h -- the
+        // engine chooses the blockages, odb does the cutting. See shim.h.
+        fn block_cut_rows(db: &OdbDb, min_row_width: i32, blockage_insts: &[String],
+                          halo_x: i32, halo_y: i32) -> Result<()>;
+        fn has_one_site_master(db: &OdbDb) -> bool;
 
         // antenna inputs (odb substrate) — numerator per routing layer, denominator per pin.
         // Consumed by vyges-ant; see shim.h for the v0 double-counting bound.
@@ -265,6 +270,7 @@ pub use ffi::{
     write_def, OdbDb,
     clear_rows, nth_site_name, num_rows, num_sites, row_create, tech_manufacturing_grid,
     site_row_pattern_len, site_row_pattern_orient, site_row_pattern_site,
+    block_cut_rows, has_one_site_master,
     layer_thickness, mterm_antenna_gate_area, net_wire_area_on_layer, net_wire_perimeter_on_layer,
     nth_net_wire_layer, num_net_wire_layers,
     mterm_antenna_diff_area, layerantenna_diff_pwl_index, layerantenna_diff_pwl_ratio,

@@ -307,3 +307,16 @@ std::size_t clear_rows(const OdbDb& db);  // upstream clears rows before rebuild
 std::size_t site_row_pattern_len(const OdbDb& db, rust::Str site);
 rust::String site_row_pattern_site(const OdbDb& db, rust::Str site, std::size_t i);
 rust::String site_row_pattern_orient(const OdbDb& db, rust::Str site, std::size_t i);
+
+// Row cutting around macros — `odb::cutRows` from odb/util.h, NOT reimplemented. Cutting rows to
+// clear placed macros is odb's own algorithm on odb's own data; the engine's job is only to
+// decide WHICH instances are blockages and to report the ones it skipped. `blockage_insts` names
+// those instances; each is resolved to its bounding box here because a dbBox* cannot cross the
+// bridge. An unknown instance name throws rather than silently cutting around nothing.
+void block_cut_rows(const OdbDb& db, int32_t min_row_width,
+                    rust::Slice<const rust::String> blockage_insts,
+                    int32_t halo_x, int32_t halo_y);
+
+// True when the technology has a single-site-width master — the condition under which upstream
+// allows tapcells to leave one-site gaps.
+bool has_one_site_master(const OdbDb& db);
