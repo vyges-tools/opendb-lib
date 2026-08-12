@@ -115,6 +115,9 @@ mod ffi {
                        x1: i32, y1: i32, x2: i32, y2: i32) -> Result<()>;
         fn num_fills(db: &OdbDb) -> Result<usize>;
         fn clear_fills(db: &OdbDb) -> Result<usize>;
+        fn num_layers(db: &OdbDb) -> Result<usize>;
+        fn nth_layer_name(db: &OdbDb, i: usize) -> Result<String>;
+        fn layer_direction(db: &OdbDb, layer: &str) -> Result<String>;
 
         // antenna inputs (odb substrate) — numerator per routing layer, denominator per pin.
         // Consumed by vyges-ant; see shim.h for the v0 double-counting bound.
@@ -298,6 +301,7 @@ pub use ffi::{
     block_cut_rows, has_one_site_master, nth_row_name, site_get_class, create_physical_inst, inst_bbox, num_masters, nth_master_name, master_get_type,
     nth_row_bbox, nth_row_site, nth_row_orient, destroy_inst,
     inst_shapes, obstruction_boxes, fill_create, num_fills, clear_fills,
+    num_layers, nth_layer_name, layer_direction,
     layer_thickness, mterm_antenna_gate_area, net_wire_area_on_layer, net_wire_perimeter_on_layer,
     nth_net_wire_layer, num_net_wire_layers,
     mterm_antenna_diff_area, layerantenna_diff_pwl_index, layerantenna_diff_pwl_ratio,

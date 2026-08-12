@@ -1195,3 +1195,20 @@ std::size_t clear_fills(const OdbDb& h) {
   for (odb::dbFill* f : fills) odb::dbFill::destroy(f);
   return fills.size();
 }
+std::size_t num_layers(const OdbDb& h) {
+  odb::dbTech* t = h.db->getTech();
+  return t ? t->getLayers().size() : 0;
+}
+rust::String nth_layer_name(const OdbDb& h, std::size_t i) {
+  odb::dbTech* t = h.db->getTech();
+  if (!t) return rust::String();
+  std::size_t n = 0;
+  for (odb::dbTechLayer* l : t->getLayers())
+    if (n++ == i) return rust::String(l->getName());
+  return rust::String();
+}
+rust::String layer_direction(const OdbDb& h, rust::Str layer) {
+  odb::dbTech* t = h.db->getTech();
+  odb::dbTechLayer* l = t ? t->findLayer(s(layer).c_str()) : nullptr;
+  return l ? rust::String(l->getDirection().getString()) : rust::String();
+}

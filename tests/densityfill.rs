@@ -76,3 +76,37 @@ fn obstruction_geometry_is_readable_and_matches_the_count() {
         "the box we just added, in order"
     );
 }
+
+#[test]
+fn layers_can_be_enumerated_and_state_their_routing_direction() {
+    // Direction decides how a fill shape is oriented and which axis the line-end spacing applies
+    // to; nothing generated exposes it, and nothing enumerated layers at all.
+    let db = odb::open_db(FIXTURE).expect("read");
+    let n = odb::num_layers(&db).unwrap();
+    assert!(n > 0, "the technology has layers");
+
+    let names: Vec<String> = (0..n)
+        .map(|i| odb::nth_layer_name(&db, i).unwrap())
+        .collect();
+    assert!(names.iter().all(|s| !s.is_empty()));
+    assert!(
+        odb::nth_layer_name(&db, n).unwrap().is_empty(),
+        "out of range is empty"
+    );
+
+    let dirs: Vec<String> = names
+        .iter()
+        .map(|l| odb::layer_direction(&db, l).unwrap())
+        .collect();
+    assert!(
+        dirs.iter().all(|d| !d.is_empty()),
+        "every layer states a direction"
+    );
+    assert!(
+        dirs.iter().any(|d| d == "HORIZONTAL") && dirs.iter().any(|d| d == "VERTICAL"),
+        "a routing stack alternates: {dirs:?}"
+    );
+    assert!(odb::layer_direction(&db, "no_such_layer_xyz")
+        .unwrap()
+        .is_empty());
+}

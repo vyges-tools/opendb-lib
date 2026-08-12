@@ -379,3 +379,10 @@ void fill_create(const OdbDb& db, bool needs_opc, uint32_t mask, rust::Str layer
                  int32_t x1, int32_t y1, int32_t x2, int32_t y2);
 std::size_t num_fills(const OdbDb& db);
 std::size_t clear_fills(const OdbDb& db);   // returns the count removed
+
+// Layer enumeration + routing direction. `layer_get_*` accessors are generated and address a
+// layer by name, but nothing enumerated them, and the DIRECTION (which decides how fill shapes
+// are oriented and where line-end spacing applies) has no generated accessor at all.
+std::size_t num_layers(const OdbDb& db);
+rust::String nth_layer_name(const OdbDb& db, std::size_t i);
+rust::String layer_direction(const OdbDb& db, rust::Str layer);   // HORIZONTAL/VERTICAL/NONE
