@@ -5,7 +5,7 @@
   "scope": "all",
   "class_count": 119,
   "method_count": 2622,
-  "bridged_count": 1167,
+  "bridged_count": 1168,
   "classes": [
     {
       "name": "dbAccessPoint",
@@ -1026,7 +1026,7 @@
           "params": [],
           "const": false,
           "kind": "getter",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "getBTermTopLayerGridRegion",

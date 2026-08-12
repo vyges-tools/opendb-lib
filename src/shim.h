@@ -449,3 +449,20 @@ rust::Vec<int32_t> blocked_regions_for_pins(const OdbDb& db);
 // `place_pin` puts a port at an explicit location, and a later pin landing on the same slot would
 // short to it. Resolve layer numbers with `layer_name_by_number`.
 rust::Vec<int64_t> fixed_bterm_shapes(const OdbDb& db);
+
+// The TOP-LAYER pin grid, if the design defines one (`define_pin_shape_pattern`).
+//
+// Nine i32: x_step, y_step, pin_width, pin_height, keepout, then the region's enclosing rectangle
+// (x0, y0, x1, y1). Empty when no grid is defined. The grid's layer is a separate accessor because
+// it is a name, not a number.
+//
+// Pins on this grid are placed on a 2-D lattice INSIDE the die rather than on its boundary, so the
+// grid is the whole geometry of that placement surface.
+//
+// `getBTermTopLayerGrid()` returns `std::optional<dbBTermTopLayerGrid>`, and its `region` is a
+// Polygon — neither is a shape the schema generator can express.
+rust::Vec<int32_t> bterm_top_layer_grid(const OdbDb& db);
+rust::String bterm_top_layer_grid_layer(const OdbDb& db);
+// Whether that region is a plain rectangle. A non-rectangular grid region is not handled by the
+// reference either, so a caller must check rather than assume the enclosing rectangle is the truth.
+bool bterm_top_layer_grid_is_rect(const OdbDb& db);

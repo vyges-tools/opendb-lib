@@ -1365,3 +1365,34 @@ rust::Vec<int64_t> fixed_bterm_shapes(const OdbDb& h) {
   }
   return out;
 }
+rust::Vec<int32_t> bterm_top_layer_grid(const OdbDb& h) {
+  rust::Vec<int32_t> out;
+  dbBlock* b = block_of(h);
+  if (!b) return out;
+  auto grid = b->getBTermTopLayerGrid();
+  if (!grid) return out;
+  const odb::Rect r = grid->region.getEnclosingRect();
+  out.push_back(grid->x_step);
+  out.push_back(grid->y_step);
+  out.push_back(grid->pin_width);
+  out.push_back(grid->pin_height);
+  out.push_back(grid->keepout);
+  out.push_back(r.xMin());
+  out.push_back(r.yMin());
+  out.push_back(r.xMax());
+  out.push_back(r.yMax());
+  return out;
+}
+rust::String bterm_top_layer_grid_layer(const OdbDb& h) {
+  dbBlock* b = block_of(h);
+  if (!b) return rust::String();
+  auto grid = b->getBTermTopLayerGrid();
+  if (!grid || !grid->layer) return rust::String();
+  return rust::String(grid->layer->getName());
+}
+bool bterm_top_layer_grid_is_rect(const OdbDb& h) {
+  dbBlock* b = block_of(h);
+  if (!b) return false;
+  auto grid = b->getBTermTopLayerGrid();
+  return grid && grid->region.isRect();
+}

@@ -124,6 +124,9 @@ mod ffi {
         fn track_grid_y(db: &OdbDb, layer: &str) -> Result<Vec<i32>>;
         fn bterm_constraint_region(db: &OdbDb, bterm: &str) -> Result<Vec<i32>>;
         fn blocked_regions_for_pins(db: &OdbDb) -> Result<Vec<i32>>;
+        fn bterm_top_layer_grid(db: &OdbDb) -> Result<Vec<i32>>;
+        fn bterm_top_layer_grid_layer(db: &OdbDb) -> Result<String>;
+        fn bterm_top_layer_grid_is_rect(db: &OdbDb) -> Result<bool>;
         fn fixed_bterm_shapes(db: &OdbDb) -> Result<Vec<i64>>;
         fn num_bterm_groups(db: &OdbDb) -> Result<usize>;
         fn nth_bterm_group(db: &OdbDb, i: usize) -> Result<Vec<String>>;
@@ -317,6 +320,7 @@ pub use ffi::{
     track_patterns_x, track_patterns_y, bterm_constraint_region,
     num_bterm_groups, nth_bterm_group, nth_bterm_group_ordered,
     blocked_regions_for_pins, fixed_bterm_shapes,
+    bterm_top_layer_grid, bterm_top_layer_grid_layer, bterm_top_layer_grid_is_rect,
     layer_thickness, mterm_antenna_gate_area, net_wire_area_on_layer, net_wire_perimeter_on_layer,
     nth_net_wire_layer, num_net_wire_layers,
     mterm_antenna_diff_area, layerantenna_diff_pwl_index, layerantenna_diff_pwl_ratio,
