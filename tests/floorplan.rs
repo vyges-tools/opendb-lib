@@ -415,3 +415,26 @@ fn rows_are_addressable_by_index_because_their_names_are_not_unique() {
         "out of range is empty"
     );
 }
+
+#[test]
+fn an_instance_can_be_destroyed_and_an_unknown_one_is_refused() {
+    let db = odb::open_db(FIXTURE).expect("read");
+    let master = odb::first_master_name(&db);
+    odb::create_physical_inst(&db, &master, "DOOMED").expect("created");
+    let before = odb::num_insts(&db);
+
+    odb::destroy_inst(&db, "DOOMED").expect("destroyed");
+    assert_eq!(odb::num_insts(&db), before - 1);
+    assert!(
+        odb::inst_master(&db, "DOOMED").is_empty(),
+        "it is really gone"
+    );
+
+    // A name that is not there is an error, not a silent no-op: a typo in a rip-up prefix would
+    // otherwise look like "nothing to remove".
+    assert!(
+        odb::destroy_inst(&db, "DOOMED").is_err(),
+        "destroying it twice fails"
+    );
+    assert!(odb::destroy_inst(&db, "no_such_inst_xyz").is_err());
+}

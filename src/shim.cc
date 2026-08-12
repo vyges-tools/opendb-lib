@@ -1133,3 +1133,7 @@ rust::String nth_row_orient(const OdbDb& h, std::size_t i) {
   odb::dbRow* r = nth_row(h, i);
   return r ? rust::String(r->getOrient().getString()) : rust::String();
 }
+void destroy_inst(const OdbDb& h, rust::Str inst) {
+  dbInst* i = require_inst(h, inst);
+  dbInst::destroy(i);
+}

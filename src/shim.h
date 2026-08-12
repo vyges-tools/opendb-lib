@@ -355,3 +355,8 @@ rust::String master_get_type(const OdbDb& db, rust::Str master);
 rust::Vec<int32_t> nth_row_bbox(const OdbDb& db, std::size_t i);   // [x_min,y_min,x_max,y_max]
 rust::String nth_row_site(const OdbDb& db, std::size_t i);
 rust::String nth_row_orient(const OdbDb& db, std::size_t i);
+
+// Destroy one instance by name. The primitive, not a bulk "delete everything matching" -- which
+// cells to remove is engine policy, and a shim that took a pattern would put that policy here.
+// Throws when the instance does not exist, so a typo cannot read as "nothing to remove".
+void destroy_inst(const OdbDb& db, rust::Str inst);
