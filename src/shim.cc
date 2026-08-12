@@ -1089,3 +1089,19 @@ rust::Vec<int32_t> inst_bbox(const OdbDb& h, rust::Str inst) {
   out.push_back(r.yMax());
   return out;
 }
+std::size_t num_masters(const OdbDb& h) {
+  std::size_t n = 0;
+  for (odb::dbLib* lib : h.db->getLibs()) n += lib->getMasters().size();
+  return n;
+}
+rust::String nth_master_name(const OdbDb& h, std::size_t i) {
+  std::size_t n = 0;
+  for (odb::dbLib* lib : h.db->getLibs())
+    for (odb::dbMaster* m : lib->getMasters())
+      if (n++ == i) return rust::String(m->getName());
+  return rust::String();
+}
+rust::String master_get_type(const OdbDb& h, rust::Str master) {
+  odb::dbMaster* m = h.db->findMaster(s(master).c_str());
+  return m ? rust::String(m->getType().getString()) : rust::String();
+}

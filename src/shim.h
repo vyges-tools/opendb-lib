@@ -338,3 +338,11 @@ void create_physical_inst(const OdbDb& db, rust::Str master, rust::Str name);
 // instance is unknown. Not derivable from origin + master size, because orientation decides which
 // way the master extends from its origin.
 rust::Vec<int32_t> inst_bbox(const OdbDb& db, rust::Str inst);
+
+// Master enumeration + LEF master type. `find_master` matches a name substring, which cannot
+// answer "which cell is the bottom-left endcap?" -- that is a question about the master's TYPE
+// (ENDCAP_LEF58_LEFTBOTTOMCORNER and friends), and nothing enumerated masters at all.
+// The type STRING is returned so the matching stays in the engine, where the policy belongs.
+std::size_t num_masters(const OdbDb& db);
+rust::String nth_master_name(const OdbDb& db, std::size_t i);
+rust::String master_get_type(const OdbDb& db, rust::Str master);

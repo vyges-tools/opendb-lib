@@ -330,3 +330,47 @@ fn an_instance_reports_a_bounding_box_that_reflects_its_orientation() {
         "absence is empty"
     );
 }
+
+#[test]
+fn masters_can_be_enumerated_and_report_their_lef_type() {
+    // `find_master` matches a name substring, which cannot answer "which cell is the bottom-left
+    // endcap?" — that is a question about the master's TYPE, and nothing enumerated masters.
+    let db = odb::open_db(FIXTURE).expect("read");
+    let n = odb::num_masters(&db).unwrap();
+    assert!(n > 0, "the fixture's libraries define masters");
+
+    let names: Vec<String> = (0..n)
+        .map(|i| odb::nth_master_name(&db, i).unwrap())
+        .collect();
+    assert!(
+        names.iter().all(|s| !s.is_empty()),
+        "every master has a name"
+    );
+    assert!(
+        odb::nth_master_name(&db, n).unwrap().is_empty(),
+        "out of range is empty"
+    );
+
+    // Every master states a type; CORE is the ordinary one.
+    let types: Vec<String> = names
+        .iter()
+        .map(|m| odb::master_get_type(&db, m).unwrap())
+        .collect();
+    assert!(
+        types.iter().all(|t| !t.is_empty()),
+        "every master states a type"
+    );
+    // The strings are LEF class spellings -- "CORE WELLTAP", "ENDCAP", and for LEF58 libraries
+    // the subtypes tap matches on ("ENDCAP_LEF58_LEFTBOTTOMCORNER"). This fixture is LEF 5.7, so
+    // it has the plain forms.
+    assert!(
+        types
+            .iter()
+            .any(|t| t.starts_with("CORE") || t.starts_with("ENDCAP")),
+        "expected LEF class strings, saw: {:?}",
+        types.iter().collect::<std::collections::BTreeSet<_>>()
+    );
+    assert!(odb::master_get_type(&db, "no_such_master_xyz")
+        .unwrap()
+        .is_empty());
+}

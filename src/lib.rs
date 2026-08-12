@@ -97,6 +97,10 @@ mod ffi {
         // Physical-only instance creation (taps, endcaps, fillers) -- see shim.h.
         fn create_physical_inst(db: &OdbDb, master: &str, name: &str) -> Result<()>;
         fn inst_bbox(db: &OdbDb, inst: &str) -> Result<Vec<i32>>;
+        // Master enumeration + LEF master type -- see shim.h.
+        fn num_masters(db: &OdbDb) -> Result<usize>;
+        fn nth_master_name(db: &OdbDb, i: usize) -> Result<String>;
+        fn master_get_type(db: &OdbDb, master: &str) -> Result<String>;
 
         // antenna inputs (odb substrate) — numerator per routing layer, denominator per pin.
         // Consumed by vyges-ant; see shim.h for the v0 double-counting bound.
@@ -277,7 +281,7 @@ pub use ffi::{
     write_def, OdbDb,
     clear_rows, nth_site_name, num_rows, num_sites, row_create, tech_manufacturing_grid,
     site_row_pattern_len, site_row_pattern_orient, site_row_pattern_site,
-    block_cut_rows, has_one_site_master, nth_row_name, site_get_class, create_physical_inst, inst_bbox,
+    block_cut_rows, has_one_site_master, nth_row_name, site_get_class, create_physical_inst, inst_bbox, num_masters, nth_master_name, master_get_type,
     layer_thickness, mterm_antenna_gate_area, net_wire_area_on_layer, net_wire_perimeter_on_layer,
     nth_net_wire_layer, num_net_wire_layers,
     mterm_antenna_diff_area, layerantenna_diff_pwl_index, layerantenna_diff_pwl_ratio,
