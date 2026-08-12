@@ -126,3 +126,19 @@ fn first_site(db: &cxx::UniquePtr<odb::OdbDb>) -> Option<String> {
         .filter_map(|i| odb::nth_site_name(db, i).ok())
         .find(|n| !n.is_empty())
 }
+
+#[test]
+fn a_plain_site_has_no_row_pattern_and_says_so_rather_than_erroring() {
+    // Absence is an answer: length 0, not a throw. The engine asks this of every site to decide
+    // between the uniform and hybrid paths, so it must be cheap and total.
+    let db = odb::open_db(FIXTURE).expect("read");
+    let site = first_site(&db).expect("a site");
+    assert!(!odb::site_has_row_pattern(&db, &site), "the fixture's sites are plain");
+    assert_eq!(odb::site_row_pattern_len(&db, &site).unwrap(), 0);
+    assert_eq!(odb::site_row_pattern_len(&db, "no_such_site_xyz").unwrap(), 0);
+
+    // Indexing a pattern that is not there is an error, not an empty string that would read as
+    // a real site named "".
+    assert!(odb::site_row_pattern_site(&db, &site, 0).is_err());
+    assert!(odb::site_row_pattern_orient(&db, &site, 0).is_err());
+}

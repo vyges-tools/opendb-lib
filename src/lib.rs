@@ -80,6 +80,11 @@ mod ffi {
         fn nth_site_name(db: &OdbDb, i: usize) -> Result<String>;
         fn num_rows(db: &OdbDb) -> Result<usize>;
         fn clear_rows(db: &OdbDb) -> Result<usize>;
+        // A hybrid site's row pattern. `site_has_row_pattern` is generated; its contents cannot
+        // be, so these three are hand-written — see shim.h.
+        fn site_row_pattern_len(db: &OdbDb, site: &str) -> Result<usize>;
+        fn site_row_pattern_site(db: &OdbDb, site: &str, i: usize) -> Result<String>;
+        fn site_row_pattern_orient(db: &OdbDb, site: &str, i: usize) -> Result<String>;
 
         // antenna inputs (odb substrate) — numerator per routing layer, denominator per pin.
         // Consumed by vyges-ant; see shim.h for the v0 double-counting bound.
@@ -259,6 +264,7 @@ pub use ffi::{
     num_net_iterms, read_def, set_inst_location, set_inst_orient, total_wire_length, write_db,
     write_def, OdbDb,
     clear_rows, nth_site_name, num_rows, num_sites, row_create, tech_manufacturing_grid,
+    site_row_pattern_len, site_row_pattern_orient, site_row_pattern_site,
     layer_thickness, mterm_antenna_gate_area, net_wire_area_on_layer, net_wire_perimeter_on_layer,
     nth_net_wire_layer, num_net_wire_layers,
     mterm_antenna_diff_area, layerantenna_diff_pwl_index, layerantenna_diff_pwl_ratio,

@@ -1012,3 +1012,31 @@ std::size_t clear_rows(const OdbDb& h) {
   for (odb::dbRow* r : rows) odb::dbRow::destroy(r);
   return rows.size();
 }
+static const odb::dbSite::RowPattern* row_pattern_of(const OdbDb& h, rust::Str site,
+                                                     odb::dbSite::RowPattern& storage) {
+  odb::dbSite* st = find_site(h, s(site));
+  if (!st || !st->hasRowPattern()) return nullptr;
+  storage = st->getRowPattern();   // returns by value; keep it alive in the caller's frame
+  return &storage;
+}
+std::size_t site_row_pattern_len(const OdbDb& h, rust::Str site) {
+  odb::dbSite::RowPattern p;
+  const odb::dbSite::RowPattern* rp = row_pattern_of(h, site, p);
+  return rp ? rp->size() : 0;
+}
+rust::String site_row_pattern_site(const OdbDb& h, rust::Str site, std::size_t i) {
+  odb::dbSite::RowPattern p;
+  const odb::dbSite::RowPattern* rp = row_pattern_of(h, site, p);
+  if (!rp || i >= rp->size())
+    throw std::runtime_error("vyges-opendb: no row pattern entry " + std::to_string(i) +
+                             " on site " + s(site));
+  return rust::String((*rp)[i].site->getName());
+}
+rust::String site_row_pattern_orient(const OdbDb& h, rust::Str site, std::size_t i) {
+  odb::dbSite::RowPattern p;
+  const odb::dbSite::RowPattern* rp = row_pattern_of(h, site, p);
+  if (!rp || i >= rp->size())
+    throw std::runtime_error("vyges-opendb: no row pattern entry " + std::to_string(i) +
+                             " on site " + s(site));
+  return rust::String((*rp)[i].orientation.getString());
+}

@@ -297,3 +297,13 @@ std::size_t num_sites(const OdbDb& db);
 rust::String nth_site_name(const OdbDb& db, std::size_t i);
 std::size_t num_rows(const OdbDb& db);
 std::size_t clear_rows(const OdbDb& db);  // upstream clears rows before rebuilding them
+
+// A hybrid site's ROW PATTERN — the repeating sequence of (site, orientation) that tiles the
+// core, where a plain site would repeat one height. Whether a pattern exists is already
+// generated (`site_has_row_pattern`), but its CONTENTS cannot be: getRowPattern() returns a
+// vector of structs, which the schema generator has no shape for. Hence these three, indexed
+// like `nth_site_name` rather than returned as one vector, so the bridge stays scalar.
+// A site with no pattern has length 0; an out-of-range index throws rather than returning "".
+std::size_t site_row_pattern_len(const OdbDb& db, rust::Str site);
+rust::String site_row_pattern_site(const OdbDb& db, rust::Str site, std::size_t i);
+rust::String site_row_pattern_orient(const OdbDb& db, rust::Str site, std::size_t i);
