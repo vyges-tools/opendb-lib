@@ -5,7 +5,7 @@
   "scope": "hand-written core only",
   "class_count": 44,
   "method_count": 1137,
-  "bridged_count": 721,
+  "bridged_count": 722,
   "classes": [
     {
       "name": "dbBPin",
@@ -1720,7 +1720,7 @@
           "params": [],
           "const": false,
           "kind": "getter",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "computeCoreArea",

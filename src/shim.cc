@@ -1396,3 +1396,13 @@ bool bterm_top_layer_grid_is_rect(const OdbDb& h) {
   auto grid = b->getBTermTopLayerGrid();
   return grid && grid->region.isRect();
 }
+rust::Vec<int32_t> die_area_polygon(const OdbDb& h) {
+  rust::Vec<int32_t> out;
+  dbBlock* b = block_of(h);
+  if (!b) return out;
+  for (const odb::Point& p : b->getDieAreaPolygon().getPoints()) {
+    out.push_back(p.getX());
+    out.push_back(p.getY());
+  }
+  return out;
+}

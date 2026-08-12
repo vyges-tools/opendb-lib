@@ -466,3 +466,11 @@ rust::String bterm_top_layer_grid_layer(const OdbDb& db);
 // Whether that region is a plain rectangle. A non-rectangular grid region is not handled by the
 // reference either, so a caller must check rather than assume the enclosing rectangle is the truth.
 bool bterm_top_layer_grid_is_rect(const OdbDb& db);
+
+// The die outline as a POLYGON: x, y pairs, closed (the last point repeats the first).
+//
+// A rectangular die reports five points; anything more is a genuinely rectilinear outline, and the
+// count is how the reference decides which placement path to take. Empty when the block has none.
+//
+// `getDieAreaPolygon()` returns a `Polygon` by value — not a shape the schema generator can express.
+rust::Vec<int32_t> die_area_polygon(const OdbDb& db);
