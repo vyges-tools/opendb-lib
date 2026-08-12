@@ -423,3 +423,13 @@ rust::Vec<int32_t> track_patterns_y(const OdbDb& db, rust::Str layer);
 //
 // `getConstraintRegion` returns `std::optional<Rect>`, which the schema generator has no shape for.
 rust::Vec<int32_t> bterm_constraint_region(const OdbDb& db, rust::Str bterm);
+
+// PIN GROUPS declared on the block: `set_io_pin_constraint -group` records a set of ports that
+// must be placed on ADJACENT slots, optionally in the order given.
+//
+// Three accessors rather than one, because a group is a list of names plus a flag and
+// `getBTermGroups()` returns a `std::vector` of a struct holding both — a shape the schema
+// generator has nothing to say about.
+std::size_t num_bterm_groups(const OdbDb& db);
+rust::Vec<rust::String> nth_bterm_group(const OdbDb& db, std::size_t i);
+bool nth_bterm_group_ordered(const OdbDb& db, std::size_t i);

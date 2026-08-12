@@ -5,7 +5,7 @@
   "scope": "all",
   "class_count": 119,
   "method_count": 2622,
-  "bridged_count": 1161,
+  "bridged_count": 1162,
   "classes": [
     {
       "name": "dbAccessPoint",
@@ -988,7 +988,7 @@
           "params": [],
           "const": false,
           "kind": "getter",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "addBTermGroup",

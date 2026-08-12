@@ -1313,3 +1313,22 @@ rust::Vec<int32_t> bterm_constraint_region(const OdbDb& h, rust::Str bterm) {
   out.push_back(region->yMax());
   return out;
 }
+std::size_t num_bterm_groups(const OdbDb& h) {
+  dbBlock* b = block_of(h);
+  return b ? b->getBTermGroups().size() : 0;
+}
+rust::Vec<rust::String> nth_bterm_group(const OdbDb& h, std::size_t i) {
+  rust::Vec<rust::String> out;
+  dbBlock* b = block_of(h);
+  if (!b) return out;
+  auto groups = b->getBTermGroups();
+  if (i >= groups.size()) return out;
+  for (dbBTerm* t : groups[i].bterms) out.push_back(rust::String(t->getName()));
+  return out;
+}
+bool nth_bterm_group_ordered(const OdbDb& h, std::size_t i) {
+  dbBlock* b = block_of(h);
+  if (!b) return false;
+  auto groups = b->getBTermGroups();
+  return i < groups.size() && groups[i].order;
+}
