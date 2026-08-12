@@ -312,3 +312,21 @@ fn a_physical_only_instance_is_created_outside_the_netlist() {
     assert!(odb::create_physical_inst(&db, &master, "PHY_TEST_0").is_err());
     assert!(odb::create_physical_inst(&db, "no_such_master_xyz", "PHY_TEST_1").is_err());
 }
+
+#[test]
+fn an_instance_reports_a_bounding_box_that_reflects_its_orientation() {
+    // Not derivable from origin + master size: orientation decides which way the master extends.
+    let db = odb::open_db(FIXTURE).expect("read");
+    let inst = odb::nth_inst_name(&db, 0);
+    assert!(!inst.is_empty());
+    let b = odb::inst_bbox(&db, &inst).unwrap();
+    assert_eq!(b.len(), 4, "[x_min, y_min, x_max, y_max]");
+    assert!(
+        b[2] >= b[0] && b[3] >= b[1],
+        "a bbox is not inverted: {b:?}"
+    );
+    assert!(
+        odb::inst_bbox(&db, "no_such_inst_xyz").unwrap().is_empty(),
+        "absence is empty"
+    );
+}

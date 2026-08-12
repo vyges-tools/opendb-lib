@@ -333,3 +333,8 @@ rust::String site_get_class(const OdbDb& db, rust::Str site);
 // is what every tap, endcap and filler is. `create_inst` makes an ordinary netlist instance;
 // using it for physical cells would put them in the hierarchy, where nothing should see them.
 void create_physical_inst(const OdbDb& db, rust::Str master, rust::Str name);
+
+// An instance's bounding box in placed coordinates: [x_min, y_min, x_max, y_max], empty when the
+// instance is unknown. Not derivable from origin + master size, because orientation decides which
+// way the master extends from its origin.
+rust::Vec<int32_t> inst_bbox(const OdbDb& db, rust::Str inst);

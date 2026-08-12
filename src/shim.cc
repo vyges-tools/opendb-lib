@@ -1076,3 +1076,16 @@ void create_physical_inst(const OdbDb& h, rust::Str master, rust::Str name) {
   if (!dbInst::create(b, m, s(name).c_str(), /*physical_only=*/true))
     throw std::runtime_error("vyges-opendb: create_physical_inst failed: " + s(name));
 }
+rust::Vec<int32_t> inst_bbox(const OdbDb& h, rust::Str inst) {
+  rust::Vec<int32_t> out;
+  dbBlock* b = block_of(h);
+  if (!b) return out;
+  dbInst* i = b->findInst(s(inst).c_str());
+  if (!i) return out;
+  const odb::Rect r = i->getBBox()->getBox();
+  out.push_back(r.xMin());
+  out.push_back(r.yMin());
+  out.push_back(r.xMax());
+  out.push_back(r.yMax());
+  return out;
+}
