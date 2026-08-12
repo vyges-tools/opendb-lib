@@ -401,3 +401,12 @@ rust::Vec<int64_t> swire_boxes(const OdbDb& db);
 // An empty result means the layer has no track grid, which is an answer, not an error.
 rust::Vec<int32_t> track_grid_x(const OdbDb& db, rust::Str layer);
 rust::Vec<int32_t> track_grid_y(const OdbDb& db, rust::Str layer);
+
+// Track PATTERNS for a layer: 3 i32 each (origin, line_count, step), one triple per pattern.
+//
+// The expanded coordinates above answer "where are the tracks"; pin placement needs the pattern
+// itself, because its slot arithmetic indexes tracks by number from the pattern's origin and a
+// layer may carry several patterns with different pitches. `getGridPatternX` returns its three
+// values through out-parameters, so the schema generator cannot express it.
+rust::Vec<int32_t> track_patterns_x(const OdbDb& db, rust::Str layer);
+rust::Vec<int32_t> track_patterns_y(const OdbDb& db, rust::Str layer);

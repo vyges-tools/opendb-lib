@@ -1271,3 +1271,32 @@ rust::Vec<int32_t> track_grid_x(const OdbDb& h, rust::Str layer) {
 rust::Vec<int32_t> track_grid_y(const OdbDb& h, rust::Str layer) {
   return track_grid(h, layer, true);
 }
+static rust::Vec<int32_t> track_patterns(const OdbDb& h, rust::Str layer, bool horizontal) {
+  rust::Vec<int32_t> out;
+  dbBlock* b = block_of(h);
+  odb::dbTech* tech = h.db->getTech();
+  if (!b || !tech) return out;
+  odb::dbTechLayer* l = tech->findLayer(s(layer).c_str());
+  if (!l) return out;
+  odb::dbTrackGrid* g = b->findTrackGrid(l);
+  if (!g) return out;
+  const int n = horizontal ? g->getNumGridPatternsY() : g->getNumGridPatternsX();
+  for (int i = 0; i < n; i++) {
+    int origin = 0, count = 0, step = 0;
+    if (horizontal) {
+      g->getGridPatternY(i, origin, count, step);
+    } else {
+      g->getGridPatternX(i, origin, count, step);
+    }
+    out.push_back(origin);
+    out.push_back(count);
+    out.push_back(step);
+  }
+  return out;
+}
+rust::Vec<int32_t> track_patterns_x(const OdbDb& h, rust::Str layer) {
+  return track_patterns(h, layer, false);
+}
+rust::Vec<int32_t> track_patterns_y(const OdbDb& h, rust::Str layer) {
+  return track_patterns(h, layer, true);
+}

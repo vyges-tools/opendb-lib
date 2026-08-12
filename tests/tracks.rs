@@ -53,3 +53,39 @@ fn a_layer_without_a_track_grid_reports_nothing_rather_than_failing() {
         .unwrap()
         .is_empty());
 }
+
+#[test]
+fn track_patterns_describe_the_grid_the_coordinates_expand_from() {
+    // Pin placement indexes tracks BY NUMBER from a pattern's origin, and a layer may carry
+    // several patterns with different pitches — so the pattern, not just the coordinates.
+    let db = odb::open_db(FIXTURE).expect("read");
+    let mut checked = 0;
+    for i in 0..odb::num_layers(&db).unwrap() {
+        let l = odb::nth_layer_name(&db, i).unwrap();
+        let pats = odb::track_patterns_x(&db, &l).unwrap();
+        assert_eq!(pats.len() % 3, 0, "three values per pattern");
+        if pats.is_empty() {
+            continue;
+        }
+        checked += 1;
+
+        // The patterns must expand to exactly the coordinates the other accessor reports.
+        let mut expanded: Vec<i32> = Vec::new();
+        for p in pats.chunks(3) {
+            let (origin, count, step) = (p[0], p[1], p[2]);
+            assert!(
+                count > 0 && step > 0,
+                "{l}: a pattern has a positive count and step"
+            );
+            expanded.extend((0..count).map(|k| origin + k * step));
+        }
+        expanded.sort_unstable();
+        let mut coords = odb::track_grid_x(&db, &l).unwrap();
+        coords.sort_unstable();
+        assert_eq!(expanded, coords, "{l}: patterns and coordinates disagree");
+    }
+    assert!(checked > 0, "some layer has an x track pattern");
+    assert!(odb::track_patterns_x(&db, "no_such_layer_xyz")
+        .unwrap()
+        .is_empty());
+}
