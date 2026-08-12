@@ -90,6 +90,10 @@ mod ffi {
         fn block_cut_rows(db: &OdbDb, min_row_width: i32, blockage_insts: &[String],
                           halo_x: i32, halo_y: i32) -> Result<()>;
         fn has_one_site_master(db: &OdbDb) -> bool;
+        // Row enumeration + site class: the row_get_* accessors are generated but address a row
+        // by NAME, and nothing enumerates them. See shim.h.
+        fn nth_row_name(db: &OdbDb, i: usize) -> Result<String>;
+        fn site_get_class(db: &OdbDb, site: &str) -> Result<String>;
 
         // antenna inputs (odb substrate) — numerator per routing layer, denominator per pin.
         // Consumed by vyges-ant; see shim.h for the v0 double-counting bound.
@@ -270,7 +274,7 @@ pub use ffi::{
     write_def, OdbDb,
     clear_rows, nth_site_name, num_rows, num_sites, row_create, tech_manufacturing_grid,
     site_row_pattern_len, site_row_pattern_orient, site_row_pattern_site,
-    block_cut_rows, has_one_site_master,
+    block_cut_rows, has_one_site_master, nth_row_name, site_get_class,
     layer_thickness, mterm_antenna_gate_area, net_wire_area_on_layer, net_wire_perimeter_on_layer,
     nth_net_wire_layer, num_net_wire_layers,
     mterm_antenna_diff_area, layerantenna_diff_pwl_index, layerantenna_diff_pwl_ratio,

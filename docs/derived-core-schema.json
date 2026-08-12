@@ -5,7 +5,7 @@
   "scope": "hand-written core only",
   "class_count": 44,
   "method_count": 1137,
-  "bridged_count": 699,
+  "bridged_count": 700,
   "classes": [
     {
       "name": "dbBPin",
@@ -8793,7 +8793,7 @@
           "params": [],
           "const": false,
           "kind": "getter",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "setClass",

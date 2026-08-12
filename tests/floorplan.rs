@@ -247,3 +247,50 @@ fn the_one_site_master_question_is_answerable() {
     let db = odb::open_db(FIXTURE).expect("read");
     let _: bool = odb::has_one_site_master(&db);
 }
+
+#[test]
+fn rows_can_be_enumerated_and_their_sites_classified() {
+    // row_get_* address a row by name; without this the names cannot be discovered at all, and a
+    // floorplan's row names are not predictable enough to guess.
+    let db = odb::open_db(FIXTURE).expect("read");
+    let site = first_site(&db).expect("site");
+    odb::clear_rows(&db).unwrap();
+    let (w, h) = (
+        odb::site_get_width(&db, &site),
+        odb::site_get_height(&db, &site),
+    );
+    odb::block_set_die_area(&db, 0, 0, w * 100, h * 4).unwrap();
+    for r in 0..3 {
+        odb::row_create(
+            &db,
+            &format!("R{r}"),
+            &site,
+            0,
+            r * h,
+            "R0",
+            "HORIZONTAL",
+            50,
+            w,
+        )
+        .unwrap();
+    }
+
+    let names: Vec<String> = (0..odb::num_rows(&db).unwrap())
+        .map(|i| odb::nth_row_name(&db, i).unwrap())
+        .collect();
+    // odb hands rows back in REVERSE creation order. Pinned rather than sorted away: anything
+    // that numbers or iterates rows (tapcell naming, for one) inherits this order, and a future
+    // change to it would otherwise show up as a mystery diff in a golden.
+    assert_eq!(names, vec!["R2", "R1", "R0"], "reverse creation order");
+    assert!(
+        odb::nth_row_name(&db, 99).unwrap().is_empty(),
+        "out of range is empty, not an error"
+    );
+
+    // The class is what separates core rows from pad rows; it must be readable and honest.
+    let class = odb::site_get_class(&db, &site).unwrap();
+    assert!(!class.is_empty(), "a site states its class");
+    assert!(odb::site_get_class(&db, "no_such_site_xyz")
+        .unwrap()
+        .is_empty());
+}

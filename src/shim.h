@@ -320,3 +320,11 @@ void block_cut_rows(const OdbDb& db, int32_t min_row_width,
 // True when the technology has a single-site-width master — the condition under which upstream
 // allows tapcells to leave one-site gaps.
 bool has_one_site_master(const OdbDb& db);
+
+// Row enumeration. `row_get_*` accessors are generated and address a row BY NAME, but nothing
+// enumerates the names — and a floorplan's rows are not named predictably enough to guess.
+rust::String nth_row_name(const OdbDb& db, std::size_t i);
+
+// A site's class (CORE, PAD, ...). Rows on PAD sites sit outside the core and are not part of
+// the region standard cells occupy, so `tap` has to be able to tell them apart.
+rust::String site_get_class(const OdbDb& db, rust::Str site);

@@ -1057,3 +1057,15 @@ void block_cut_rows(const OdbDb& h, int32_t min_row_width,
   odb::cutRows(b, min_row_width, blockages, halo_x, halo_y, const_cast<utl::Logger*>(&h.logger));
 }
 bool has_one_site_master(const OdbDb& h) { return odb::hasOneSiteMaster(h.db); }
+rust::String nth_row_name(const OdbDb& h, std::size_t i) {
+  dbBlock* b = block_of(h);
+  if (!b) return rust::String();
+  std::size_t n = 0;
+  for (odb::dbRow* r : b->getRows())
+    if (n++ == i) return rust::String(r->getName());
+  return rust::String();
+}
+rust::String site_get_class(const OdbDb& h, rust::Str site) {
+  odb::dbSite* st = find_site(h, s(site));
+  return st ? rust::String(st->getClass().getString()) : rust::String();
+}
