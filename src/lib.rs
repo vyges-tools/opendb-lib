@@ -66,6 +66,21 @@ mod ffi {
         fn connect(db: &OdbDb, inst: &str, pin: &str, net: &str) -> Result<()>;
         fn disconnect(db: &OdbDb, inst: &str, pin: &str) -> Result<()>;
 
+        // floorplan writes (vyges-ifp). Hand-written rather than generated: setDieArea takes a
+        // Rect, setCoreArea a Polygon, and dbRow::create is a static factory.
+        fn block_set_die_area(db: &OdbDb, x1: i32, y1: i32, x2: i32, y2: i32) -> Result<()>;
+        fn block_set_core_area(db: &OdbDb, x1: i32, y1: i32, x2: i32, y2: i32) -> Result<()>;
+        fn block_set_core_area_from_rows(db: &OdbDb) -> Result<()>;
+        fn block_compute_core_area(db: &OdbDb) -> Result<Vec<i32>>;
+        fn tech_manufacturing_grid(db: &OdbDb) -> Result<i32>;
+        #[allow(clippy::too_many_arguments)]
+        fn row_create(db: &OdbDb, name: &str, site: &str, x: i32, y: i32, orient: &str,
+                      direction: &str, num_sites: i32, spacing: i32) -> Result<()>;
+        fn num_sites(db: &OdbDb) -> Result<usize>;
+        fn nth_site_name(db: &OdbDb, i: usize) -> Result<String>;
+        fn num_rows(db: &OdbDb) -> Result<usize>;
+        fn clear_rows(db: &OdbDb) -> Result<usize>;
+
         // antenna inputs (odb substrate) — numerator per routing layer, denominator per pin.
         // Consumed by vyges-ant; see shim.h for the v0 double-counting bound.
         fn num_net_wire_layers(db: &OdbDb, net: &str) -> usize;
@@ -227,7 +242,8 @@ pub use generated_write_bridge::*;
 
 #[cfg(unix)]
 pub use ffi::{
-    add_obstruction, block_name, bterm_direction, bterm_net, bterm_x, bterm_y, check_3dblox,
+    add_obstruction, block_compute_core_area, block_name, block_set_core_area,
+    block_set_core_area_from_rows, block_set_die_area, bterm_direction, bterm_net, bterm_x, bterm_y, check_3dblox,
     eco_begin, eco_commit, eco_empty, eco_end, eco_undo,
     clear_obstructions, construct_unfolded_model,
     chip_block_create, chip_bump_create, chip_conn_create, chip_create, chip_inst_create,
@@ -242,6 +258,7 @@ pub use ffi::{
     net_is_special, net_sigtype, nth_net_bterm, nth_net_iterm, nth_net_name, num_net_bterms,
     num_net_iterms, read_def, set_inst_location, set_inst_orient, total_wire_length, write_db,
     write_def, OdbDb,
+    clear_rows, nth_site_name, num_rows, num_sites, row_create, tech_manufacturing_grid,
     layer_thickness, mterm_antenna_gate_area, net_wire_area_on_layer, net_wire_perimeter_on_layer,
     nth_net_wire_layer, num_net_wire_layers,
     mterm_antenna_diff_area, layerantenna_diff_pwl_index, layerantenna_diff_pwl_ratio,

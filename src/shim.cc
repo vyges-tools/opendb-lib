@@ -948,3 +948,67 @@ double layerantenna_diff_pwl_ratio(const OdbDb& h, rust::Str layer, rust::Str wh
   const auto p = diff_curve(r, s(which));
   return i < p.ratios.size() ? p.ratios[i] : 0.0;
 }
+
+// ---- floorplan writes (vyges-ifp) ------------------------------------------------------
+static odb::dbSite* find_site(const OdbDb& h, const std::string& name) {
+  for (odb::dbLib* lib : h.db->getLibs())
+    if (odb::dbSite* st = lib->findSite(name.c_str())) return st;
+  return nullptr;
+}
+void block_set_die_area(const OdbDb& h, int32_t x1, int32_t y1, int32_t x2, int32_t y2) {
+  require_block(h)->setDieArea(odb::Rect(x1, y1, x2, y2));
+}
+void block_set_core_area(const OdbDb& h, int32_t x1, int32_t y1, int32_t x2, int32_t y2) {
+  require_block(h)->setCoreArea(odb::Rect(x1, y1, x2, y2));
+}
+void block_set_core_area_from_rows(const OdbDb& h) {
+  dbBlock* b = require_block(h);
+  b->setCoreArea(b->computeCoreArea());
+}
+rust::Vec<std::int32_t> block_compute_core_area(const OdbDb& h) {
+  rust::Vec<std::int32_t> out;
+  dbBlock* b = block_of(h);
+  if (!b || b->getRows().empty()) return out;
+  const odb::Rect r = b->computeCoreArea().getEnclosingRect();
+  out.push_back(r.xMin());
+  out.push_back(r.yMin());
+  out.push_back(r.xMax());
+  out.push_back(r.yMax());
+  return out;
+}
+int32_t tech_manufacturing_grid(const OdbDb& h) {
+  dbTech* tech = h.db->getTech();
+  if (!tech || !tech->hasManufacturingGrid()) return 0;
+  return tech->getManufacturingGrid();
+}
+void row_create(const OdbDb& h, rust::Str name, rust::Str site, int32_t x, int32_t y,
+                rust::Str orient, rust::Str direction, int32_t num_sites, int32_t spacing) {
+  dbBlock* b = require_block(h);
+  odb::dbSite* st = find_site(h, s(site));
+  if (!st) throw std::runtime_error("vyges-opendb: site not found: " + s(site));
+  odb::dbRow::create(b, s(name).c_str(), st, x, y, odb::dbOrientType(s(orient).c_str()),
+                odb::dbRowDir(s(direction).c_str()), num_sites, spacing);
+}
+std::size_t num_sites(const OdbDb& h) {
+  std::size_t n = 0;
+  for (odb::dbLib* lib : h.db->getLibs()) n += lib->getSites().size();
+  return n;
+}
+rust::String nth_site_name(const OdbDb& h, std::size_t i) {
+  std::size_t n = 0;
+  for (odb::dbLib* lib : h.db->getLibs())
+    for (odb::dbSite* st : lib->getSites())
+      if (n++ == i) return rust::String(st->getName());
+  return rust::String();
+}
+std::size_t num_rows(const OdbDb& h) {
+  dbBlock* b = block_of(h);
+  return b ? b->getRows().size() : 0;
+}
+std::size_t clear_rows(const OdbDb& h) {
+  dbBlock* b = block_of(h);
+  if (!b) return 0;
+  std::vector<odb::dbRow*> rows(b->getRows().begin(), b->getRows().end());
+  for (odb::dbRow* r : rows) odb::dbRow::destroy(r);
+  return rows.size();
+}

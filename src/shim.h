@@ -267,3 +267,33 @@ rust::Vec<std::int64_t> iterm_pin_boxes(const OdbDb& db, rust::Str inst, rust::S
 std::size_t layerantenna_num_diff_pwl(const OdbDb& db, rust::Str layer, rust::Str which);
 double layerantenna_diff_pwl_index(const OdbDb& db, rust::Str layer, rust::Str which, std::size_t i);  // diffusion area at point i
 double layerantenna_diff_pwl_ratio(const OdbDb& db, rust::Str layer, rust::Str which, std::size_t i);  // ratio limit at point i
+
+// ---- floorplan writes (vyges-ifp) ------------------------------------------------------
+// Hand-written, not generated: the generator emits scalar setters, while `setDieArea` takes a
+// `Rect`, `setCoreArea` a `Polygon`, and `dbRow::create` is a static factory. Same reason the
+// dbChip*::create surface is hand-written.
+void block_set_die_area(const OdbDb& db, int32_t x1, int32_t y1, int32_t x2, int32_t y2);
+void block_set_core_area(const OdbDb& db, int32_t x1, int32_t y1, int32_t x2, int32_t y2);
+// Replace the core area with what the ROWS actually cover — upstream's
+// `setCoreArea(computeCoreArea())`. Polygon-to-polygon, so nothing is lost to a bbox.
+void block_set_core_area_from_rows(const OdbDb& db);
+// Bounding box of `computeCoreArea()` WITHOUT storing it: [x_min, y_min, x_max, y_max], DBU.
+// Empty when there are no rows.
+rust::Vec<std::int32_t> block_compute_core_area(const OdbDb& db);
+
+// Manufacturing grid in DBU; 0 when the tech does not declare one (the "no snap" case).
+int32_t tech_manufacturing_grid(const OdbDb& db);
+
+// Site width/height and hybrid-ness are already generated (`site_get_width` / `_height` /
+// `site_is_hybrid`) — by name, exactly this shape. Do not add them here.
+
+// `orient` is a dbOrientType spelling (R0, MX, MY, R180, ...); `direction` is HORIZONTAL or
+// VERTICAL. Throws when the site is not found in any library.
+void row_create(const OdbDb& db, rust::Str name, rust::Str site, int32_t x, int32_t y,
+                rust::Str orient, rust::Str direction, int32_t num_sites, int32_t spacing);
+// Site enumeration — `ifp` validates `-site`/`-additional_sites` against what the libraries
+// actually define, and an engine cannot ask by name for a name it does not know.
+std::size_t num_sites(const OdbDb& db);
+rust::String nth_site_name(const OdbDb& db, std::size_t i);
+std::size_t num_rows(const OdbDb& db);
+std::size_t clear_rows(const OdbDb& db);  // upstream clears rows before rebuilding them
