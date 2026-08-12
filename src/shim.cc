@@ -1246,3 +1246,28 @@ rust::Vec<int64_t> swire_boxes(const OdbDb& h) {
   }
   return out;
 }
+static rust::Vec<int32_t> track_grid(const OdbDb& h, rust::Str layer, bool horizontal) {
+  rust::Vec<int32_t> out;
+  dbBlock* b = block_of(h);
+  odb::dbTech* tech = h.db->getTech();
+  if (!b || !tech) return out;
+  odb::dbTechLayer* l = tech->findLayer(s(layer).c_str());
+  if (!l) return out;
+  odb::dbTrackGrid* g = b->findTrackGrid(l);
+  if (!g) return out;
+  std::vector<int> coords;
+  if (horizontal) {
+    g->getGridY(coords);
+  } else {
+    g->getGridX(coords);
+  }
+  out.reserve(coords.size());
+  for (int c : coords) out.push_back(c);
+  return out;
+}
+rust::Vec<int32_t> track_grid_x(const OdbDb& h, rust::Str layer) {
+  return track_grid(h, layer, false);
+}
+rust::Vec<int32_t> track_grid_y(const OdbDb& h, rust::Str layer) {
+  return track_grid(h, layer, true);
+}

@@ -5,7 +5,7 @@
   "scope": "all",
   "class_count": 119,
   "method_count": 2622,
-  "bridged_count": 1149,
+  "bridged_count": 1156,
   "classes": [
     {
       "name": "dbAccessPoint",
@@ -1916,7 +1916,7 @@
           ],
           "const": false,
           "kind": "relation",
-          "bridged": false,
+          "bridged": true,
           "target": "dbTrackGrid"
         },
         {
@@ -5657,7 +5657,7 @@
           ],
           "const": false,
           "kind": "setter",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "getGridY",
@@ -5670,7 +5670,7 @@
           ],
           "const": false,
           "kind": "setter",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "getBlock",
@@ -27549,7 +27549,7 @@
           ],
           "const": false,
           "kind": "setter",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "getGridX",
@@ -27557,7 +27557,7 @@
           "params": [],
           "const": false,
           "kind": "getter",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "getGridY",
@@ -27570,7 +27570,7 @@
           ],
           "const": false,
           "kind": "setter",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "getGridY",
@@ -27578,7 +27578,7 @@
           "params": [],
           "const": false,
           "kind": "getter",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "getBlock",

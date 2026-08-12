@@ -393,3 +393,11 @@ rust::String layer_direction(const OdbDb& db, rust::Str layer);   // HORIZONTAL/
 // Special wires are the power grid — rails and straps — and they are a separate collection from
 // routed signal wires. Density fill that misses them fills straight over the PDN.
 rust::Vec<int64_t> swire_boxes(const OdbDb& db);
+
+// Routing track coordinates for a layer — the positions pins and wires may legally sit on.
+//
+// These are the foundation of pin placement: every legal pin slot is a track. `getGridX` fills a
+// std::vector by reference, which the schema generator cannot express, so nothing reached them.
+// An empty result means the layer has no track grid, which is an answer, not an error.
+rust::Vec<int32_t> track_grid_x(const OdbDb& db, rust::Str layer);
+rust::Vec<int32_t> track_grid_y(const OdbDb& db, rust::Str layer);
