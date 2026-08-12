@@ -360,3 +360,22 @@ rust::String nth_row_orient(const OdbDb& db, std::size_t i);
 // cells to remove is engine policy, and a shim that took a pattern would put that policy here.
 // Throws when the instance does not exist, so a typo cannot read as "nothing to remove".
 void destroy_inst(const OdbDb& db, rust::Str inst);
+
+// ---- density fill (vyges-fin) -------------------------------------------------
+// Every shape of every PLACED instance, flattened to 5 i64 each
+// (layer_number, x_min, y_min, x_max, y_max), in placed coordinates.
+//
+// This is what stops fill landing on top of the design: a standard cell's pins and internal metal
+// are non-fill area, and nothing else in the bridge exposes them. Flat because one call per shape
+// would cross the boundary millions of times on a real block.
+rust::Vec<int64_t> inst_shapes(const OdbDb& db);
+
+// Routing/PDN obstruction rectangles, 5 i64 each (layer_number, x_min, y_min, x_max, y_max).
+// `num_obstructions` counts them; this is the geometry.
+rust::Vec<int64_t> obstruction_boxes(const OdbDb& db);
+
+// Create a fill rectangle. `mask` 0 means "no mask" (single-mask layers).
+void fill_create(const OdbDb& db, bool needs_opc, uint32_t mask, rust::Str layer,
+                 int32_t x1, int32_t y1, int32_t x2, int32_t y2);
+std::size_t num_fills(const OdbDb& db);
+std::size_t clear_fills(const OdbDb& db);   // returns the count removed

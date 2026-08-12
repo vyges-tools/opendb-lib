@@ -107,6 +107,14 @@ mod ffi {
         fn nth_row_site(db: &OdbDb, i: usize) -> Result<String>;
         fn nth_row_orient(db: &OdbDb, i: usize) -> Result<String>;
         fn destroy_inst(db: &OdbDb, inst: &str) -> Result<()>;
+        // density fill (vyges-fin) -- see shim.h
+        fn inst_shapes(db: &OdbDb) -> Result<Vec<i64>>;
+        fn obstruction_boxes(db: &OdbDb) -> Result<Vec<i64>>;
+        #[allow(clippy::too_many_arguments)]
+        fn fill_create(db: &OdbDb, needs_opc: bool, mask: u32, layer: &str,
+                       x1: i32, y1: i32, x2: i32, y2: i32) -> Result<()>;
+        fn num_fills(db: &OdbDb) -> Result<usize>;
+        fn clear_fills(db: &OdbDb) -> Result<usize>;
 
         // antenna inputs (odb substrate) — numerator per routing layer, denominator per pin.
         // Consumed by vyges-ant; see shim.h for the v0 double-counting bound.
@@ -289,6 +297,7 @@ pub use ffi::{
     site_row_pattern_len, site_row_pattern_orient, site_row_pattern_site,
     block_cut_rows, has_one_site_master, nth_row_name, site_get_class, create_physical_inst, inst_bbox, num_masters, nth_master_name, master_get_type,
     nth_row_bbox, nth_row_site, nth_row_orient, destroy_inst,
+    inst_shapes, obstruction_boxes, fill_create, num_fills, clear_fills,
     layer_thickness, mterm_antenna_gate_area, net_wire_area_on_layer, net_wire_perimeter_on_layer,
     nth_net_wire_layer, num_net_wire_layers,
     mterm_antenna_diff_area, layerantenna_diff_pwl_index, layerantenna_diff_pwl_ratio,

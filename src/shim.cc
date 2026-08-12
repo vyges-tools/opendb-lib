@@ -1137,3 +1137,61 @@ void destroy_inst(const OdbDb& h, rust::Str inst) {
   dbInst* i = require_inst(h, inst);
   dbInst::destroy(i);
 }
+rust::Vec<int64_t> inst_shapes(const OdbDb& h) {
+  rust::Vec<int64_t> out;
+  dbBlock* b = block_of(h);
+  if (!b) return out;
+  odb::dbShape shape;
+  odb::dbInstShapeItr it(/*expand_vias=*/false);
+  for (odb::dbInst* inst : b->getInsts()) {
+    if (!inst->isPlaced()) continue;
+    for (it.begin(inst, odb::dbInstShapeItr::ALL); it.next(shape);) {
+      odb::dbTechLayer* layer = shape.getTechLayer();
+      if (!layer) continue;   // a via cut with no layer of its own
+      const odb::Rect r = shape.getBox();
+      out.push_back(layer->getNumber());
+      out.push_back(r.xMin());
+      out.push_back(r.yMin());
+      out.push_back(r.xMax());
+      out.push_back(r.yMax());
+    }
+  }
+  return out;
+}
+rust::Vec<int64_t> obstruction_boxes(const OdbDb& h) {
+  rust::Vec<int64_t> out;
+  dbBlock* b = block_of(h);
+  if (!b) return out;
+  for (odb::dbObstruction* o : b->getObstructions()) {
+    odb::dbBox* box = o->getBBox();
+    if (!box) continue;
+    odb::dbTechLayer* layer = box->getTechLayer();
+    if (!layer) continue;
+    out.push_back(layer->getNumber());
+    out.push_back(box->xMin());
+    out.push_back(box->yMin());
+    out.push_back(box->xMax());
+    out.push_back(box->yMax());
+  }
+  return out;
+}
+void fill_create(const OdbDb& h, bool needs_opc, uint32_t mask, rust::Str layer,
+                 int32_t x1, int32_t y1, int32_t x2, int32_t y2) {
+  dbBlock* b = require_block(h);
+  odb::dbTech* tech = h.db->getTech();
+  odb::dbTechLayer* l = tech ? tech->findLayer(s(layer).c_str()) : nullptr;
+  if (!l) throw std::runtime_error("vyges-opendb: layer not found: " + s(layer));
+  if (!odb::dbFill::create(b, needs_opc, mask, l, x1, y1, x2, y2))
+    throw std::runtime_error("vyges-opendb: fill_create failed");
+}
+std::size_t num_fills(const OdbDb& h) {
+  dbBlock* b = block_of(h);
+  return b ? b->getFills().size() : 0;
+}
+std::size_t clear_fills(const OdbDb& h) {
+  dbBlock* b = block_of(h);
+  if (!b) return 0;
+  std::vector<odb::dbFill*> fills(b->getFills().begin(), b->getFills().end());
+  for (odb::dbFill* f : fills) odb::dbFill::destroy(f);
+  return fills.size();
+}
