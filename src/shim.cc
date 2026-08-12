@@ -1332,3 +1332,36 @@ bool nth_bterm_group_ordered(const OdbDb& h, std::size_t i) {
   auto groups = b->getBTermGroups();
   return i < groups.size() && groups[i].order;
 }
+rust::Vec<int32_t> blocked_regions_for_pins(const OdbDb& h) {
+  rust::Vec<int32_t> out;
+  dbBlock* b = block_of(h);
+  if (!b) return out;
+  for (const odb::Rect& r : b->getBlockedRegionsForPins()) {
+    out.push_back(r.xMin());
+    out.push_back(r.yMin());
+    out.push_back(r.xMax());
+    out.push_back(r.yMax());
+  }
+  return out;
+}
+rust::Vec<int64_t> fixed_bterm_shapes(const OdbDb& h) {
+  rust::Vec<int64_t> out;
+  dbBlock* b = block_of(h);
+  if (!b) return out;
+  for (dbBTerm* t : b->getBTerms()) {
+    if (!t->getFirstPinPlacementStatus().isFixed()) continue;
+    for (odb::dbBPin* p : t->getBPins()) {
+      for (odb::dbBox* box : p->getBoxes()) {
+        odb::dbTechLayer* layer = box->getTechLayer();
+        if (!layer) continue;
+        const odb::Rect r = box->getBox();
+        out.push_back(layer->getNumber());
+        out.push_back(r.xMin());
+        out.push_back(r.yMin());
+        out.push_back(r.xMax());
+        out.push_back(r.yMax());
+      }
+    }
+  }
+  return out;
+}

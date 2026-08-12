@@ -433,3 +433,19 @@ rust::Vec<int32_t> bterm_constraint_region(const OdbDb& db, rust::Str bterm);
 std::size_t num_bterm_groups(const OdbDb& db);
 rust::Vec<rust::String> nth_bterm_group(const OdbDb& db, std::size_t i);
 bool nth_bterm_group_ordered(const OdbDb& db, std::size_t i);
+
+// Regions where NO pin may be placed: `exclude_io_pin_region -region edge:lo-hi`, stored on the
+// block. Four i32 per rectangle (x0, y0, x1, y1); a degenerate rectangle is an interval on an edge,
+// exactly as a constraint region is.
+//
+// `getBlockedRegionsForPins()` returns `const std::vector<Rect>&` — a by-reference container, so
+// the schema generator leaves it unimplemented.
+rust::Vec<int32_t> blocked_regions_for_pins(const OdbDb& db);
+
+// Every metal shape of every port whose placement is already FIXED: 5 i64 each
+// (layer number, x0, y0, x1, y1).
+//
+// A fixed port is not ours to move, and the slots its metal covers are not ours to use either —
+// `place_pin` puts a port at an explicit location, and a later pin landing on the same slot would
+// short to it. Resolve layer numbers with `layer_name_by_number`.
+rust::Vec<int64_t> fixed_bterm_shapes(const OdbDb& db);

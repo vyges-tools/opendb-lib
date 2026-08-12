@@ -5,7 +5,7 @@
   "scope": "all",
   "class_count": 119,
   "method_count": 2622,
-  "bridged_count": 1162,
+  "bridged_count": 1167,
   "classes": [
     {
       "name": "dbAccessPoint",
@@ -317,7 +317,7 @@
           "params": [],
           "const": false,
           "kind": "iterator",
-          "bridged": false,
+          "bridged": true,
           "element": "dbBox"
         },
         {
@@ -677,7 +677,7 @@
           "params": [],
           "const": true,
           "kind": "iterator",
-          "bridged": false,
+          "bridged": true,
           "element": "dbBPin"
         },
         {
@@ -2061,7 +2061,7 @@
           "params": [],
           "const": false,
           "kind": "getter",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "setExtmi",
@@ -27091,7 +27091,7 @@
           "params": [],
           "const": false,
           "kind": "iterator",
-          "bridged": false,
+          "bridged": true,
           "element": "dbBox"
         },
         {
@@ -28030,7 +28030,7 @@
           "params": [],
           "const": false,
           "kind": "iterator",
-          "bridged": false,
+          "bridged": true,
           "element": "dbBox"
         },
         {
