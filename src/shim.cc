@@ -1069,3 +1069,10 @@ rust::String site_get_class(const OdbDb& h, rust::Str site) {
   odb::dbSite* st = find_site(h, s(site));
   return st ? rust::String(st->getClass().getString()) : rust::String();
 }
+void create_physical_inst(const OdbDb& h, rust::Str master, rust::Str name) {
+  dbBlock* b = require_block(h);
+  dbMaster* m = h.db->findMaster(s(master).c_str());
+  if (!m) throw std::runtime_error("vyges-opendb: master not found: " + s(master));
+  if (!dbInst::create(b, m, s(name).c_str(), /*physical_only=*/true))
+    throw std::runtime_error("vyges-opendb: create_physical_inst failed: " + s(name));
+}

@@ -294,3 +294,21 @@ fn rows_can_be_enumerated_and_their_sites_classified() {
         .unwrap()
         .is_empty());
 }
+
+#[test]
+fn a_physical_only_instance_is_created_outside_the_netlist() {
+    // Taps, endcaps and fillers exist in the layout but not the netlist. Creating them as
+    // ordinary instances would put them in the hierarchy, where nothing should see them.
+    let db = odb::open_db(FIXTURE).expect("read");
+    let master = odb::first_master_name(&db);
+    assert!(!master.is_empty(), "the fixture has masters");
+    let before = odb::num_insts(&db);
+
+    odb::create_physical_inst(&db, &master, "PHY_TEST_0").expect("created");
+    assert_eq!(odb::num_insts(&db), before + 1);
+    assert_eq!(odb::inst_master(&db, "PHY_TEST_0"), master);
+
+    // A name already taken is an error, not a silent second cell at the same name.
+    assert!(odb::create_physical_inst(&db, &master, "PHY_TEST_0").is_err());
+    assert!(odb::create_physical_inst(&db, "no_such_master_xyz", "PHY_TEST_1").is_err());
+}

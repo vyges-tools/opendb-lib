@@ -328,3 +328,8 @@ rust::String nth_row_name(const OdbDb& db, std::size_t i);
 // A site's class (CORE, PAD, ...). Rows on PAD sites sit outside the core and are not part of
 // the region standard cells occupy, so `tap` has to be able to tell them apart.
 rust::String site_get_class(const OdbDb& db, rust::Str site);
+
+// Create a PHYSICAL-ONLY instance — a cell that exists in the layout but not the netlist, which
+// is what every tap, endcap and filler is. `create_inst` makes an ordinary netlist instance;
+// using it for physical cells would put them in the hierarchy, where nothing should see them.
+void create_physical_inst(const OdbDb& db, rust::Str master, rust::Str name);
