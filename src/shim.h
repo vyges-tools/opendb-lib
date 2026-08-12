@@ -386,3 +386,10 @@ std::size_t clear_fills(const OdbDb& db);   // returns the count removed
 std::size_t num_layers(const OdbDb& db);
 rust::String nth_layer_name(const OdbDb& db, std::size_t i);
 rust::String layer_direction(const OdbDb& db, rust::Str layer);   // HORIZONTAL/VERTICAL/NONE
+
+// Every SPECIAL-wire box, vias decomposed onto the layers they occupy: 5 i64 each
+// (layer_number, x_min, y_min, x_max, y_max).
+//
+// Special wires are the power grid — rails and straps — and they are a separate collection from
+// routed signal wires. Density fill that misses them fills straight over the PDN.
+rust::Vec<int64_t> swire_boxes(const OdbDb& db);

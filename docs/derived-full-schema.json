@@ -5,7 +5,7 @@
   "scope": "all",
   "class_count": 119,
   "method_count": 2622,
-  "bridged_count": 1147,
+  "bridged_count": 1149,
   "classes": [
     {
       "name": "dbAccessPoint",
@@ -12425,7 +12425,7 @@
           "params": [],
           "const": false,
           "kind": "iterator",
-          "bridged": false,
+          "bridged": true,
           "element": "dbSWire"
         },
         {
@@ -15085,7 +15085,7 @@
           "params": [],
           "const": false,
           "kind": "iterator",
-          "bridged": false,
+          "bridged": true,
           "element": "dbSBox"
         }
       ],

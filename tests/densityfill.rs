@@ -51,6 +51,18 @@ fn fills_can_be_created_counted_and_cleared() {
 }
 
 #[test]
+fn special_wire_boxes_are_readable_and_carry_via_enclosures() {
+    // Special wires are the power grid. Density fill that misses them fills over the PDN, and
+    // nothing else in the bridge exposes them.
+    let db = odb::open_db(FIXTURE).expect("read");
+    let flat = odb::swire_boxes(&db).unwrap();
+    assert_eq!(flat.len() % 5, 0, "five values per box");
+    for b in flat.chunks(5) {
+        assert!(b[3] >= b[1] && b[4] >= b[2], "a box is not inverted: {b:?}");
+    }
+}
+
+#[test]
 fn obstruction_geometry_is_readable_and_matches_the_count() {
     let db = odb::open_db(FIXTURE).expect("read");
     let boxes = odb::obstruction_boxes(&db).unwrap();

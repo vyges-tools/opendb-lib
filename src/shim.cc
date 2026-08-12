@@ -1212,3 +1212,37 @@ rust::String layer_direction(const OdbDb& h, rust::Str layer) {
   odb::dbTechLayer* l = t ? t->findLayer(s(layer).c_str()) : nullptr;
   return l ? rust::String(l->getDirection().getString()) : rust::String();
 }
+rust::Vec<int64_t> swire_boxes(const OdbDb& h) {
+  rust::Vec<int64_t> out;
+  dbBlock* b = block_of(h);
+  if (!b) return out;
+  auto push = [&out](odb::dbTechLayer* layer, const odb::Rect& r) {
+    if (!layer) return;
+    out.push_back(layer->getNumber());
+    out.push_back(r.xMin());
+    out.push_back(r.yMin());
+    out.push_back(r.xMax());
+    out.push_back(r.yMax());
+  };
+  std::vector<odb::dbShape> via_shapes;
+  for (odb::dbNet* net : b->getNets()) {
+    for (odb::dbSWire* sw : net->getSWires()) {
+      for (odb::dbSBox* sbox : sw->getWires()) {
+        if (sbox->isVia()) {
+          // A via is a cut plus an enclosure above and below; the enclosures are metal on those
+          // layers and fill must clear them too.
+          odb::dbVia* via = sbox->getBlockVia();
+          if (!via) continue;
+          odb::dbShape shape;
+          shape.setVia(via, sbox->getBox());
+          via_shapes.clear();
+          odb::dbShape::getViaBoxes(shape, via_shapes);
+          for (const odb::dbShape& vs : via_shapes) push(vs.getTechLayer(), vs.getBox());
+        } else {
+          push(sbox->getTechLayer(), sbox->getBox());
+        }
+      }
+    }
+  }
+  return out;
+}
