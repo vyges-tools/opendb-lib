@@ -1445,6 +1445,28 @@ rust::Vec<int32_t> mterm_pin_boxes(const OdbDb& h, rust::Str master, rust::Str t
     for (odb::dbBox* b : p->getGeometry()) push_box(out, b->getTechLayer(), b->getBox());
   return out;
 }
+void bterm_create(const OdbDb& h, rust::Str net, rust::Str name) {
+  dbBlock* b = require_block(h);
+  odb::dbNet* n = b->findNet(s(net).c_str());
+  if (!n) throw std::runtime_error("no net named " + s(net));
+  if (!odb::dbBTerm::create(n, s(name).c_str()))
+    throw std::runtime_error("cannot create block terminal " + s(name));
+}
+std::size_t bterm_create_pin(const OdbDb& h, rust::Str bterm, rust::Str layer,
+                             int32_t x1, int32_t y1, int32_t x2, int32_t y2) {
+  dbBlock* b = require_block(h);
+  odb::dbBTerm* t = b->findBTerm(s(bterm).c_str());
+  if (!t) throw std::runtime_error("no block terminal named " + s(bterm));
+  odb::dbTech* tech = h.db->getTech();
+  odb::dbTechLayer* l = tech ? tech->findLayer(s(layer).c_str()) : nullptr;
+  if (!l) throw std::runtime_error("no layer named " + s(layer));
+  odb::dbBPin* p = odb::dbBPin::create(t);
+  if (!p) throw std::runtime_error("cannot create a pin on " + s(bterm));
+  odb::dbBox::create(p, l, x1, y1, x2, y2);
+  std::size_t i = 0;
+  for (odb::dbBPin* q : t->getBPins()) { if (q == p) return i; ++i; }
+  return i;
+}
 void net_destroy(const OdbDb& h, rust::Str net) {
   dbBlock* b = require_block(h);
   odb::dbNet* n = b->findNet(s(net).c_str());

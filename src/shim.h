@@ -501,6 +501,16 @@ rust::Vec<int32_t> mterm_pin_boxes(const OdbDb& db, rust::Str master, rust::Str 
 // Delete a net. Its terminals are left disconnected.
 void net_destroy(const OdbDb& db, rust::Str net);
 
+// Create a block terminal on a net. Named separately from the net because they usually differ.
+void bterm_create(const OdbDb& db, rust::Str net, rust::Str name);
+
+// Add a pin shape to a block terminal, returning the new pin's index.
+// Creating the pin and its box has to be one call: a dbBPin has no name, so there is no way to
+// address the pin between the two steps. The index this returns is what the generated
+// `bpin_*` accessors take.
+std::size_t bterm_create_pin(const OdbDb& db, rust::Str bterm, rust::Str layer,
+                             int32_t x1, int32_t y1, int32_t x2, int32_t y2);
+
 // A routing layer's TYPE (`ROUTING`, `CUT`, `OVERLAP`, …). The type is what marks an obstruction as
 // an outline rather than metal, and it is not the layer's name.
 rust::String layer_get_type(const OdbDb& db, rust::Str layer);
