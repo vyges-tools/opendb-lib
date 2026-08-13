@@ -516,6 +516,9 @@ std::size_t swire_clear_routed(const OdbDb& db, rust::Str net);
 // cannot be reconstructed from geometry or names.
 uint32_t iterm_get_id(const OdbDb& db, rust::Str inst, rust::Str pin);
 
+// The same, for an instance. Maps keyed by instance iterate in this order.
+uint32_t inst_get_id(const OdbDb& db, rust::Str inst);
+
 // Create a block terminal on a net. Named separately from the net because they usually differ.
 void bterm_create(const OdbDb& db, rust::Str net, rust::Str name);
 

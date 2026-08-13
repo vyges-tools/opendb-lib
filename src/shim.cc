@@ -1472,6 +1472,12 @@ std::size_t swire_clear_routed(const OdbDb& h, rust::Str net) {
   }
   return removed;
 }
+uint32_t inst_get_id(const OdbDb& h, rust::Str inst) {
+  dbBlock* b = require_block(h);
+  odb::dbInst* i = b->findInst(s(inst).c_str());
+  if (!i) throw std::runtime_error("no instance named " + s(inst));
+  return i->getId();
+}
 uint32_t iterm_get_id(const OdbDb& h, rust::Str inst, rust::Str pin) {
   dbBlock* b = require_block(h);
   odb::dbInst* i = b->findInst(s(inst).c_str());
