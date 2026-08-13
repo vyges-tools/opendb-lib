@@ -87,6 +87,13 @@ TARGETS = {
     "dbTechViaRule":         {"key": "techviarule",      "args": [{"name": "idx", "type": "idx"}], "resolve": "gen_techviarule(h, idx)"},
     "dbTechViaGenerateRule": {"key": "techviagenrule",   "args": [{"name": "idx", "type": "idx"}], "resolve": "gen_techviagenrule(h, idx)"},
     "dbTechViaLayerRule":    {"key": "techvialayerrule", "args": [{"name": "gen_idx", "type": "idx"}, {"name": "layer_idx", "type": "idx"}], "resolve": "gen_techvialayerrule(h, gen_idx, layer_idx)"},
+    # LEF58 cut rules — addressed by (layer, index) off the owning tech layer. `pdn` reads these
+    # to size via enclosures and check cut spacing; the enclosure rule's TYPE (DEFAULT / EOL /
+    # ENDSIDE / HORZ_AND_VERT) selects which overhang is x and which is y.
+    "dbTechLayerCutClassRule":           {"key": "cutclassrule",        "args": ["layer", {"name": "idx", "type": "idx"}], "resolve": "gen_cutclassrule(h, layer, idx)"},
+    "dbTechLayerCutEnclosureRule":       {"key": "cutenclosurerule",    "args": ["layer", {"name": "idx", "type": "idx"}], "resolve": "gen_cutenclosurerule(h, layer, idx)"},
+    "dbTechLayerCutSpacingRule":         {"key": "cutspacingrule",      "args": ["layer", {"name": "idx", "type": "idx"}], "resolve": "gen_cutspacingrule(h, layer, idx)"},
+    "dbTechLayerCutSpacingTableDefRule": {"key": "cutspacingtablerule", "args": ["layer", {"name": "idx", "type": "idx"}], "resolve": "gen_cutspacingtablerule(h, layer, idx)"},
     "dbTechLayerAntennaRule": {"key": "layerantenna",     "args": ["layer"], "resolve": "gen_layerantenna(h, layer)"},
     "dbTechAntennaPinModel":  {"key": "antennapinmodel",  "args": ["master", "term"], "resolve": "gen_antennapinmodel(h, master, term)"},
     # via cut geometry (value-struct via dbVia::getViaParams(), stashed thread-local) — see resolver.
@@ -194,6 +201,18 @@ ENUM_MAPPED = {
                              ["DIE", "RDL", "IP", "SUBSTRATE", "HIER"]),
     ("dbChipRegion", "Side"): ("odb::dbChipRegion::Side", "chip_region_side_str",
                                ["FRONT", "BACK", "INTERNAL", "INTERNAL_EXT"]),
+    # LEF58 cut rules. ⚠️ `ENC_TYPE` is the one `pdn` switches on to decide which overhang is x
+    # and which is y, so a rule read without it is a rule that cannot be applied.
+    ("dbTechLayerCutEnclosureRule", "ENC_TYPE"):
+        ("odb::dbTechLayerCutEnclosureRule::ENC_TYPE", "cut_enclosure_type_str",
+         ["DEFAULT", "EOL", "ENDSIDE", "HORZ_AND_VERT"]),
+    ("dbTechLayerCutSpacingRule", "CutSpacingType"):
+        ("odb::dbTechLayerCutSpacingRule::CutSpacingType", "cut_spacing_type_str",
+         ["NONE", "MAXXY", "SAMEMASK", "LAYER", "ADJACENTCUTS", "PARALLELOVERLAP",
+          "PARALLELWITHIN", "SAMEMETALSHAREDEDGE", "AREA"]),
+    ("dbTechLayerCutSpacingTableDefRule", "LOOKUP_STRATEGY"):
+        ("odb::dbTechLayerCutSpacingTableDefRule::LOOKUP_STRATEGY", "cut_spacing_lookup_str",
+         ["FIRST", "SECOND", "MAX", "MIN"]),
     ("dbUnfoldedChipRegionInst", "EffectiveSide"):
         ("odb::dbUnfoldedChipRegionInst::EffectiveSide", "unfolded_side_str",
          ["TOP", "BOTTOM", "INTERNAL", "INTERNAL_EXT"]),
@@ -634,6 +653,31 @@ class Emit:
                 f"{{ sys::{fn}(self.r(){rust_fwd}) }}")
         elif kind == "iterator":
             if elem not in nameable:
+                # ⚠️ A set whose element has no name can still be READ, as long as the element is a
+                # bound target with an index-addressed resolver of its own — that is exactly how the
+                # LEF58 cut rules are reached, by (layer, index). What such a set cannot supply is
+                # the nth-NAME accessor, so emit the COUNT alone: without it the set is invisible
+                # and the per-element getters have no legal index to walk, which makes a rule set
+                # that is bound but unreadable.
+                if elem in TARGETS:
+                    num = f"num_{fn}"
+                    if num in seen:
+                        return False
+                    self.h.append(f"std::size_t {num}(const OdbDb& db{c_params});")
+                    self.cc.append(
+                        f"std::size_t {num}(const OdbDb& h{c_params}) {{ auto* p = {resolve}; "
+                        f"return p ? p->{name}().size() : 0; }}")
+                    self.bridge.append(f"        fn {num}(db: &OdbDb{r_params}) -> usize;")
+                    self.reexport.append(num)
+                    self.api.append(
+                        f"    pub fn {num}(&self{rust_args_sig}) -> usize "
+                        f"{{ sys::{num}(self.r(){rust_fwd}) }}")
+                    seen.add(num)
+                    self.per_class[cls] = self.per_class.get(cls, 0) + 1
+                    self.reg.append((cls, field, "u64", keys_desc,
+                                     f'        ("{cls}", "{field}") => '
+                                     f'Ok(serde_json::json!(db.{num}({key_call}))),'))
+                    return True
                 self.skipped += 1
                 return False
             nexpr = nameable[elem].format("e")
@@ -867,6 +911,20 @@ def main() -> int:
         "  std::size_t k = 0; for (odb::dbTechViaGenerateRule* x : t->getViaGenerateRules()) { if (k++ == i) return x; } return nullptr; }\n"
         "static odb::dbTechViaLayerRule* gen_techvialayerrule(const OdbDb& h, std::size_t gen_i, std::size_t layer_i) {\n"
         "  odb::dbTechViaGenerateRule* g = gen_techviagenrule(h, gen_i); return g ? g->getViaLayerRule(layer_i) : nullptr; }\n"
+        "// LEF58 cut rules. Each hangs off a routing or cut layer as a dbSet, so it is addressed\n"
+        "// by (layer, index) the way markers are addressed by (category, index).\n"
+        "static odb::dbTechLayerCutClassRule* gen_cutclassrule(const OdbDb& h, rust::Str layer, std::size_t i) {\n"
+        "  odb::dbTechLayer* l = gen_techlayer(h, layer); if (!l) return nullptr;\n"
+        "  std::size_t k = 0; for (odb::dbTechLayerCutClassRule* r : l->getTechLayerCutClassRules()) { if (k++ == i) return r; } return nullptr; }\n"
+        "static odb::dbTechLayerCutEnclosureRule* gen_cutenclosurerule(const OdbDb& h, rust::Str layer, std::size_t i) {\n"
+        "  odb::dbTechLayer* l = gen_techlayer(h, layer); if (!l) return nullptr;\n"
+        "  std::size_t k = 0; for (odb::dbTechLayerCutEnclosureRule* r : l->getTechLayerCutEnclosureRules()) { if (k++ == i) return r; } return nullptr; }\n"
+        "static odb::dbTechLayerCutSpacingRule* gen_cutspacingrule(const OdbDb& h, rust::Str layer, std::size_t i) {\n"
+        "  odb::dbTechLayer* l = gen_techlayer(h, layer); if (!l) return nullptr;\n"
+        "  std::size_t k = 0; for (odb::dbTechLayerCutSpacingRule* r : l->getTechLayerCutSpacingRules()) { if (k++ == i) return r; } return nullptr; }\n"
+        "static odb::dbTechLayerCutSpacingTableDefRule* gen_cutspacingtablerule(const OdbDb& h, rust::Str layer, std::size_t i) {\n"
+        "  odb::dbTechLayer* l = gen_techlayer(h, layer); if (!l) return nullptr;\n"
+        "  std::size_t k = 0; for (odb::dbTechLayerCutSpacingTableDefRule* r : l->getTechLayerCutSpacingTableDefRules()) { if (k++ == i) return r; } return nullptr; }\n"
         "static odb::dbTechLayerAntennaRule* gen_layerantenna(const OdbDb& h, rust::Str layer) {\n"
         "  odb::dbTechLayer* l = gen_techlayer(h, layer); return l ? l->getDefaultAntennaRule() : nullptr; }\n"
         "static odb::dbTechAntennaPinModel* gen_antennapinmodel(const OdbDb& h, rust::Str master, rust::Str term) {\n"

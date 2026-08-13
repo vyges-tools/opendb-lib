@@ -228,6 +228,134 @@ mod ffi_gen_write {
         fn techvialayerrule_set_metal_overhang(db: &OdbDb, gen_idx: usize, layer_idx: usize, overhang: i32) -> Result<()>;
         fn techvialayerrule_set_spacing(db: &OdbDb, gen_idx: usize, layer_idx: usize, x_spacing: i32, y_spacing: i32) -> Result<()>;
         fn techvialayerrule_set_resistance(db: &OdbDb, gen_idx: usize, layer_idx: usize, r: f64) -> Result<()>;
+        fn cutclassrule_set_width(db: &OdbDb, layer: &str, idx: usize, width: i32) -> Result<()>;
+        fn cutclassrule_set_length(db: &OdbDb, layer: &str, idx: usize, length: i32) -> Result<()>;
+        fn cutclassrule_set_num_cuts(db: &OdbDb, layer: &str, idx: usize, num_cuts: i32) -> Result<()>;
+        fn cutclassrule_set_length_valid(db: &OdbDb, layer: &str, idx: usize, length_valid: bool) -> Result<()>;
+        fn cutclassrule_set_cuts_valid(db: &OdbDb, layer: &str, idx: usize, cuts_valid: bool) -> Result<()>;
+        fn cutenclosurerule_set_eol_width(db: &OdbDb, layer: &str, idx: usize, eol_width: i32) -> Result<()>;
+        fn cutenclosurerule_set_eol_min_length(db: &OdbDb, layer: &str, idx: usize, eol_min_length: i32) -> Result<()>;
+        fn cutenclosurerule_set_first_overhang(db: &OdbDb, layer: &str, idx: usize, first_overhang: i32) -> Result<()>;
+        fn cutenclosurerule_set_second_overhang(db: &OdbDb, layer: &str, idx: usize, second_overhang: i32) -> Result<()>;
+        fn cutenclosurerule_set_spacing(db: &OdbDb, layer: &str, idx: usize, spacing: i32) -> Result<()>;
+        fn cutenclosurerule_set_extension(db: &OdbDb, layer: &str, idx: usize, extension: i32) -> Result<()>;
+        fn cutenclosurerule_set_forward_extension(db: &OdbDb, layer: &str, idx: usize, forward_extension: i32) -> Result<()>;
+        fn cutenclosurerule_set_backward_extension(db: &OdbDb, layer: &str, idx: usize, backward_extension: i32) -> Result<()>;
+        fn cutenclosurerule_set_min_width(db: &OdbDb, layer: &str, idx: usize, min_width: i32) -> Result<()>;
+        fn cutenclosurerule_set_cut_within(db: &OdbDb, layer: &str, idx: usize, cut_within: i32) -> Result<()>;
+        fn cutenclosurerule_set_min_length(db: &OdbDb, layer: &str, idx: usize, min_length: i32) -> Result<()>;
+        fn cutenclosurerule_set_par_length(db: &OdbDb, layer: &str, idx: usize, par_length: i32) -> Result<()>;
+        fn cutenclosurerule_set_second_par_length(db: &OdbDb, layer: &str, idx: usize, second_par_length: i32) -> Result<()>;
+        fn cutenclosurerule_set_par_within(db: &OdbDb, layer: &str, idx: usize, par_within: i32) -> Result<()>;
+        fn cutenclosurerule_set_second_par_within(db: &OdbDb, layer: &str, idx: usize, second_par_within: i32) -> Result<()>;
+        fn cutenclosurerule_set_below_enclosure(db: &OdbDb, layer: &str, idx: usize, below_enclosure: i32) -> Result<()>;
+        fn cutenclosurerule_set_num_corners(db: &OdbDb, layer: &str, idx: usize, num_corners: u32) -> Result<()>;
+        fn cutenclosurerule_set_cut_class_valid(db: &OdbDb, layer: &str, idx: usize, cut_class_valid: bool) -> Result<()>;
+        fn cutenclosurerule_set_above(db: &OdbDb, layer: &str, idx: usize, above: bool) -> Result<()>;
+        fn cutenclosurerule_set_below(db: &OdbDb, layer: &str, idx: usize, below: bool) -> Result<()>;
+        fn cutenclosurerule_set_eol_min_length_valid(db: &OdbDb, layer: &str, idx: usize, eol_min_length_valid: bool) -> Result<()>;
+        fn cutenclosurerule_set_eol_only(db: &OdbDb, layer: &str, idx: usize, eol_only: bool) -> Result<()>;
+        fn cutenclosurerule_set_short_edge_on_eol(db: &OdbDb, layer: &str, idx: usize, short_edge_on_eol: bool) -> Result<()>;
+        fn cutenclosurerule_set_side_spacing_valid(db: &OdbDb, layer: &str, idx: usize, side_spacing_valid: bool) -> Result<()>;
+        fn cutenclosurerule_set_end_spacing_valid(db: &OdbDb, layer: &str, idx: usize, end_spacing_valid: bool) -> Result<()>;
+        fn cutenclosurerule_set_off_center_line(db: &OdbDb, layer: &str, idx: usize, off_center_line: bool) -> Result<()>;
+        fn cutenclosurerule_set_width_valid(db: &OdbDb, layer: &str, idx: usize, width_valid: bool) -> Result<()>;
+        fn cutenclosurerule_set_include_abutted(db: &OdbDb, layer: &str, idx: usize, include_abutted: bool) -> Result<()>;
+        fn cutenclosurerule_set_except_extra_cut(db: &OdbDb, layer: &str, idx: usize, except_extra_cut: bool) -> Result<()>;
+        fn cutenclosurerule_set_prl(db: &OdbDb, layer: &str, idx: usize, prl: bool) -> Result<()>;
+        fn cutenclosurerule_set_no_shared_edge(db: &OdbDb, layer: &str, idx: usize, no_shared_edge: bool) -> Result<()>;
+        fn cutenclosurerule_set_length_valid(db: &OdbDb, layer: &str, idx: usize, length_valid: bool) -> Result<()>;
+        fn cutenclosurerule_set_extra_cut_valid(db: &OdbDb, layer: &str, idx: usize, extra_cut_valid: bool) -> Result<()>;
+        fn cutenclosurerule_set_extra_only(db: &OdbDb, layer: &str, idx: usize, extra_only: bool) -> Result<()>;
+        fn cutenclosurerule_set_redundant_cut_valid(db: &OdbDb, layer: &str, idx: usize, redundant_cut_valid: bool) -> Result<()>;
+        fn cutenclosurerule_set_parallel_valid(db: &OdbDb, layer: &str, idx: usize, parallel_valid: bool) -> Result<()>;
+        fn cutenclosurerule_set_second_parallel_valid(db: &OdbDb, layer: &str, idx: usize, second_parallel_valid: bool) -> Result<()>;
+        fn cutenclosurerule_set_second_par_within_valid(db: &OdbDb, layer: &str, idx: usize, second_par_within_valid: bool) -> Result<()>;
+        fn cutenclosurerule_set_below_enclosure_valid(db: &OdbDb, layer: &str, idx: usize, below_enclosure_valid: bool) -> Result<()>;
+        fn cutenclosurerule_set_concave_corners_valid(db: &OdbDb, layer: &str, idx: usize, concave_corners_valid: bool) -> Result<()>;
+        fn cutspacingrule_set_cut_spacing(db: &OdbDb, layer: &str, idx: usize, cut_spacing: i32) -> Result<()>;
+        fn cutspacingrule_set_orthogonal_spacing(db: &OdbDb, layer: &str, idx: usize, orthogonal_spacing: i32) -> Result<()>;
+        fn cutspacingrule_set_width(db: &OdbDb, layer: &str, idx: usize, width: i32) -> Result<()>;
+        fn cutspacingrule_set_enclosure(db: &OdbDb, layer: &str, idx: usize, enclosure: i32) -> Result<()>;
+        fn cutspacingrule_set_edge_length(db: &OdbDb, layer: &str, idx: usize, edge_length: i32) -> Result<()>;
+        fn cutspacingrule_set_par_within(db: &OdbDb, layer: &str, idx: usize, par_within: i32) -> Result<()>;
+        fn cutspacingrule_set_par_enclosure(db: &OdbDb, layer: &str, idx: usize, par_enclosure: i32) -> Result<()>;
+        fn cutspacingrule_set_edge_enclosure(db: &OdbDb, layer: &str, idx: usize, edge_enclosure: i32) -> Result<()>;
+        fn cutspacingrule_set_adj_enclosure(db: &OdbDb, layer: &str, idx: usize, adj_enclosure: i32) -> Result<()>;
+        fn cutspacingrule_set_above_enclosure(db: &OdbDb, layer: &str, idx: usize, above_enclosure: i32) -> Result<()>;
+        fn cutspacingrule_set_above_width(db: &OdbDb, layer: &str, idx: usize, above_width: i32) -> Result<()>;
+        fn cutspacingrule_set_min_length(db: &OdbDb, layer: &str, idx: usize, min_length: i32) -> Result<()>;
+        fn cutspacingrule_set_extension(db: &OdbDb, layer: &str, idx: usize, extension: i32) -> Result<()>;
+        fn cutspacingrule_set_eol_width(db: &OdbDb, layer: &str, idx: usize, eol_width: i32) -> Result<()>;
+        fn cutspacingrule_set_num_cuts(db: &OdbDb, layer: &str, idx: usize, num_cuts: u32) -> Result<()>;
+        fn cutspacingrule_set_within(db: &OdbDb, layer: &str, idx: usize, within: i32) -> Result<()>;
+        fn cutspacingrule_set_second_within(db: &OdbDb, layer: &str, idx: usize, second_within: i32) -> Result<()>;
+        fn cutspacingrule_set_two_cuts(db: &OdbDb, layer: &str, idx: usize, two_cuts: u32) -> Result<()>;
+        fn cutspacingrule_set_prl(db: &OdbDb, layer: &str, idx: usize, prl: u32) -> Result<()>;
+        fn cutspacingrule_set_par_length(db: &OdbDb, layer: &str, idx: usize, par_length: u32) -> Result<()>;
+        fn cutspacingrule_set_cut_area(db: &OdbDb, layer: &str, idx: usize, cut_area: i64) -> Result<()>;
+        fn cutspacingrule_set_center_to_center(db: &OdbDb, layer: &str, idx: usize, center_to_center: bool) -> Result<()>;
+        fn cutspacingrule_set_same_net(db: &OdbDb, layer: &str, idx: usize, same_net: bool) -> Result<()>;
+        fn cutspacingrule_set_same_metal(db: &OdbDb, layer: &str, idx: usize, same_metal: bool) -> Result<()>;
+        fn cutspacingrule_set_same_via(db: &OdbDb, layer: &str, idx: usize, same_via: bool) -> Result<()>;
+        fn cutspacingrule_set_stack(db: &OdbDb, layer: &str, idx: usize, stack: bool) -> Result<()>;
+        fn cutspacingrule_set_orthogonal_spacing_valid(db: &OdbDb, layer: &str, idx: usize, orthogonal_spacing_valid: bool) -> Result<()>;
+        fn cutspacingrule_set_above_width_enclosure_valid(db: &OdbDb, layer: &str, idx: usize, above_width_enclosure_valid: bool) -> Result<()>;
+        fn cutspacingrule_set_short_edge_only(db: &OdbDb, layer: &str, idx: usize, short_edge_only: bool) -> Result<()>;
+        fn cutspacingrule_set_concave_corner_width(db: &OdbDb, layer: &str, idx: usize, concave_corner_width: bool) -> Result<()>;
+        fn cutspacingrule_set_concave_corner_parallel(db: &OdbDb, layer: &str, idx: usize, concave_corner_parallel: bool) -> Result<()>;
+        fn cutspacingrule_set_concave_corner_edge_length(db: &OdbDb, layer: &str, idx: usize, concave_corner_edge_length: bool) -> Result<()>;
+        fn cutspacingrule_set_concave_corner(db: &OdbDb, layer: &str, idx: usize, concave_corner: bool) -> Result<()>;
+        fn cutspacingrule_set_extension_valid(db: &OdbDb, layer: &str, idx: usize, extension_valid: bool) -> Result<()>;
+        fn cutspacingrule_set_non_eol_convex_corner(db: &OdbDb, layer: &str, idx: usize, non_eol_convex_corner: bool) -> Result<()>;
+        fn cutspacingrule_set_eol_width_valid(db: &OdbDb, layer: &str, idx: usize, eol_width_valid: bool) -> Result<()>;
+        fn cutspacingrule_set_min_length_valid(db: &OdbDb, layer: &str, idx: usize, min_length_valid: bool) -> Result<()>;
+        fn cutspacingrule_set_above_width_valid(db: &OdbDb, layer: &str, idx: usize, above_width_valid: bool) -> Result<()>;
+        fn cutspacingrule_set_mask_overlap(db: &OdbDb, layer: &str, idx: usize, mask_overlap: bool) -> Result<()>;
+        fn cutspacingrule_set_wrong_direction(db: &OdbDb, layer: &str, idx: usize, wrong_direction: bool) -> Result<()>;
+        fn cutspacingrule_set_adjacent_cuts(db: &OdbDb, layer: &str, idx: usize, adjacent_cuts: u32) -> Result<()>;
+        fn cutspacingrule_set_exact_aligned(db: &OdbDb, layer: &str, idx: usize, exact_aligned: bool) -> Result<()>;
+        fn cutspacingrule_set_cut_class_to_all(db: &OdbDb, layer: &str, idx: usize, cut_class_to_all: bool) -> Result<()>;
+        fn cutspacingrule_set_no_prl(db: &OdbDb, layer: &str, idx: usize, no_prl: bool) -> Result<()>;
+        fn cutspacingrule_set_same_mask(db: &OdbDb, layer: &str, idx: usize, same_mask: bool) -> Result<()>;
+        fn cutspacingrule_set_except_same_pgnet(db: &OdbDb, layer: &str, idx: usize, except_same_pgnet: bool) -> Result<()>;
+        fn cutspacingrule_set_side_parallel_overlap(db: &OdbDb, layer: &str, idx: usize, side_parallel_overlap: bool) -> Result<()>;
+        fn cutspacingrule_set_except_same_net(db: &OdbDb, layer: &str, idx: usize, except_same_net: bool) -> Result<()>;
+        fn cutspacingrule_set_except_same_metal(db: &OdbDb, layer: &str, idx: usize, except_same_metal: bool) -> Result<()>;
+        fn cutspacingrule_set_except_same_metal_overlap(db: &OdbDb, layer: &str, idx: usize, except_same_metal_overlap: bool) -> Result<()>;
+        fn cutspacingrule_set_except_same_via(db: &OdbDb, layer: &str, idx: usize, except_same_via: bool) -> Result<()>;
+        fn cutspacingrule_set_above(db: &OdbDb, layer: &str, idx: usize, above: bool) -> Result<()>;
+        fn cutspacingrule_set_except_two_edges(db: &OdbDb, layer: &str, idx: usize, except_two_edges: bool) -> Result<()>;
+        fn cutspacingrule_set_two_cuts_valid(db: &OdbDb, layer: &str, idx: usize, two_cuts_valid: bool) -> Result<()>;
+        fn cutspacingrule_set_same_cut(db: &OdbDb, layer: &str, idx: usize, same_cut: bool) -> Result<()>;
+        fn cutspacingrule_set_long_edge_only(db: &OdbDb, layer: &str, idx: usize, long_edge_only: bool) -> Result<()>;
+        fn cutspacingrule_set_prl_valid(db: &OdbDb, layer: &str, idx: usize, prl_valid: bool) -> Result<()>;
+        fn cutspacingrule_set_below(db: &OdbDb, layer: &str, idx: usize, below: bool) -> Result<()>;
+        fn cutspacingrule_set_par_within_enclosure_valid(db: &OdbDb, layer: &str, idx: usize, par_within_enclosure_valid: bool) -> Result<()>;
+        fn cutspacingtablerule_set_default(db: &OdbDb, layer: &str, idx: usize, spacing: i32) -> Result<()>;
+        fn cutspacingtablerule_set_prl(db: &OdbDb, layer: &str, idx: usize, prl: i32) -> Result<()>;
+        fn cutspacingtablerule_set_extension(db: &OdbDb, layer: &str, idx: usize, extension: i32) -> Result<()>;
+        fn cutspacingtablerule_set_default_valid(db: &OdbDb, layer: &str, idx: usize, default_valid: bool) -> Result<()>;
+        fn cutspacingtablerule_set_same_mask(db: &OdbDb, layer: &str, idx: usize, same_mask: bool) -> Result<()>;
+        fn cutspacingtablerule_set_same_net(db: &OdbDb, layer: &str, idx: usize, same_net: bool) -> Result<()>;
+        fn cutspacingtablerule_set_same_metal(db: &OdbDb, layer: &str, idx: usize, same_metal: bool) -> Result<()>;
+        fn cutspacingtablerule_set_same_via(db: &OdbDb, layer: &str, idx: usize, same_via: bool) -> Result<()>;
+        fn cutspacingtablerule_set_layer_valid(db: &OdbDb, layer: &str, idx: usize, layer_valid: bool) -> Result<()>;
+        fn cutspacingtablerule_set_no_stack(db: &OdbDb, layer: &str, idx: usize, no_stack: bool) -> Result<()>;
+        fn cutspacingtablerule_set_non_zero_enclosure(db: &OdbDb, layer: &str, idx: usize, non_zero_enclosure: bool) -> Result<()>;
+        fn cutspacingtablerule_set_prl_for_aligned_cut(db: &OdbDb, layer: &str, idx: usize, prl_for_aligned_cut: bool) -> Result<()>;
+        fn cutspacingtablerule_set_center_to_center_valid(db: &OdbDb, layer: &str, idx: usize, center_to_center_valid: bool) -> Result<()>;
+        fn cutspacingtablerule_set_center_and_edge_valid(db: &OdbDb, layer: &str, idx: usize, center_and_edge_valid: bool) -> Result<()>;
+        fn cutspacingtablerule_set_no_prl(db: &OdbDb, layer: &str, idx: usize, no_prl: bool) -> Result<()>;
+        fn cutspacingtablerule_set_prl_valid(db: &OdbDb, layer: &str, idx: usize, prl_valid: bool) -> Result<()>;
+        fn cutspacingtablerule_set_max_x_y(db: &OdbDb, layer: &str, idx: usize, max_x_y: bool) -> Result<()>;
+        fn cutspacingtablerule_set_end_extension_valid(db: &OdbDb, layer: &str, idx: usize, end_extension_valid: bool) -> Result<()>;
+        fn cutspacingtablerule_set_side_extension_valid(db: &OdbDb, layer: &str, idx: usize, side_extension_valid: bool) -> Result<()>;
+        fn cutspacingtablerule_set_exact_aligned_spacing_valid(db: &OdbDb, layer: &str, idx: usize, exact_aligned_spacing_valid: bool) -> Result<()>;
+        fn cutspacingtablerule_set_horizontal(db: &OdbDb, layer: &str, idx: usize, horizontal: bool) -> Result<()>;
+        fn cutspacingtablerule_set_prl_horizontal(db: &OdbDb, layer: &str, idx: usize, prl_horizontal: bool) -> Result<()>;
+        fn cutspacingtablerule_set_vertical(db: &OdbDb, layer: &str, idx: usize, vertical: bool) -> Result<()>;
+        fn cutspacingtablerule_set_prl_vertical(db: &OdbDb, layer: &str, idx: usize, prl_vertical: bool) -> Result<()>;
         fn layerantenna_set_gate_plus_diff_factor(db: &OdbDb, layer: &str, factor: f64) -> Result<()>;
         fn layerantenna_set_area_minus_diff_factor(db: &OdbDb, layer: &str, factor: f64) -> Result<()>;
         fn layerantenna_set_area_factor(db: &OdbDb, layer: &str, factor: f64, diffuse: bool) -> Result<()>;
@@ -320,6 +448,134 @@ pub use ffi_gen_write::{
     chipconn_set_thickness,
     chipinst_set_loc,
     chipinst_set_orient,
+    cutclassrule_set_cuts_valid,
+    cutclassrule_set_length,
+    cutclassrule_set_length_valid,
+    cutclassrule_set_num_cuts,
+    cutclassrule_set_width,
+    cutenclosurerule_set_above,
+    cutenclosurerule_set_backward_extension,
+    cutenclosurerule_set_below,
+    cutenclosurerule_set_below_enclosure,
+    cutenclosurerule_set_below_enclosure_valid,
+    cutenclosurerule_set_concave_corners_valid,
+    cutenclosurerule_set_cut_class_valid,
+    cutenclosurerule_set_cut_within,
+    cutenclosurerule_set_end_spacing_valid,
+    cutenclosurerule_set_eol_min_length,
+    cutenclosurerule_set_eol_min_length_valid,
+    cutenclosurerule_set_eol_only,
+    cutenclosurerule_set_eol_width,
+    cutenclosurerule_set_except_extra_cut,
+    cutenclosurerule_set_extension,
+    cutenclosurerule_set_extra_cut_valid,
+    cutenclosurerule_set_extra_only,
+    cutenclosurerule_set_first_overhang,
+    cutenclosurerule_set_forward_extension,
+    cutenclosurerule_set_include_abutted,
+    cutenclosurerule_set_length_valid,
+    cutenclosurerule_set_min_length,
+    cutenclosurerule_set_min_width,
+    cutenclosurerule_set_no_shared_edge,
+    cutenclosurerule_set_num_corners,
+    cutenclosurerule_set_off_center_line,
+    cutenclosurerule_set_par_length,
+    cutenclosurerule_set_par_within,
+    cutenclosurerule_set_parallel_valid,
+    cutenclosurerule_set_prl,
+    cutenclosurerule_set_redundant_cut_valid,
+    cutenclosurerule_set_second_overhang,
+    cutenclosurerule_set_second_par_length,
+    cutenclosurerule_set_second_par_within,
+    cutenclosurerule_set_second_par_within_valid,
+    cutenclosurerule_set_second_parallel_valid,
+    cutenclosurerule_set_short_edge_on_eol,
+    cutenclosurerule_set_side_spacing_valid,
+    cutenclosurerule_set_spacing,
+    cutenclosurerule_set_width_valid,
+    cutspacingrule_set_above,
+    cutspacingrule_set_above_enclosure,
+    cutspacingrule_set_above_width,
+    cutspacingrule_set_above_width_enclosure_valid,
+    cutspacingrule_set_above_width_valid,
+    cutspacingrule_set_adj_enclosure,
+    cutspacingrule_set_adjacent_cuts,
+    cutspacingrule_set_below,
+    cutspacingrule_set_center_to_center,
+    cutspacingrule_set_concave_corner,
+    cutspacingrule_set_concave_corner_edge_length,
+    cutspacingrule_set_concave_corner_parallel,
+    cutspacingrule_set_concave_corner_width,
+    cutspacingrule_set_cut_area,
+    cutspacingrule_set_cut_class_to_all,
+    cutspacingrule_set_cut_spacing,
+    cutspacingrule_set_edge_enclosure,
+    cutspacingrule_set_edge_length,
+    cutspacingrule_set_enclosure,
+    cutspacingrule_set_eol_width,
+    cutspacingrule_set_eol_width_valid,
+    cutspacingrule_set_exact_aligned,
+    cutspacingrule_set_except_same_metal,
+    cutspacingrule_set_except_same_metal_overlap,
+    cutspacingrule_set_except_same_net,
+    cutspacingrule_set_except_same_pgnet,
+    cutspacingrule_set_except_same_via,
+    cutspacingrule_set_except_two_edges,
+    cutspacingrule_set_extension,
+    cutspacingrule_set_extension_valid,
+    cutspacingrule_set_long_edge_only,
+    cutspacingrule_set_mask_overlap,
+    cutspacingrule_set_min_length,
+    cutspacingrule_set_min_length_valid,
+    cutspacingrule_set_no_prl,
+    cutspacingrule_set_non_eol_convex_corner,
+    cutspacingrule_set_num_cuts,
+    cutspacingrule_set_orthogonal_spacing,
+    cutspacingrule_set_orthogonal_spacing_valid,
+    cutspacingrule_set_par_enclosure,
+    cutspacingrule_set_par_length,
+    cutspacingrule_set_par_within,
+    cutspacingrule_set_par_within_enclosure_valid,
+    cutspacingrule_set_prl,
+    cutspacingrule_set_prl_valid,
+    cutspacingrule_set_same_cut,
+    cutspacingrule_set_same_mask,
+    cutspacingrule_set_same_metal,
+    cutspacingrule_set_same_net,
+    cutspacingrule_set_same_via,
+    cutspacingrule_set_second_within,
+    cutspacingrule_set_short_edge_only,
+    cutspacingrule_set_side_parallel_overlap,
+    cutspacingrule_set_stack,
+    cutspacingrule_set_two_cuts,
+    cutspacingrule_set_two_cuts_valid,
+    cutspacingrule_set_width,
+    cutspacingrule_set_within,
+    cutspacingrule_set_wrong_direction,
+    cutspacingtablerule_set_center_and_edge_valid,
+    cutspacingtablerule_set_center_to_center_valid,
+    cutspacingtablerule_set_default,
+    cutspacingtablerule_set_default_valid,
+    cutspacingtablerule_set_end_extension_valid,
+    cutspacingtablerule_set_exact_aligned_spacing_valid,
+    cutspacingtablerule_set_extension,
+    cutspacingtablerule_set_horizontal,
+    cutspacingtablerule_set_layer_valid,
+    cutspacingtablerule_set_max_x_y,
+    cutspacingtablerule_set_no_prl,
+    cutspacingtablerule_set_no_stack,
+    cutspacingtablerule_set_non_zero_enclosure,
+    cutspacingtablerule_set_prl,
+    cutspacingtablerule_set_prl_for_aligned_cut,
+    cutspacingtablerule_set_prl_horizontal,
+    cutspacingtablerule_set_prl_valid,
+    cutspacingtablerule_set_prl_vertical,
+    cutspacingtablerule_set_same_mask,
+    cutspacingtablerule_set_same_metal,
+    cutspacingtablerule_set_same_net,
+    cutspacingtablerule_set_same_via,
+    cutspacingtablerule_set_side_extension_valid,
+    cutspacingtablerule_set_vertical,
     inst_clear_user_flag1,
     inst_clear_user_flag2,
     inst_clear_user_flag3,

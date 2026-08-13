@@ -134,6 +134,20 @@ inline odb::dbTechViaGenerateRule* gen_techviagenrule(const OdbDb& h, std::size_
   std::size_t k = 0; for (odb::dbTechViaGenerateRule* x : t->getViaGenerateRules()) { if (k++ == i) return x; } return nullptr; }
 inline odb::dbTechViaLayerRule* gen_techvialayerrule(const OdbDb& h, std::size_t gen_i, std::size_t layer_i) {
   odb::dbTechViaGenerateRule* g = gen_techviagenrule(h, gen_i); return g ? g->getViaLayerRule(layer_i) : nullptr; }
+// LEF58 cut rules. Each hangs off a routing or cut layer as a dbSet, so it is addressed
+// by (layer, index) the way markers are addressed by (category, index).
+inline odb::dbTechLayerCutClassRule* gen_cutclassrule(const OdbDb& h, rust::Str layer, std::size_t i) {
+  odb::dbTechLayer* l = gen_techlayer(h, layer); if (!l) return nullptr;
+  std::size_t k = 0; for (odb::dbTechLayerCutClassRule* r : l->getTechLayerCutClassRules()) { if (k++ == i) return r; } return nullptr; }
+inline odb::dbTechLayerCutEnclosureRule* gen_cutenclosurerule(const OdbDb& h, rust::Str layer, std::size_t i) {
+  odb::dbTechLayer* l = gen_techlayer(h, layer); if (!l) return nullptr;
+  std::size_t k = 0; for (odb::dbTechLayerCutEnclosureRule* r : l->getTechLayerCutEnclosureRules()) { if (k++ == i) return r; } return nullptr; }
+inline odb::dbTechLayerCutSpacingRule* gen_cutspacingrule(const OdbDb& h, rust::Str layer, std::size_t i) {
+  odb::dbTechLayer* l = gen_techlayer(h, layer); if (!l) return nullptr;
+  std::size_t k = 0; for (odb::dbTechLayerCutSpacingRule* r : l->getTechLayerCutSpacingRules()) { if (k++ == i) return r; } return nullptr; }
+inline odb::dbTechLayerCutSpacingTableDefRule* gen_cutspacingtablerule(const OdbDb& h, rust::Str layer, std::size_t i) {
+  odb::dbTechLayer* l = gen_techlayer(h, layer); if (!l) return nullptr;
+  std::size_t k = 0; for (odb::dbTechLayerCutSpacingTableDefRule* r : l->getTechLayerCutSpacingTableDefRules()) { if (k++ == i) return r; } return nullptr; }
 inline odb::dbTechLayerAntennaRule* gen_layerantenna(const OdbDb& h, rust::Str layer) {
   odb::dbTechLayer* l = gen_techlayer(h, layer); return l ? l->getDefaultAntennaRule() : nullptr; }
 inline odb::dbTechAntennaPinModel* gen_antennapinmodel(const OdbDb& h, rust::Str master, rust::Str term) {
@@ -201,6 +215,29 @@ inline const char* chip_region_side_str(odb::dbChipRegion::Side v) {
   if (v == odb::dbChipRegion::Side::BACK) return "BACK";
   if (v == odb::dbChipRegion::Side::INTERNAL) return "INTERNAL";
   if (v == odb::dbChipRegion::Side::INTERNAL_EXT) return "INTERNAL_EXT";
+  return ""; }
+inline const char* cut_enclosure_type_str(odb::dbTechLayerCutEnclosureRule::ENC_TYPE v) {
+  if (v == odb::dbTechLayerCutEnclosureRule::ENC_TYPE::DEFAULT) return "DEFAULT";
+  if (v == odb::dbTechLayerCutEnclosureRule::ENC_TYPE::EOL) return "EOL";
+  if (v == odb::dbTechLayerCutEnclosureRule::ENC_TYPE::ENDSIDE) return "ENDSIDE";
+  if (v == odb::dbTechLayerCutEnclosureRule::ENC_TYPE::HORZ_AND_VERT) return "HORZ_AND_VERT";
+  return ""; }
+inline const char* cut_spacing_type_str(odb::dbTechLayerCutSpacingRule::CutSpacingType v) {
+  if (v == odb::dbTechLayerCutSpacingRule::CutSpacingType::NONE) return "NONE";
+  if (v == odb::dbTechLayerCutSpacingRule::CutSpacingType::MAXXY) return "MAXXY";
+  if (v == odb::dbTechLayerCutSpacingRule::CutSpacingType::SAMEMASK) return "SAMEMASK";
+  if (v == odb::dbTechLayerCutSpacingRule::CutSpacingType::LAYER) return "LAYER";
+  if (v == odb::dbTechLayerCutSpacingRule::CutSpacingType::ADJACENTCUTS) return "ADJACENTCUTS";
+  if (v == odb::dbTechLayerCutSpacingRule::CutSpacingType::PARALLELOVERLAP) return "PARALLELOVERLAP";
+  if (v == odb::dbTechLayerCutSpacingRule::CutSpacingType::PARALLELWITHIN) return "PARALLELWITHIN";
+  if (v == odb::dbTechLayerCutSpacingRule::CutSpacingType::SAMEMETALSHAREDEDGE) return "SAMEMETALSHAREDEDGE";
+  if (v == odb::dbTechLayerCutSpacingRule::CutSpacingType::AREA) return "AREA";
+  return ""; }
+inline const char* cut_spacing_lookup_str(odb::dbTechLayerCutSpacingTableDefRule::LOOKUP_STRATEGY v) {
+  if (v == odb::dbTechLayerCutSpacingTableDefRule::LOOKUP_STRATEGY::FIRST) return "FIRST";
+  if (v == odb::dbTechLayerCutSpacingTableDefRule::LOOKUP_STRATEGY::SECOND) return "SECOND";
+  if (v == odb::dbTechLayerCutSpacingTableDefRule::LOOKUP_STRATEGY::MAX) return "MAX";
+  if (v == odb::dbTechLayerCutSpacingTableDefRule::LOOKUP_STRATEGY::MIN) return "MIN";
   return ""; }
 inline const char* unfolded_side_str(odb::dbUnfoldedChipRegionInst::EffectiveSide v) {
   if (v == odb::dbUnfoldedChipRegionInst::EffectiveSide::TOP) return "TOP";

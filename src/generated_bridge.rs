@@ -47,8 +47,12 @@ mod ffi_gen {
         fn nth_block_get_groups(db: &OdbDb, i: usize) -> String;
         fn num_block_get_component_mask_shift(db: &OdbDb) -> usize;
         fn nth_block_get_component_mask_shift(db: &OdbDb, i: usize) -> String;
+        fn num_block_get_obstructions(db: &OdbDb) -> usize;
+        fn num_block_get_blockages(db: &OdbDb) -> usize;
         fn num_block_get_nets(db: &OdbDb) -> usize;
         fn nth_block_get_nets(db: &OdbDb, i: usize) -> String;
+        fn num_block_get_cap_nodes(db: &OdbDb) -> usize;
+        fn num_block_get_r_segs(db: &OdbDb) -> usize;
         fn num_block_get_vias(db: &OdbDb) -> usize;
         fn nth_block_get_vias(db: &OdbDb, i: usize) -> String;
         fn block_get_def_units(db: &OdbDb) -> i32;
@@ -57,8 +61,10 @@ mod ffi_gen {
         fn block_get_corners_per_block(db: &OdbDb) -> i32;
         fn block_get_ext_db_count(db: &OdbDb) -> i32;
         fn block_get_corner_name_list(db: &OdbDb) -> String;
+        fn num_block_get_track_grids(db: &OdbDb) -> usize;
         fn num_block_get_rows(db: &OdbDb) -> usize;
         fn nth_block_get_rows(db: &OdbDb, i: usize) -> String;
+        fn num_block_get_fills(db: &OdbDb) -> usize;
         fn block_get_die_area_x_min(db: &OdbDb) -> i32;
         fn block_get_die_area_y_min(db: &OdbDb) -> i32;
         fn block_get_die_area_x_max(db: &OdbDb) -> i32;
@@ -76,6 +82,7 @@ mod ffi_gen {
         fn block_get_min_layer_for_clock(db: &OdbDb) -> i32;
         fn block_get_max_layer_for_clock(db: &OdbDb) -> i32;
         fn block_get_g_cell_tile_size(db: &OdbDb) -> i32;
+        fn num_block_get_c_c_segs(db: &OdbDb) -> usize;
         fn num_block_get_regions(db: &OdbDb) -> usize;
         fn nth_block_get_regions(db: &OdbDb, i: usize) -> String;
         fn num_block_get_non_default_rules(db: &OdbDb) -> usize;
@@ -156,6 +163,7 @@ mod ffi_gen {
         fn num_net_get_b_terms(db: &OdbDb, net: &str) -> usize;
         fn nth_net_get_b_terms(db: &OdbDb, net: &str, i: usize) -> String;
         fn net_get1st_b_term(db: &OdbDb, net: &str) -> String;
+        fn num_net_get_s_wires(db: &OdbDb, net: &str) -> usize;
         fn net_is_connected_by_abutment(db: &OdbDb, net: &str) -> bool;
         fn net_is_i_o(db: &OdbDb, net: &str) -> bool;
         fn net_is_wild_connected(db: &OdbDb, net: &str) -> bool;
@@ -166,9 +174,11 @@ mod ffi_gen {
         fn net_get_db_cc(db: &OdbDb, net: &str) -> f32;
         fn net_get_ref_cc(db: &OdbDb, net: &str) -> f32;
         fn net_get_cc_match_ratio(db: &OdbDb, net: &str) -> f32;
+        fn num_net_get_cap_nodes(db: &OdbDb, net: &str) -> usize;
         fn net_get1st_r_seg_id(db: &OdbDb, net: &str) -> u32;
         fn net_get1st_cap_node_id(db: &OdbDb, net: &str) -> u32;
         fn net_get_r_seg_count(db: &OdbDb, net: &str) -> u32;
+        fn num_net_get_r_segs(db: &OdbDb, net: &str) -> usize;
         fn net_max_internal_cap_num(db: &OdbDb, net: &str) -> u32;
         fn net_get_cap_node_count(db: &OdbDb, net: &str) -> u32;
         fn net_get_cc_count(db: &OdbDb, net: &str) -> u32;
@@ -210,6 +220,7 @@ mod ffi_gen {
         fn bterm_get_mod_net(db: &OdbDb, bterm: &str) -> String;
         fn bterm_get_block(db: &OdbDb, bterm: &str) -> String;
         fn bterm_get_i_term(db: &OdbDb, bterm: &str) -> String;
+        fn num_bterm_get_b_pins(db: &OdbDb, bterm: &str) -> usize;
         fn bterm_get_first_pin_placement_status(db: &OdbDb, bterm: &str) -> String;
         fn bterm_get_ground_pin(db: &OdbDb, bterm: &str) -> String;
         fn bterm_get_supply_pin(db: &OdbDb, bterm: &str) -> String;
@@ -273,6 +284,7 @@ mod ffi_gen {
         fn mterm_get_io_type(db: &OdbDb, master: &str, term: &str) -> String;
         fn mterm_is_set_mark(db: &OdbDb, master: &str, term: &str) -> bool;
         fn mterm_get_master(db: &OdbDb, master: &str, term: &str) -> String;
+        fn num_mterm_get_m_pins(db: &OdbDb, master: &str, term: &str) -> usize;
         fn mterm_get_b_box_x_min(db: &OdbDb, master: &str, term: &str) -> i32;
         fn mterm_get_b_box_y_min(db: &OdbDb, master: &str, term: &str) -> i32;
         fn mterm_get_b_box_x_max(db: &OdbDb, master: &str, term: &str) -> i32;
@@ -287,6 +299,8 @@ mod ffi_gen {
         fn layer_get_layer_adjustment(db: &OdbDb, layer: &str) -> f32;
         fn num_layer_get_tech_layer_cut_class_rules(db: &OdbDb, layer: &str) -> usize;
         fn nth_layer_get_tech_layer_cut_class_rules(db: &OdbDb, layer: &str, i: usize) -> String;
+        fn num_layer_get_tech_layer_cut_spacing_rules(db: &OdbDb, layer: &str) -> usize;
+        fn num_layer_get_tech_layer_cut_enclosure_rules(db: &OdbDb, layer: &str) -> usize;
         fn layer_is_rect_only(db: &OdbDb, layer: &str) -> bool;
         fn layer_is_right_way_on_grid_only(db: &OdbDb, layer: &str) -> bool;
         fn layer_is_right_way_on_grid_only_check_mask(db: &OdbDb, layer: &str) -> bool;
@@ -363,6 +377,7 @@ mod ffi_gen {
         fn via_get_via_generate_rule(db: &OdbDb, via: &str) -> String;
         fn via_has_params(db: &OdbDb, via: &str) -> bool;
         fn via_get_block(db: &OdbDb, via: &str) -> String;
+        fn num_via_get_boxes(db: &OdbDb, via: &str) -> usize;
         fn via_get_top_layer(db: &OdbDb, via: &str) -> String;
         fn via_get_bottom_layer(db: &OdbDb, via: &str) -> String;
         fn via_is_via_rotated(db: &OdbDb, via: &str) -> bool;
@@ -379,6 +394,7 @@ mod ffi_gen {
         fn techvia_get_via_generate_rule(db: &OdbDb, via: &str) -> String;
         fn techvia_has_params(db: &OdbDb, via: &str) -> bool;
         fn techvia_get_tech(db: &OdbDb, via: &str) -> String;
+        fn num_techvia_get_boxes(db: &OdbDb, via: &str) -> usize;
         fn techvia_get_top_layer(db: &OdbDb, via: &str) -> String;
         fn techvia_get_bottom_layer(db: &OdbDb, via: &str) -> String;
         fn techvia_get_non_default_rule(db: &OdbDb, via: &str) -> String;
@@ -411,6 +427,7 @@ mod ffi_gen {
         fn swire_get_net(db: &OdbDb, net: &str, idx: usize) -> String;
         fn swire_get_wire_type(db: &OdbDb, net: &str, idx: usize) -> String;
         fn swire_get_shield(db: &OdbDb, net: &str, idx: usize) -> String;
+        fn num_swire_get_wires(db: &OdbDb, net: &str, idx: usize) -> usize;
         fn wire_get_block(db: &OdbDb, net: &str) -> String;
         fn wire_get_net(db: &OdbDb, net: &str) -> String;
         fn wire_is_global_wire(db: &OdbDb, net: &str) -> bool;
@@ -479,6 +496,7 @@ mod ffi_gen {
         fn num_region_get_region_insts(db: &OdbDb, region: &str) -> usize;
         fn nth_region_get_region_insts(db: &OdbDb, region: &str, i: usize) -> String;
         fn region_is_invalid(db: &OdbDb, region: &str) -> bool;
+        fn num_region_get_boundaries(db: &OdbDb, region: &str) -> usize;
         fn num_region_get_groups(db: &OdbDb, region: &str) -> usize;
         fn nth_region_get_groups(db: &OdbDb, region: &str, i: usize) -> String;
         fn region_get_block(db: &OdbDb, region: &str) -> String;
@@ -649,6 +667,7 @@ mod ffi_gen {
         fn capnode_get_children_cnt(db: &OdbDb, idx: usize) -> u32;
         fn capnode_get_sort_index(db: &OdbDb, idx: usize) -> u32;
         fn capnode_check_c_c(db: &OdbDb, idx: usize) -> bool;
+        fn num_capnode_get_c_c_segs(db: &OdbDb, idx: usize) -> usize;
         fn capnode_get_net(db: &OdbDb, idx: usize) -> String;
         fn rseg_updated_cap(db: &OdbDb, idx: usize) -> bool;
         fn rseg_check_c_c(db: &OdbDb, idx: usize) -> bool;
@@ -672,6 +691,7 @@ mod ffi_gen {
         fn sbox_has_via_layer_masks(db: &OdbDb, net: &str, swire_idx: usize, sbox_idx: usize) -> bool;
         fn bpin_get_placement_status(db: &OdbDb, bterm: &str, idx: usize) -> String;
         fn bpin_get_b_term(db: &OdbDb, bterm: &str, idx: usize) -> String;
+        fn num_bpin_get_boxes(db: &OdbDb, bterm: &str, idx: usize) -> usize;
         fn bpin_get_b_box_x_min(db: &OdbDb, bterm: &str, idx: usize) -> i32;
         fn bpin_get_b_box_y_min(db: &OdbDb, bterm: &str, idx: usize) -> i32;
         fn bpin_get_b_box_x_max(db: &OdbDb, bterm: &str, idx: usize) -> i32;
@@ -713,6 +733,144 @@ mod ffi_gen {
         fn techvialayerrule_get_enclosure_overhang2(db: &OdbDb, gen_idx: usize, layer_idx: usize) -> i32;
         fn techvialayerrule_get_spacing_x_spacing(db: &OdbDb, gen_idx: usize, layer_idx: usize) -> i32;
         fn techvialayerrule_get_spacing_y_spacing(db: &OdbDb, gen_idx: usize, layer_idx: usize) -> i32;
+        fn cutclassrule_get_name(db: &OdbDb, layer: &str, idx: usize) -> String;
+        fn cutclassrule_get_width(db: &OdbDb, layer: &str, idx: usize) -> i32;
+        fn cutclassrule_get_length(db: &OdbDb, layer: &str, idx: usize) -> i32;
+        fn cutclassrule_get_num_cuts(db: &OdbDb, layer: &str, idx: usize) -> i32;
+        fn cutclassrule_is_length_valid(db: &OdbDb, layer: &str, idx: usize) -> bool;
+        fn cutclassrule_is_cuts_valid(db: &OdbDb, layer: &str, idx: usize) -> bool;
+        fn cutenclosurerule_get_cut_class(db: &OdbDb, layer: &str, idx: usize) -> String;
+        fn cutenclosurerule_get_eol_width(db: &OdbDb, layer: &str, idx: usize) -> i32;
+        fn cutenclosurerule_get_eol_min_length(db: &OdbDb, layer: &str, idx: usize) -> i32;
+        fn cutenclosurerule_get_first_overhang(db: &OdbDb, layer: &str, idx: usize) -> i32;
+        fn cutenclosurerule_get_second_overhang(db: &OdbDb, layer: &str, idx: usize) -> i32;
+        fn cutenclosurerule_get_spacing(db: &OdbDb, layer: &str, idx: usize) -> i32;
+        fn cutenclosurerule_get_extension(db: &OdbDb, layer: &str, idx: usize) -> i32;
+        fn cutenclosurerule_get_forward_extension(db: &OdbDb, layer: &str, idx: usize) -> i32;
+        fn cutenclosurerule_get_backward_extension(db: &OdbDb, layer: &str, idx: usize) -> i32;
+        fn cutenclosurerule_get_min_width(db: &OdbDb, layer: &str, idx: usize) -> i32;
+        fn cutenclosurerule_get_cut_within(db: &OdbDb, layer: &str, idx: usize) -> i32;
+        fn cutenclosurerule_get_min_length(db: &OdbDb, layer: &str, idx: usize) -> i32;
+        fn cutenclosurerule_get_par_length(db: &OdbDb, layer: &str, idx: usize) -> i32;
+        fn cutenclosurerule_get_second_par_length(db: &OdbDb, layer: &str, idx: usize) -> i32;
+        fn cutenclosurerule_get_par_within(db: &OdbDb, layer: &str, idx: usize) -> i32;
+        fn cutenclosurerule_get_second_par_within(db: &OdbDb, layer: &str, idx: usize) -> i32;
+        fn cutenclosurerule_get_below_enclosure(db: &OdbDb, layer: &str, idx: usize) -> i32;
+        fn cutenclosurerule_get_num_corners(db: &OdbDb, layer: &str, idx: usize) -> u32;
+        fn cutenclosurerule_is_cut_class_valid(db: &OdbDb, layer: &str, idx: usize) -> bool;
+        fn cutenclosurerule_is_above(db: &OdbDb, layer: &str, idx: usize) -> bool;
+        fn cutenclosurerule_is_below(db: &OdbDb, layer: &str, idx: usize) -> bool;
+        fn cutenclosurerule_is_eol_min_length_valid(db: &OdbDb, layer: &str, idx: usize) -> bool;
+        fn cutenclosurerule_is_eol_only(db: &OdbDb, layer: &str, idx: usize) -> bool;
+        fn cutenclosurerule_is_short_edge_on_eol(db: &OdbDb, layer: &str, idx: usize) -> bool;
+        fn cutenclosurerule_is_side_spacing_valid(db: &OdbDb, layer: &str, idx: usize) -> bool;
+        fn cutenclosurerule_is_end_spacing_valid(db: &OdbDb, layer: &str, idx: usize) -> bool;
+        fn cutenclosurerule_is_off_center_line(db: &OdbDb, layer: &str, idx: usize) -> bool;
+        fn cutenclosurerule_is_width_valid(db: &OdbDb, layer: &str, idx: usize) -> bool;
+        fn cutenclosurerule_is_include_abutted(db: &OdbDb, layer: &str, idx: usize) -> bool;
+        fn cutenclosurerule_is_except_extra_cut(db: &OdbDb, layer: &str, idx: usize) -> bool;
+        fn cutenclosurerule_is_prl(db: &OdbDb, layer: &str, idx: usize) -> bool;
+        fn cutenclosurerule_is_no_shared_edge(db: &OdbDb, layer: &str, idx: usize) -> bool;
+        fn cutenclosurerule_is_length_valid(db: &OdbDb, layer: &str, idx: usize) -> bool;
+        fn cutenclosurerule_is_extra_cut_valid(db: &OdbDb, layer: &str, idx: usize) -> bool;
+        fn cutenclosurerule_is_extra_only(db: &OdbDb, layer: &str, idx: usize) -> bool;
+        fn cutenclosurerule_is_redundant_cut_valid(db: &OdbDb, layer: &str, idx: usize) -> bool;
+        fn cutenclosurerule_is_parallel_valid(db: &OdbDb, layer: &str, idx: usize) -> bool;
+        fn cutenclosurerule_is_second_parallel_valid(db: &OdbDb, layer: &str, idx: usize) -> bool;
+        fn cutenclosurerule_is_second_par_within_valid(db: &OdbDb, layer: &str, idx: usize) -> bool;
+        fn cutenclosurerule_is_below_enclosure_valid(db: &OdbDb, layer: &str, idx: usize) -> bool;
+        fn cutenclosurerule_is_concave_corners_valid(db: &OdbDb, layer: &str, idx: usize) -> bool;
+        fn cutenclosurerule_get_type(db: &OdbDb, layer: &str, idx: usize) -> String;
+        fn cutspacingrule_get_cut_spacing(db: &OdbDb, layer: &str, idx: usize) -> i32;
+        fn cutspacingrule_get_orthogonal_spacing(db: &OdbDb, layer: &str, idx: usize) -> i32;
+        fn cutspacingrule_get_width(db: &OdbDb, layer: &str, idx: usize) -> i32;
+        fn cutspacingrule_get_enclosure(db: &OdbDb, layer: &str, idx: usize) -> i32;
+        fn cutspacingrule_get_edge_length(db: &OdbDb, layer: &str, idx: usize) -> i32;
+        fn cutspacingrule_get_par_within(db: &OdbDb, layer: &str, idx: usize) -> i32;
+        fn cutspacingrule_get_par_enclosure(db: &OdbDb, layer: &str, idx: usize) -> i32;
+        fn cutspacingrule_get_edge_enclosure(db: &OdbDb, layer: &str, idx: usize) -> i32;
+        fn cutspacingrule_get_adj_enclosure(db: &OdbDb, layer: &str, idx: usize) -> i32;
+        fn cutspacingrule_get_above_enclosure(db: &OdbDb, layer: &str, idx: usize) -> i32;
+        fn cutspacingrule_get_above_width(db: &OdbDb, layer: &str, idx: usize) -> i32;
+        fn cutspacingrule_get_min_length(db: &OdbDb, layer: &str, idx: usize) -> i32;
+        fn cutspacingrule_get_extension(db: &OdbDb, layer: &str, idx: usize) -> i32;
+        fn cutspacingrule_get_eol_width(db: &OdbDb, layer: &str, idx: usize) -> i32;
+        fn cutspacingrule_get_num_cuts(db: &OdbDb, layer: &str, idx: usize) -> u32;
+        fn cutspacingrule_get_within(db: &OdbDb, layer: &str, idx: usize) -> i32;
+        fn cutspacingrule_get_second_within(db: &OdbDb, layer: &str, idx: usize) -> i32;
+        fn cutspacingrule_get_two_cuts(db: &OdbDb, layer: &str, idx: usize) -> u32;
+        fn cutspacingrule_get_prl(db: &OdbDb, layer: &str, idx: usize) -> u32;
+        fn cutspacingrule_get_par_length(db: &OdbDb, layer: &str, idx: usize) -> u32;
+        fn cutspacingrule_is_center_to_center(db: &OdbDb, layer: &str, idx: usize) -> bool;
+        fn cutspacingrule_is_same_net(db: &OdbDb, layer: &str, idx: usize) -> bool;
+        fn cutspacingrule_is_same_metal(db: &OdbDb, layer: &str, idx: usize) -> bool;
+        fn cutspacingrule_is_same_via(db: &OdbDb, layer: &str, idx: usize) -> bool;
+        fn cutspacingrule_is_stack(db: &OdbDb, layer: &str, idx: usize) -> bool;
+        fn cutspacingrule_is_orthogonal_spacing_valid(db: &OdbDb, layer: &str, idx: usize) -> bool;
+        fn cutspacingrule_is_above_width_enclosure_valid(db: &OdbDb, layer: &str, idx: usize) -> bool;
+        fn cutspacingrule_is_short_edge_only(db: &OdbDb, layer: &str, idx: usize) -> bool;
+        fn cutspacingrule_is_concave_corner_width(db: &OdbDb, layer: &str, idx: usize) -> bool;
+        fn cutspacingrule_is_concave_corner_parallel(db: &OdbDb, layer: &str, idx: usize) -> bool;
+        fn cutspacingrule_is_concave_corner_edge_length(db: &OdbDb, layer: &str, idx: usize) -> bool;
+        fn cutspacingrule_is_concave_corner(db: &OdbDb, layer: &str, idx: usize) -> bool;
+        fn cutspacingrule_is_extension_valid(db: &OdbDb, layer: &str, idx: usize) -> bool;
+        fn cutspacingrule_is_non_eol_convex_corner(db: &OdbDb, layer: &str, idx: usize) -> bool;
+        fn cutspacingrule_is_eol_width_valid(db: &OdbDb, layer: &str, idx: usize) -> bool;
+        fn cutspacingrule_is_min_length_valid(db: &OdbDb, layer: &str, idx: usize) -> bool;
+        fn cutspacingrule_is_above_width_valid(db: &OdbDb, layer: &str, idx: usize) -> bool;
+        fn cutspacingrule_is_mask_overlap(db: &OdbDb, layer: &str, idx: usize) -> bool;
+        fn cutspacingrule_is_wrong_direction(db: &OdbDb, layer: &str, idx: usize) -> bool;
+        fn cutspacingrule_get_adjacent_cuts(db: &OdbDb, layer: &str, idx: usize) -> u32;
+        fn cutspacingrule_is_exact_aligned(db: &OdbDb, layer: &str, idx: usize) -> bool;
+        fn cutspacingrule_is_cut_class_to_all(db: &OdbDb, layer: &str, idx: usize) -> bool;
+        fn cutspacingrule_is_no_prl(db: &OdbDb, layer: &str, idx: usize) -> bool;
+        fn cutspacingrule_is_same_mask(db: &OdbDb, layer: &str, idx: usize) -> bool;
+        fn cutspacingrule_is_except_same_pgnet(db: &OdbDb, layer: &str, idx: usize) -> bool;
+        fn cutspacingrule_is_side_parallel_overlap(db: &OdbDb, layer: &str, idx: usize) -> bool;
+        fn cutspacingrule_is_except_same_net(db: &OdbDb, layer: &str, idx: usize) -> bool;
+        fn cutspacingrule_is_except_same_metal(db: &OdbDb, layer: &str, idx: usize) -> bool;
+        fn cutspacingrule_is_except_same_metal_overlap(db: &OdbDb, layer: &str, idx: usize) -> bool;
+        fn cutspacingrule_is_except_same_via(db: &OdbDb, layer: &str, idx: usize) -> bool;
+        fn cutspacingrule_is_above(db: &OdbDb, layer: &str, idx: usize) -> bool;
+        fn cutspacingrule_is_except_two_edges(db: &OdbDb, layer: &str, idx: usize) -> bool;
+        fn cutspacingrule_is_two_cuts_valid(db: &OdbDb, layer: &str, idx: usize) -> bool;
+        fn cutspacingrule_is_same_cut(db: &OdbDb, layer: &str, idx: usize) -> bool;
+        fn cutspacingrule_is_long_edge_only(db: &OdbDb, layer: &str, idx: usize) -> bool;
+        fn cutspacingrule_is_prl_valid(db: &OdbDb, layer: &str, idx: usize) -> bool;
+        fn cutspacingrule_is_below(db: &OdbDb, layer: &str, idx: usize) -> bool;
+        fn cutspacingrule_is_par_within_enclosure_valid(db: &OdbDb, layer: &str, idx: usize) -> bool;
+        fn cutspacingrule_get_cut_class(db: &OdbDb, layer: &str, idx: usize) -> String;
+        fn cutspacingrule_get_second_layer(db: &OdbDb, layer: &str, idx: usize) -> String;
+        fn cutspacingrule_get_tech_layer(db: &OdbDb, layer: &str, idx: usize) -> String;
+        fn cutspacingrule_get_type(db: &OdbDb, layer: &str, idx: usize) -> String;
+        fn cutspacingtablerule_get_default(db: &OdbDb, layer: &str, idx: usize) -> i32;
+        fn cutspacingtablerule_get_prl(db: &OdbDb, layer: &str, idx: usize) -> i32;
+        fn cutspacingtablerule_get_extension(db: &OdbDb, layer: &str, idx: usize) -> i32;
+        fn cutspacingtablerule_is_default_valid(db: &OdbDb, layer: &str, idx: usize) -> bool;
+        fn cutspacingtablerule_is_same_mask(db: &OdbDb, layer: &str, idx: usize) -> bool;
+        fn cutspacingtablerule_is_same_net(db: &OdbDb, layer: &str, idx: usize) -> bool;
+        fn cutspacingtablerule_is_same_metal(db: &OdbDb, layer: &str, idx: usize) -> bool;
+        fn cutspacingtablerule_is_same_via(db: &OdbDb, layer: &str, idx: usize) -> bool;
+        fn cutspacingtablerule_is_layer_valid(db: &OdbDb, layer: &str, idx: usize) -> bool;
+        fn cutspacingtablerule_is_no_stack(db: &OdbDb, layer: &str, idx: usize) -> bool;
+        fn cutspacingtablerule_is_non_zero_enclosure(db: &OdbDb, layer: &str, idx: usize) -> bool;
+        fn cutspacingtablerule_is_prl_for_aligned_cut(db: &OdbDb, layer: &str, idx: usize) -> bool;
+        fn cutspacingtablerule_is_center_to_center_valid(db: &OdbDb, layer: &str, idx: usize) -> bool;
+        fn cutspacingtablerule_is_center_and_edge_valid(db: &OdbDb, layer: &str, idx: usize) -> bool;
+        fn cutspacingtablerule_is_no_prl(db: &OdbDb, layer: &str, idx: usize) -> bool;
+        fn cutspacingtablerule_is_prl_valid(db: &OdbDb, layer: &str, idx: usize) -> bool;
+        fn cutspacingtablerule_is_max_x_y(db: &OdbDb, layer: &str, idx: usize) -> bool;
+        fn cutspacingtablerule_is_end_extension_valid(db: &OdbDb, layer: &str, idx: usize) -> bool;
+        fn cutspacingtablerule_is_side_extension_valid(db: &OdbDb, layer: &str, idx: usize) -> bool;
+        fn cutspacingtablerule_is_exact_aligned_spacing_valid(db: &OdbDb, layer: &str, idx: usize) -> bool;
+        fn cutspacingtablerule_is_horizontal(db: &OdbDb, layer: &str, idx: usize) -> bool;
+        fn cutspacingtablerule_is_prl_horizontal(db: &OdbDb, layer: &str, idx: usize) -> bool;
+        fn cutspacingtablerule_is_vertical(db: &OdbDb, layer: &str, idx: usize) -> bool;
+        fn cutspacingtablerule_is_prl_vertical(db: &OdbDb, layer: &str, idx: usize) -> bool;
+        fn cutspacingtablerule_is_non_opposite_enclosure_spacing_valid(db: &OdbDb, layer: &str, idx: usize) -> bool;
+        fn cutspacingtablerule_is_opposite_enclosure_resize_spacing_valid(db: &OdbDb, layer: &str, idx: usize) -> bool;
+        fn cutspacingtablerule_get_second_layer(db: &OdbDb, layer: &str, idx: usize) -> String;
+        fn cutspacingtablerule_get_tech_layer(db: &OdbDb, layer: &str, idx: usize) -> String;
         fn layerantenna_is_valid(db: &OdbDb, layer: &str) -> bool;
         fn layerantenna_has_area_factor(db: &OdbDb, layer: &str) -> bool;
         fn layerantenna_has_side_area_factor(db: &OdbDb, layer: &str) -> bool;
@@ -796,6 +954,7 @@ mod ffi_gen {
         fn chipinst_get_b_box_y_max(db: &OdbDb, chip: &str, inst: &str) -> i32;
         fn chipinst_get_b_box_dx(db: &OdbDb, chip: &str, inst: &str) -> i32;
         fn chipinst_get_b_box_dy(db: &OdbDb, chip: &str, inst: &str) -> i32;
+        fn num_chipinst_get_regions(db: &OdbDb, chip: &str, inst: &str) -> usize;
         fn chipregion_get_name(db: &OdbDb, chip: &str, region: &str) -> String;
         fn chipregion_get_box_x_min(db: &OdbDb, chip: &str, region: &str) -> i32;
         fn chipregion_get_box_y_min(db: &OdbDb, chip: &str, region: &str) -> i32;
@@ -803,6 +962,7 @@ mod ffi_gen {
         fn chipregion_get_box_y_max(db: &OdbDb, chip: &str, region: &str) -> i32;
         fn chipregion_get_box_dx(db: &OdbDb, chip: &str, region: &str) -> i32;
         fn chipregion_get_box_dy(db: &OdbDb, chip: &str, region: &str) -> i32;
+        fn num_chipregion_get_chip_bumps(db: &OdbDb, chip: &str, region: &str) -> usize;
         fn chipregion_get_chip(db: &OdbDb, chip: &str, region: &str) -> String;
         fn chipregion_get_side(db: &OdbDb, chip: &str, region: &str) -> String;
         fn chipregion_get_layer(db: &OdbDb, chip: &str, region: &str) -> String;
@@ -826,6 +986,7 @@ mod ffi_gen {
         fn chippath_get_name(db: &OdbDb, chip: &str, path: &str) -> String;
         fn chippath_get_chip(db: &OdbDb, chip: &str, path: &str) -> String;
         fn unfoldedchip_get_name(db: &OdbDb, path: &str) -> String;
+        fn num_unfoldedchip_get_regions(db: &OdbDb, path: &str) -> usize;
         fn num_unfoldedchip_get_chip_inst_path(db: &OdbDb, path: &str) -> usize;
         fn nth_unfoldedchip_get_chip_inst_path(db: &OdbDb, path: &str, i: usize) -> String;
         fn unfoldedregion_get_parent_chip(db: &OdbDb, path: &str, idx: usize) -> String;
@@ -835,6 +996,7 @@ mod ffi_gen {
         fn unfoldedregion_is_internal(db: &OdbDb, path: &str, idx: usize) -> bool;
         fn unfoldedregion_is_internal_ext(db: &OdbDb, path: &str, idx: usize) -> bool;
         fn unfoldedregion_get_surface_z(db: &OdbDb, path: &str, idx: usize) -> i32;
+        fn num_unfoldedregion_get_bumps(db: &OdbDb, path: &str, idx: usize) -> usize;
         fn unfoldedbump_get_global_position_x(db: &OdbDb, path: &str, region_idx: usize, idx: usize) -> i32;
         fn unfoldedbump_get_global_position_y(db: &OdbDb, path: &str, region_idx: usize, idx: usize) -> i32;
         fn unfoldedbump_get_global_position_z(db: &OdbDb, path: &str, region_idx: usize, idx: usize) -> i32;
@@ -1023,6 +1185,144 @@ pub use ffi_gen::{
     chipregion_get_side,
     chipregioninst_get_chip_inst,
     chipregioninst_get_chip_region,
+    cutclassrule_get_length,
+    cutclassrule_get_name,
+    cutclassrule_get_num_cuts,
+    cutclassrule_get_width,
+    cutclassrule_is_cuts_valid,
+    cutclassrule_is_length_valid,
+    cutenclosurerule_get_backward_extension,
+    cutenclosurerule_get_below_enclosure,
+    cutenclosurerule_get_cut_class,
+    cutenclosurerule_get_cut_within,
+    cutenclosurerule_get_eol_min_length,
+    cutenclosurerule_get_eol_width,
+    cutenclosurerule_get_extension,
+    cutenclosurerule_get_first_overhang,
+    cutenclosurerule_get_forward_extension,
+    cutenclosurerule_get_min_length,
+    cutenclosurerule_get_min_width,
+    cutenclosurerule_get_num_corners,
+    cutenclosurerule_get_par_length,
+    cutenclosurerule_get_par_within,
+    cutenclosurerule_get_second_overhang,
+    cutenclosurerule_get_second_par_length,
+    cutenclosurerule_get_second_par_within,
+    cutenclosurerule_get_spacing,
+    cutenclosurerule_get_type,
+    cutenclosurerule_is_above,
+    cutenclosurerule_is_below,
+    cutenclosurerule_is_below_enclosure_valid,
+    cutenclosurerule_is_concave_corners_valid,
+    cutenclosurerule_is_cut_class_valid,
+    cutenclosurerule_is_end_spacing_valid,
+    cutenclosurerule_is_eol_min_length_valid,
+    cutenclosurerule_is_eol_only,
+    cutenclosurerule_is_except_extra_cut,
+    cutenclosurerule_is_extra_cut_valid,
+    cutenclosurerule_is_extra_only,
+    cutenclosurerule_is_include_abutted,
+    cutenclosurerule_is_length_valid,
+    cutenclosurerule_is_no_shared_edge,
+    cutenclosurerule_is_off_center_line,
+    cutenclosurerule_is_parallel_valid,
+    cutenclosurerule_is_prl,
+    cutenclosurerule_is_redundant_cut_valid,
+    cutenclosurerule_is_second_par_within_valid,
+    cutenclosurerule_is_second_parallel_valid,
+    cutenclosurerule_is_short_edge_on_eol,
+    cutenclosurerule_is_side_spacing_valid,
+    cutenclosurerule_is_width_valid,
+    cutspacingrule_get_above_enclosure,
+    cutspacingrule_get_above_width,
+    cutspacingrule_get_adj_enclosure,
+    cutspacingrule_get_adjacent_cuts,
+    cutspacingrule_get_cut_class,
+    cutspacingrule_get_cut_spacing,
+    cutspacingrule_get_edge_enclosure,
+    cutspacingrule_get_edge_length,
+    cutspacingrule_get_enclosure,
+    cutspacingrule_get_eol_width,
+    cutspacingrule_get_extension,
+    cutspacingrule_get_min_length,
+    cutspacingrule_get_num_cuts,
+    cutspacingrule_get_orthogonal_spacing,
+    cutspacingrule_get_par_enclosure,
+    cutspacingrule_get_par_length,
+    cutspacingrule_get_par_within,
+    cutspacingrule_get_prl,
+    cutspacingrule_get_second_layer,
+    cutspacingrule_get_second_within,
+    cutspacingrule_get_tech_layer,
+    cutspacingrule_get_two_cuts,
+    cutspacingrule_get_type,
+    cutspacingrule_get_width,
+    cutspacingrule_get_within,
+    cutspacingrule_is_above,
+    cutspacingrule_is_above_width_enclosure_valid,
+    cutspacingrule_is_above_width_valid,
+    cutspacingrule_is_below,
+    cutspacingrule_is_center_to_center,
+    cutspacingrule_is_concave_corner,
+    cutspacingrule_is_concave_corner_edge_length,
+    cutspacingrule_is_concave_corner_parallel,
+    cutspacingrule_is_concave_corner_width,
+    cutspacingrule_is_cut_class_to_all,
+    cutspacingrule_is_eol_width_valid,
+    cutspacingrule_is_exact_aligned,
+    cutspacingrule_is_except_same_metal,
+    cutspacingrule_is_except_same_metal_overlap,
+    cutspacingrule_is_except_same_net,
+    cutspacingrule_is_except_same_pgnet,
+    cutspacingrule_is_except_same_via,
+    cutspacingrule_is_except_two_edges,
+    cutspacingrule_is_extension_valid,
+    cutspacingrule_is_long_edge_only,
+    cutspacingrule_is_mask_overlap,
+    cutspacingrule_is_min_length_valid,
+    cutspacingrule_is_no_prl,
+    cutspacingrule_is_non_eol_convex_corner,
+    cutspacingrule_is_orthogonal_spacing_valid,
+    cutspacingrule_is_par_within_enclosure_valid,
+    cutspacingrule_is_prl_valid,
+    cutspacingrule_is_same_cut,
+    cutspacingrule_is_same_mask,
+    cutspacingrule_is_same_metal,
+    cutspacingrule_is_same_net,
+    cutspacingrule_is_same_via,
+    cutspacingrule_is_short_edge_only,
+    cutspacingrule_is_side_parallel_overlap,
+    cutspacingrule_is_stack,
+    cutspacingrule_is_two_cuts_valid,
+    cutspacingrule_is_wrong_direction,
+    cutspacingtablerule_get_default,
+    cutspacingtablerule_get_extension,
+    cutspacingtablerule_get_prl,
+    cutspacingtablerule_get_second_layer,
+    cutspacingtablerule_get_tech_layer,
+    cutspacingtablerule_is_center_and_edge_valid,
+    cutspacingtablerule_is_center_to_center_valid,
+    cutspacingtablerule_is_default_valid,
+    cutspacingtablerule_is_end_extension_valid,
+    cutspacingtablerule_is_exact_aligned_spacing_valid,
+    cutspacingtablerule_is_horizontal,
+    cutspacingtablerule_is_layer_valid,
+    cutspacingtablerule_is_max_x_y,
+    cutspacingtablerule_is_no_prl,
+    cutspacingtablerule_is_no_stack,
+    cutspacingtablerule_is_non_opposite_enclosure_spacing_valid,
+    cutspacingtablerule_is_non_zero_enclosure,
+    cutspacingtablerule_is_opposite_enclosure_resize_spacing_valid,
+    cutspacingtablerule_is_prl_for_aligned_cut,
+    cutspacingtablerule_is_prl_horizontal,
+    cutspacingtablerule_is_prl_valid,
+    cutspacingtablerule_is_prl_vertical,
+    cutspacingtablerule_is_same_mask,
+    cutspacingtablerule_is_same_metal,
+    cutspacingtablerule_is_same_net,
+    cutspacingtablerule_is_same_via,
+    cutspacingtablerule_is_side_extension_valid,
+    cutspacingtablerule_is_vertical,
     fill_get_tech_layer,
     fill_mask_number,
     fill_needs_o_p_c,
@@ -1435,8 +1735,12 @@ pub use ffi_gen::{
     nth_tech_get_vias,
     nth_unfoldedchip_get_chip_inst_path,
     num_block_get_b_terms,
+    num_block_get_blockages,
+    num_block_get_c_c_segs,
+    num_block_get_cap_nodes,
     num_block_get_children,
     num_block_get_component_mask_shift,
+    num_block_get_fills,
     num_block_get_groups,
     num_block_get_i_terms,
     num_block_get_insts,
@@ -1451,11 +1755,17 @@ pub use ffi_gen::{
     num_block_get_modules,
     num_block_get_nets,
     num_block_get_non_default_rules,
+    num_block_get_obstructions,
     num_block_get_power_domains,
     num_block_get_power_switches,
+    num_block_get_r_segs,
     num_block_get_regions,
     num_block_get_rows,
+    num_block_get_track_grids,
     num_block_get_vias,
+    num_bpin_get_boxes,
+    num_bterm_get_b_pins,
+    num_capnode_get_c_c_segs,
     num_chip_get_chip_conns,
     num_chip_get_chip_insts,
     num_chip_get_chip_nets,
@@ -1464,6 +1774,8 @@ pub use ffi_gen::{
     num_chip_get_marker_categories,
     num_chipconn_get_bottom_region_path,
     num_chipconn_get_top_region_path,
+    num_chipinst_get_regions,
+    num_chipregion_get_chip_bumps,
     num_group_get_ground_nets,
     num_group_get_groups,
     num_group_get_insts,
@@ -1473,6 +1785,8 @@ pub use ffi_gen::{
     num_inst_get_i_terms,
     num_isolation_get_isolation_cells,
     num_layer_get_tech_layer_cut_class_rules,
+    num_layer_get_tech_layer_cut_enclosure_rules,
+    num_layer_get_tech_layer_cut_spacing_rules,
     num_lib_get_masters,
     num_lib_get_sites,
     num_marker_cat_get_marker_categories,
@@ -1492,19 +1806,29 @@ pub use ffi_gen::{
     num_module_get_mod_insts,
     num_module_get_mod_nets,
     num_module_get_ports,
+    num_mterm_get_m_pins,
     num_net_get_b_terms,
+    num_net_get_cap_nodes,
     num_net_get_i_terms,
+    num_net_get_r_segs,
+    num_net_get_s_wires,
     num_pwr_domain_get_isolations,
     num_pwr_domain_get_level_shifters,
     num_pwr_domain_get_power_switches,
+    num_region_get_boundaries,
     num_region_get_groups,
     num_region_get_region_insts,
+    num_swire_get_wires,
     num_tech_get_layers,
     num_tech_get_non_default_rules,
     num_tech_get_via_generate_rules,
     num_tech_get_via_rules,
     num_tech_get_vias,
+    num_techvia_get_boxes,
     num_unfoldedchip_get_chip_inst_path,
+    num_unfoldedchip_get_regions,
+    num_unfoldedregion_get_bumps,
+    num_via_get_boxes,
     obs_get_block,
     obs_get_effective_width,
     obs_get_instance,
