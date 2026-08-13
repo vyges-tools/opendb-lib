@@ -1406,3 +1406,32 @@ rust::Vec<int32_t> die_area_polygon(const OdbDb& h) {
   }
   return out;
 }
+static void push_box(rust::Vec<int32_t>& out, odb::dbTechLayer* layer, const odb::Rect& r) {
+  if (!layer) return;
+  out.push_back(layer->getNumber());
+  out.push_back(r.xMin());
+  out.push_back(r.yMin());
+  out.push_back(r.xMax());
+  out.push_back(r.yMax());
+}
+rust::Vec<int32_t> master_obstruction_boxes(const OdbDb& h, rust::Str master) {
+  rust::Vec<int32_t> out;
+  odb::dbMaster* m = h.db->findMaster(s(master).c_str());
+  if (!m) return out;
+  for (odb::dbBox* b : m->getObstructions()) push_box(out, b->getTechLayer(), b->getBox());
+  return out;
+}
+rust::Vec<int32_t> master_pin_boxes(const OdbDb& h, rust::Str master) {
+  rust::Vec<int32_t> out;
+  odb::dbMaster* m = h.db->findMaster(s(master).c_str());
+  if (!m) return out;
+  for (odb::dbMTerm* t : m->getMTerms())
+    for (odb::dbMPin* p : t->getMPins())
+      for (odb::dbBox* b : p->getGeometry()) push_box(out, b->getTechLayer(), b->getBox());
+  return out;
+}
+rust::String layer_get_type(const OdbDb& h, rust::Str layer) {
+  odb::dbTech* t = h.db->getTech();
+  odb::dbTechLayer* l = t ? t->findLayer(s(layer).c_str()) : nullptr;
+  return l ? rust::String(l->getType().getString()) : rust::String();
+}

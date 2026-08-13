@@ -474,3 +474,18 @@ bool bterm_top_layer_grid_is_rect(const OdbDb& db);
 //
 // `getDieAreaPolygon()` returns a `Polygon` by value — not a shape the schema generator can express.
 rust::Vec<int32_t> die_area_polygon(const OdbDb& db);
+
+// A MASTER's own shapes, in master coordinates: 5 i32 each (layer number, x0, y0, x1, y1).
+//
+// Master coordinates, not placed ones, because a placer needs them for a cell it has not put
+// anywhere yet — the whole point is to ask "would it fit there".
+//
+// Two collections, because the reference treats them differently: an obstruction on an
+// OVERLAP-type layer defines the cell's true outline, while pin shapes take part in the per-layer
+// clearance check and carry a net.
+rust::Vec<int32_t> master_obstruction_boxes(const OdbDb& db, rust::Str master);
+rust::Vec<int32_t> master_pin_boxes(const OdbDb& db, rust::Str master);
+
+// A routing layer's TYPE (`ROUTING`, `CUT`, `OVERLAP`, …). The type is what marks an obstruction as
+// an outline rather than metal, and it is not the layer's name.
+rust::String layer_get_type(const OdbDb& db, rust::Str layer);
