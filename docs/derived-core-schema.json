@@ -5,7 +5,7 @@
   "scope": "hand-written core only",
   "class_count": 44,
   "method_count": 1137,
-  "bridged_count": 723,
+  "bridged_count": 732,
   "classes": [
     {
       "name": "dbBPin",
@@ -1198,7 +1198,7 @@
           "params": [],
           "const": false,
           "kind": "iterator",
-          "bridged": false,
+          "bridged": true,
           "element": "dbCapNode"
         },
         {
@@ -1207,7 +1207,7 @@
           "params": [],
           "const": false,
           "kind": "iterator",
-          "bridged": false,
+          "bridged": true,
           "element": "dbRSeg"
         },
         {
@@ -1632,7 +1632,7 @@
           "params": [],
           "const": false,
           "kind": "iterator",
-          "bridged": false,
+          "bridged": true,
           "element": "dbTrackGrid"
         },
         {
@@ -1943,7 +1943,7 @@
           "params": [],
           "const": false,
           "kind": "iterator",
-          "bridged": false,
+          "bridged": true,
           "element": "dbCCSeg"
         },
         {
@@ -3497,7 +3497,7 @@
           "params": [],
           "const": false,
           "kind": "iterator",
-          "bridged": false,
+          "bridged": true,
           "element": "dbCCSeg"
         },
         {
@@ -7003,7 +7003,7 @@
           "params": [],
           "const": false,
           "kind": "iterator",
-          "bridged": false,
+          "bridged": true,
           "element": "dbCapNode"
         },
         {
@@ -7123,7 +7123,7 @@
           "params": [],
           "const": false,
           "kind": "iterator",
-          "bridged": false,
+          "bridged": true,
           "element": "dbRSeg"
         },
         {
@@ -8395,7 +8395,7 @@
           "params": [],
           "const": false,
           "kind": "iterator",
-          "bridged": false,
+          "bridged": true,
           "element": "dbBox"
         },
         {
@@ -10527,7 +10527,7 @@
           ],
           "const": false,
           "kind": "setter",
-          "bridged": false
+          "bridged": true
         }
       ],
       "hand_written": true

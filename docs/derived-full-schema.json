@@ -5,7 +5,7 @@
   "scope": "all",
   "class_count": 119,
   "method_count": 2622,
-  "bridged_count": 1170,
+  "bridged_count": 1505,
   "classes": [
     {
       "name": "dbAccessPoint",
@@ -1468,7 +1468,7 @@
           "params": [],
           "const": false,
           "kind": "iterator",
-          "bridged": false,
+          "bridged": true,
           "element": "dbCapNode"
         },
         {
@@ -1477,7 +1477,7 @@
           "params": [],
           "const": false,
           "kind": "iterator",
-          "bridged": false,
+          "bridged": true,
           "element": "dbRSeg"
         },
         {
@@ -1902,7 +1902,7 @@
           "params": [],
           "const": false,
           "kind": "iterator",
-          "bridged": false,
+          "bridged": true,
           "element": "dbTrackGrid"
         },
         {
@@ -2213,7 +2213,7 @@
           "params": [],
           "const": false,
           "kind": "iterator",
-          "bridged": false,
+          "bridged": true,
           "element": "dbCCSeg"
         },
         {
@@ -3891,7 +3891,7 @@
           "params": [],
           "const": false,
           "kind": "iterator",
-          "bridged": false,
+          "bridged": true,
           "element": "dbCCSeg"
         },
         {
@@ -4997,7 +4997,7 @@
           "params": [],
           "const": true,
           "kind": "iterator",
-          "bridged": false,
+          "bridged": true,
           "element": "dbChipBump"
         },
         {
@@ -12881,7 +12881,7 @@
           "params": [],
           "const": false,
           "kind": "iterator",
-          "bridged": false,
+          "bridged": true,
           "element": "dbCapNode"
         },
         {
@@ -13001,7 +13001,7 @@
           "params": [],
           "const": false,
           "kind": "iterator",
-          "bridged": false,
+          "bridged": true,
           "element": "dbRSeg"
         },
         {
@@ -14761,7 +14761,7 @@
           "params": [],
           "const": false,
           "kind": "iterator",
-          "bridged": false,
+          "bridged": true,
           "element": "dbBox"
         },
         {
@@ -16520,7 +16520,7 @@
           "params": [],
           "const": true,
           "kind": "iterator",
-          "bridged": false,
+          "bridged": true,
           "element": "dbTechLayerCutSpacingRule"
         },
         {
@@ -16547,7 +16547,7 @@
           "params": [],
           "const": true,
           "kind": "iterator",
-          "bridged": false,
+          "bridged": true,
           "element": "dbTechLayerCutEnclosureRule"
         },
         {
@@ -18475,7 +18475,7 @@
           ],
           "const": false,
           "kind": "setter",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "getCutSpacing",
@@ -18483,7 +18483,7 @@
           "params": [],
           "const": true,
           "kind": "getter",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "setWithin",
@@ -18496,7 +18496,7 @@
           ],
           "const": false,
           "kind": "setter",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "getWithin",
@@ -18504,7 +18504,7 @@
           "params": [],
           "const": true,
           "kind": "getter",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "setArrayWidth",
@@ -18655,7 +18655,7 @@
           "params": [],
           "const": true,
           "kind": "relation",
-          "bridged": false,
+          "bridged": true,
           "target": "dbTechLayerCutClassRule"
         }
       ],
@@ -18676,7 +18676,7 @@
           ],
           "const": false,
           "kind": "setter",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "getWithin",
@@ -18684,7 +18684,7 @@
           "params": [],
           "const": true,
           "kind": "getter",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "setEolWidth",
@@ -18697,7 +18697,7 @@
           ],
           "const": false,
           "kind": "setter",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "getEolWidth",
@@ -18705,7 +18705,7 @@
           "params": [],
           "const": true,
           "kind": "getter",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "setJogLength",
@@ -18739,7 +18739,7 @@
           ],
           "const": false,
           "kind": "setter",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "getEdgeLength",
@@ -18747,7 +18747,7 @@
           "params": [],
           "const": true,
           "kind": "getter",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "setMinLength",
@@ -18760,7 +18760,7 @@
           ],
           "const": false,
           "kind": "setter",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "getMinLength",
@@ -18768,7 +18768,7 @@
           "params": [],
           "const": true,
           "kind": "getter",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "setExceptNotchLength",
@@ -18802,7 +18802,7 @@
           ],
           "const": false,
           "kind": "setter",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "isSameMask",
@@ -18810,7 +18810,7 @@
           "params": [],
           "const": true,
           "kind": "predicate",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "setCornerOnly",
@@ -18928,7 +18928,7 @@
           ],
           "const": false,
           "kind": "setter",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "isMinLengthValid",
@@ -18936,7 +18936,7 @@
           "params": [],
           "const": true,
           "kind": "predicate",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "setExceptNotch",
@@ -18991,7 +18991,7 @@
           ],
           "const": false,
           "kind": "setter",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "isExceptSameNet",
@@ -18999,7 +18999,7 @@
           "params": [],
           "const": true,
           "kind": "predicate",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "setExceptSameMetal",
@@ -19012,7 +19012,7 @@
           ],
           "const": false,
           "kind": "setter",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "isExceptSameMetal",
@@ -19020,7 +19020,7 @@
           "params": [],
           "const": true,
           "kind": "predicate",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "setCornerToCorner",
@@ -19158,7 +19158,7 @@
           ],
           "const": false,
           "kind": "setter",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "getLength",
@@ -19179,7 +19179,7 @@
           ],
           "const": false,
           "kind": "setter",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "getNumCuts",
@@ -19187,7 +19187,7 @@
           "params": [],
           "const": true,
           "kind": "getter",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "setLengthValid",
@@ -19200,7 +19200,7 @@
           ],
           "const": false,
           "kind": "setter",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "isLengthValid",
@@ -19208,7 +19208,7 @@
           "params": [],
           "const": true,
           "kind": "predicate",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "setCutsValid",
@@ -19221,7 +19221,7 @@
           ],
           "const": false,
           "kind": "setter",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "isCutsValid",
@@ -19229,7 +19229,7 @@
           "params": [],
           "const": true,
           "kind": "predicate",
-          "bridged": false
+          "bridged": true
         }
       ],
       "hand_written": false
@@ -19257,7 +19257,7 @@
           "params": [],
           "const": true,
           "kind": "relation",
-          "bridged": false,
+          "bridged": true,
           "target": "dbTechLayerCutClassRule"
         },
         {
@@ -19271,7 +19271,7 @@
           ],
           "const": false,
           "kind": "setter",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "getEolWidth",
@@ -19279,7 +19279,7 @@
           "params": [],
           "const": true,
           "kind": "getter",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "setEolMinLength",
@@ -19292,7 +19292,7 @@
           ],
           "const": false,
           "kind": "setter",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "getEolMinLength",
@@ -19300,7 +19300,7 @@
           "params": [],
           "const": true,
           "kind": "getter",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "setFirstOverhang",
@@ -19313,7 +19313,7 @@
           ],
           "const": false,
           "kind": "setter",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "getFirstOverhang",
@@ -19321,7 +19321,7 @@
           "params": [],
           "const": true,
           "kind": "getter",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "setSecondOverhang",
@@ -19334,7 +19334,7 @@
           ],
           "const": false,
           "kind": "setter",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "getSecondOverhang",
@@ -19342,7 +19342,7 @@
           "params": [],
           "const": true,
           "kind": "getter",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "setSpacing",
@@ -19376,7 +19376,7 @@
           ],
           "const": false,
           "kind": "setter",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "getExtension",
@@ -19384,7 +19384,7 @@
           "params": [],
           "const": true,
           "kind": "getter",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "setForwardExtension",
@@ -19397,7 +19397,7 @@
           ],
           "const": false,
           "kind": "setter",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "getForwardExtension",
@@ -19405,7 +19405,7 @@
           "params": [],
           "const": true,
           "kind": "getter",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "setBackwardExtension",
@@ -19418,7 +19418,7 @@
           ],
           "const": false,
           "kind": "setter",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "getBackwardExtension",
@@ -19426,7 +19426,7 @@
           "params": [],
           "const": true,
           "kind": "getter",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "setMinWidth",
@@ -19460,7 +19460,7 @@
           ],
           "const": false,
           "kind": "setter",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "getCutWithin",
@@ -19468,7 +19468,7 @@
           "params": [],
           "const": true,
           "kind": "getter",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "setMinLength",
@@ -19481,7 +19481,7 @@
           ],
           "const": false,
           "kind": "setter",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "getMinLength",
@@ -19489,7 +19489,7 @@
           "params": [],
           "const": true,
           "kind": "getter",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "setParLength",
@@ -19502,7 +19502,7 @@
           ],
           "const": false,
           "kind": "setter",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "getParLength",
@@ -19510,7 +19510,7 @@
           "params": [],
           "const": true,
           "kind": "getter",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "setSecondParLength",
@@ -19523,7 +19523,7 @@
           ],
           "const": false,
           "kind": "setter",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "getSecondParLength",
@@ -19531,7 +19531,7 @@
           "params": [],
           "const": true,
           "kind": "getter",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "setParWithin",
@@ -19544,7 +19544,7 @@
           ],
           "const": false,
           "kind": "setter",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "getParWithin",
@@ -19552,7 +19552,7 @@
           "params": [],
           "const": true,
           "kind": "getter",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "setSecondParWithin",
@@ -19565,7 +19565,7 @@
           ],
           "const": false,
           "kind": "setter",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "getSecondParWithin",
@@ -19573,7 +19573,7 @@
           "params": [],
           "const": true,
           "kind": "getter",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "setBelowEnclosure",
@@ -19586,7 +19586,7 @@
           ],
           "const": false,
           "kind": "setter",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "getBelowEnclosure",
@@ -19594,7 +19594,7 @@
           "params": [],
           "const": true,
           "kind": "getter",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "setNumCorners",
@@ -19607,7 +19607,7 @@
           ],
           "const": false,
           "kind": "setter",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "getNumCorners",
@@ -19615,7 +19615,7 @@
           "params": [],
           "const": true,
           "kind": "getter",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "setCutClassValid",
@@ -19628,7 +19628,7 @@
           ],
           "const": false,
           "kind": "setter",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "isCutClassValid",
@@ -19636,7 +19636,7 @@
           "params": [],
           "const": true,
           "kind": "predicate",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "setAbove",
@@ -19649,7 +19649,7 @@
           ],
           "const": false,
           "kind": "setter",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "isAbove",
@@ -19657,7 +19657,7 @@
           "params": [],
           "const": true,
           "kind": "predicate",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "setBelow",
@@ -19670,7 +19670,7 @@
           ],
           "const": false,
           "kind": "setter",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "isBelow",
@@ -19678,7 +19678,7 @@
           "params": [],
           "const": true,
           "kind": "predicate",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "setEolMinLengthValid",
@@ -19691,7 +19691,7 @@
           ],
           "const": false,
           "kind": "setter",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "isEolMinLengthValid",
@@ -19699,7 +19699,7 @@
           "params": [],
           "const": true,
           "kind": "predicate",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "setEolOnly",
@@ -19712,7 +19712,7 @@
           ],
           "const": false,
           "kind": "setter",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "isEolOnly",
@@ -19720,7 +19720,7 @@
           "params": [],
           "const": true,
           "kind": "predicate",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "setShortEdgeOnEol",
@@ -19733,7 +19733,7 @@
           ],
           "const": false,
           "kind": "setter",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "isShortEdgeOnEol",
@@ -19741,7 +19741,7 @@
           "params": [],
           "const": true,
           "kind": "predicate",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "setSideSpacingValid",
@@ -19754,7 +19754,7 @@
           ],
           "const": false,
           "kind": "setter",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "isSideSpacingValid",
@@ -19762,7 +19762,7 @@
           "params": [],
           "const": true,
           "kind": "predicate",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "setEndSpacingValid",
@@ -19775,7 +19775,7 @@
           ],
           "const": false,
           "kind": "setter",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "isEndSpacingValid",
@@ -19783,7 +19783,7 @@
           "params": [],
           "const": true,
           "kind": "predicate",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "setOffCenterLine",
@@ -19796,7 +19796,7 @@
           ],
           "const": false,
           "kind": "setter",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "isOffCenterLine",
@@ -19804,7 +19804,7 @@
           "params": [],
           "const": true,
           "kind": "predicate",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "setWidthValid",
@@ -19817,7 +19817,7 @@
           ],
           "const": false,
           "kind": "setter",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "isWidthValid",
@@ -19825,7 +19825,7 @@
           "params": [],
           "const": true,
           "kind": "predicate",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "setIncludeAbutted",
@@ -19838,7 +19838,7 @@
           ],
           "const": false,
           "kind": "setter",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "isIncludeAbutted",
@@ -19846,7 +19846,7 @@
           "params": [],
           "const": true,
           "kind": "predicate",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "setExceptExtraCut",
@@ -19859,7 +19859,7 @@
           ],
           "const": false,
           "kind": "setter",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "isExceptExtraCut",
@@ -19867,7 +19867,7 @@
           "params": [],
           "const": true,
           "kind": "predicate",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "setPrl",
@@ -19880,7 +19880,7 @@
           ],
           "const": false,
           "kind": "setter",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "isPrl",
@@ -19888,7 +19888,7 @@
           "params": [],
           "const": true,
           "kind": "predicate",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "setNoSharedEdge",
@@ -19901,7 +19901,7 @@
           ],
           "const": false,
           "kind": "setter",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "isNoSharedEdge",
@@ -19909,7 +19909,7 @@
           "params": [],
           "const": true,
           "kind": "predicate",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "setLengthValid",
@@ -19922,7 +19922,7 @@
           ],
           "const": false,
           "kind": "setter",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "isLengthValid",
@@ -19930,7 +19930,7 @@
           "params": [],
           "const": true,
           "kind": "predicate",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "setExtraCutValid",
@@ -19943,7 +19943,7 @@
           ],
           "const": false,
           "kind": "setter",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "isExtraCutValid",
@@ -19951,7 +19951,7 @@
           "params": [],
           "const": true,
           "kind": "predicate",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "setExtraOnly",
@@ -19964,7 +19964,7 @@
           ],
           "const": false,
           "kind": "setter",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "isExtraOnly",
@@ -19972,7 +19972,7 @@
           "params": [],
           "const": true,
           "kind": "predicate",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "setRedundantCutValid",
@@ -19985,7 +19985,7 @@
           ],
           "const": false,
           "kind": "setter",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "isRedundantCutValid",
@@ -19993,7 +19993,7 @@
           "params": [],
           "const": true,
           "kind": "predicate",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "setParallelValid",
@@ -20006,7 +20006,7 @@
           ],
           "const": false,
           "kind": "setter",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "isParallelValid",
@@ -20014,7 +20014,7 @@
           "params": [],
           "const": true,
           "kind": "predicate",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "setSecondParallelValid",
@@ -20027,7 +20027,7 @@
           ],
           "const": false,
           "kind": "setter",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "isSecondParallelValid",
@@ -20035,7 +20035,7 @@
           "params": [],
           "const": true,
           "kind": "predicate",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "setSecondParWithinValid",
@@ -20048,7 +20048,7 @@
           ],
           "const": false,
           "kind": "setter",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "isSecondParWithinValid",
@@ -20056,7 +20056,7 @@
           "params": [],
           "const": true,
           "kind": "predicate",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "setBelowEnclosureValid",
@@ -20069,7 +20069,7 @@
           ],
           "const": false,
           "kind": "setter",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "isBelowEnclosureValid",
@@ -20077,7 +20077,7 @@
           "params": [],
           "const": true,
           "kind": "predicate",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "setConcaveCornersValid",
@@ -20090,7 +20090,7 @@
           ],
           "const": false,
           "kind": "setter",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "isConcaveCornersValid",
@@ -20098,7 +20098,7 @@
           "params": [],
           "const": true,
           "kind": "predicate",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "setType",
@@ -20139,7 +20139,7 @@
           ],
           "const": false,
           "kind": "setter",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "getCutSpacing",
@@ -20147,7 +20147,7 @@
           "params": [],
           "const": true,
           "kind": "getter",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "setSecondLayer",
@@ -20173,7 +20173,7 @@
           ],
           "const": false,
           "kind": "setter",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "getOrthogonalSpacing",
@@ -20181,7 +20181,7 @@
           "params": [],
           "const": true,
           "kind": "getter",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "setWidth",
@@ -20236,7 +20236,7 @@
           ],
           "const": false,
           "kind": "setter",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "getEdgeLength",
@@ -20244,7 +20244,7 @@
           "params": [],
           "const": true,
           "kind": "getter",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "setParWithin",
@@ -20257,7 +20257,7 @@
           ],
           "const": false,
           "kind": "setter",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "getParWithin",
@@ -20265,7 +20265,7 @@
           "params": [],
           "const": true,
           "kind": "getter",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "setParEnclosure",
@@ -20278,7 +20278,7 @@
           ],
           "const": false,
           "kind": "setter",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "getParEnclosure",
@@ -20286,7 +20286,7 @@
           "params": [],
           "const": true,
           "kind": "getter",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "setEdgeEnclosure",
@@ -20299,7 +20299,7 @@
           ],
           "const": false,
           "kind": "setter",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "getEdgeEnclosure",
@@ -20307,7 +20307,7 @@
           "params": [],
           "const": true,
           "kind": "getter",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "setAdjEnclosure",
@@ -20320,7 +20320,7 @@
           ],
           "const": false,
           "kind": "setter",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "getAdjEnclosure",
@@ -20328,7 +20328,7 @@
           "params": [],
           "const": true,
           "kind": "getter",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "setAboveEnclosure",
@@ -20341,7 +20341,7 @@
           ],
           "const": false,
           "kind": "setter",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "getAboveEnclosure",
@@ -20349,7 +20349,7 @@
           "params": [],
           "const": true,
           "kind": "getter",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "setAboveWidth",
@@ -20362,7 +20362,7 @@
           ],
           "const": false,
           "kind": "setter",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "getAboveWidth",
@@ -20370,7 +20370,7 @@
           "params": [],
           "const": true,
           "kind": "getter",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "setMinLength",
@@ -20383,7 +20383,7 @@
           ],
           "const": false,
           "kind": "setter",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "getMinLength",
@@ -20391,7 +20391,7 @@
           "params": [],
           "const": true,
           "kind": "getter",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "setExtension",
@@ -20404,7 +20404,7 @@
           ],
           "const": false,
           "kind": "setter",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "getExtension",
@@ -20412,7 +20412,7 @@
           "params": [],
           "const": true,
           "kind": "getter",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "setEolWidth",
@@ -20425,7 +20425,7 @@
           ],
           "const": false,
           "kind": "setter",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "getEolWidth",
@@ -20433,7 +20433,7 @@
           "params": [],
           "const": true,
           "kind": "getter",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "setNumCuts",
@@ -20446,7 +20446,7 @@
           ],
           "const": false,
           "kind": "setter",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "getNumCuts",
@@ -20454,7 +20454,7 @@
           "params": [],
           "const": true,
           "kind": "getter",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "setWithin",
@@ -20467,7 +20467,7 @@
           ],
           "const": false,
           "kind": "setter",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "getWithin",
@@ -20475,7 +20475,7 @@
           "params": [],
           "const": true,
           "kind": "getter",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "setSecondWithin",
@@ -20488,7 +20488,7 @@
           ],
           "const": false,
           "kind": "setter",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "getSecondWithin",
@@ -20496,7 +20496,7 @@
           "params": [],
           "const": true,
           "kind": "getter",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "setCutClass",
@@ -20522,7 +20522,7 @@
           ],
           "const": false,
           "kind": "setter",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "getTwoCuts",
@@ -20530,7 +20530,7 @@
           "params": [],
           "const": true,
           "kind": "getter",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "setPrl",
@@ -20543,7 +20543,7 @@
           ],
           "const": false,
           "kind": "setter",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "getPrl",
@@ -20551,7 +20551,7 @@
           "params": [],
           "const": true,
           "kind": "getter",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "setParLength",
@@ -20564,7 +20564,7 @@
           ],
           "const": false,
           "kind": "setter",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "getParLength",
@@ -20572,7 +20572,7 @@
           "params": [],
           "const": true,
           "kind": "getter",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "setCutArea",
@@ -20585,7 +20585,7 @@
           ],
           "const": false,
           "kind": "setter",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "getCutArea",
@@ -20606,7 +20606,7 @@
           ],
           "const": false,
           "kind": "setter",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "isCenterToCenter",
@@ -20614,7 +20614,7 @@
           "params": [],
           "const": true,
           "kind": "predicate",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "setSameNet",
@@ -20627,7 +20627,7 @@
           ],
           "const": false,
           "kind": "setter",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "isSameNet",
@@ -20635,7 +20635,7 @@
           "params": [],
           "const": true,
           "kind": "predicate",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "setSameMetal",
@@ -20648,7 +20648,7 @@
           ],
           "const": false,
           "kind": "setter",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "isSameMetal",
@@ -20656,7 +20656,7 @@
           "params": [],
           "const": true,
           "kind": "predicate",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "setSameVia",
@@ -20669,7 +20669,7 @@
           ],
           "const": false,
           "kind": "setter",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "isSameVia",
@@ -20677,7 +20677,7 @@
           "params": [],
           "const": true,
           "kind": "predicate",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "setStack",
@@ -20690,7 +20690,7 @@
           ],
           "const": false,
           "kind": "setter",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "isStack",
@@ -20698,7 +20698,7 @@
           "params": [],
           "const": true,
           "kind": "predicate",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "setOrthogonalSpacingValid",
@@ -20711,7 +20711,7 @@
           ],
           "const": false,
           "kind": "setter",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "isOrthogonalSpacingValid",
@@ -20719,7 +20719,7 @@
           "params": [],
           "const": true,
           "kind": "predicate",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "setAboveWidthEnclosureValid",
@@ -20732,7 +20732,7 @@
           ],
           "const": false,
           "kind": "setter",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "isAboveWidthEnclosureValid",
@@ -20740,7 +20740,7 @@
           "params": [],
           "const": true,
           "kind": "predicate",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "setShortEdgeOnly",
@@ -20753,7 +20753,7 @@
           ],
           "const": false,
           "kind": "setter",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "isShortEdgeOnly",
@@ -20761,7 +20761,7 @@
           "params": [],
           "const": true,
           "kind": "predicate",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "setConcaveCornerWidth",
@@ -20774,7 +20774,7 @@
           ],
           "const": false,
           "kind": "setter",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "isConcaveCornerWidth",
@@ -20782,7 +20782,7 @@
           "params": [],
           "const": true,
           "kind": "predicate",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "setConcaveCornerParallel",
@@ -20795,7 +20795,7 @@
           ],
           "const": false,
           "kind": "setter",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "isConcaveCornerParallel",
@@ -20803,7 +20803,7 @@
           "params": [],
           "const": true,
           "kind": "predicate",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "setConcaveCornerEdgeLength",
@@ -20816,7 +20816,7 @@
           ],
           "const": false,
           "kind": "setter",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "isConcaveCornerEdgeLength",
@@ -20824,7 +20824,7 @@
           "params": [],
           "const": true,
           "kind": "predicate",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "setConcaveCorner",
@@ -20837,7 +20837,7 @@
           ],
           "const": false,
           "kind": "setter",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "isConcaveCorner",
@@ -20845,7 +20845,7 @@
           "params": [],
           "const": true,
           "kind": "predicate",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "setExtensionValid",
@@ -20858,7 +20858,7 @@
           ],
           "const": false,
           "kind": "setter",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "isExtensionValid",
@@ -20866,7 +20866,7 @@
           "params": [],
           "const": true,
           "kind": "predicate",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "setNonEolConvexCorner",
@@ -20879,7 +20879,7 @@
           ],
           "const": false,
           "kind": "setter",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "isNonEolConvexCorner",
@@ -20887,7 +20887,7 @@
           "params": [],
           "const": true,
           "kind": "predicate",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "setEolWidthValid",
@@ -20900,7 +20900,7 @@
           ],
           "const": false,
           "kind": "setter",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "isEolWidthValid",
@@ -20908,7 +20908,7 @@
           "params": [],
           "const": true,
           "kind": "predicate",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "setMinLengthValid",
@@ -20921,7 +20921,7 @@
           ],
           "const": false,
           "kind": "setter",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "isMinLengthValid",
@@ -20929,7 +20929,7 @@
           "params": [],
           "const": true,
           "kind": "predicate",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "setAboveWidthValid",
@@ -20942,7 +20942,7 @@
           ],
           "const": false,
           "kind": "setter",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "isAboveWidthValid",
@@ -20950,7 +20950,7 @@
           "params": [],
           "const": true,
           "kind": "predicate",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "setMaskOverlap",
@@ -20963,7 +20963,7 @@
           ],
           "const": false,
           "kind": "setter",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "isMaskOverlap",
@@ -20971,7 +20971,7 @@
           "params": [],
           "const": true,
           "kind": "predicate",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "setWrongDirection",
@@ -20984,7 +20984,7 @@
           ],
           "const": false,
           "kind": "setter",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "isWrongDirection",
@@ -20992,7 +20992,7 @@
           "params": [],
           "const": true,
           "kind": "predicate",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "setAdjacentCuts",
@@ -21005,7 +21005,7 @@
           ],
           "const": false,
           "kind": "setter",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "getAdjacentCuts",
@@ -21013,7 +21013,7 @@
           "params": [],
           "const": true,
           "kind": "getter",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "setExactAligned",
@@ -21026,7 +21026,7 @@
           ],
           "const": false,
           "kind": "setter",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "isExactAligned",
@@ -21034,7 +21034,7 @@
           "params": [],
           "const": true,
           "kind": "predicate",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "setCutClassToAll",
@@ -21047,7 +21047,7 @@
           ],
           "const": false,
           "kind": "setter",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "isCutClassToAll",
@@ -21055,7 +21055,7 @@
           "params": [],
           "const": true,
           "kind": "predicate",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "setNoPrl",
@@ -21068,7 +21068,7 @@
           ],
           "const": false,
           "kind": "setter",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "isNoPrl",
@@ -21076,7 +21076,7 @@
           "params": [],
           "const": true,
           "kind": "predicate",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "setSameMask",
@@ -21089,7 +21089,7 @@
           ],
           "const": false,
           "kind": "setter",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "isSameMask",
@@ -21097,7 +21097,7 @@
           "params": [],
           "const": true,
           "kind": "predicate",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "setExceptSamePgnet",
@@ -21110,7 +21110,7 @@
           ],
           "const": false,
           "kind": "setter",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "isExceptSamePgnet",
@@ -21118,7 +21118,7 @@
           "params": [],
           "const": true,
           "kind": "predicate",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "setSideParallelOverlap",
@@ -21131,7 +21131,7 @@
           ],
           "const": false,
           "kind": "setter",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "isSideParallelOverlap",
@@ -21139,7 +21139,7 @@
           "params": [],
           "const": true,
           "kind": "predicate",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "setExceptSameNet",
@@ -21152,7 +21152,7 @@
           ],
           "const": false,
           "kind": "setter",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "isExceptSameNet",
@@ -21160,7 +21160,7 @@
           "params": [],
           "const": true,
           "kind": "predicate",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "setExceptSameMetal",
@@ -21173,7 +21173,7 @@
           ],
           "const": false,
           "kind": "setter",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "isExceptSameMetal",
@@ -21181,7 +21181,7 @@
           "params": [],
           "const": true,
           "kind": "predicate",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "setExceptSameMetalOverlap",
@@ -21194,7 +21194,7 @@
           ],
           "const": false,
           "kind": "setter",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "isExceptSameMetalOverlap",
@@ -21202,7 +21202,7 @@
           "params": [],
           "const": true,
           "kind": "predicate",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "setExceptSameVia",
@@ -21215,7 +21215,7 @@
           ],
           "const": false,
           "kind": "setter",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "isExceptSameVia",
@@ -21223,7 +21223,7 @@
           "params": [],
           "const": true,
           "kind": "predicate",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "setAbove",
@@ -21236,7 +21236,7 @@
           ],
           "const": false,
           "kind": "setter",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "isAbove",
@@ -21244,7 +21244,7 @@
           "params": [],
           "const": true,
           "kind": "predicate",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "setExceptTwoEdges",
@@ -21257,7 +21257,7 @@
           ],
           "const": false,
           "kind": "setter",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "isExceptTwoEdges",
@@ -21265,7 +21265,7 @@
           "params": [],
           "const": true,
           "kind": "predicate",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "setTwoCutsValid",
@@ -21278,7 +21278,7 @@
           ],
           "const": false,
           "kind": "setter",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "isTwoCutsValid",
@@ -21286,7 +21286,7 @@
           "params": [],
           "const": true,
           "kind": "predicate",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "setSameCut",
@@ -21299,7 +21299,7 @@
           ],
           "const": false,
           "kind": "setter",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "isSameCut",
@@ -21307,7 +21307,7 @@
           "params": [],
           "const": true,
           "kind": "predicate",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "setLongEdgeOnly",
@@ -21320,7 +21320,7 @@
           ],
           "const": false,
           "kind": "setter",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "isLongEdgeOnly",
@@ -21328,7 +21328,7 @@
           "params": [],
           "const": true,
           "kind": "predicate",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "setPrlValid",
@@ -21341,7 +21341,7 @@
           ],
           "const": false,
           "kind": "setter",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "isPrlValid",
@@ -21349,7 +21349,7 @@
           "params": [],
           "const": true,
           "kind": "predicate",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "setBelow",
@@ -21362,7 +21362,7 @@
           ],
           "const": false,
           "kind": "setter",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "isBelow",
@@ -21370,7 +21370,7 @@
           "params": [],
           "const": true,
           "kind": "predicate",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "setParWithinEnclosureValid",
@@ -21383,7 +21383,7 @@
           ],
           "const": false,
           "kind": "setter",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "isParWithinEnclosureValid",
@@ -21391,7 +21391,7 @@
           "params": [],
           "const": true,
           "kind": "predicate",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "getCutClass",
@@ -21399,7 +21399,7 @@
           "params": [],
           "const": true,
           "kind": "relation",
-          "bridged": false,
+          "bridged": true,
           "target": "dbTechLayerCutClassRule"
         },
         {
@@ -21408,7 +21408,7 @@
           "params": [],
           "const": true,
           "kind": "relation",
-          "bridged": false,
+          "bridged": true,
           "target": "dbTechLayer"
         },
         {
@@ -21467,7 +21467,7 @@
           "params": [],
           "const": true,
           "kind": "getter",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "setSecondLayer",
@@ -21493,7 +21493,7 @@
           ],
           "const": false,
           "kind": "setter",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "getPrl",
@@ -21501,7 +21501,7 @@
           "params": [],
           "const": true,
           "kind": "getter",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "setExtension",
@@ -21514,7 +21514,7 @@
           ],
           "const": false,
           "kind": "setter",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "getExtension",
@@ -21522,7 +21522,7 @@
           "params": [],
           "const": true,
           "kind": "getter",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "setDefaultValid",
@@ -21535,7 +21535,7 @@
           ],
           "const": false,
           "kind": "setter",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "isDefaultValid",
@@ -21543,7 +21543,7 @@
           "params": [],
           "const": true,
           "kind": "predicate",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "setSameMask",
@@ -21556,7 +21556,7 @@
           ],
           "const": false,
           "kind": "setter",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "isSameMask",
@@ -21564,7 +21564,7 @@
           "params": [],
           "const": true,
           "kind": "predicate",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "setSameNet",
@@ -21577,7 +21577,7 @@
           ],
           "const": false,
           "kind": "setter",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "isSameNet",
@@ -21585,7 +21585,7 @@
           "params": [],
           "const": true,
           "kind": "predicate",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "setSameMetal",
@@ -21598,7 +21598,7 @@
           ],
           "const": false,
           "kind": "setter",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "isSameMetal",
@@ -21606,7 +21606,7 @@
           "params": [],
           "const": true,
           "kind": "predicate",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "setSameVia",
@@ -21619,7 +21619,7 @@
           ],
           "const": false,
           "kind": "setter",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "isSameVia",
@@ -21627,7 +21627,7 @@
           "params": [],
           "const": true,
           "kind": "predicate",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "setLayerValid",
@@ -21640,7 +21640,7 @@
           ],
           "const": false,
           "kind": "setter",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "isLayerValid",
@@ -21648,7 +21648,7 @@
           "params": [],
           "const": true,
           "kind": "predicate",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "setNoStack",
@@ -21661,7 +21661,7 @@
           ],
           "const": false,
           "kind": "setter",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "isNoStack",
@@ -21669,7 +21669,7 @@
           "params": [],
           "const": true,
           "kind": "predicate",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "setNonZeroEnclosure",
@@ -21682,7 +21682,7 @@
           ],
           "const": false,
           "kind": "setter",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "isNonZeroEnclosure",
@@ -21690,7 +21690,7 @@
           "params": [],
           "const": true,
           "kind": "predicate",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "setPrlForAlignedCut",
@@ -21703,7 +21703,7 @@
           ],
           "const": false,
           "kind": "setter",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "isPrlForAlignedCut",
@@ -21711,7 +21711,7 @@
           "params": [],
           "const": true,
           "kind": "predicate",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "setCenterToCenterValid",
@@ -21724,7 +21724,7 @@
           ],
           "const": false,
           "kind": "setter",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "isCenterToCenterValid",
@@ -21732,7 +21732,7 @@
           "params": [],
           "const": true,
           "kind": "predicate",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "setCenterAndEdgeValid",
@@ -21745,7 +21745,7 @@
           ],
           "const": false,
           "kind": "setter",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "isCenterAndEdgeValid",
@@ -21753,7 +21753,7 @@
           "params": [],
           "const": true,
           "kind": "predicate",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "setNoPrl",
@@ -21766,7 +21766,7 @@
           ],
           "const": false,
           "kind": "setter",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "isNoPrl",
@@ -21774,7 +21774,7 @@
           "params": [],
           "const": true,
           "kind": "predicate",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "setPrlValid",
@@ -21787,7 +21787,7 @@
           ],
           "const": false,
           "kind": "setter",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "isPrlValid",
@@ -21795,7 +21795,7 @@
           "params": [],
           "const": true,
           "kind": "predicate",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "setMaxXY",
@@ -21808,7 +21808,7 @@
           ],
           "const": false,
           "kind": "setter",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "isMaxXY",
@@ -21816,7 +21816,7 @@
           "params": [],
           "const": true,
           "kind": "predicate",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "setEndExtensionValid",
@@ -21829,7 +21829,7 @@
           ],
           "const": false,
           "kind": "setter",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "isEndExtensionValid",
@@ -21837,7 +21837,7 @@
           "params": [],
           "const": true,
           "kind": "predicate",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "setSideExtensionValid",
@@ -21850,7 +21850,7 @@
           ],
           "const": false,
           "kind": "setter",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "isSideExtensionValid",
@@ -21858,7 +21858,7 @@
           "params": [],
           "const": true,
           "kind": "predicate",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "setExactAlignedSpacingValid",
@@ -21871,7 +21871,7 @@
           ],
           "const": false,
           "kind": "setter",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "isExactAlignedSpacingValid",
@@ -21879,7 +21879,7 @@
           "params": [],
           "const": true,
           "kind": "predicate",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "setHorizontal",
@@ -21892,7 +21892,7 @@
           ],
           "const": false,
           "kind": "setter",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "isHorizontal",
@@ -21900,7 +21900,7 @@
           "params": [],
           "const": true,
           "kind": "predicate",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "setPrlHorizontal",
@@ -21913,7 +21913,7 @@
           ],
           "const": false,
           "kind": "setter",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "isPrlHorizontal",
@@ -21921,7 +21921,7 @@
           "params": [],
           "const": true,
           "kind": "predicate",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "setVertical",
@@ -21934,7 +21934,7 @@
           ],
           "const": false,
           "kind": "setter",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "isVertical",
@@ -21942,7 +21942,7 @@
           "params": [],
           "const": true,
           "kind": "predicate",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "setPrlVertical",
@@ -21955,7 +21955,7 @@
           ],
           "const": false,
           "kind": "setter",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "isPrlVertical",
@@ -21963,7 +21963,7 @@
           "params": [],
           "const": true,
           "kind": "predicate",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "isNonOppositeEnclosureSpacingValid",
@@ -21971,7 +21971,7 @@
           "params": [],
           "const": true,
           "kind": "predicate",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "isOppositeEnclosureResizeSpacingValid",
@@ -21979,7 +21979,7 @@
           "params": [],
           "const": true,
           "kind": "predicate",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "addPrlForAlignedCutEntry",
@@ -22127,7 +22127,7 @@
           "params": [],
           "const": true,
           "kind": "relation",
-          "bridged": false,
+          "bridged": true,
           "target": "dbTechLayer"
         },
         {
@@ -22316,7 +22316,7 @@
           ],
           "const": false,
           "kind": "setter",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "getEolWidth",
@@ -22324,7 +22324,7 @@
           "params": [],
           "const": true,
           "kind": "getter",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "setBackwardExt",
@@ -22575,7 +22575,7 @@
           ],
           "const": false,
           "kind": "setter",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "getWithin",
@@ -22583,7 +22583,7 @@
           "params": [],
           "const": true,
           "kind": "getter",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "setPrl",
@@ -22596,7 +22596,7 @@
           ],
           "const": false,
           "kind": "setter",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "getPrl",
@@ -22604,7 +22604,7 @@
           "params": [],
           "const": true,
           "kind": "getter",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "setTwoEdges",
@@ -22761,7 +22761,7 @@
           ],
           "const": false,
           "kind": "setter",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "getForwardExtension",
@@ -22769,7 +22769,7 @@
           "params": [],
           "const": true,
           "kind": "getter",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "setEndSideExtension",
@@ -22887,7 +22887,7 @@
           ],
           "const": false,
           "kind": "setter",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "isSameMask",
@@ -22895,7 +22895,7 @@
           "params": [],
           "const": true,
           "kind": "predicate",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "setSameMetal",
@@ -22908,7 +22908,7 @@
           ],
           "const": false,
           "kind": "setter",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "isSameMetal",
@@ -22916,7 +22916,7 @@
           "params": [],
           "const": true,
           "kind": "predicate",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "setDiffMetal",
@@ -23007,7 +23007,7 @@
           "params": [],
           "const": true,
           "kind": "getter",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "setMaxSpacing",
@@ -23056,7 +23056,7 @@
           ],
           "const": false,
           "kind": "setter",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "getNumCuts",
@@ -23064,7 +23064,7 @@
           "params": [],
           "const": true,
           "kind": "getter",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "getCutClassCutsMap",
@@ -23127,7 +23127,7 @@
           ],
           "const": false,
           "kind": "setter",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "getLength",
@@ -23295,7 +23295,7 @@
           ],
           "const": false,
           "kind": "setter",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "isLengthValid",
@@ -23303,7 +23303,7 @@
           "params": [],
           "const": true,
           "kind": "predicate",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "setAreaValid",
@@ -23508,7 +23508,7 @@
           ],
           "const": false,
           "kind": "setter",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "getEolWidth",
@@ -23516,7 +23516,7 @@
           "params": [],
           "const": true,
           "kind": "getter",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "setMinBetweenLength",
@@ -23697,7 +23697,7 @@
           ],
           "const": false,
           "kind": "setter",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "isConcaveCorner",
@@ -23705,7 +23705,7 @@
           "params": [],
           "const": true,
           "kind": "predicate",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "setExceptRectangle",
@@ -23947,7 +23947,7 @@
           ],
           "const": false,
           "kind": "setter",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "getEolWidth",
@@ -23955,7 +23955,7 @@
           "params": [],
           "const": true,
           "kind": "getter",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "setWrongDirSpace",
@@ -24123,7 +24123,7 @@
           "params": [],
           "const": true,
           "kind": "getter",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "setWithCutSpace",
@@ -24304,7 +24304,7 @@
           ],
           "const": false,
           "kind": "setter",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "getExtension",
@@ -24312,7 +24312,7 @@
           "params": [],
           "const": true,
           "kind": "getter",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "setWrongDirExtension",
@@ -24388,7 +24388,7 @@
           ],
           "const": false,
           "kind": "setter",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "getMinLength",
@@ -24396,7 +24396,7 @@
           "params": [],
           "const": true,
           "kind": "getter",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "setParSpace",
@@ -24430,7 +24430,7 @@
           ],
           "const": false,
           "kind": "setter",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "getParWithin",
@@ -24438,7 +24438,7 @@
           "params": [],
           "const": true,
           "kind": "getter",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "setParPrl",
@@ -24808,7 +24808,7 @@
           ],
           "const": false,
           "kind": "setter",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "isCutClassValid",
@@ -24816,7 +24816,7 @@
           "params": [],
           "const": true,
           "kind": "predicate",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "setWithCutAboveValid",
@@ -24913,7 +24913,7 @@
           ],
           "const": false,
           "kind": "setter",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "isPrlValid",
@@ -24921,7 +24921,7 @@
           "params": [],
           "const": true,
           "kind": "predicate",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "setEndToEndValid",
@@ -24976,7 +24976,7 @@
           ],
           "const": false,
           "kind": "setter",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "isExtensionValid",
@@ -24984,7 +24984,7 @@
           "params": [],
           "const": true,
           "kind": "predicate",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "setWrongDirExtensionValid",
@@ -25060,7 +25060,7 @@
           ],
           "const": false,
           "kind": "setter",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "isMinLengthValid",
@@ -25068,7 +25068,7 @@
           "params": [],
           "const": true,
           "kind": "predicate",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "setTwoSidesValid",
@@ -25917,7 +25917,7 @@
           ],
           "const": false,
           "kind": "setter",
-          "bridged": false
+          "bridged": true
         }
       ],
       "hand_written": true
@@ -25937,7 +25937,7 @@
           ],
           "const": false,
           "kind": "setter",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "getEolWidth",
@@ -25945,7 +25945,7 @@
           "params": [],
           "const": true,
           "kind": "getter",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "setWrongDirection",
@@ -25958,7 +25958,7 @@
           ],
           "const": false,
           "kind": "setter",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "isWrongDirection",
@@ -25966,7 +25966,7 @@
           "params": [],
           "const": true,
           "kind": "predicate",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "setSameMask",
@@ -25979,7 +25979,7 @@
           ],
           "const": false,
           "kind": "setter",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "isSameMask",
@@ -25987,7 +25987,7 @@
           "params": [],
           "const": true,
           "kind": "predicate",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "setExceeptEol",
@@ -26155,7 +26155,7 @@
           ],
           "const": false,
           "kind": "setter",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "getPrl",
@@ -26163,7 +26163,7 @@
           "params": [],
           "const": true,
           "kind": "getter",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "setMinExactSpanLength",
@@ -26299,7 +26299,7 @@
           ],
           "const": false,
           "kind": "setter",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "isWrongDirection",
@@ -26307,7 +26307,7 @@
           "params": [],
           "const": true,
           "kind": "predicate",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "setOrthogonal",
@@ -26411,7 +26411,7 @@
           ],
           "const": false,
           "kind": "setter",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "getLength",
@@ -26474,7 +26474,7 @@
           ],
           "const": false,
           "kind": "setter",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "isLengthValid",
@@ -26482,7 +26482,7 @@
           "params": [],
           "const": true,
           "kind": "predicate",
-          "bridged": false
+          "bridged": true
         }
       ],
       "hand_written": false
@@ -27908,7 +27908,7 @@
           "params": [],
           "const": true,
           "kind": "iterator",
-          "bridged": false,
+          "bridged": true,
           "element": "dbUnfoldedChipBumpInst"
         }
       ],
