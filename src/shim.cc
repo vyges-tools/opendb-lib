@@ -1175,6 +1175,20 @@ rust::Vec<int64_t> obstruction_boxes(const OdbDb& h) {
   }
   return out;
 }
+rust::Vec<int32_t> blockage_boxes(const OdbDb& h) {
+  rust::Vec<int32_t> out;
+  dbBlock* b = block_of(h);
+  if (!b) return out;
+  for (odb::dbBlockage* g : b->getBlockages()) {
+    odb::dbBox* box = g->getBBox();
+    if (!box) continue;
+    out.push_back(box->xMin());
+    out.push_back(box->yMin());
+    out.push_back(box->xMax());
+    out.push_back(box->yMax());
+  }
+  return out;
+}
 void fill_create(const OdbDb& h, bool needs_opc, uint32_t mask, rust::Str layer,
                  int32_t x1, int32_t y1, int32_t x2, int32_t y2) {
   dbBlock* b = require_block(h);

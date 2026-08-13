@@ -374,6 +374,12 @@ rust::Vec<int64_t> inst_shapes(const OdbDb& db);
 // `num_obstructions` counts them; this is the geometry.
 rust::Vec<int64_t> obstruction_boxes(const OdbDb& db);
 
+// Placement blockage rectangles, 4 i32 each (x_min, y_min, x_max, y_max).
+// A blockage is resolvable by index in the generated surface, but its box arrives through a
+// dbBox*, which the schema cannot express -- and there is no count either, so nothing about the
+// geometry is reachable without this.
+rust::Vec<int32_t> blockage_boxes(const OdbDb& db);
+
 // Create a fill rectangle. `mask` 0 means "no mask" (single-mask layers).
 void fill_create(const OdbDb& db, bool needs_opc, uint32_t mask, rust::Str layer,
                  int32_t x1, int32_t y1, int32_t x2, int32_t y2);

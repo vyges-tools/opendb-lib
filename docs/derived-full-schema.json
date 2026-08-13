@@ -5,7 +5,7 @@
   "scope": "all",
   "class_count": 119,
   "method_count": 2622,
-  "bridged_count": 1169,
+  "bridged_count": 1170,
   "classes": [
     {
       "name": "dbAccessPoint",
@@ -1450,7 +1450,7 @@
           "params": [],
           "const": false,
           "kind": "iterator",
-          "bridged": false,
+          "bridged": true,
           "element": "dbBlockage"
         },
         {

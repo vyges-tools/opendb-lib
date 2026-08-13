@@ -110,6 +110,7 @@ mod ffi {
         // density fill (vyges-fin) -- see shim.h
         fn inst_shapes(db: &OdbDb) -> Result<Vec<i64>>;
         fn obstruction_boxes(db: &OdbDb) -> Result<Vec<i64>>;
+        fn blockage_boxes(db: &OdbDb) -> Result<Vec<i32>>;
         fn swire_boxes(db: &OdbDb) -> Result<Vec<i64>>;
         #[allow(clippy::too_many_arguments)]
         fn fill_create(db: &OdbDb, needs_opc: bool, mask: u32, layer: &str,
@@ -319,7 +320,7 @@ pub use ffi::{
     site_row_pattern_len, site_row_pattern_orient, site_row_pattern_site,
     block_cut_rows, has_one_site_master, nth_row_name, site_get_class, create_physical_inst, inst_bbox, num_masters, nth_master_name, master_get_type,
     nth_row_bbox, nth_row_site, nth_row_orient, destroy_inst,
-    inst_shapes, obstruction_boxes, swire_boxes, fill_create, num_fills, clear_fills,
+    inst_shapes, obstruction_boxes, blockage_boxes, swire_boxes, fill_create, num_fills, clear_fills,
     num_layers, nth_layer_name, layer_direction, track_grid_x, track_grid_y,
     track_patterns_x, track_patterns_y, bterm_constraint_region,
     num_bterm_groups, nth_bterm_group, nth_bterm_group_ordered,
