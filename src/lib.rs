@@ -128,6 +128,8 @@ mod ffi {
         fn die_area_polygon(db: &OdbDb) -> Result<Vec<i32>>;
         fn master_obstruction_boxes(db: &OdbDb, master: &str) -> Result<Vec<i32>>;
         fn master_pin_boxes(db: &OdbDb, master: &str) -> Result<Vec<i32>>;
+        fn mterm_pin_boxes(db: &OdbDb, master: &str, term: &str) -> Result<Vec<i32>>;
+        fn net_destroy(db: &OdbDb, net: &str) -> Result<()>;
         fn layer_get_type(db: &OdbDb, layer: &str) -> Result<String>;
         fn bterm_top_layer_grid(db: &OdbDb) -> Result<Vec<i32>>;
         fn bterm_top_layer_grid_layer(db: &OdbDb) -> Result<String>;
@@ -326,7 +328,8 @@ pub use ffi::{
     num_bterm_groups, nth_bterm_group, nth_bterm_group_ordered,
     blocked_regions_for_pins, fixed_bterm_shapes,
     bterm_top_layer_grid, bterm_top_layer_grid_layer, bterm_top_layer_grid_is_rect,
-    die_area_polygon, master_obstruction_boxes, master_pin_boxes, layer_get_type,
+    die_area_polygon, master_obstruction_boxes, master_pin_boxes, mterm_pin_boxes,
+    net_destroy, layer_get_type,
     layer_thickness, mterm_antenna_gate_area, net_wire_area_on_layer, net_wire_perimeter_on_layer,
     nth_net_wire_layer, num_net_wire_layers,
     mterm_antenna_diff_area, layerantenna_diff_pwl_index, layerantenna_diff_pwl_ratio,

@@ -492,6 +492,15 @@ rust::Vec<int32_t> die_area_polygon(const OdbDb& db);
 rust::Vec<int32_t> master_obstruction_boxes(const OdbDb& db, rust::Str master);
 rust::Vec<int32_t> master_pin_boxes(const OdbDb& db, rust::Str master);
 
+// Pin rectangles of ONE terminal of a master, 5 i32 each (layer_number, x_min, y_min, x_max,
+// y_max), in MASTER coordinates.
+// `master_pin_boxes` merges every terminal's shapes together, which loses the question "do these
+// two cells touch on the SAME pin" -- connection by abutment is exactly that question.
+rust::Vec<int32_t> mterm_pin_boxes(const OdbDb& db, rust::Str master, rust::Str term);
+
+// Delete a net. Its terminals are left disconnected.
+void net_destroy(const OdbDb& db, rust::Str net);
+
 // A routing layer's TYPE (`ROUTING`, `CUT`, `OVERLAP`, …). The type is what marks an obstruction as
 // an outline rather than metal, and it is not the layer's name.
 rust::String layer_get_type(const OdbDb& db, rust::Str layer);

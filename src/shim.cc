@@ -1435,6 +1435,22 @@ rust::Vec<int32_t> master_obstruction_boxes(const OdbDb& h, rust::Str master) {
   for (odb::dbBox* b : m->getObstructions()) push_box(out, b->getTechLayer(), b->getBox());
   return out;
 }
+rust::Vec<int32_t> mterm_pin_boxes(const OdbDb& h, rust::Str master, rust::Str term) {
+  rust::Vec<int32_t> out;
+  odb::dbMaster* m = h.db->findMaster(s(master).c_str());
+  if (!m) return out;
+  odb::dbMTerm* t = m->findMTerm(s(term).c_str());
+  if (!t) return out;
+  for (odb::dbMPin* p : t->getMPins())
+    for (odb::dbBox* b : p->getGeometry()) push_box(out, b->getTechLayer(), b->getBox());
+  return out;
+}
+void net_destroy(const OdbDb& h, rust::Str net) {
+  dbBlock* b = require_block(h);
+  odb::dbNet* n = b->findNet(s(net).c_str());
+  if (!n) throw std::runtime_error("no net named " + s(net));
+  odb::dbNet::destroy(n);
+}
 rust::Vec<int32_t> master_pin_boxes(const OdbDb& h, rust::Str master) {
   rust::Vec<int32_t> out;
   odb::dbMaster* m = h.db->findMaster(s(master).c_str());
