@@ -88,3 +88,34 @@ fn cut_classes_carry_the_names_the_enclosure_rules_refer_to() {
     let names: Vec<String> = (0..n).map(|i| odb::cutclassrule_get_name(&db, "V3", i)).collect();
     assert!(names.iter().all(|s| !s.is_empty()), "every cut class is named: {names:?}");
 }
+
+#[test]
+fn the_above_below_split_matches_what_the_reference_reports() {
+    // 🔑 The reference's `ViaEnclosure` debug on asap7 reports "2" enclosure rules for V4 from
+    // above and "2" from below. That split has to be reconstructible from the bindings, or the
+    // selection built on them cannot agree.
+    //
+    // ⚠️ A rule declaring NEITHER above nor below governs both sides — reading the two flags as a
+    // two-way choice drops every unqualified rule, and unqualified is the common case.
+    let db = odb::open_db(FIXTURE).expect("read");
+    let n = odb::num_layer_get_tech_layer_cut_enclosure_rules(&db, "V4");
+    assert!(n > 0, "V4 declares cut enclosure rules");
+
+    let mut above = 0;
+    let mut below = 0;
+    for i in 0..n {
+        let is_above = odb::cutenclosurerule_is_above(&db, "V4", i);
+        let is_below = odb::cutenclosurerule_is_below(&db, "V4", i);
+        let (t, b) = if !is_above && !is_below { (true, true) } else { (is_above, is_below) };
+        if t {
+            above += 1;
+        }
+        if b {
+            below += 1;
+        }
+    }
+    // Every rule governs at least one side, and the two counts are equal here because asap7's V4
+    // rules are symmetric about the cut layer.
+    assert_eq!(above, below, "V4's rules split evenly, as the reference's 2 and 2 imply");
+    assert!(above >= 2, "at least the two the reference selects, before cut-class filtering");
+}
