@@ -1445,6 +1445,21 @@ rust::Vec<int32_t> mterm_pin_boxes(const OdbDb& h, rust::Str master, rust::Str t
     for (odb::dbBox* b : p->getGeometry()) push_box(out, b->getTechLayer(), b->getBox());
   return out;
 }
+void swire_add_box_shaped(const OdbDb& h, rust::Str net, bool fixed, rust::Str layer,
+                          int32_t x1, int32_t y1, int32_t x2, int32_t y2, rust::Str shape) {
+  dbBlock* b = require_block(h);
+  odb::dbNet* n = b->findNet(s(net).c_str());
+  if (!n) throw std::runtime_error("no net named " + s(net));
+  odb::dbTech* tech = h.db->getTech();
+  odb::dbTechLayer* l = tech ? tech->findLayer(s(layer).c_str()) : nullptr;
+  if (!l) throw std::runtime_error("no layer named " + s(layer));
+  const odb::dbWireType want = fixed ? odb::dbWireType::FIXED : odb::dbWireType::ROUTED;
+  odb::dbSWire* w = nullptr;
+  for (odb::dbSWire* e : n->getSWires()) { if (e->getWireType() == want) { w = e; break; } }
+  if (!w) w = odb::dbSWire::create(n, want);
+  odb::dbSBox::create(w, l, x1, y1, x2, y2, odb::dbWireShapeType(s(shape).c_str()));
+}
+
 void swire_add_box(const OdbDb& h, rust::Str net, bool fixed, rust::Str layer,
                    int32_t x1, int32_t y1, int32_t x2, int32_t y2) {
   dbBlock* b = require_block(h);

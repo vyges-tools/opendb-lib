@@ -503,6 +503,11 @@ void net_destroy(const OdbDb& db, rust::Str net);
 
 // Append a special-wire box to a net, creating the wire container if the net has none.
 // The container has no name, so finding-or-creating it and adding the box has to be one call.
+// Special-wire box carrying an explicit SHAPE annotation ("FOLLOWPIN", "STRIPE", "RING", ...).
+// The untyped `swire_add_box` below writes IOWIRE, which is what a wire with no particular role
+// is; a power grid's wires all have one, and a DEF comparison sees the difference.
+void swire_add_box_shaped(const OdbDb& db, rust::Str net, bool fixed, rust::Str layer,
+                          int32_t x1, int32_t y1, int32_t x2, int32_t y2, rust::Str shape);
 void swire_add_box(const OdbDb& db, rust::Str net, bool fixed, rust::Str layer,
                    int32_t x1, int32_t y1, int32_t x2, int32_t y2);
 
