@@ -1445,6 +1445,13 @@ rust::Vec<int32_t> mterm_pin_boxes(const OdbDb& h, rust::Str master, rust::Str t
     for (odb::dbBox* b : p->getGeometry()) push_box(out, b->getTechLayer(), b->getBox());
   return out;
 }
+int32_t layer_find_v55_spacing(const OdbDb& h, rust::Str layer, int32_t width, int32_t prl) {
+  odb::dbTech* tech = h.db->getTech();
+  odb::dbTechLayer* l = tech ? tech->findLayer(s(layer).c_str()) : nullptr;
+  if (!l || !l->hasV55SpacingRules()) return 0;
+  return l->findV55Spacing(width, prl);
+}
+
 void swire_add_box_shaped(const OdbDb& h, rust::Str net, bool fixed, rust::Str layer,
                           int32_t x1, int32_t y1, int32_t x2, int32_t y2, rust::Str shape) {
   dbBlock* b = require_block(h);

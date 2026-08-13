@@ -506,6 +506,10 @@ void net_destroy(const OdbDb& db, rust::Str net);
 // Special-wire box carrying an explicit SHAPE annotation ("FOLLOWPIN", "STRIPE", "RING", ...).
 // The untyped `swire_add_box` below writes IOWIRE, which is what a wire with no particular role
 // is; a power grid's wires all have one, and a DEF comparison sees the difference.
+// LEF 5.5 SPACINGTABLE PARALLELRUNLENGTH lookup: the spacing required of a wire of this width
+// running alongside something for this length. `pdn` bloats a shape by this to work out what it
+// must be kept clear of. Returns 0 where the layer declares no such table.
+int32_t layer_find_v55_spacing(const OdbDb& db, rust::Str layer, int32_t width, int32_t prl);
 void swire_add_box_shaped(const OdbDb& db, rust::Str net, bool fixed, rust::Str layer,
                           int32_t x1, int32_t y1, int32_t x2, int32_t y2, rust::Str shape);
 void swire_add_box(const OdbDb& db, rust::Str net, bool fixed, rust::Str layer,
