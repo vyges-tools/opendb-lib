@@ -501,6 +501,16 @@ rust::Vec<int32_t> mterm_pin_boxes(const OdbDb& db, rust::Str master, rust::Str 
 // Delete a net. Its terminals are left disconnected.
 void net_destroy(const OdbDb& db, rust::Str net);
 
+// Append a special-wire box to a net, creating the wire container if the net has none.
+// The container has no name, so finding-or-creating it and adding the box has to be one call.
+void swire_add_box(const OdbDb& db, rust::Str net, bool fixed, rust::Str layer,
+                   int32_t x1, int32_t y1, int32_t x2, int32_t y2);
+
+// Remove a net's ROUTED special wires, keeping any marked FIXED.
+// Re-running a router should replace its own previous result and leave alone anything a person
+// pinned in place.
+std::size_t swire_clear_routed(const OdbDb& db, rust::Str net);
+
 // The database's own object identifier for a terminal.
 // Ordering rules in the reference tools break ties with it, and it reflects creation order, so it
 // cannot be reconstructed from geometry or names.
