@@ -1445,6 +1445,14 @@ rust::Vec<int32_t> mterm_pin_boxes(const OdbDb& h, rust::Str master, rust::Str t
     for (odb::dbBox* b : p->getGeometry()) push_box(out, b->getTechLayer(), b->getBox());
   return out;
 }
+uint32_t iterm_get_id(const OdbDb& h, rust::Str inst, rust::Str pin) {
+  dbBlock* b = require_block(h);
+  odb::dbInst* i = b->findInst(s(inst).c_str());
+  if (!i) throw std::runtime_error("no instance named " + s(inst));
+  odb::dbITerm* t = i->findITerm(s(pin).c_str());
+  if (!t) throw std::runtime_error("no terminal " + s(pin) + " on " + s(inst));
+  return t->getId();
+}
 void bterm_create(const OdbDb& h, rust::Str net, rust::Str name) {
   dbBlock* b = require_block(h);
   odb::dbNet* n = b->findNet(s(net).c_str());

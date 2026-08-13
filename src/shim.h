@@ -501,6 +501,11 @@ rust::Vec<int32_t> mterm_pin_boxes(const OdbDb& db, rust::Str master, rust::Str 
 // Delete a net. Its terminals are left disconnected.
 void net_destroy(const OdbDb& db, rust::Str net);
 
+// The database's own object identifier for a terminal.
+// Ordering rules in the reference tools break ties with it, and it reflects creation order, so it
+// cannot be reconstructed from geometry or names.
+uint32_t iterm_get_id(const OdbDb& db, rust::Str inst, rust::Str pin);
+
 // Create a block terminal on a net. Named separately from the net because they usually differ.
 void bterm_create(const OdbDb& db, rust::Str net, rust::Str name);
 
