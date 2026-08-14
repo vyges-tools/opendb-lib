@@ -1527,6 +1527,38 @@ int32_t layer_find_v55_spacing(const OdbDb& h, rust::Str layer, int32_t width, i
 //
 // Where LEF58 AREA rules exist the LARGEST of them governs and the layer's own AREA is ignored
 // entirely rather than combined with them; a rule of 0 is skipped, not treated as a minimum.
+// Every box of a named tech via as flat (layer_number, x0, y0, x1, y1) quintuples.
+//
+// A tech via is a fixed piece of geometry: cut boxes on its cut layer and metal boxes on its two
+// routing layers. Everything the generator needs — the cut rect, the cut centres, and the two
+// enclosure rects — is derived from these and nothing else.
+rust::Vec<int32_t> tech_via_boxes(const OdbDb& h, rust::Str via) {
+  rust::Vec<int32_t> out;
+  odb::dbTech* tech = h.db->getTech();
+  odb::dbTechVia* v = tech ? tech->findVia(s(via).c_str()) : nullptr;
+  if (!v) return out;
+  for (auto* box : v->getBoxes()) {
+    auto* layer = box->getTechLayer();
+    if (layer == nullptr) continue;
+    const odb::Rect r = box->getBox();
+    out.push_back(static_cast<int32_t>(layer->getNumber()));
+    out.push_back(r.xMin());
+    out.push_back(r.yMin());
+    out.push_back(r.xMax());
+    out.push_back(r.yMax());
+  }
+  return out;
+}
+
+// The name of a tech via's bottom or top routing layer; empty when there is no such via.
+rust::String tech_via_layer(const OdbDb& h, rust::Str via, rust::Str which) {
+  odb::dbTech* tech = h.db->getTech();
+  odb::dbTechVia* v = tech ? tech->findVia(s(via).c_str()) : nullptr;
+  if (!v) return rust::String("");
+  odb::dbTechLayer* l = s(which) == "top" ? v->getTopLayer() : v->getBottomLayer();
+  return rust::String(l ? l->getName() : "");
+}
+
 int64_t layer_min_area(const OdbDb& h, rust::Str layer) {
   odb::dbTech* tech = h.db->getTech();
   odb::dbTechLayer* l = tech ? tech->findLayer(s(layer).c_str()) : nullptr;
