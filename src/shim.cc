@@ -1445,6 +1445,58 @@ rust::Vec<int32_t> mterm_pin_boxes(const OdbDb& h, rust::Str master, rust::Str t
     for (odb::dbBox* b : p->getGeometry()) push_box(out, b->getTechLayer(), b->getBox());
   return out;
 }
+void via_create_generated(const OdbDb& h, rust::Str name, rust::Str rule,
+                          rust::Str bottom, rust::Str cut, rust::Str top,
+                          int32_t cut_w, int32_t cut_h,
+                          int32_t spacing_x, int32_t spacing_y,
+                          int32_t bot_enc_x, int32_t bot_enc_y,
+                          int32_t top_enc_x, int32_t top_enc_y,
+                          int32_t rows, int32_t cols) {
+  dbBlock* b = require_block(h);
+  if (b->findVia(s(name).c_str())) return;  // already there; leave it as it stands
+  odb::dbTech* tech = h.db->getTech();
+  if (!tech) throw std::runtime_error("no tech");
+  odb::dbTechLayer* bl = tech->findLayer(s(bottom).c_str());
+  odb::dbTechLayer* cl = tech->findLayer(s(cut).c_str());
+  odb::dbTechLayer* tl = tech->findLayer(s(top).c_str());
+  if (!bl || !cl || !tl) throw std::runtime_error("unknown layer for via " + s(name));
+  odb::dbVia* v = odb::dbVia::create(b, s(name).c_str());
+  if (!rule.empty()) {
+    for (odb::dbTechViaGenerateRule* r : tech->getViaGenerateRules()) {
+      if (r->getName() == s(rule)) { v->setViaGenerateRule(r); break; }
+    }
+  }
+  odb::dbViaParams p = v->getViaParams();
+  p.setBottomLayer(bl);
+  p.setCutLayer(cl);
+  p.setTopLayer(tl);
+  p.setXCutSize(cut_w);
+  p.setYCutSize(cut_h);
+  p.setXCutSpacing(spacing_x);
+  p.setYCutSpacing(spacing_y);
+  p.setXBottomEnclosure(bot_enc_x);
+  p.setYBottomEnclosure(bot_enc_y);
+  p.setXTopEnclosure(top_enc_x);
+  p.setYTopEnclosure(top_enc_y);
+  p.setNumCutRows(rows);
+  p.setNumCutCols(cols);
+  v->setViaParams(p);
+}
+
+void swire_add_via(const OdbDb& h, rust::Str net, bool fixed, rust::Str via,
+                   int32_t x, int32_t y, rust::Str shape) {
+  dbBlock* b = require_block(h);
+  odb::dbNet* n = b->findNet(s(net).c_str());
+  if (!n) throw std::runtime_error("no net named " + s(net));
+  odb::dbVia* v = b->findVia(s(via).c_str());
+  if (!v) throw std::runtime_error("no via named " + s(via));
+  const odb::dbWireType want = fixed ? odb::dbWireType::FIXED : odb::dbWireType::ROUTED;
+  odb::dbSWire* w = nullptr;
+  for (odb::dbSWire* e : n->getSWires()) { if (e->getWireType() == want) { w = e; break; } }
+  if (!w) w = odb::dbSWire::create(n, want);
+  odb::dbSBox::create(w, v, x, y, odb::dbWireShapeType(s(shape).c_str()));
+}
+
 int32_t layer_find_v55_spacing(const OdbDb& h, rust::Str layer, int32_t width, int32_t prl) {
   odb::dbTech* tech = h.db->getTech();
   odb::dbTechLayer* l = tech ? tech->findLayer(s(layer).c_str()) : nullptr;

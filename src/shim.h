@@ -509,6 +509,23 @@ void net_destroy(const OdbDb& db, rust::Str net);
 // LEF 5.5 SPACINGTABLE PARALLELRUNLENGTH lookup: the spacing required of a wire of this width
 // running alongside something for this length. `pdn` bloats a shape by this to work out what it
 // must be kept clear of. Returns 0 where the layer declares no such table.
+// Create a generated via (LEF VIARULE GENERATE) with explicit cut geometry, or leave an existing
+// one of that name alone. `rule` names the generate rule; an empty string leaves it unset.
+// ⚠️ Cut SPACING here is edge-to-edge, which is what the database stores — not the centre-to-centre
+// pitch a generator works in.
+void via_create_generated(const OdbDb& db, rust::Str name, rust::Str rule,
+                          rust::Str bottom, rust::Str cut, rust::Str top,
+                          int32_t cut_w, int32_t cut_h,
+                          int32_t spacing_x, int32_t spacing_y,
+                          int32_t bot_enc_x, int32_t bot_enc_y,
+                          int32_t top_enc_x, int32_t top_enc_y,
+                          int32_t rows, int32_t cols);
+
+// Place an existing via on a net's special wire at a point. A via is placed by its CENTRE, unlike
+// a box, which is given its corners.
+void swire_add_via(const OdbDb& db, rust::Str net, bool fixed, rust::Str via,
+                   int32_t x, int32_t y, rust::Str shape);
+
 int32_t layer_find_v55_spacing(const OdbDb& db, rust::Str layer, int32_t width, int32_t prl);
 void swire_add_box_shaped(const OdbDb& db, rust::Str net, bool fixed, rust::Str layer,
                           int32_t x1, int32_t y1, int32_t x2, int32_t y2, rust::Str shape);
