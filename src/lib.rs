@@ -132,6 +132,7 @@ mod ffi {
         fn net_destroy(db: &OdbDb, net: &str) -> Result<()>;
         fn iterm_get_id(db: &OdbDb, inst: &str, pin: &str) -> Result<u32>;
         fn inst_get_id(db: &OdbDb, inst: &str) -> Result<u32>;
+        fn techvialayerrule_rect(db: &OdbDb, gen_idx: usize, layer_idx: usize) -> Result<Vec<i32>>;
         fn via_create_generated(db: &OdbDb, name: &str, rule: &str, bottom: &str, cut: &str,
                                 top: &str, cut_w: i32, cut_h: i32, spacing_x: i32, spacing_y: i32,
                                 bot_enc_x: i32, bot_enc_y: i32, top_enc_x: i32, top_enc_y: i32,
@@ -346,7 +347,7 @@ pub use ffi::{
     blocked_regions_for_pins, fixed_bterm_shapes,
     bterm_top_layer_grid, bterm_top_layer_grid_layer, bterm_top_layer_grid_is_rect,
     die_area_polygon, master_obstruction_boxes, master_pin_boxes, mterm_pin_boxes,
-    net_destroy, iterm_get_id, inst_get_id, layer_find_v55_spacing, via_create_generated, swire_add_via, swire_add_box, swire_add_box_shaped, swire_clear_routed, bterm_create, bterm_create_pin, layer_get_type,
+    net_destroy, iterm_get_id, inst_get_id, layer_find_v55_spacing, techvialayerrule_rect, via_create_generated, swire_add_via, swire_add_box, swire_add_box_shaped, swire_clear_routed, bterm_create, bterm_create_pin, layer_get_type,
     layer_thickness, mterm_antenna_gate_area, net_wire_area_on_layer, net_wire_perimeter_on_layer,
     nth_net_wire_layer, num_net_wire_layers,
     mterm_antenna_diff_area, layerantenna_diff_pwl_index, layerantenna_diff_pwl_ratio,

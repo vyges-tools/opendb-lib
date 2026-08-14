@@ -513,6 +513,12 @@ void net_destroy(const OdbDb& db, rust::Str net);
 // one of that name alone. `rule` names the generate rule; an empty string leaves it unset.
 // ⚠️ Cut SPACING here is edge-to-edge, which is what the database stores — not the centre-to-centre
 // pitch a generator works in.
+// The cut rectangle a VIARULE GENERATE declares for one of its layers, as {x0,y0,x1,y1}; empty
+// where the rule declares none. ⚠️ `getRect` returns through a `Rect&` out-parameter, which the
+// binding generator handles for scalars only — the same shape of gap as every other hand-written
+// accessor here.
+rust::Vec<int32_t> techvialayerrule_rect(const OdbDb& db, std::size_t gen_idx, std::size_t layer_idx);
+
 void via_create_generated(const OdbDb& db, rust::Str name, rust::Str rule,
                           rust::Str bottom, rust::Str cut, rust::Str top,
                           int32_t cut_w, int32_t cut_h,

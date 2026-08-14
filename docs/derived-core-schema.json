@@ -5,7 +5,7 @@
   "scope": "hand-written core only",
   "class_count": 44,
   "method_count": 1137,
-  "bridged_count": 753,
+  "bridged_count": 757,
   "classes": [
     {
       "name": "dbBPin",
@@ -3589,7 +3589,7 @@
           ],
           "const": false,
           "kind": "setter",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "needsOPC",
@@ -11208,7 +11208,7 @@
           ],
           "const": false,
           "kind": "relation",
-          "bridged": false,
+          "bridged": true,
           "target": "dbTechViaLayerRule"
         }
       ],
@@ -11409,7 +11409,7 @@
           ],
           "const": false,
           "kind": "setter",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "setRect",
@@ -11564,7 +11564,7 @@
           ],
           "const": false,
           "kind": "relation",
-          "bridged": false,
+          "bridged": true,
           "target": "dbTechViaLayerRule"
         }
       ],

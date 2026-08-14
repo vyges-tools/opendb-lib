@@ -1445,6 +1445,25 @@ rust::Vec<int32_t> mterm_pin_boxes(const OdbDb& h, rust::Str master, rust::Str t
     for (odb::dbBox* b : p->getGeometry()) push_box(out, b->getTechLayer(), b->getBox());
   return out;
 }
+rust::Vec<int32_t> techvialayerrule_rect(const OdbDb& h, std::size_t gen_idx, std::size_t layer_idx) {
+  rust::Vec<int32_t> out;
+  odb::dbTech* tech = h.db->getTech();
+  if (!tech) return out;
+  std::size_t k = 0;
+  for (odb::dbTechViaGenerateRule* g : tech->getViaGenerateRules()) {
+    if (k++ != gen_idx) continue;
+    if (layer_idx >= g->getViaLayerRuleCount()) return out;
+    odb::dbTechViaLayerRule* lr = g->getViaLayerRule(layer_idx);
+    if (!lr || !lr->hasRect()) return out;
+    odb::Rect r;
+    lr->getRect(r);
+    out.push_back(r.xMin()); out.push_back(r.yMin());
+    out.push_back(r.xMax()); out.push_back(r.yMax());
+    return out;
+  }
+  return out;
+}
+
 void via_create_generated(const OdbDb& h, rust::Str name, rust::Str rule,
                           rust::Str bottom, rust::Str cut, rust::Str top,
                           int32_t cut_w, int32_t cut_h,
