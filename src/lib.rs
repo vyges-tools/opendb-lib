@@ -136,7 +136,7 @@ mod ffi {
         fn via_create_generated(db: &OdbDb, name: &str, rule: &str, bottom: &str, cut: &str,
                                 top: &str, cut_w: i32, cut_h: i32, spacing_x: i32, spacing_y: i32,
                                 bot_enc_x: i32, bot_enc_y: i32, top_enc_x: i32, top_enc_y: i32,
-                                rows: i32, cols: i32) -> Result<()>;
+                                rows: i32, cols: i32, origin_x: i32, origin_y: i32) -> Result<()>;
         fn swire_add_via(db: &OdbDb, net: &str, fixed: bool, via: &str, x: i32, y: i32,
                          shape: &str) -> Result<()>;
         fn layer_find_v55_spacing(db: &OdbDb, layer: &str, width: i32, prl: i32) -> Result<i32>;

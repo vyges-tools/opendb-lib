@@ -525,7 +525,8 @@ void via_create_generated(const OdbDb& db, rust::Str name, rust::Str rule,
                           int32_t spacing_x, int32_t spacing_y,
                           int32_t bot_enc_x, int32_t bot_enc_y,
                           int32_t top_enc_x, int32_t top_enc_y,
-                          int32_t rows, int32_t cols);
+                          int32_t rows, int32_t cols,
+                          int32_t origin_x, int32_t origin_y);
 
 // Place an existing via on a net's special wire at a point. A via is placed by its CENTRE, unlike
 // a box, which is given its corners.

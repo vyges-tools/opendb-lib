@@ -1470,7 +1470,8 @@ void via_create_generated(const OdbDb& h, rust::Str name, rust::Str rule,
                           int32_t spacing_x, int32_t spacing_y,
                           int32_t bot_enc_x, int32_t bot_enc_y,
                           int32_t top_enc_x, int32_t top_enc_y,
-                          int32_t rows, int32_t cols) {
+                          int32_t rows, int32_t cols,
+                          int32_t origin_x, int32_t origin_y) {
   dbBlock* b = require_block(h);
   if (b->findVia(s(name).c_str())) return;  // already there; leave it as it stands
   odb::dbTech* tech = h.db->getTech();
@@ -1499,6 +1500,10 @@ void via_create_generated(const OdbDb& h, rust::Str name, rust::Str rule,
   p.setYTopEnclosure(top_enc_y);
   p.setNumCutRows(rows);
   p.setNumCutCols(cols);
+  // A via built from a technology-declared one is offset by that via's own cut centre; a via
+  // built from a generate rule is centred already and passes 0 here.
+  p.setXOrigin(origin_x);
+  p.setYOrigin(origin_y);
   v->setViaParams(p);
 }
 
