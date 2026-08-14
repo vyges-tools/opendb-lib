@@ -533,6 +533,7 @@ void swire_add_via(const OdbDb& db, rust::Str net, bool fixed, rust::Str via,
                    int32_t x, int32_t y, rust::Str shape);
 
 int32_t layer_find_v55_spacing(const OdbDb& db, rust::Str layer, int32_t width, int32_t prl);
+int64_t layer_min_area(const OdbDb& db, rust::Str layer);
 void swire_add_box_shaped(const OdbDb& db, rust::Str net, bool fixed, rust::Str layer,
                           int32_t x1, int32_t y1, int32_t x2, int32_t y2, rust::Str shape);
 void swire_add_box(const OdbDb& db, rust::Str net, bool fixed, rust::Str layer,

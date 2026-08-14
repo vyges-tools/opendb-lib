@@ -1523,6 +1523,26 @@ int32_t layer_find_v55_spacing(const OdbDb& h, rust::Str layer, int32_t width, i
   return l->findV55Spacing(width, prl);
 }
 
+// The minimum area a shape on this layer must have, 0 if the layer sets none.
+//
+// Where LEF58 AREA rules exist the LARGEST of them governs and the layer's own AREA is ignored
+// entirely rather than combined with them; a rule of 0 is skipped, not treated as a minimum.
+int64_t layer_min_area(const OdbDb& h, rust::Str layer) {
+  odb::dbTech* tech = h.db->getTech();
+  odb::dbTechLayer* l = tech ? tech->findLayer(s(layer).c_str()) : nullptr;
+  if (!l) return 0;
+  auto rules = l->getTechLayerAreaRules();
+  if (!rules.empty()) {
+    int64_t most = 0;
+    for (auto* r : rules) {
+      const int64_t a = r->getArea();
+      if (a > most) most = a;
+    }
+    return most;
+  }
+  return l->hasArea() ? l->getArea() : 0;
+}
+
 void swire_add_box_shaped(const OdbDb& h, rust::Str net, bool fixed, rust::Str layer,
                           int32_t x1, int32_t y1, int32_t x2, int32_t y2, rust::Str shape) {
   dbBlock* b = require_block(h);
