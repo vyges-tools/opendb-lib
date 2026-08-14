@@ -536,6 +536,7 @@ void swire_add_via(const OdbDb& db, rust::Str net, bool fixed, rust::Str via,
 int32_t layer_find_v55_spacing(const OdbDb& db, rust::Str layer, int32_t width, int32_t prl);
 int64_t layer_min_area(const OdbDb& db, rust::Str layer);
 rust::Vec<int32_t> tech_via_boxes(const OdbDb& db, rust::Str via);
+rust::Vec<int32_t> bpin_layer_boxes(const OdbDb& db, rust::Str bterm, std::size_t pin);
 rust::String tech_via_layer(const OdbDb& db, rust::Str via, rust::Str which);
 std::size_t num_cut_spacing_table_rules(const OdbDb& db, rust::Str layer);
 int32_t cut_spacing_table_max_spacing(const OdbDb& db, rust::Str layer, std::size_t idx, rust::Str cls);

@@ -1537,6 +1537,32 @@ int32_t layer_find_v55_spacing(const OdbDb& h, rust::Str layer, int32_t width, i
 // A tech via is a fixed piece of geometry: cut boxes on its cut layer and metal boxes on its two
 // routing layers. Everything the generator needs — the cut rect, the cut centres, and the two
 // enclosure rects — is derived from these and nothing else.
+// Every box of one block pin as flat (layer_number, x0, y0, x1, y1) quintuples.
+//
+// ⚠️ A pin's bounding box is already exposed, and it is not the same thing: a pin may carry boxes
+// on several layers, and an obstruction belongs to the layer its box is on.
+rust::Vec<int32_t> bpin_layer_boxes(const OdbDb& h, rust::Str bterm, std::size_t pin) {
+  rust::Vec<int32_t> out;
+  dbBlock* b = require_block(h);
+  odb::dbBTerm* bt = b->findBTerm(s(bterm).c_str());
+  if (!bt) return out;
+  std::size_t k = 0;
+  for (odb::dbBPin* bp : bt->getBPins()) {
+    if (k++ != pin) continue;
+    for (odb::dbBox* box : bp->getBoxes()) {
+      auto* layer = box->getTechLayer();
+      if (layer == nullptr) continue;
+      out.push_back(static_cast<int32_t>(layer->getNumber()));
+      out.push_back(box->xMin());
+      out.push_back(box->yMin());
+      out.push_back(box->xMax());
+      out.push_back(box->yMax());
+    }
+    break;
+  }
+  return out;
+}
+
 rust::Vec<int32_t> tech_via_boxes(const OdbDb& h, rust::Str via) {
   rust::Vec<int32_t> out;
   odb::dbTech* tech = h.db->getTech();
