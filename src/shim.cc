@@ -1564,6 +1564,62 @@ rust::String tech_via_layer(const OdbDb& h, rust::Str via, rust::Str which) {
   return rust::String(l ? l->getName() : "");
 }
 
+// LEF58 cut spacing tables, addressed by (layer, index).
+//
+// ⚠️ These take a CUT CLASS and side flags, so the binding generator cannot synthesise them —
+// it emits only argument-free getters. The rule set is also a nameless dbSet, so it had no count
+// accessor either and could not be enumerated at all.
+//
+// 🔑 Where a cut layer states no `SPACING` of its own — which every ASAP7 cut layer does — this
+// table is the ONLY place the cut pitch comes from.
+static odb::dbTechLayerCutSpacingTableDefRule* cst_rule(const OdbDb& h, rust::Str layer,
+                                                        std::size_t idx) {
+  odb::dbTech* tech = h.db->getTech();
+  odb::dbTechLayer* l = tech ? tech->findLayer(s(layer).c_str()) : nullptr;
+  if (!l) return nullptr;
+  std::size_t k = 0;
+  for (odb::dbTechLayerCutSpacingTableDefRule* r : l->getTechLayerCutSpacingTableDefRules()) {
+    if (k++ == idx) return r;
+  }
+  return nullptr;
+}
+
+std::size_t num_cut_spacing_table_rules(const OdbDb& h, rust::Str layer) {
+  odb::dbTech* tech = h.db->getTech();
+  odb::dbTechLayer* l = tech ? tech->findLayer(s(layer).c_str()) : nullptr;
+  if (!l) return 0;
+  std::size_t n = 0;
+  for (auto* r : l->getTechLayerCutSpacingTableDefRules()) { (void) r; n++; }
+  return n;
+}
+
+int32_t cut_spacing_table_max_spacing(const OdbDb& h, rust::Str layer, std::size_t idx,
+                                      rust::Str cls) {
+  auto* r = cst_rule(h, layer, idx);
+  if (!r) return 0;
+  return r->getMaxSpacing(s(cls), s(cls),
+                          odb::dbTechLayerCutSpacingTableDefRule::MIN);
+}
+
+int32_t cut_spacing_table_spacing(const OdbDb& h, rust::Str layer, std::size_t idx,
+                                  rust::Str cls, bool side1, bool side2) {
+  auto* r = cst_rule(h, layer, idx);
+  if (!r) return 0;
+  return r->getSpacing(s(cls), side1, s(cls), side2);
+}
+
+bool cut_spacing_table_is_center_and_edge(const OdbDb& h, rust::Str layer, std::size_t idx,
+                                          rust::Str cls) {
+  auto* r = cst_rule(h, layer, idx);
+  return r ? r->isCenterAndEdge(s(cls), s(cls)) : false;
+}
+
+bool cut_spacing_table_is_center_to_center(const OdbDb& h, rust::Str layer, std::size_t idx,
+                                           rust::Str cls) {
+  auto* r = cst_rule(h, layer, idx);
+  return r ? r->isCenterToCenter(s(cls), s(cls)) : false;
+}
+
 int64_t layer_min_area(const OdbDb& h, rust::Str layer) {
   odb::dbTech* tech = h.db->getTech();
   odb::dbTechLayer* l = tech ? tech->findLayer(s(layer).c_str()) : nullptr;

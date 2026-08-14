@@ -537,6 +537,11 @@ int32_t layer_find_v55_spacing(const OdbDb& db, rust::Str layer, int32_t width, 
 int64_t layer_min_area(const OdbDb& db, rust::Str layer);
 rust::Vec<int32_t> tech_via_boxes(const OdbDb& db, rust::Str via);
 rust::String tech_via_layer(const OdbDb& db, rust::Str via, rust::Str which);
+std::size_t num_cut_spacing_table_rules(const OdbDb& db, rust::Str layer);
+int32_t cut_spacing_table_max_spacing(const OdbDb& db, rust::Str layer, std::size_t idx, rust::Str cls);
+int32_t cut_spacing_table_spacing(const OdbDb& db, rust::Str layer, std::size_t idx, rust::Str cls, bool side1, bool side2);
+bool cut_spacing_table_is_center_and_edge(const OdbDb& db, rust::Str layer, std::size_t idx, rust::Str cls);
+bool cut_spacing_table_is_center_to_center(const OdbDb& db, rust::Str layer, std::size_t idx, rust::Str cls);
 void swire_add_box_shaped(const OdbDb& db, rust::Str net, bool fixed, rust::Str layer,
                           int32_t x1, int32_t y1, int32_t x2, int32_t y2, rust::Str shape);
 void swire_add_box(const OdbDb& db, rust::Str net, bool fixed, rust::Str layer,

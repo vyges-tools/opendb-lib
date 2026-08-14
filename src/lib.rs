@@ -143,6 +143,11 @@ mod ffi {
         fn layer_min_area(db: &OdbDb, layer: &str) -> Result<i64>;
         fn tech_via_boxes(db: &OdbDb, via: &str) -> Result<Vec<i32>>;
         fn tech_via_layer(db: &OdbDb, via: &str, which: &str) -> Result<String>;
+        fn num_cut_spacing_table_rules(db: &OdbDb, layer: &str) -> Result<usize>;
+        fn cut_spacing_table_max_spacing(db: &OdbDb, layer: &str, idx: usize, cls: &str) -> Result<i32>;
+        fn cut_spacing_table_spacing(db: &OdbDb, layer: &str, idx: usize, cls: &str, side1: bool, side2: bool) -> Result<i32>;
+        fn cut_spacing_table_is_center_and_edge(db: &OdbDb, layer: &str, idx: usize, cls: &str) -> Result<bool>;
+        fn cut_spacing_table_is_center_to_center(db: &OdbDb, layer: &str, idx: usize, cls: &str) -> Result<bool>;
         fn swire_add_box_shaped(db: &OdbDb, net: &str, fixed: bool, layer: &str,
                                 x1: i32, y1: i32, x2: i32, y2: i32, shape: &str) -> Result<()>;
         fn swire_add_box(db: &OdbDb, net: &str, fixed: bool, layer: &str,
@@ -350,7 +355,7 @@ pub use ffi::{
     blocked_regions_for_pins, fixed_bterm_shapes,
     bterm_top_layer_grid, bterm_top_layer_grid_layer, bterm_top_layer_grid_is_rect,
     die_area_polygon, master_obstruction_boxes, master_pin_boxes, mterm_pin_boxes,
-    net_destroy, iterm_get_id, inst_get_id, layer_find_v55_spacing, layer_min_area, tech_via_boxes, tech_via_layer, techvialayerrule_rect, via_create_generated, swire_add_via, swire_add_box, swire_add_box_shaped, swire_clear_routed, bterm_create, bterm_create_pin, layer_get_type,
+    net_destroy, iterm_get_id, inst_get_id, layer_find_v55_spacing, layer_min_area, tech_via_boxes, tech_via_layer, num_cut_spacing_table_rules, cut_spacing_table_max_spacing, cut_spacing_table_spacing, cut_spacing_table_is_center_and_edge, cut_spacing_table_is_center_to_center, techvialayerrule_rect, via_create_generated, swire_add_via, swire_add_box, swire_add_box_shaped, swire_clear_routed, bterm_create, bterm_create_pin, layer_get_type,
     layer_thickness, mterm_antenna_gate_area, net_wire_area_on_layer, net_wire_perimeter_on_layer,
     nth_net_wire_layer, num_net_wire_layers,
     mterm_antenna_diff_area, layerantenna_diff_pwl_index, layerantenna_diff_pwl_ratio,
