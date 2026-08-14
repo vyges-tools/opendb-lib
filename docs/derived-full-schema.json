@@ -5,7 +5,7 @@
   "scope": "all",
   "class_count": 119,
   "method_count": 2622,
-  "bridged_count": 1528,
+  "bridged_count": 1532,
   "classes": [
     {
       "name": "dbAccessPoint",
@@ -5612,7 +5612,7 @@
           ],
           "const": false,
           "kind": "setter",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "needsOPC",
@@ -27163,7 +27163,7 @@
           ],
           "const": false,
           "kind": "relation",
-          "bridged": false,
+          "bridged": true,
           "target": "dbTechViaLayerRule"
         }
       ],
@@ -27364,7 +27364,7 @@
           ],
           "const": false,
           "kind": "setter",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "setRect",
@@ -27519,7 +27519,7 @@
           ],
           "const": false,
           "kind": "relation",
-          "bridged": false,
+          "bridged": true,
           "target": "dbTechViaLayerRule"
         }
       ],
