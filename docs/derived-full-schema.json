@@ -5,7 +5,7 @@
   "scope": "all",
   "class_count": 119,
   "method_count": 2622,
-  "bridged_count": 1532,
+  "bridged_count": 1543,
   "classes": [
     {
       "name": "dbAccessPoint",
@@ -10189,7 +10189,7 @@
           "params": [],
           "const": true,
           "kind": "getter",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "isFiller",
@@ -13950,7 +13950,7 @@
           ],
           "const": false,
           "kind": "other",
-          "bridged": false
+          "bridged": true
         }
       ],
       "hand_written": false
@@ -16610,7 +16610,7 @@
           "params": [],
           "const": true,
           "kind": "iterator",
-          "bridged": false,
+          "bridged": true,
           "element": "dbTechLayerAreaRule"
         },
         {
@@ -17467,7 +17467,7 @@
           "params": [],
           "const": true,
           "kind": "getter",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "setArea",
@@ -18223,7 +18223,7 @@
           "params": [],
           "const": true,
           "kind": "getter",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "setExceptMinWidth",
@@ -22162,7 +22162,7 @@
           ],
           "const": true,
           "kind": "other",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "getExactAlignedSpacing",
@@ -23028,7 +23028,7 @@
           "params": [],
           "const": true,
           "kind": "getter",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "hasCutClass",
@@ -23177,7 +23177,7 @@
           "params": [],
           "const": true,
           "kind": "getter",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "setAreaWithinDist",
@@ -26100,7 +26100,7 @@
           "params": [],
           "const": true,
           "kind": "getter",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "setMinSpanLength",
@@ -28409,7 +28409,7 @@
           ],
           "const": false,
           "kind": "setter",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "setYOrigin",
@@ -28422,7 +28422,7 @@
           ],
           "const": false,
           "kind": "setter",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "setXTopOffset",
