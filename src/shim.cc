@@ -1563,6 +1563,24 @@ rust::Vec<int32_t> bpin_layer_boxes(const OdbDb& h, rust::Str bterm, std::size_t
   return out;
 }
 
+// Every boundary rectangle of a named region, flattened as x0,y0,x1,y1 per box.
+//
+// A region may carry more than one box -- DEF allows a non-rectangular region, expressed as
+// several rectangles -- so all of them are returned rather than the first.
+rust::Vec<int32_t> region_boundaries(const OdbDb& h, rust::Str region) {
+  rust::Vec<int32_t> out;
+  dbBlock* b = require_block(h);
+  odb::dbRegion* r = b->findRegion(s(region).c_str());
+  if (!r) return out;
+  for (odb::dbBox* box : r->getBoundaries()) {
+    out.push_back(box->xMin());
+    out.push_back(box->yMin());
+    out.push_back(box->xMax());
+    out.push_back(box->yMax());
+  }
+  return out;
+}
+
 rust::Vec<int32_t> tech_via_boxes(const OdbDb& h, rust::Str via) {
   rust::Vec<int32_t> out;
   odb::dbTech* tech = h.db->getTech();
