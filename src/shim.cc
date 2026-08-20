@@ -1528,6 +1528,22 @@ int32_t layer_find_v55_spacing(const OdbDb& h, rust::Str layer, int32_t width, i
   return l->findV55Spacing(width, prl);
 }
 
+// The TWOWIDTHS spacing table's answer for two shapes of the given widths running `prl` alongside
+// each other, 0 where the layer declares no such table.
+//
+// ⚠️ **Not an alternative to the V55 rules but a companion to them.** A layer may declare both,
+// and a caller asking how far to keep clear must take the LARGER: OpenROAD's own
+// `TechLayer::getSpacing` is `std::max(layer->getSpacing(width, length),
+// layer->findTwSpacing(width, width, length))`. Asking only one of the two answers with a keep-out
+// that is short by whatever the other rule adds.
+int32_t layer_find_tw_spacing(const OdbDb& h, rust::Str layer, int32_t width1, int32_t width2,
+                              int32_t prl) {
+  odb::dbTech* tech = h.db->getTech();
+  odb::dbTechLayer* l = tech ? tech->findLayer(s(layer).c_str()) : nullptr;
+  if (!l || !l->hasTwoWidthsSpacingRules()) return 0;
+  return l->findTwSpacing(width1, width2, prl);
+}
+
 // The minimum area a shape on this layer must have, 0 if the layer sets none.
 //
 // Where LEF58 AREA rules exist the LARGEST of them governs and the layer's own AREA is ignored
