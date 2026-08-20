@@ -1521,6 +1521,25 @@ void swire_add_via(const OdbDb& h, rust::Str net, bool fixed, rust::Str via,
   odb::dbSBox::create(w, v, x, y, odb::dbWireShapeType(s(shape).c_str()));
 }
 
+// The spacing the DATABASE would use for a shape of this width running `prl` alongside another --
+// `dbTechLayer::getSpacing(width, length)`, which is three rules and a default, not one table:
+//
+//   1. V5.4 SPACING rules with a RANGE: the smallest whose range covers the width
+//   2. the V5.5 SPACINGTABLE, which OVERWRITES whatever (1) found
+//   3. failing both, the smallest V5.4 rule whose range ends BELOW the width
+//   4. failing all three, the layer's plain SPACING
+//
+// ⚠️ **`layer_find_v55_spacing` is only step 2**, and answers 0 where the layer has no V5.5 table
+// at all. A caller that reads it as "the spacing" gets a keep-out short by whatever the range
+// rules add, and a caller that patches the gap with the plain SPACING alone skips step 1 -- which
+// is a different wrong answer, not a fix.
+int32_t layer_get_spacing_for(const OdbDb& h, rust::Str layer, int32_t width, int32_t length) {
+  odb::dbTech* tech = h.db->getTech();
+  odb::dbTechLayer* l = tech ? tech->findLayer(s(layer).c_str()) : nullptr;
+  if (!l) return 0;
+  return l->getSpacing(width, length);
+}
+
 int32_t layer_find_v55_spacing(const OdbDb& h, rust::Str layer, int32_t width, int32_t prl) {
   odb::dbTech* tech = h.db->getTech();
   odb::dbTechLayer* l = tech ? tech->findLayer(s(layer).c_str()) : nullptr;
@@ -1701,6 +1720,84 @@ static odb::dbTechLayerCutSpacingTableDefRule* cst_rule(const OdbDb& h, rust::St
     if (k++ == idx) return r;
   }
   return nullptr;
+}
+
+// ── LEF58 ARRAYSPACING ────────────────────────────────────────────────────────────────────────
+//
+// A cut layer's ARRAYSPACING rules say that once a via holds enough cuts in a row, the cuts must be
+// grouped: N per group at the ordinary cut pitch, with a wider `SPACING` between groups.
+//
+//     ARRAYSPACING CUTSPACING 0.114
+//       ARRAYCUTS 3 SPACING 1.0
+//       ARRAYCUTS 4 SPACING 1.5
+//       ARRAYCUTS 5 SPACING 2.0 ;
+//
+// ⚠️ **A rule naming no cut class applies to every via**, which is what `ViaGenerator::isCutClass`
+// says by returning true whenever either side is null — so an empty class here is "any", never
+// "none".
+static odb::dbTechLayerArraySpacingRule* array_rule(const OdbDb& h, rust::Str layer,
+                                                    std::size_t idx) {
+  odb::dbTech* tech = h.db->getTech();
+  odb::dbTechLayer* l = tech ? tech->findLayer(s(layer).c_str()) : nullptr;
+  if (!l) return nullptr;
+  std::size_t i = 0;
+  for (auto* r : l->getTechLayerArraySpacingRules()) {
+    if (i++ == idx) return r;
+  }
+  return nullptr;
+}
+
+std::size_t num_array_spacing_rules(const OdbDb& h, rust::Str layer) {
+  odb::dbTech* tech = h.db->getTech();
+  odb::dbTechLayer* l = tech ? tech->findLayer(s(layer).c_str()) : nullptr;
+  if (!l) return 0;
+  std::size_t n = 0;
+  for (auto* r : l->getTechLayerArraySpacingRules()) { (void) r; n++; }
+  return n;
+}
+
+// The cut class the rule is restricted to, or "" where it names none -- which means EVERY class.
+rust::String array_spacing_rule_cut_class(const OdbDb& h, rust::Str layer, std::size_t idx) {
+  auto* r = array_rule(h, layer, idx);
+  if (!r) return rust::String("");
+  odb::dbTechLayerCutClassRule* c = r->getCutClass();
+  return rust::String(c ? c->getName() : "");
+}
+
+bool array_spacing_rule_is_parallel_overlap(const OdbDb& h, rust::Str layer, std::size_t idx) {
+  auto* r = array_rule(h, layer, idx);
+  return r ? r->isParallelOverlap() : false;
+}
+
+bool array_spacing_rule_is_long_array(const OdbDb& h, rust::Str layer, std::size_t idx) {
+  auto* r = array_rule(h, layer, idx);
+  return r ? r->isLongArray() : false;
+}
+
+// ⚠️ Zero means the rule states no width limit, not a limit of nothing: the reference skips a rule
+// only when `getArrayWidth() != 0 && getArrayWidth() > width`.
+int32_t array_spacing_rule_array_width(const OdbDb& h, rust::Str layer, std::size_t idx) {
+  auto* r = array_rule(h, layer, idx);
+  return r ? r->getArrayWidth() : 0;
+}
+
+// ⚠️ Zero likewise means the rule states none, and the via keeps the cut pitch it already had.
+int32_t array_spacing_rule_cut_spacing(const OdbDb& h, rust::Str layer, std::size_t idx) {
+  auto* r = array_rule(h, layer, idx);
+  return r ? r->getCutSpacing() : 0;
+}
+
+// The ARRAYCUTS table flattened to (cuts, spacing) pairs, in the map's own ascending order.
+rust::Vec<int32_t> array_spacing_rule_cuts_spacing(const OdbDb& h, rust::Str layer,
+                                                   std::size_t idx) {
+  rust::Vec<int32_t> out;
+  auto* r = array_rule(h, layer, idx);
+  if (!r) return out;
+  for (const auto& [cuts, spacing] : r->getCutsArraySpacing()) {
+    out.push_back(cuts);
+    out.push_back(spacing);
+  }
+  return out;
 }
 
 std::size_t num_cut_spacing_table_rules(const OdbDb& h, rust::Str layer) {

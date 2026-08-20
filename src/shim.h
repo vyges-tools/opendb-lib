@@ -533,6 +533,7 @@ void via_create_generated(const OdbDb& db, rust::Str name, rust::Str rule,
 void swire_add_via(const OdbDb& db, rust::Str net, bool fixed, rust::Str via,
                    int32_t x, int32_t y, rust::Str shape);
 
+int32_t layer_get_spacing_for(const OdbDb& db, rust::Str layer, int32_t width, int32_t length);
 int32_t layer_find_v55_spacing(const OdbDb& db, rust::Str layer, int32_t width, int32_t prl);
 int32_t layer_find_tw_spacing(const OdbDb& db, rust::Str layer, int32_t width1, int32_t width2, int32_t prl);
 int64_t layer_min_area(const OdbDb& db, rust::Str layer);
@@ -541,6 +542,13 @@ rust::Vec<int32_t> bpin_layer_boxes(const OdbDb& db, rust::Str bterm, std::size_
 rust::Vec<int32_t> region_boundaries(const OdbDb& db, rust::Str region);
 rust::Vec<int64_t> net_swire_shapes(const OdbDb& db, rust::Str net);
 rust::String tech_via_layer(const OdbDb& db, rust::Str via, rust::Str which);
+std::size_t num_array_spacing_rules(const OdbDb& db, rust::Str layer);
+rust::String array_spacing_rule_cut_class(const OdbDb& db, rust::Str layer, std::size_t idx);
+bool array_spacing_rule_is_parallel_overlap(const OdbDb& db, rust::Str layer, std::size_t idx);
+bool array_spacing_rule_is_long_array(const OdbDb& db, rust::Str layer, std::size_t idx);
+int32_t array_spacing_rule_array_width(const OdbDb& db, rust::Str layer, std::size_t idx);
+int32_t array_spacing_rule_cut_spacing(const OdbDb& db, rust::Str layer, std::size_t idx);
+rust::Vec<int32_t> array_spacing_rule_cuts_spacing(const OdbDb& db, rust::Str layer, std::size_t idx);
 std::size_t num_cut_spacing_table_rules(const OdbDb& db, rust::Str layer);
 int32_t cut_spacing_table_max_spacing(const OdbDb& db, rust::Str layer, std::size_t idx, rust::Str cls);
 int32_t cut_spacing_table_spacing(const OdbDb& db, rust::Str layer, std::size_t idx, rust::Str cls, bool side1, bool side2);
