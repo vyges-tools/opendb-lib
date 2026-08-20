@@ -1581,6 +1581,65 @@ rust::Vec<int32_t> region_boundaries(const OdbDb& h, rust::Str region) {
   return out;
 }
 
+// Every special-wire box of one net, flattened as
+// layer number, x0, y0, x1, y1, wire shape type, octilinear -- seven values per box.
+//
+// The wire shape type is odb::dbWireShapeType::Value: 0 NONE, 1 RING, 2 PADRING, 3 BLOCKRING,
+// 4 STRIPE, 5 FOLLOWPIN, 6 IOWIRE, 7 COREWIRE, 8 BLOCKWIRE, 9 BLOCKAGEWIRE, 10 FILLWIRE,
+// 11 DRCFILL. A caller deciding what a shape may connect to needs it: a stripe and a ring are
+// landing targets where a follow pin or a fill wire is not.
+//
+// A VIA box is decomposed into the metal it occupies on each layer, placed at the via's own
+// coordinates -- the enclosures above and below are real metal and anything reasoning about
+// occupied space needs them, not the cut alone.
+//
+// The octilinear flag marks a box whose direction is diagonal. Its two corners do NOT describe
+// the metal: the shape is a 45-degree segment inside that bounding box, so a caller must treat it
+// as occupied space rather than as something to connect to.
+//
+// ⚠️ Distinct from swire_boxes, which flattens every net's boxes together with no net, no type
+// and no octilinear flag. That is enough for density fill, which only asks *is this occupied*;
+// it is not enough for anything that must also ask *whose is it, and of what kind*.
+rust::Vec<int64_t> net_swire_shapes(const OdbDb& h, rust::Str net) {
+  rust::Vec<int64_t> out;
+  dbBlock* b = require_block(h);
+  odb::dbNet* n = b->findNet(s(net).c_str());
+  if (!n) return out;
+  auto push = [&out](odb::dbTechLayer* layer, const odb::Rect& r, int type, bool octilinear) {
+    if (!layer) return;
+    out.push_back(layer->getNumber());
+    out.push_back(r.xMin());
+    out.push_back(r.yMin());
+    out.push_back(r.xMax());
+    out.push_back(r.yMax());
+    out.push_back(type);
+    out.push_back(octilinear ? 1 : 0);
+  };
+  std::vector<odb::dbShape> via_shapes;
+  for (odb::dbSWire* sw : n->getSWires()) {
+    for (odb::dbSBox* sbox : sw->getWires()) {
+      const int type = sbox->getWireShapeType().getValue();
+      if (sbox->isVia()) {
+        odb::dbShape shape;
+        if (odb::dbVia* via = sbox->getBlockVia()) {
+          shape.setVia(via, sbox->getBox());
+        } else if (odb::dbTechVia* techvia = sbox->getTechVia()) {
+          shape.setVia(techvia, sbox->getBox());
+        } else {
+          continue;
+        }
+        via_shapes.clear();
+        odb::dbShape::getViaBoxes(shape, via_shapes);
+        for (const odb::dbShape& vs : via_shapes) push(vs.getTechLayer(), vs.getBox(), type, false);
+      } else {
+        push(sbox->getTechLayer(), sbox->getBox(), type,
+             sbox->getDirection() == odb::dbSBox::OCTILINEAR);
+      }
+    }
+  }
+  return out;
+}
+
 rust::Vec<int32_t> tech_via_boxes(const OdbDb& h, rust::Str via) {
   rust::Vec<int32_t> out;
   odb::dbTech* tech = h.db->getTech();
