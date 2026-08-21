@@ -1512,13 +1512,28 @@ void swire_add_via(const OdbDb& h, rust::Str net, bool fixed, rust::Str via,
   dbBlock* b = require_block(h);
   odb::dbNet* n = b->findNet(s(net).c_str());
   if (!n) throw std::runtime_error("no net named " + s(net));
+  // A generated via is a BLOCK via and a technology-declared one is not, and they take different
+  // `dbSBox::create` overloads. Looking only in the block finds every via this engine generated
+  // and none of the technology's -- so a level that falls back to a tech via was chosen, counted
+  // and then silently dropped at the write. On a technology with no applicable VIARULE GENERATE
+  // that is every via of that level: 742 of 1484 on one ASAP7 design.
   odb::dbVia* v = b->findVia(s(via).c_str());
-  if (!v) throw std::runtime_error("no via named " + s(via));
+  odb::dbTechVia* tv = nullptr;
+  if (!v) {
+    odb::dbTech* t = b->getDb()->getTech();
+    tv = t ? t->findVia(s(via).c_str()) : nullptr;
+  }
+  if (!v && !tv) throw std::runtime_error("no via named " + s(via));
   const odb::dbWireType want = fixed ? odb::dbWireType::FIXED : odb::dbWireType::ROUTED;
   odb::dbSWire* w = nullptr;
   for (odb::dbSWire* e : n->getSWires()) { if (e->getWireType() == want) { w = e; break; } }
   if (!w) w = odb::dbSWire::create(n, want);
-  odb::dbSBox::create(w, v, x, y, odb::dbWireShapeType(s(shape).c_str()));
+  const odb::dbWireShapeType st(s(shape).c_str());
+  if (v) {
+    odb::dbSBox::create(w, v, x, y, st);
+  } else {
+    odb::dbSBox::create(w, tv, x, y, st);
+  }
 }
 
 // The spacing the DATABASE would use for a shape of this width running `prl` alongside another --
