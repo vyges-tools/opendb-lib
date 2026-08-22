@@ -5,7 +5,7 @@
   "scope": "all",
   "class_count": 119,
   "method_count": 2622,
-  "bridged_count": 1545,
+  "bridged_count": 1557,
   "classes": [
     {
       "name": "dbAccessPoint",
@@ -2635,7 +2635,7 @@
           "params": [],
           "const": false,
           "kind": "getter",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "setValue",
@@ -5579,7 +5579,7 @@
           "params": [],
           "const": false,
           "kind": "getter",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "setValue",
@@ -8376,7 +8376,7 @@
           "params": [],
           "const": false,
           "kind": "getter",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "setValue",
@@ -14936,7 +14936,7 @@
           "params": [],
           "const": true,
           "kind": "getter",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "getDirection",
@@ -15738,7 +15738,7 @@
           "params": [],
           "const": false,
           "kind": "getter",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "setValue",
@@ -16565,7 +16565,7 @@
           "params": [],
           "const": true,
           "kind": "iterator",
-          "bridged": false,
+          "bridged": true,
           "element": "dbTechLayerArraySpacingRule"
         },
         {
@@ -16751,7 +16751,7 @@
           ],
           "const": true,
           "kind": "other",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "setLef58Type",
@@ -16968,7 +16968,7 @@
           "params": [],
           "const": true,
           "kind": "iterator",
-          "bridged": false,
+          "bridged": true,
           "element": "dbTechLayerSpacingRule"
         },
         {
@@ -18525,7 +18525,7 @@
           "params": [],
           "const": true,
           "kind": "getter",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "setCutClass",
@@ -18559,7 +18559,7 @@
           "params": [],
           "const": true,
           "kind": "predicate",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "setLongArray",
@@ -18580,7 +18580,7 @@
           "params": [],
           "const": true,
           "kind": "predicate",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "setViaWidthValid",
@@ -18647,7 +18647,7 @@
           "params": [],
           "const": true,
           "kind": "getter",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "getCutClass",
