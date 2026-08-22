@@ -1762,6 +1762,60 @@ static odb::dbTechLayerArraySpacingRule* array_rule(const OdbDb& h, rust::Str la
   return nullptr;
 }
 
+// ── V5.4 ADJACENTCUTS spacing ──────────────────────────────────────────────
+// A cut layer's LEF 5.4 `SPACING <s> ADJACENTCUTS <n> WITHIN <w>` rules, which a via array must
+// honour once enough of its cuts are adjacent. Exposed raw so the rule that reads them stays in
+// Rust where it can be tested; `within` is not exposed because the generator never consults it.
+static odb::dbTechLayerSpacingRule* v54_rule(const OdbDb& h, rust::Str layer, std::size_t idx) {
+  odb::dbTech* tech = h.db->getTech();
+  odb::dbTechLayer* l = tech ? tech->findLayer(s(layer).c_str()) : nullptr;
+  if (!l) return nullptr;
+  // ⚠️ The pinned API answers with a `dbSet`, not an out-parameter, so index by walking it —
+  // which is also the order the generator sees them in.
+  std::size_t i = 0;
+  for (auto* r : l->getV54SpacingRules()) {
+    if (i++ == idx) return r;
+  }
+  return nullptr;
+}
+
+std::size_t num_v54_spacing_rules(const OdbDb& h, rust::Str layer) {
+  odb::dbTech* tech = h.db->getTech();
+  odb::dbTechLayer* l = tech ? tech->findLayer(s(layer).c_str()) : nullptr;
+  if (!l) return 0;
+  std::size_t n = 0;
+  for (auto* r : l->getV54SpacingRules()) {
+    (void) r;
+    n++;
+  }
+  return n;
+}
+
+// 0 where the rule carries no adjacent-cut clause at all.
+uint32_t v54_spacing_rule_adjacent_cuts(const OdbDb& h, rust::Str layer, std::size_t idx) {
+  auto* r = v54_rule(h, layer, idx);
+  uint32_t numcuts = 0, within = 0, spacing = 0;
+  bool except_same_pgnet = false;
+  if (!r || !r->getAdjacentCuts(numcuts, within, spacing, except_same_pgnet)) return 0;
+  return numcuts;
+}
+
+int32_t v54_spacing_rule_adjacent_spacing(const OdbDb& h, rust::Str layer, std::size_t idx) {
+  auto* r = v54_rule(h, layer, idx);
+  uint32_t numcuts = 0, within = 0, spacing = 0;
+  bool except_same_pgnet = false;
+  if (!r || !r->getAdjacentCuts(numcuts, within, spacing, except_same_pgnet)) return 0;
+  return static_cast<int32_t>(spacing);
+}
+
+bool v54_spacing_rule_adjacent_except_same_pgnet(const OdbDb& h, rust::Str layer, std::size_t idx) {
+  auto* r = v54_rule(h, layer, idx);
+  uint32_t numcuts = 0, within = 0, spacing = 0;
+  bool except_same_pgnet = false;
+  if (!r || !r->getAdjacentCuts(numcuts, within, spacing, except_same_pgnet)) return false;
+  return except_same_pgnet;
+}
+
 std::size_t num_array_spacing_rules(const OdbDb& h, rust::Str layer) {
   odb::dbTech* tech = h.db->getTech();
   odb::dbTechLayer* l = tech ? tech->findLayer(s(layer).c_str()) : nullptr;

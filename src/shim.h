@@ -542,6 +542,10 @@ rust::Vec<int32_t> bpin_layer_boxes(const OdbDb& db, rust::Str bterm, std::size_
 rust::Vec<int32_t> region_boundaries(const OdbDb& db, rust::Str region);
 rust::Vec<int64_t> net_swire_shapes(const OdbDb& db, rust::Str net);
 rust::String tech_via_layer(const OdbDb& db, rust::Str via, rust::Str which);
+std::size_t num_v54_spacing_rules(const OdbDb& h, rust::Str layer);
+uint32_t v54_spacing_rule_adjacent_cuts(const OdbDb& h, rust::Str layer, std::size_t idx);
+int32_t v54_spacing_rule_adjacent_spacing(const OdbDb& h, rust::Str layer, std::size_t idx);
+bool v54_spacing_rule_adjacent_except_same_pgnet(const OdbDb& h, rust::Str layer, std::size_t idx);
 std::size_t num_array_spacing_rules(const OdbDb& db, rust::Str layer);
 rust::String array_spacing_rule_cut_class(const OdbDb& db, rust::Str layer, std::size_t idx);
 bool array_spacing_rule_is_parallel_overlap(const OdbDb& db, rust::Str layer, std::size_t idx);
