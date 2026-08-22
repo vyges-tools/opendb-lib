@@ -106,6 +106,7 @@ mod ffi {
         fn nth_row_bbox(db: &OdbDb, i: usize) -> Result<Vec<i32>>;
         fn nth_row_site(db: &OdbDb, i: usize) -> Result<String>;
         fn nth_row_orient(db: &OdbDb, i: usize) -> Result<String>;
+        fn nth_row_direction(db: &OdbDb, i: usize) -> Result<String>;
         fn destroy_inst(db: &OdbDb, inst: &str) -> Result<()>;
         // density fill (vyges-fin) -- see shim.h
         fn inst_shapes(db: &OdbDb) -> Result<Vec<i64>>;
@@ -168,6 +169,9 @@ mod ffi {
         fn cut_spacing_table_spacing(db: &OdbDb, layer: &str, idx: usize, cls: &str, side1: bool, side2: bool) -> Result<i32>;
         fn cut_spacing_table_is_center_and_edge(db: &OdbDb, layer: &str, idx: usize, cls: &str) -> Result<bool>;
         fn cut_spacing_table_is_center_to_center(db: &OdbDb, layer: &str, idx: usize, cls: &str) -> Result<bool>;
+        fn num_width_table_rules(db: &OdbDb, layer: &str) -> Result<usize>;
+        fn width_table_rule_is_wrong_direction(db: &OdbDb, layer: &str, idx: usize) -> Result<bool>;
+        fn width_table_rule_widths(db: &OdbDb, layer: &str, idx: usize) -> Result<Vec<i32>>;
         fn swire_add_box_shaped(db: &OdbDb, net: &str, fixed: bool, layer: &str,
                                 x1: i32, y1: i32, x2: i32, y2: i32, shape: &str) -> Result<()>;
         fn swire_add_box(db: &OdbDb, net: &str, fixed: bool, layer: &str,
@@ -367,7 +371,7 @@ pub use ffi::{
     clear_rows, nth_site_name, num_rows, num_sites, row_create, tech_manufacturing_grid,
     site_row_pattern_len, site_row_pattern_orient, site_row_pattern_site,
     block_cut_rows, has_one_site_master, nth_row_name, site_get_class, create_physical_inst, inst_bbox, num_masters, nth_master_name, master_get_type,
-    nth_row_bbox, nth_row_site, nth_row_orient, destroy_inst,
+    nth_row_bbox, nth_row_site, nth_row_orient, nth_row_direction, destroy_inst,
     inst_shapes, obstruction_boxes, blockage_boxes, swire_boxes, fill_create, num_fills, clear_fills,
     num_layers, nth_layer_name, layer_direction, track_grid_x, track_grid_y,
     track_patterns_x, track_patterns_y, bterm_constraint_region,
@@ -375,7 +379,7 @@ pub use ffi::{
     blocked_regions_for_pins, fixed_bterm_shapes,
     bterm_top_layer_grid, bterm_top_layer_grid_layer, bterm_top_layer_grid_is_rect,
     die_area_polygon, master_obstruction_boxes, master_pin_boxes, mterm_pin_boxes,
-    net_destroy, iterm_get_id, inst_get_id, layer_find_v55_spacing, layer_find_tw_spacing, layer_get_spacing_for, layer_min_area, tech_via_boxes, tech_via_layer, bpin_layer_boxes, region_boundaries, net_swire_shapes, num_v54_spacing_rules, v54_spacing_rule_adjacent_cuts, v54_spacing_rule_adjacent_spacing, v54_spacing_rule_adjacent_except_same_pgnet, num_array_spacing_rules, array_spacing_rule_cut_class, array_spacing_rule_is_parallel_overlap, array_spacing_rule_is_long_array, array_spacing_rule_array_width, array_spacing_rule_cut_spacing, array_spacing_rule_cuts_spacing, num_cut_spacing_table_rules, cut_spacing_table_max_spacing, cut_spacing_table_spacing, cut_spacing_table_is_center_and_edge, cut_spacing_table_is_center_to_center, techvialayerrule_rect, via_create_generated, swire_add_via, swire_add_box, swire_add_box_shaped, swire_clear_routed, bterm_create, bterm_create_pin, layer_get_type,
+    net_destroy, iterm_get_id, inst_get_id, layer_find_v55_spacing, layer_find_tw_spacing, layer_get_spacing_for, layer_min_area, tech_via_boxes, tech_via_layer, bpin_layer_boxes, region_boundaries, net_swire_shapes, num_v54_spacing_rules, v54_spacing_rule_adjacent_cuts, v54_spacing_rule_adjacent_spacing, v54_spacing_rule_adjacent_except_same_pgnet, num_array_spacing_rules, array_spacing_rule_cut_class, array_spacing_rule_is_parallel_overlap, array_spacing_rule_is_long_array, array_spacing_rule_array_width, array_spacing_rule_cut_spacing, array_spacing_rule_cuts_spacing, num_cut_spacing_table_rules, cut_spacing_table_max_spacing, cut_spacing_table_spacing, cut_spacing_table_is_center_and_edge, cut_spacing_table_is_center_to_center, num_width_table_rules, width_table_rule_is_wrong_direction, width_table_rule_widths, techvialayerrule_rect, via_create_generated, swire_add_via, swire_add_box, swire_add_box_shaped, swire_clear_routed, bterm_create, bterm_create_pin, layer_get_type,
     layer_thickness, mterm_antenna_gate_area, net_wire_area_on_layer, net_wire_perimeter_on_layer,
     nth_net_wire_layer, num_net_wire_layers,
     mterm_antenna_diff_area, layerantenna_diff_pwl_index, layerantenna_diff_pwl_ratio,

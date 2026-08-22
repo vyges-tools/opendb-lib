@@ -355,6 +355,7 @@ rust::String master_get_type(const OdbDb& db, rust::Str master);
 rust::Vec<int32_t> nth_row_bbox(const OdbDb& db, std::size_t i);   // [x_min,y_min,x_max,y_max]
 rust::String nth_row_site(const OdbDb& db, std::size_t i);
 rust::String nth_row_orient(const OdbDb& db, std::size_t i);
+rust::String nth_row_direction(const OdbDb& db, std::size_t i);
 
 // Destroy one instance by name. The primitive, not a bulk "delete everything matching" -- which
 // cells to remove is engine policy, and a shim that took a pattern would put that policy here.
@@ -589,3 +590,10 @@ std::size_t bterm_create_pin(const OdbDb& db, rust::Str bterm, rust::Str layer,
 // A routing layer's TYPE (`ROUTING`, `CUT`, `OVERLAP`, …). The type is what marks an obstruction as
 // an outline rather than metal, and it is not the layer's name.
 rust::String layer_get_type(const OdbDb& db, rust::Str layer);
+
+// ── LEF58 WIDTHTABLE ───────────────────────────────────────────────────────
+// The widths a routing layer allows a wire on it to take, raw: the rule count, whether a rule is
+// stated WRONGDIRECTION, and the table itself.
+std::size_t num_width_table_rules(const OdbDb& db, rust::Str layer);
+bool width_table_rule_is_wrong_direction(const OdbDb& db, rust::Str layer, std::size_t idx);
+rust::Vec<int32_t> width_table_rule_widths(const OdbDb& db, rust::Str layer, std::size_t idx);

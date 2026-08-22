@@ -1133,6 +1133,14 @@ rust::String nth_row_orient(const OdbDb& h, std::size_t i) {
   odb::dbRow* r = nth_row(h, i);
   return r ? rust::String(r->getOrient().getString()) : rust::String();
 }
+// The direction the row's sites step in, as the DEF states it ("HORIZONTAL"/"VERTICAL").
+// ⚠️ NOT derivable from the bounding box: a row of one site is square in the only sense the box
+// records, and the direction still decides which way the rails on it run.
+rust::String nth_row_direction(const OdbDb& h, std::size_t i) {
+  odb::dbRow* r = nth_row(h, i);
+  if (!r) return rust::String();
+  return rust::String(r->getDirection() == odb::dbRowDir::HORIZONTAL ? "HORIZONTAL" : "VERTICAL");
+}
 void destroy_inst(const OdbDb& h, rust::Str inst) {
   dbInst* i = require_inst(h, inst);
   dbInst::destroy(i);
@@ -2018,4 +2026,49 @@ rust::String layer_get_type(const OdbDb& h, rust::Str layer) {
   odb::dbTech* t = h.db->getTech();
   odb::dbTechLayer* l = t ? t->findLayer(s(layer).c_str()) : nullptr;
   return l ? rust::String(l->getType().getString()) : rust::String();
+}
+
+// ── LEF58 WIDTHTABLE ───────────────────────────────────────────────────────
+// A routing layer may declare the only widths a wire on it is allowed to take. Exposed raw — the
+// count, the WRONGDIRECTION flag and the table itself — because the rule that reads them is
+// conditional in three ways (direction, an empty table, a width past the last entry) and belongs
+// in Rust where it can be tested without a technology.
+static odb::dbTechLayerWidthTableRule* width_table_rule(const OdbDb& h, rust::Str layer,
+                                                        std::size_t idx) {
+  odb::dbTech* tech = h.db->getTech();
+  odb::dbTechLayer* l = tech ? tech->findLayer(s(layer).c_str()) : nullptr;
+  if (!l) return nullptr;
+  std::size_t i = 0;
+  for (auto* r : l->getTechLayerWidthTableRules()) {
+    if (i++ == idx) return r;
+  }
+  return nullptr;
+}
+
+std::size_t num_width_table_rules(const OdbDb& h, rust::Str layer) {
+  odb::dbTech* tech = h.db->getTech();
+  odb::dbTechLayer* l = tech ? tech->findLayer(s(layer).c_str()) : nullptr;
+  if (!l) return 0;
+  std::size_t n = 0;
+  for (auto* r : l->getTechLayerWidthTableRules()) { (void) r; n++; }
+  return n;
+}
+
+// ⚠️ WRONGDIRECTION INVERTS which shapes the table applies to: a plain table constrains a wire
+// running the layer's own way, a WRONGDIRECTION one constrains a wire running across it. Reading
+// the flag as "also applies" instead of "applies instead" checks the wrong shapes both ways round.
+bool width_table_rule_is_wrong_direction(const OdbDb& h, rust::Str layer, std::size_t idx) {
+  auto* r = width_table_rule(h, layer, idx);
+  return r ? r->isWrongDirection() : false;
+}
+
+// The allowed widths, in the order the rule states them, in database units.
+rust::Vec<int32_t> width_table_rule_widths(const OdbDb& h, rust::Str layer, std::size_t idx) {
+  rust::Vec<int32_t> out;
+  auto* r = width_table_rule(h, layer, idx);
+  if (!r) return out;
+  for (int w : r->getWidthTable()) {
+    out.push_back(w);
+  }
+  return out;
 }
