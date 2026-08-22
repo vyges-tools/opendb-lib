@@ -587,6 +587,13 @@ void bterm_create(const OdbDb& db, rust::Str net, rust::Str name);
 std::size_t bterm_create_pin(const OdbDb& db, rust::Str bterm, rust::Str layer,
                              int32_t x1, int32_t y1, int32_t x2, int32_t y2);
 
+// Remove a terminal's generator-owned pin geometry, keeping anything placed FIXED, and add one
+// rectangle to it. Together these are how a power grid republishes a supply terminal.
+void bterm_destroy(const OdbDb& db, rust::Str bterm);
+std::size_t bterm_clear_unfixed_bpins(const OdbDb& db, rust::Str bterm);
+bool bterm_add_pin_box(const OdbDb& db, rust::Str bterm, rust::Str layer,
+                       int32_t x1, int32_t y1, int32_t x2, int32_t y2);
+
 // A routing layer's TYPE (`ROUTING`, `CUT`, `OVERLAP`, …). The type is what marks an obstruction as
 // an outline rather than metal, and it is not the layer's name.
 rust::String layer_get_type(const OdbDb& db, rust::Str layer);

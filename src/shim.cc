@@ -1992,6 +1992,75 @@ void bterm_create(const OdbDb& h, rust::Str net, rust::Str name) {
   if (!odb::dbBTerm::create(n, s(name).c_str()))
     throw std::runtime_error("cannot create block terminal " + s(name));
 }
+// Remove every bpin on a terminal that a person did not pin in place.
+// ⚠️ **FIXED is the exemption and it is the whole rule** — a generator owns what it produced and
+// must leave alone what was placed deliberately. Same contract as `swire_clear_routed`.
+// Remove a block terminal outright.
+// 🔑 **A generator destroys the terminals IT created that ended up carrying no pin geometry**, and
+// only those — a terminal the design arrived with stays, empty or not. Without this a design that
+// asks for no pins at all still gains a shapeless terminal per supply net.
+void bterm_destroy(const OdbDb& h, rust::Str bterm) {
+  dbBlock* b = require_block(h);
+  odb::dbBTerm* t = b->findBTerm(s(bterm).c_str());
+  if (t) odb::dbBTerm::destroy(t);
+}
+
+std::size_t bterm_clear_unfixed_bpins(const OdbDb& h, rust::Str bterm) {
+  dbBlock* b = require_block(h);
+  odb::dbBTerm* t = b->findBTerm(s(bterm).c_str());
+  if (!t) return 0;
+  auto bpins = t->getBPins();
+  odb::PtrSet<odb::dbBPin> pins(bpins.begin(), bpins.end());
+  std::size_t n = 0;
+  for (odb::dbBPin* p : pins) {
+    if (!p->getPlacementStatus().isFixed()) {
+      odb::dbBPin::destroy(p);
+      n++;
+    }
+  }
+  return n;
+}
+
+// Add one rectangle to a terminal's pin geometry, and report whether it was new.
+//
+// 🔑 **Every box goes on ONE bpin, not one bpin per box.** A dbBPin is a PORT in the DEF, so a
+// terminal built box-per-pin writes several PORT blocks with separate placements where the
+// reference writes one PORT carrying several LAYER lines — a difference visible in the DEF for
+// geometry that is otherwise identical. The reference reuses the FIRST existing pin and creates
+// one only when the terminal has none.
+//
+// ⚠️ **A rectangle already present on this layer is not added twice**, and the placement status is
+// still set: two components can legitimately produce the same shape.
+bool bterm_add_pin_box(const OdbDb& h, rust::Str bterm, rust::Str layer,
+                       int32_t x1, int32_t y1, int32_t x2, int32_t y2) {
+  dbBlock* b = require_block(h);
+  odb::dbBTerm* t = b->findBTerm(s(bterm).c_str());
+  if (!t) throw std::runtime_error("no block terminal named " + s(bterm));
+  odb::dbTech* tech = h.db->getTech();
+  odb::dbTechLayer* l = tech ? tech->findLayer(s(layer).c_str()) : nullptr;
+  if (!l) throw std::runtime_error("no layer named " + s(layer));
+  const odb::Rect want(x1, y1, x2, y2);
+
+  odb::dbBPin* pin = nullptr;
+  auto pins = t->getBPins();
+  for (odb::dbBPin* p : pins) {
+    for (odb::dbBox* box : p->getBoxes()) {
+      if (box->getTechLayer() == l && box->getBox() == want) {
+        pin = p;
+      }
+    }
+  }
+
+  bool added = false;
+  if (pin == nullptr) {
+    pin = pins.empty() ? odb::dbBPin::create(t) : *pins.begin();
+    odb::dbBox::create(pin, l, x1, y1, x2, y2);
+    added = true;
+  }
+  pin->setPlacementStatus(odb::dbPlacementStatus::FIRM);
+  return added;
+}
+
 std::size_t bterm_create_pin(const OdbDb& h, rust::Str bterm, rust::Str layer,
                              int32_t x1, int32_t y1, int32_t x2, int32_t y2) {
   dbBlock* b = require_block(h);
