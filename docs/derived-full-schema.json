@@ -5,7 +5,7 @@
   "scope": "all",
   "class_count": 119,
   "method_count": 2622,
-  "bridged_count": 1557,
+  "bridged_count": 1560,
   "classes": [
     {
       "name": "dbAccessPoint",
@@ -16592,7 +16592,7 @@
           "params": [],
           "const": true,
           "kind": "iterator",
-          "bridged": false,
+          "bridged": true,
           "element": "dbTechLayerWidthTableRule"
         },
         {
@@ -19109,7 +19109,7 @@
           ],
           "const": false,
           "kind": "setter",
-          "bridged": false
+          "bridged": true
         }
       ],
       "hand_written": false
@@ -26349,7 +26349,7 @@
           "params": [],
           "const": true,
           "kind": "getter",
-          "bridged": false
+          "bridged": true
         }
       ],
       "hand_written": false
