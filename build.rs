@@ -12,6 +12,12 @@
 use std::path::{Path, PathBuf};
 
 fn main() {
+    // ⚠️ **Emitted before the non-unix early return**, because `OPENROAD_PIN` is a plain constant
+    // and `env!` would fail to compile wherever this is skipped — including the Windows stub build
+    // that the dist matrix still has to get through.
+    println!("cargo:rerun-if-changed=openroad-pin.yaml");
+    println!("cargo:rustc-env=VYGES_OPENROAD_PIN={}", pinned_sha());
+
     if std::env::var_os("CARGO_CFG_UNIX").is_none() {
         println!("cargo:warning=vyges-opendb-lib: non-unix target, building empty stub (libodb unavailable)");
         return;
@@ -174,12 +180,26 @@ fn source_tree() -> PathBuf {
 }
 
 /// Blobless, cone-sparse checkout of only src/odb + src/utl + cmake at the pinned commit.
-fn fetch_openroad(dest: &Path) {
+/// The pinned OpenROAD commit, read from the one file that defines it.
+///
+/// 🔑 **`openroad-pin.yaml` is the single definition of the pin for the whole programme.** It is
+/// surfaced to Rust as [`vyges_opendb_lib::OPENROAD_PIN`] and re-exported by `vyges-opendb`, so
+/// every engine inherits it through a dependency it already has and nobody types a SHA by hand.
+/// Before that existed the pin was written out in each engine's `--describe`, and four of them
+/// were still quoting the previous one a day after the pin moved.
+fn pinned_sha() -> String {
     let pin = std::fs::read_to_string("openroad-pin.yaml").expect("read openroad-pin.yaml");
-    let sha = pin
-        .lines()
-        .find_map(|l| l.trim().strip_prefix("commit:").map(|s| s.split('#').next().unwrap().trim().to_string()))
-        .expect("commit: in openroad-pin.yaml");
+    pin.lines()
+        .find_map(|l| {
+            l.trim()
+                .strip_prefix("commit:")
+                .map(|s| s.split('#').next().unwrap().trim().to_string())
+        })
+        .expect("commit: in openroad-pin.yaml")
+}
+
+fn fetch_openroad(dest: &Path) {
+    let sha = pinned_sha();
     let src = "https://github.com/The-OpenROAD-Project/OpenROAD.git";
     println!("cargo:warning=vyges-opendb-lib: fetching pinned OpenROAD subtree @ {sha}");
     let run = |args: &[&str], cwd: Option<&Path>| {

@@ -7,6 +7,19 @@
 //! blocks for the ECO applier (`InsertECOBuffers`). The safe, ergonomic wrappers live in
 //! the sibling crate `vyges-opendb`.
 
+/// The OpenROAD commit this crate's `libodb` is built from.
+///
+/// 🔑 **One definition for the whole programme.** It comes from `openroad-pin.yaml` via `build.rs`,
+/// is re-exported by `vyges-opendb`, and every engine reports it rather than carrying a SHA of its
+/// own. A re-pin is then one file plus a rebuild.
+///
+/// ⚠️ **This says what the BINARY was built against — it cannot tell you the binary is current.**
+/// A stale build reports its own stale pin perfectly happily. That is what it is for: a harness
+/// compares this against the oracle image it is about to run and refuses on a mismatch. On
+/// 2026-08-23 two engines ran a whole gate against the previous pin's oracle, and only one of them
+/// happened to fail loudly.
+pub const OPENROAD_PIN: &str = env!("VYGES_OPENROAD_PIN");
+
 // Unix-only: libodb is not built on non-unix targets (see build.rs). On Windows this crate
 // compiles to an empty stub so a `--features odb` build still succeeds across the dist matrix.
 #[cfg(unix)]
