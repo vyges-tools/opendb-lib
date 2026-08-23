@@ -224,17 +224,21 @@ fn rows_are_cut_around_a_blockage_and_an_unknown_one_is_refused() {
     let before = odb::num_rows(&db).unwrap();
 
     // No blockages: nothing to cut around, so the row count cannot fall.
-    odb::block_cut_rows(&db, 0, &[], 0, 0).unwrap();
+    // ⚠️ Argument order is (min_row_width, min_row_height, blockages, halo_x, halo_y).
+    // `min_row_height` was added by the 945a9f4 re-pin and this test was left calling the
+    // five-argument form, so the whole test binary stopped compiling -- and a crate whose
+    // suite does not build hides every later regression behind one stale call.
+    odb::block_cut_rows(&db, 0, 0, &[], 0, 0).unwrap();
     assert_eq!(odb::num_rows(&db).unwrap(), before, "no blockage, no cut");
 
     // A name the block does not define is an error -- cutting around nothing would look like
     // success and leave rows crossing a macro.
-    assert!(odb::block_cut_rows(&db, 0, &["no_such_inst_xyz".to_string()], 0, 0).is_err());
+    assert!(odb::block_cut_rows(&db, 0, 0, &["no_such_inst_xyz".to_string()], 0, 0).is_err());
 
     // A real instance cuts the rows it overlaps into pieces, so the count RISES.
     let inst = odb::nth_inst_name(&db, 0);
     assert!(!inst.is_empty(), "the fixture has instances");
-    odb::block_cut_rows(&db, 0, std::slice::from_ref(&inst), 0, 0).unwrap();
+    odb::block_cut_rows(&db, 0, 0, std::slice::from_ref(&inst), 0, 0).unwrap();
     assert!(
         odb::num_rows(&db).unwrap() >= before,
         "cutting splits rows in two around the macro, it never loses them silently"
