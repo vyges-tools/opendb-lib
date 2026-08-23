@@ -87,7 +87,8 @@ mod ffi {
         fn site_row_pattern_orient(db: &OdbDb, site: &str, i: usize) -> Result<String>;
         // Row cutting around macros (vyges-tap). odb's OWN algorithm from odb/util.h -- the
         // engine chooses the blockages, odb does the cutting. See shim.h.
-        fn block_cut_rows(db: &OdbDb, min_row_width: i32, blockage_insts: &[String],
+        fn block_cut_rows(db: &OdbDb, min_row_width: i32, min_row_height: i32,
+                          blockage_insts: &[String],
                           halo_x: i32, halo_y: i32) -> Result<()>;
         fn has_one_site_master(db: &OdbDb) -> bool;
         // Row enumeration + site class: the row_get_* accessors are generated but address a row

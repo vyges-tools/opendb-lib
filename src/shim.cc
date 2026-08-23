@@ -1042,7 +1042,7 @@ rust::String site_row_pattern_orient(const OdbDb& h, rust::Str site, std::size_t
                              " on site " + s(site));
   return rust::String((*rp)[i].orientation.getString());
 }
-void block_cut_rows(const OdbDb& h, int32_t min_row_width,
+void block_cut_rows(const OdbDb& h, int32_t min_row_width, int32_t min_row_height,
                     rust::Slice<const rust::String> blockage_insts,
                     int32_t halo_x, int32_t halo_y) {
   dbBlock* b = require_block(h);
@@ -1054,7 +1054,8 @@ void block_cut_rows(const OdbDb& h, int32_t min_row_width,
     if (!inst) throw std::runtime_error("vyges-opendb: no such instance: " + n);
     blockages.push_back(inst->getBBox());
   }
-  odb::cutRows(b, min_row_width, blockages, halo_x, halo_y, const_cast<utl::Logger*>(&h.logger));
+  odb::cutRows(b, min_row_width, min_row_height, blockages, halo_x, halo_y,
+               const_cast<utl::Logger*>(&h.logger));
 }
 bool has_one_site_master(const OdbDb& h) { return odb::hasOneSiteMaster(h.db); }
 rust::String nth_row_name(const OdbDb& h, std::size_t i) {

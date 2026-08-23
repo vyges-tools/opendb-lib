@@ -313,7 +313,15 @@ rust::String site_row_pattern_orient(const OdbDb& db, rust::Str site, std::size_
 // decide WHICH instances are blockages and to report the ones it skipped. `blockage_insts` names
 // those instances; each is resolved to its bounding box here because a dbBox* cannot cross the
 // bridge. An unknown instance name throws rather than silently cutting around nothing.
-void block_cut_rows(const OdbDb& db, int32_t min_row_width,
+// ⚠️ **`min_row_height` is passed 0, and 0 is what upstream itself passes.** Both `cutRows` call
+// sites in `ifp`'s `InitFloorplan.cc` use it, and the code it enables is gated
+// `if (min_row_height > 0)` — so zero is the behaviour-preserving value, and passing it is what
+// makes tracking this signature a re-pin rather than a change of behaviour.
+//
+// 🔑 What it enables is a TAPCELL concern: odb removing regions between two vertically stacked
+// blockages too narrow to fit endcaps. Whether an engine should ask for that is a separate
+// question from tracking the new signature, and answering it needs its own correlation run.
+void block_cut_rows(const OdbDb& db, int32_t min_row_width, int32_t min_row_height,
                     rust::Slice<const rust::String> blockage_insts,
                     int32_t halo_x, int32_t halo_y);
 

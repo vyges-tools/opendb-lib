@@ -72,6 +72,7 @@ void net_set_term_ext_ids(const OdbDb& h, rust::Str net, int32_t cap_id) { auto*
 void net_clear_guides(const OdbDb& h, rust::Str net) { auto* p = gen_net(h, net); if (!p) throw std::runtime_error("vyges-opendb: dbNet not found"); p->clearGuides(); }
 void net_clear_tracks(const OdbDb& h, rust::Str net) { auto* p = gen_net(h, net); if (!p) throw std::runtime_error("vyges-opendb: dbNet not found"); p->clearTracks(); }
 void net_set_jumpers(const OdbDb& h, rust::Str net, bool has_jumpers) { auto* p = gen_net(h, net); if (!p) throw std::runtime_error("vyges-opendb: dbNet not found"); p->setJumpers(has_jumpers); }
+void net_set_auto_taper(const OdbDb& h, rust::Str net, bool enable) { auto* p = gen_net(h, net); if (!p) throw std::runtime_error("vyges-opendb: dbNet not found"); p->setAutoTaper(enable); }
 void bterm_set_sig_type(const OdbDb& h, rust::Str bterm, rust::Str a0) { auto* p = gen_bterm(h, bterm); if (!p) throw std::runtime_error("vyges-opendb: dbBTerm not found"); p->setSigType(odb::dbSigType(gs(a0).c_str())); }
 void bterm_set_io_type(const OdbDb& h, rust::Str bterm, rust::Str a0) { auto* p = gen_bterm(h, bterm); if (!p) throw std::runtime_error("vyges-opendb: dbBTerm not found"); p->setIoType(odb::dbIoType(gs(a0).c_str())); }
 void bterm_set_spef_mark(const OdbDb& h, rust::Str bterm, uint32_t v) { auto* p = gen_bterm(h, bterm); if (!p) throw std::runtime_error("vyges-opendb: dbBTerm not found"); p->setSpefMark(v); }
@@ -190,7 +191,6 @@ void level_shifter_set_name_suffix(const OdbDb& h, rust::Str name, rust::Str nam
 void level_shifter_set_cell_name(const OdbDb& h, rust::Str name, rust::Str cell_name) { auto* p = gen_levelshifter(h, name); if (!p) throw std::runtime_error("vyges-opendb: dbLevelShifter not found"); p->setCellName(gs(cell_name)); }
 void level_shifter_set_cell_input(const OdbDb& h, rust::Str name, rust::Str cell_input) { auto* p = gen_levelshifter(h, name); if (!p) throw std::runtime_error("vyges-opendb: dbLevelShifter not found"); p->setCellInput(gs(cell_input)); }
 void level_shifter_set_cell_output(const OdbDb& h, rust::Str name, rust::Str cell_output) { auto* p = gen_levelshifter(h, name); if (!p) throw std::runtime_error("vyges-opendb: dbLevelShifter not found"); p->setCellOutput(gs(cell_output)); }
-void tech_set_extraction_rules_file(const OdbDb& h, rust::Str path) { auto* p = gen_tech(h); if (!p) throw std::runtime_error("vyges-opendb: dbTech not found"); p->setExtractionRulesFile(gs(path)); }
 void tech_set_lef_units(const OdbDb& h, int32_t units) { auto* p = gen_tech(h); if (!p) throw std::runtime_error("vyges-opendb: dbTech not found"); p->setLefUnits(units); }
 void tech_set_lef_version(const OdbDb& h, double inver) { auto* p = gen_tech(h); if (!p) throw std::runtime_error("vyges-opendb: dbTech not found"); p->setLefVersion(inver); }
 void tech_set_manufacturing_grid(const OdbDb& h, int32_t ingrd) { auto* p = gen_tech(h); if (!p) throw std::runtime_error("vyges-opendb: dbTech not found"); p->setManufacturingGrid(ingrd); }

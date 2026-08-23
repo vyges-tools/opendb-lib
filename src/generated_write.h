@@ -68,6 +68,7 @@ void net_set_term_ext_ids(const OdbDb& db, rust::Str net, int32_t cap_id);
 void net_clear_guides(const OdbDb& db, rust::Str net);
 void net_clear_tracks(const OdbDb& db, rust::Str net);
 void net_set_jumpers(const OdbDb& db, rust::Str net, bool has_jumpers);
+void net_set_auto_taper(const OdbDb& db, rust::Str net, bool enable);
 void bterm_set_sig_type(const OdbDb& db, rust::Str bterm, rust::Str a0);
 void bterm_set_io_type(const OdbDb& db, rust::Str bterm, rust::Str a0);
 void bterm_set_spef_mark(const OdbDb& db, rust::Str bterm, uint32_t v);
@@ -186,7 +187,6 @@ void level_shifter_set_name_suffix(const OdbDb& db, rust::Str name, rust::Str na
 void level_shifter_set_cell_name(const OdbDb& db, rust::Str name, rust::Str cell_name);
 void level_shifter_set_cell_input(const OdbDb& db, rust::Str name, rust::Str cell_input);
 void level_shifter_set_cell_output(const OdbDb& db, rust::Str name, rust::Str cell_output);
-void tech_set_extraction_rules_file(const OdbDb& db, rust::Str path);
 void tech_set_lef_units(const OdbDb& db, int32_t units);
 void tech_set_lef_version(const OdbDb& db, double inver);
 void tech_set_manufacturing_grid(const OdbDb& db, int32_t ingrd);

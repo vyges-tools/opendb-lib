@@ -192,6 +192,7 @@ int32_t net_get_term_b_box_dy(const OdbDb& h, rust::Str net) { auto* p = gen_net
 rust::String net_find_main_parent_mod_inst(const OdbDb& h, rust::Str net) { auto* p = gen_net(h, net); if (!p) return rust::String(); auto* t = p->findMainParentModInst(); return t ? rust::String(t->getName()) : rust::String(); }
 rust::String net_find_main_parent_module(const OdbDb& h, rust::Str net) { auto* p = gen_net(h, net); if (!p) return rust::String(); auto* t = p->findMainParentModule(); return t ? rust::String(t->getName()) : rust::String(); }
 bool net_has_jumpers(const OdbDb& h, rust::Str net) { auto* p = gen_net(h, net); return p ? p->hasJumpers() : false; }
+bool net_is_auto_taper_enabled(const OdbDb& h, rust::Str net) { auto* p = gen_net(h, net); return p ? p->isAutoTaperEnabled() : false; }
 rust::String net_find_mod_net_in_highest_hier(const OdbDb& h, rust::Str net) { auto* p = gen_net(h, net); if (!p) return rust::String(); auto* t = p->findModNetInHighestHier(); return t ? rust::String(t->getConstName()) : rust::String(); }
 uint32_t net_get_wire_count_wire_cnt(const OdbDb& h, rust::Str net) { uint32_t v0 = 0; uint32_t v1 = 0; auto* p = gen_net(h, net); if (p) p->getWireCount(v0, v1); return v0; }
 uint32_t net_get_wire_count_via_cnt(const OdbDb& h, rust::Str net) { uint32_t v0 = 0; uint32_t v1 = 0; auto* p = gen_net(h, net); if (p) p->getWireCount(v0, v1); return v1; }
@@ -450,6 +451,7 @@ int32_t box_get_box_dx(const OdbDb& h, std::size_t idx) { auto* p = gen_box(h, i
 int32_t box_get_box_dy(const OdbDb& h, std::size_t idx) { auto* p = gen_box(h, idx); return p ? p->getBox().dy() : 0; }
 uint32_t box_get_d_x(const OdbDb& h, std::size_t idx) { auto* p = gen_box(h, idx); return p ? p->getDX() : 0; }
 int32_t box_get_design_rule_width(const OdbDb& h, std::size_t idx) { auto* p = gen_box(h, idx); return p ? p->getDesignRuleWidth() : 0; }
+int32_t box_get_min_spacing(const OdbDb& h, std::size_t idx) { auto* p = gen_box(h, idx); return p ? p->getMinSpacing() : 0; }
 uint32_t box_get_d_y(const OdbDb& h, std::size_t idx) { auto* p = gen_box(h, idx); return p ? p->getDY() : 0; }
 bool box_is_soft(const OdbDb& h, std::size_t idx) { auto* p = gen_box(h, idx); return p ? p->isSoft() : false; }
 rust::String box_get_tech_layer(const OdbDb& h, std::size_t idx) { auto* p = gen_box(h, idx); if (!p) return rust::String(); auto* t = p->getTechLayer(); return t ? rust::String(t->getConstName()) : rust::String(); }
@@ -614,7 +616,6 @@ rust::String level_shifter_get_cell_name(const OdbDb& h, rust::Str name) { auto*
 rust::String level_shifter_get_cell_input(const OdbDb& h, rust::Str name) { auto* p = gen_levelshifter(h, name); return p ? rust::String(p->getCellInput()) : rust::String(); }
 rust::String level_shifter_get_cell_output(const OdbDb& h, rust::Str name) { auto* p = gen_levelshifter(h, name); return p ? rust::String(p->getCellOutput()) : rust::String(); }
 rust::String tech_get_name(const OdbDb& h) { auto* p = gen_tech(h); return p ? rust::String(p->getName()) : rust::String(); }
-rust::String tech_get_extraction_rules_file(const OdbDb& h) { auto* p = gen_tech(h); return p ? rust::String(p->getExtractionRulesFile()) : rust::String(); }
 int32_t tech_get_db_units_per_micron(const OdbDb& h) { auto* p = gen_tech(h); return p ? p->getDbUnitsPerMicron() : 0; }
 std::size_t num_tech_get_layers(const OdbDb& h) { auto* p = gen_tech(h); return p ? p->getLayers().size() : 0; }
 rust::String nth_tech_get_layers(const OdbDb& h, std::size_t i) { auto* p = gen_tech(h); if (!p) return rust::String(); std::size_t k = 0; for (auto* e : p->getLayers()) { if (k++ == i) return rust::String(e->getConstName()); } return rust::String(); }

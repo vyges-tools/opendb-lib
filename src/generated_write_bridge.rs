@@ -73,6 +73,7 @@ mod ffi_gen_write {
         fn net_clear_guides(db: &OdbDb, net: &str) -> Result<()>;
         fn net_clear_tracks(db: &OdbDb, net: &str) -> Result<()>;
         fn net_set_jumpers(db: &OdbDb, net: &str, has_jumpers: bool) -> Result<()>;
+        fn net_set_auto_taper(db: &OdbDb, net: &str, enable: bool) -> Result<()>;
         fn bterm_set_sig_type(db: &OdbDb, bterm: &str, a0: &str) -> Result<()>;
         fn bterm_set_io_type(db: &OdbDb, bterm: &str, a0: &str) -> Result<()>;
         fn bterm_set_spef_mark(db: &OdbDb, bterm: &str, v: u32) -> Result<()>;
@@ -191,7 +192,6 @@ mod ffi_gen_write {
         fn level_shifter_set_cell_name(db: &OdbDb, name: &str, cell_name: &str) -> Result<()>;
         fn level_shifter_set_cell_input(db: &OdbDb, name: &str, cell_input: &str) -> Result<()>;
         fn level_shifter_set_cell_output(db: &OdbDb, name: &str, cell_output: &str) -> Result<()>;
-        fn tech_set_extraction_rules_file(db: &OdbDb, path: &str) -> Result<()>;
         fn tech_set_lef_units(db: &OdbDb, units: i32) -> Result<()>;
         fn tech_set_lef_version(db: &OdbDb, inver: f64) -> Result<()>;
         fn tech_set_manufacturing_grid(db: &OdbDb, ingrd: i32) -> Result<()>;
@@ -699,6 +699,7 @@ pub use ffi_gen_write::{
     net_clear_wild_connected,
     net_set1st_cap_node_id,
     net_set1st_r_seg_id,
+    net_set_auto_taper,
     net_set_cc_adjust_factor,
     net_set_cc_adjust_order,
     net_set_cc_calib_factor,
@@ -752,7 +753,6 @@ pub use ffi_gen_write::{
     site_set_symmetry_y,
     site_set_width,
     swire_set_wire_type,
-    tech_set_extraction_rules_file,
     tech_set_lef_units,
     tech_set_lef_version,
     tech_set_manufacturing_grid,

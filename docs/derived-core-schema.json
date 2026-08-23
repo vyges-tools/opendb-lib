@@ -4,8 +4,8 @@
   "note": "Method-based schema derived from the hand-written core classes; parallels OpenROAD's field-based codeGenerator schema for the classes it does not cover.",
   "scope": "hand-written core only",
   "class_count": 44,
-  "method_count": 1137,
-  "bridged_count": 766,
+  "method_count": 1140,
+  "bridged_count": 768,
   "classes": [
     {
       "name": "dbBPin",
@@ -2527,6 +2527,27 @@
           "const": false,
           "kind": "setter",
           "bridged": false
+        },
+        {
+          "name": "getMinSpacing",
+          "return": "int",
+          "params": [],
+          "const": true,
+          "kind": "getter",
+          "bridged": true
+        },
+        {
+          "name": "setMinSpacing",
+          "return": "void",
+          "params": [
+            {
+              "type": "i",
+              "name": "nt"
+            }
+          ],
+          "const": false,
+          "kind": "setter",
+          "bridged": true
         },
         {
           "name": "getDY",
@@ -7477,6 +7498,27 @@
           "bridged": true
         },
         {
+          "name": "isAutoTaperEnabled",
+          "return": "bool",
+          "params": [],
+          "const": false,
+          "kind": "predicate",
+          "bridged": true
+        },
+        {
+          "name": "setAutoTaper",
+          "return": "void",
+          "params": [
+            {
+              "type": "bool",
+              "name": "enable"
+            }
+          ],
+          "const": false,
+          "kind": "setter",
+          "bridged": true
+        },
+        {
           "name": "isDeeperThan",
           "return": "bool",
           "params": [
@@ -8399,6 +8441,19 @@
           "element": "dbBox"
         },
         {
+          "name": "getOverlapArea",
+          "return": "int64_t",
+          "params": [
+            {
+              "type": "const Rect&",
+              "name": "r"
+            }
+          ],
+          "const": false,
+          "kind": "other",
+          "bridged": false
+        },
+        {
           "name": "addInst",
           "return": "void",
           "params": [
@@ -8939,27 +8994,6 @@
       "methods": [
         {
           "name": "getName",
-          "return": "std::string",
-          "params": [],
-          "const": false,
-          "kind": "getter",
-          "bridged": true
-        },
-        {
-          "name": "setExtractionRulesFile",
-          "return": "void",
-          "params": [
-            {
-              "type": "const std::string&",
-              "name": "path"
-            }
-          ],
-          "const": false,
-          "kind": "setter",
-          "bridged": true
-        },
-        {
-          "name": "getExtractionRulesFile",
           "return": "std::string",
           "params": [],
           "const": false,

@@ -195,6 +195,7 @@ mod ffi_gen {
         fn net_find_main_parent_mod_inst(db: &OdbDb, net: &str) -> String;
         fn net_find_main_parent_module(db: &OdbDb, net: &str) -> String;
         fn net_has_jumpers(db: &OdbDb, net: &str) -> bool;
+        fn net_is_auto_taper_enabled(db: &OdbDb, net: &str) -> bool;
         fn net_find_mod_net_in_highest_hier(db: &OdbDb, net: &str) -> String;
         fn net_get_wire_count_wire_cnt(db: &OdbDb, net: &str) -> u32;
         fn net_get_wire_count_via_cnt(db: &OdbDb, net: &str) -> u32;
@@ -453,6 +454,7 @@ mod ffi_gen {
         fn box_get_box_dy(db: &OdbDb, idx: usize) -> i32;
         fn box_get_d_x(db: &OdbDb, idx: usize) -> u32;
         fn box_get_design_rule_width(db: &OdbDb, idx: usize) -> i32;
+        fn box_get_min_spacing(db: &OdbDb, idx: usize) -> i32;
         fn box_get_d_y(db: &OdbDb, idx: usize) -> u32;
         fn box_is_soft(db: &OdbDb, idx: usize) -> bool;
         fn box_get_tech_layer(db: &OdbDb, idx: usize) -> String;
@@ -617,7 +619,6 @@ mod ffi_gen {
         fn level_shifter_get_cell_input(db: &OdbDb, name: &str) -> String;
         fn level_shifter_get_cell_output(db: &OdbDb, name: &str) -> String;
         fn tech_get_name(db: &OdbDb) -> String;
-        fn tech_get_extraction_rules_file(db: &OdbDb) -> String;
         fn tech_get_db_units_per_micron(db: &OdbDb) -> i32;
         fn num_tech_get_layers(db: &OdbDb) -> usize;
         fn nth_tech_get_layers(db: &OdbDb, i: usize) -> String;
@@ -1053,6 +1054,7 @@ pub use ffi_gen::{
     box_get_d_y,
     box_get_design_rule_width,
     box_get_layer_mask,
+    box_get_min_spacing,
     box_get_tech_layer,
     box_get_tech_via,
     box_get_via_x_y_x,
@@ -1648,6 +1650,7 @@ pub use ffi_gen::{
     net_get_x_talk_class,
     net_has_fixed_bump,
     net_has_jumpers,
+    net_is_auto_taper_enabled,
     net_is_connected_by_abutment,
     net_is_disconnected,
     net_is_do_not_touch,
@@ -1897,7 +1900,6 @@ pub use ffi_gen::{
     tech_first_backside_routing_layer,
     tech_first_frontside_routing_layer,
     tech_get_db_units_per_micron,
-    tech_get_extraction_rules_file,
     tech_get_layer_count,
     tech_get_lef_units,
     tech_get_lef_version,
