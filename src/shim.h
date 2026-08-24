@@ -136,7 +136,7 @@ void construct_unfolded_model(const OdbDb& db);
 // It does NOT check LOGICAL equivalence — same pins does not mean same function. Picking a
 // replacement that actually computes the same thing is the caller's problem.
 //
-// The swap is journaled (dbJournal kSwapObject), so it rolls back with the ECO journal below.
+// 🔒 Transactional: the swap is journaled, so it rolls back with the ECO journal below.
 bool swap_master(const OdbDb& db, rust::Str inst, rust::Str master);
 
 // ---- ECO journal: speculative edits with a real undo -------------------------
@@ -403,16 +403,13 @@ void blockage_create(const OdbDb& db, int32_t x1, int32_t y1, int32_t x2, int32_
 std::size_t num_blockages(const OdbDb& db);
 // Destroy the blockage at `idx` in the block's blockage set.
 //
-// ⚠️ Needed because OpenDB's ECO journal covers NO PHYSICAL OBJECT AT ALL, so a blockage created
-// inside beginEco/undoEco SURVIVES the rollback. Verified at pin 945a9f4: dbJournal handles the
-// netlist (dbInst, dbNet, dbITerm, dbBTerm, dbBlock, dbName), the module hierarchy (dbModule,
-// dbModInst, dbModNet, dbModBTerm, dbModITerm), parasitics (dbRSeg, dbCCSeg, dbCapNode) and
-// routing guides (dbGuide) -- and has ZERO cases for dbBlockage, dbObstruction, dbFill, dbRow,
-// dbSWire, dbWire, dbVia or dbRegion.
+// ⛔ NOT TRANSACTIONAL. The ECO journal rolls back the NETLIST, not the GEOMETRY: a blockage
+// created inside beginEco/undoEco SURVIVES the rollback, and so do fills, rows, obstructions and
+// special wires. Measured rather than assumed -- see tests/transactional.rs, which performs each
+// edit inside an ECO, undoes it, and asserts whether it came back.
 //
-// It is a NETLIST-ECO journal, not a general transaction log. That is a scope, not an oversight:
-// it covers what a timing-driven ECO touches. An engine that wants transaction semantics over
-// physical geometry must undo that geometry itself.
+// So an engine that writes geometry and wants transaction semantics has to undo it itself, which
+// is what this exists for.
 //
 // Indices shift as blockages are destroyed, so a caller removing several must work backwards.
 void blockage_destroy(const OdbDb& db, std::size_t idx);

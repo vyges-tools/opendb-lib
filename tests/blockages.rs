@@ -76,14 +76,10 @@ fn an_unknown_instance_is_an_error_not_a_silent_orphan() {
 
 #[test]
 fn a_blockage_is_NOT_rolled_back_by_the_eco_journal() {
-    // ⛔ **A verified SCOPE of OpenDB, not a bug in this shim and not an oversight upstream.**
-    // At pin 945a9f4 `dbJournal` covers the netlist (dbInst, dbNet, dbITerm, dbBTerm, dbBlock,
-    // dbName), the module hierarchy, parasitics and routing guides — and has ZERO cases for
-    // dbBlockage, dbObstruction, dbFill, dbRow, dbSWire, dbWire, dbVia or dbRegion.
-    //
-    // 🔑 It is a NETLIST-ECO journal, not a general transaction log. So this is not "blockages
-    // were forgotten"; it is "physical geometry was never in scope", and the same is true of
-    // every fill, row, special wire and via any of our engines writes.
+    // ⛔ **The ECO journal rolls back the NETLIST, not the GEOMETRY.** This is not specific to
+    // blockages: fills, rows, obstructions and special wires behave the same way. The full split
+    // is measured in `tests/transactional.rs`; this test pins the blockage case because blockages
+    // are on macro placement's main path.
     //
     // 🔑 This matters because macro placement is applied as a TRANSACTION: if the engine refuses
     // part-way it must leave the database exactly as it found it. Blockages are on the main path
