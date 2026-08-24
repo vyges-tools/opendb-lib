@@ -1198,6 +1198,21 @@ rust::Vec<int32_t> blockage_boxes(const OdbDb& h) {
   }
   return out;
 }
+void blockage_create(const OdbDb& h, int32_t x1, int32_t y1, int32_t x2, int32_t y2,
+                     rust::Str inst, bool soft) {
+  dbBlock* b = require_block(h);
+  // An empty name means "not associated with an instance"; upstream passes nullptr there.
+  dbInst* i = inst.empty() ? nullptr : require_inst(h, inst);
+  odb::dbBlockage* g = odb::dbBlockage::create(b, x1, y1, x2, y2, i);
+  if (!g) throw std::runtime_error("vyges-opendb: blockage_create failed");
+  // ⚠️ Order matters to nothing here, but upstream sets soft AFTER create
+  // (mpl hier_rtlmp.cpp: create(...) then ->setSoft()), so we match it.
+  if (soft) g->setSoft();
+}
+std::size_t num_blockages(const OdbDb& h) {
+  dbBlock* b = block_of(h);
+  return b ? b->getBlockages().size() : 0;
+}
 void fill_create(const OdbDb& h, bool needs_opc, uint32_t mask, rust::Str layer,
                  int32_t x1, int32_t y1, int32_t x2, int32_t y2) {
   dbBlock* b = require_block(h);

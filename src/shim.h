@@ -389,6 +389,19 @@ rust::Vec<int64_t> obstruction_boxes(const OdbDb& db);
 // geometry is reachable without this.
 rust::Vec<int32_t> blockage_boxes(const OdbDb& db);
 
+// Create a PLACEMENT blockage over a rectangle, optionally associated with an instance and
+// optionally soft.
+//
+// 🔑 Why this is a hand shim: the binding generator emits by-name accessors for instance methods,
+// but `dbBlockage::create` is a STATIC FACTORY, and the generator emits none of those. Same reason
+// `dbRow::create` and `dbFill::create` are hand-written here.
+//
+// `inst` may be empty for a blockage not tied to an instance; a non-empty name that does not
+// resolve is an error rather than a silently unassociated blockage.
+void blockage_create(const OdbDb& db, int32_t x1, int32_t y1, int32_t x2, int32_t y2,
+                     rust::Str inst, bool soft);
+std::size_t num_blockages(const OdbDb& db);
+
 // Create a fill rectangle. `mask` 0 means "no mask" (single-mask layers).
 void fill_create(const OdbDb& db, bool needs_opc, uint32_t mask, rust::Str layer,
                  int32_t x1, int32_t y1, int32_t x2, int32_t y2);
