@@ -401,6 +401,15 @@ rust::Vec<int32_t> blockage_boxes(const OdbDb& db);
 void blockage_create(const OdbDb& db, int32_t x1, int32_t y1, int32_t x2, int32_t y2,
                      rust::Str inst, bool soft);
 std::size_t num_blockages(const OdbDb& db);
+// Destroy the blockage at `idx` in the block's blockage set.
+//
+// ⚠️ Needed because OpenDB's ECO journal does NOT cover dbBlockage: a blockage created inside
+// beginEco/undoEco SURVIVES the rollback. Verified at pin 945a9f4, where dbJournal handles
+// dbInst, dbNet, dbBTerm, dbITerm, dbGuide and others but has no dbBlockageObj case. An engine
+// that treats its writes as a transaction has to undo these itself.
+//
+// Indices shift as blockages are destroyed, so a caller removing several must work backwards.
+void blockage_destroy(const OdbDb& db, std::size_t idx);
 
 // Create a fill rectangle. `mask` 0 means "no mask" (single-mask layers).
 void fill_create(const OdbDb& db, bool needs_opc, uint32_t mask, rust::Str layer,

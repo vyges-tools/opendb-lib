@@ -131,6 +131,7 @@ mod ffi {
         fn blockage_create(db: &OdbDb, x1: i32, y1: i32, x2: i32, y2: i32,
                            inst: &str, soft: bool) -> Result<()>;
         fn num_blockages(db: &OdbDb) -> Result<usize>;
+        fn blockage_destroy(db: &OdbDb, idx: usize) -> Result<()>;
         #[allow(clippy::too_many_arguments)]
         fn fill_create(db: &OdbDb, needs_opc: bool, mask: u32, layer: &str,
                        x1: i32, y1: i32, x2: i32, y2: i32) -> Result<()>;
@@ -394,7 +395,7 @@ pub use ffi::{
     site_row_pattern_len, site_row_pattern_orient, site_row_pattern_site,
     block_cut_rows, has_one_site_master, nth_row_name, site_get_class, create_physical_inst, inst_bbox, num_masters, nth_master_name, master_get_type,
     nth_row_bbox, nth_row_site, nth_row_orient, nth_row_direction, destroy_inst,
-    inst_shapes, obstruction_boxes, blockage_boxes, swire_boxes, blockage_create, num_blockages,
+    inst_shapes, obstruction_boxes, blockage_boxes, swire_boxes, blockage_create, num_blockages, blockage_destroy,
     fill_create, num_fills, clear_fills,
     num_layers, nth_layer_name, layer_direction, track_grid_x, track_grid_y,
     track_patterns_x, track_patterns_y, bterm_constraint_region,

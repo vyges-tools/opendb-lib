@@ -71,3 +71,87 @@ fn an_unknown_instance_is_an_error_not_a_silent_orphan() {
         "a refused create leaves nothing behind"
     );
 }
+
+// ------------------------------------------------------------------ transaction semantics
+
+#[test]
+fn a_blockage_is_NOT_rolled_back_by_the_eco_journal() {
+    // ⛔ **A verified LIMIT of OpenDB, not a bug in this shim.** At pin 945a9f4 `dbJournal`
+    // handles dbInst, dbNet, dbBTerm, dbITerm, dbGuide and others — there is **no dbBlockageObj
+    // case** — so a blockage created inside beginEco/undoEco SURVIVES the rollback.
+    //
+    // 🔑 This matters because macro placement is applied as a TRANSACTION: if the engine refuses
+    // part-way it must leave the database exactly as it found it. Blockages are on the main path
+    // (34 of upstream mpl's 36 DEF goldens carry a BLOCKAGES section), so relying on the journal
+    // for them would leave orphans behind every refusal.
+    //
+    // ⚠️ **If this test ever fails, that is GOOD news**: OpenDB started journaling blockages and
+    // the manual cleanup below can go. Asserting the limit is how we get told.
+    let db = odb::open_db(FIXTURE).expect("read");
+    let before = odb::num_blockages(&db).unwrap();
+
+    odb::eco_begin(&db).expect("begin");
+    odb::blockage_create(&db, 10, 20, 30, 40, "", true).expect("created");
+    odb::eco_undo(&db).expect("undo");
+
+    assert_eq!(
+        odb::num_blockages(&db).unwrap(),
+        before + 1,
+        "the blockage SURVIVES the rollback -- undo it manually, do not trust the journal"
+    );
+}
+
+#[test]
+fn destroying_blockages_completes_the_rollback_by_hand() {
+    // The workaround the limit above forces: record the count, and destroy back down to it.
+    let db = odb::open_db(FIXTURE).expect("read");
+    let before = odb::num_blockages(&db).unwrap();
+
+    odb::blockage_create(&db, 10, 20, 30, 40, "", true).expect("created");
+    odb::blockage_create(&db, 50, 60, 70, 80, "", false).expect("created");
+    assert_eq!(odb::num_blockages(&db).unwrap(), before + 2);
+
+    // ⚠️ Backwards: destroying one shifts the indices of everything after it.
+    for idx in (before..before + 2).rev() {
+        odb::blockage_destroy(&db, idx).expect("destroyed");
+    }
+    assert_eq!(odb::num_blockages(&db).unwrap(), before, "baseline restored");
+}
+
+#[test]
+fn destroying_an_out_of_range_blockage_is_an_error() {
+    let db = odb::open_db(FIXTURE).expect("read");
+    let n = odb::num_blockages(&db).unwrap();
+    assert!(odb::blockage_destroy(&db, n).is_err(), "one past the end");
+}
+
+#[test]
+fn a_committed_blockage_survives() {
+    // Teeth for the test above: if `undo` were a no-op, both tests would pass. This one fails
+    // if `commit` were the no-op instead, so the pair distinguishes them.
+    let db = odb::open_db(FIXTURE).expect("read");
+    let before = odb::num_blockages(&db).unwrap();
+
+    odb::eco_begin(&db).expect("begin");
+    odb::blockage_create(&db, 10, 20, 30, 40, "", true).expect("created");
+    odb::eco_commit(&db).expect("commit");
+
+    assert_eq!(odb::num_blockages(&db).unwrap(), before + 1, "kept");
+}
+
+#[test]
+fn a_macro_move_is_rolled_back_too() {
+    // The other half of what mpl writes: location, orientation and placement status. A rollback
+    // that restored blockages but not positions would leave a design that looks placed and is
+    // not the one anybody asked for.
+    let db = odb::open_db(FIXTURE).expect("read");
+    let inst = odb::nth_inst_name(&db, 0);
+    let (x0, y0) = (odb::inst_x(&db, &inst), odb::inst_y(&db, &inst));
+
+    odb::eco_begin(&db).expect("begin");
+    odb::set_inst_location(&db, &inst, x0 + 5000, y0 + 7000).expect("moved");
+    assert_ne!(odb::inst_x(&db, &inst), x0, "it really moved");
+    odb::eco_undo(&db).expect("undo");
+
+    assert_eq!((odb::inst_x(&db, &inst), odb::inst_y(&db, &inst)), (x0, y0));
+}

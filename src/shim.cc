@@ -1213,6 +1213,17 @@ std::size_t num_blockages(const OdbDb& h) {
   dbBlock* b = block_of(h);
   return b ? b->getBlockages().size() : 0;
 }
+void blockage_destroy(const OdbDb& h, std::size_t idx) {
+  dbBlock* b = require_block(h);
+  std::size_t i = 0;
+  for (odb::dbBlockage* g : b->getBlockages()) {
+    if (i++ == idx) {
+      odb::dbBlockage::destroy(g);
+      return;
+    }
+  }
+  throw std::runtime_error("vyges-opendb: blockage index out of range: " + std::to_string(idx));
+}
 void fill_create(const OdbDb& h, bool needs_opc, uint32_t mask, rust::Str layer,
                  int32_t x1, int32_t y1, int32_t x2, int32_t y2) {
   dbBlock* b = require_block(h);
