@@ -532,6 +532,18 @@ rust::Vec<int32_t> master_pin_boxes(const OdbDb& db, rust::Str master);
 // two cells touch on the SAME pin" -- connection by abutment is exactly that question.
 rust::Vec<int32_t> mterm_pin_boxes(const OdbDb& db, rust::Str master, rust::Str term);
 
+// Pin rectangles of ONE MPin of one terminal, 5 i32 each, in MASTER coordinates.
+//
+// 🔑 `mterm_pin_boxes` flattens every MPin of the terminal together, which loses the grouping —
+// and a rule that asks "which layer does THIS pin sit on" needs the group, because the answer is
+// taken from the pin's FIRST box, not from the box being examined. A terminal with two MPins on
+// different layers gives a different answer once flattened, silently.
+rust::Vec<int32_t> mpin_boxes(const OdbDb& db, rust::Str master, rust::Str term, std::size_t idx);
+
+// The instance's halo rectangle as (x_min, y_min, x_max, y_max, is_soft), or empty if it has none.
+// ⚠️ The four values are DISTANCES per side, not a rectangle in the instance's coordinates.
+rust::Vec<std::int64_t> inst_halo(const OdbDb& db, rust::Str inst);
+
 // Delete a net. Its terminals are left disconnected.
 void net_destroy(const OdbDb& db, rust::Str net);
 

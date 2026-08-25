@@ -1480,6 +1480,36 @@ rust::Vec<int32_t> mterm_pin_boxes(const OdbDb& h, rust::Str master, rust::Str t
     for (odb::dbBox* b : p->getGeometry()) push_box(out, b->getTechLayer(), b->getBox());
   return out;
 }
+rust::Vec<int32_t> mpin_boxes(const OdbDb& h, rust::Str master, rust::Str term, std::size_t idx) {
+  rust::Vec<int32_t> out;
+  odb::dbMaster* m = h.db->findMaster(s(master).c_str());
+  if (!m) return out;
+  odb::dbMTerm* t = m->findMTerm(s(term).c_str());
+  if (!t) return out;
+  std::size_t k = 0;
+  for (odb::dbMPin* p : t->getMPins()) {
+    if (k++ != idx) continue;
+    for (odb::dbBox* b : p->getGeometry()) push_box(out, b->getTechLayer(), b->getBox());
+    return out;
+  }
+  return out;
+}
+rust::Vec<std::int64_t> inst_halo(const OdbDb& h, rust::Str inst) {
+  rust::Vec<std::int64_t> out;
+  dbBlock* b = h.db->getChip() ? h.db->getChip()->getBlock() : nullptr;
+  if (!b) return out;
+  dbInst* i = b->findInst(s(inst).c_str());
+  if (!i) return out;
+  odb::dbBox* halo = i->getHalo();
+  if (!halo) return out;
+  odb::Rect r = halo->getBox();
+  out.push_back(r.xMin());
+  out.push_back(r.yMin());
+  out.push_back(r.xMax());
+  out.push_back(r.yMax());
+  out.push_back(halo->isSoft() ? 1 : 0);
+  return out;
+}
 rust::Vec<int32_t> techvialayerrule_rect(const OdbDb& h, std::size_t gen_idx, std::size_t layer_idx) {
   rust::Vec<int32_t> out;
   odb::dbTech* tech = h.db->getTech();
