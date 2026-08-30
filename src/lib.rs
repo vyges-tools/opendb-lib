@@ -35,6 +35,7 @@ mod ffi {
         fn open_db(path: &str) -> Result<UniquePtr<OdbDb>>;
         fn write_db(db: &OdbDb, path: &str) -> Result<()>;
         fn write_def(db: &OdbDb, path: &str) -> Result<()>;
+        fn read_lef(db: &OdbDb, lef_path: &str) -> Result<()>;
         fn read_def(db: &OdbDb, def_path: &str, mode: &str) -> Result<()>;
 
         // read / inspect
@@ -394,6 +395,7 @@ pub use ffi::{
     swap_master,
     net_is_special, net_sigtype, nth_net_bterm, nth_net_iterm, nth_net_name, num_net_bterms,
     add_track_pattern_x, add_track_pattern_y,
+    read_lef,
     num_net_iterms, read_def, set_inst_location, set_inst_orient, total_wire_length, write_db,
     write_def, OdbDb,
     clear_rows, nth_site_name, num_rows, num_sites, row_create, tech_manufacturing_grid,

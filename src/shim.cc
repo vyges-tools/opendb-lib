@@ -346,6 +346,36 @@ void write_def(const OdbDb& h, rust::Str path) {
 // Read a DEF into the db. mode: "default" (design from scratch), "floorplan" (update existing
 // COMPONENTS/PINS/DIEAREA/TRACKS/ROWS/NETS — this is Odb.ApplyDEFTemplate), "incremental"
 // (update COMPONENTS/PINS). Non-default modes require an existing design (chip + libs).
+// ⛔ **Reading LEF was the last thing only OpenROAD could do.** `read_def` needed a tech and libs
+// that nothing on our side could create, so every chain had to start from an OpenROAD-built `.odb`.
+//
+// 🔑 **Transcribes `read_lef`'s own rule** (`src/OpenRoad.tcl:7` and `OpenRoad.cc:336`): with
+// neither `-tech` nor `-library` given, a library is ALWAYS made, and a tech is made only when the
+// database has none — so the FIRST LEF read creates the tech and every later one adds a library to
+// it. Both names come from the file's own rootname.
+//
+// ⚠️ `ignore_non_routing_layers` is FALSE, matching `odb::lefin lef_reader(db_, logger_, false)`.
+// Passing true silently drops cut and masterslice layers, which a later via search then cannot find.
+void read_lef(const OdbDb& h, rust::Str lef_path) {
+  odb::dbDatabase* db = h.db;
+  std::string path = s(lef_path);
+  // lib_name = [file rootname [file tail $filename]]
+  std::string base = path;
+  const size_t slash = base.find_last_of('/');
+  if (slash != std::string::npos) base = base.substr(slash + 1);
+  const size_t dot = base.find_last_of('.');
+  if (dot != std::string::npos && dot > 0) base = base.substr(0, dot);
+
+  odb::lefin reader(db, const_cast<utl::Logger*>(&h.logger), false);
+  odb::dbTech* tech = db->getTech();
+  if (!tech) {
+    if (!reader.createTechAndLib(base.c_str(), base.c_str(), path.c_str()))
+      throw std::runtime_error("vyges-opendb: could not read tech+lib from LEF: " + path);
+  } else {
+    if (!reader.createLib(tech, base.c_str(), path.c_str()))
+      throw std::runtime_error("vyges-opendb: could not read lib from LEF: " + path);
+  }
+}
 void read_def(const OdbDb& h, rust::Str def_path, rust::Str mode) {
   odb::dbDatabase* db = h.db;
   std::string ms = s(mode);

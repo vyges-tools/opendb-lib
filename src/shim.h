@@ -50,6 +50,7 @@ void create_net(const OdbDb& db, rust::Str name);                       // throw
 void create_inst(const OdbDb& db, rust::Str master, rust::Str name);    // throws if master missing
 void set_inst_location(const OdbDb& db, rust::Str inst, int32_t x, int32_t y);  // + PLACED
 void set_inst_orient(const OdbDb& db, rust::Str inst, rust::Str orient);        // R0/R90/MX/…
+void read_lef(const OdbDb& db, rust::Str lef_path);  // first LEF makes the tech
 void add_track_pattern_x(const OdbDb& db, rust::Str layer, int32_t origin, int32_t count,
                          int32_t step);  // find-or-create the layer's dbTrackGrid
 void add_track_pattern_y(const OdbDb& db, rust::Str layer, int32_t origin, int32_t count,
