@@ -50,6 +50,8 @@ void create_net(const OdbDb& db, rust::Str name);                       // throw
 void create_inst(const OdbDb& db, rust::Str master, rust::Str name);    // throws if master missing
 void set_inst_location(const OdbDb& db, rust::Str inst, int32_t x, int32_t y);  // + PLACED
 void set_inst_orient(const OdbDb& db, rust::Str inst, rust::Str orient);        // R0/R90/MX/…
+void bterm_set_io_type(const OdbDb& db, rust::Str bterm, rust::Str io_type);
+void block_set_def_units(const OdbDb& db, int32_t units);
 void read_lef(const OdbDb& db, rust::Str lef_path);  // first LEF makes the tech
 void block_set_bus_delimiters(const OdbDb& db, rust::Str left, rust::Str right);
 void add_track_pattern_x(const OdbDb& db, rust::Str layer, int32_t origin, int32_t count,

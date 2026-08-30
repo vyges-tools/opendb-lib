@@ -9,7 +9,6 @@ mod ffi_gen_write {
         include!("generated_write.h");
         type OdbDb = crate::ffi::OdbDb;
         fn block_clear_global_connect(db: &OdbDb) -> Result<()>;
-        fn block_set_def_units(db: &OdbDb, units: i32) -> Result<()>;
         fn block_set_corner_name_list(db: &OdbDb, name_list: &str) -> Result<()>;
         fn block_set_corner_count(db: &OdbDb, corner_cnt: i32, ext_db_cnt: i32, name_list: &str) -> Result<()>;
         fn block_set_min_routing_layer(db: &OdbDb, min_routing_layer: i32) -> Result<()>;
@@ -75,7 +74,6 @@ mod ffi_gen_write {
         fn net_set_jumpers(db: &OdbDb, net: &str, has_jumpers: bool) -> Result<()>;
         fn net_set_auto_taper(db: &OdbDb, net: &str, enable: bool) -> Result<()>;
         fn bterm_set_sig_type(db: &OdbDb, bterm: &str, a0: &str) -> Result<()>;
-        fn bterm_set_io_type(db: &OdbDb, bterm: &str, a0: &str) -> Result<()>;
         fn bterm_set_spef_mark(db: &OdbDb, bterm: &str, v: u32) -> Result<()>;
         fn bterm_set_mark(db: &OdbDb, bterm: &str, v: u32) -> Result<()>;
         fn bterm_set_ext_id(db: &OdbDb, bterm: &str, v: u32) -> Result<()>;
@@ -395,7 +393,6 @@ pub use ffi_gen_write::{
     block_clear_user_inst_flags,
     block_set_corner_count,
     block_set_corner_name_list,
-    block_set_def_units,
     block_set_driving_itermsfor_nets,
     block_set_max_layer_for_clock,
     block_set_max_routing_layer,
@@ -411,7 +408,6 @@ pub use ffi_gen_write::{
     bpin_set_min_spacing,
     bpin_set_placement_status,
     bterm_set_ext_id,
-    bterm_set_io_type,
     bterm_set_mark,
     bterm_set_sig_type,
     bterm_set_special,

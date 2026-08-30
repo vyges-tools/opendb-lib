@@ -4,7 +4,6 @@
 #include "shim.h"
 
 void block_clear_global_connect(const OdbDb& db);
-void block_set_def_units(const OdbDb& db, int32_t units);
 void block_set_corner_name_list(const OdbDb& db, rust::Str name_list);
 void block_set_corner_count(const OdbDb& db, int32_t corner_cnt, int32_t ext_db_cnt, rust::Str name_list);
 void block_set_min_routing_layer(const OdbDb& db, int32_t min_routing_layer);
@@ -70,7 +69,6 @@ void net_clear_tracks(const OdbDb& db, rust::Str net);
 void net_set_jumpers(const OdbDb& db, rust::Str net, bool has_jumpers);
 void net_set_auto_taper(const OdbDb& db, rust::Str net, bool enable);
 void bterm_set_sig_type(const OdbDb& db, rust::Str bterm, rust::Str a0);
-void bterm_set_io_type(const OdbDb& db, rust::Str bterm, rust::Str a0);
 void bterm_set_spef_mark(const OdbDb& db, rust::Str bterm, uint32_t v);
 void bterm_set_mark(const OdbDb& db, rust::Str bterm, uint32_t v);
 void bterm_set_ext_id(const OdbDb& db, rust::Str bterm, uint32_t v);

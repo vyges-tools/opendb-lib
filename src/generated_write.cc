@@ -8,7 +8,6 @@
 using namespace odb;
 
 void block_clear_global_connect(const OdbDb& h) { auto* p = gen_block(h); if (!p) throw std::runtime_error("vyges-opendb: dbBlock not found"); p->clearGlobalConnect(); }
-void block_set_def_units(const OdbDb& h, int32_t units) { auto* p = gen_block(h); if (!p) throw std::runtime_error("vyges-opendb: dbBlock not found"); p->setDefUnits(units); }
 void block_set_corner_name_list(const OdbDb& h, rust::Str name_list) { auto* p = gen_block(h); if (!p) throw std::runtime_error("vyges-opendb: dbBlock not found"); p->setCornerNameList(gs(name_list).c_str()); }
 void block_set_corner_count(const OdbDb& h, int32_t corner_cnt, int32_t ext_db_cnt, rust::Str name_list) { auto* p = gen_block(h); if (!p) throw std::runtime_error("vyges-opendb: dbBlock not found"); p->setCornerCount(corner_cnt, ext_db_cnt, gs(name_list).c_str()); }
 void block_set_min_routing_layer(const OdbDb& h, int32_t min_routing_layer) { auto* p = gen_block(h); if (!p) throw std::runtime_error("vyges-opendb: dbBlock not found"); p->setMinRoutingLayer(min_routing_layer); }
@@ -74,7 +73,6 @@ void net_clear_tracks(const OdbDb& h, rust::Str net) { auto* p = gen_net(h, net)
 void net_set_jumpers(const OdbDb& h, rust::Str net, bool has_jumpers) { auto* p = gen_net(h, net); if (!p) throw std::runtime_error("vyges-opendb: dbNet not found"); p->setJumpers(has_jumpers); }
 void net_set_auto_taper(const OdbDb& h, rust::Str net, bool enable) { auto* p = gen_net(h, net); if (!p) throw std::runtime_error("vyges-opendb: dbNet not found"); p->setAutoTaper(enable); }
 void bterm_set_sig_type(const OdbDb& h, rust::Str bterm, rust::Str a0) { auto* p = gen_bterm(h, bterm); if (!p) throw std::runtime_error("vyges-opendb: dbBTerm not found"); p->setSigType(odb::dbSigType(gs(a0).c_str())); }
-void bterm_set_io_type(const OdbDb& h, rust::Str bterm, rust::Str a0) { auto* p = gen_bterm(h, bterm); if (!p) throw std::runtime_error("vyges-opendb: dbBTerm not found"); p->setIoType(odb::dbIoType(gs(a0).c_str())); }
 void bterm_set_spef_mark(const OdbDb& h, rust::Str bterm, uint32_t v) { auto* p = gen_bterm(h, bterm); if (!p) throw std::runtime_error("vyges-opendb: dbBTerm not found"); p->setSpefMark(v); }
 void bterm_set_mark(const OdbDb& h, rust::Str bterm, uint32_t v) { auto* p = gen_bterm(h, bterm); if (!p) throw std::runtime_error("vyges-opendb: dbBTerm not found"); p->setMark(v); }
 void bterm_set_ext_id(const OdbDb& h, rust::Str bterm, uint32_t v) { auto* p = gen_bterm(h, bterm); if (!p) throw std::runtime_error("vyges-opendb: dbBTerm not found"); p->setExtId(v); }

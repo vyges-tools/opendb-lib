@@ -356,6 +356,32 @@ void write_def(const OdbDb& h, rust::Str path) {
 //
 // ⚠️ `ignore_non_routing_layers` is FALSE, matching `odb::lefin lef_reader(db_, logger_, false)`.
 // Passing true silently drops cut and masterslice layers, which a later via search then cannot find.
+// ⛔ **Hand-written so the VERILOG HANDOFF does not need `gen-write`.** Both are otherwise
+// schema-generated into `generated_write.cc` behind that feature, and `vyges-opendb` is the binary
+// `vyges install opendb` ships — gating the whole of it on a mutation feature to reach two setters
+// is the wrong trade. `generate-bindings.py` skips any method the hand-written shim already
+// exports, so declaring them here MOVES them out of the gated surface rather than duplicating.
+//
+// 🔑 **Both call the real dbAPI, which matters for the first one:** `dbBTerm::setIoType`
+// (`dbBTerm.cpp:310`) is not a field write — it captures the previous flags and calls
+// `journal_->updateField`, so an ECO rollback depends on going through it. Writing the flag
+// directly would leave the journal blind.
+void bterm_set_io_type(const OdbDb& h, rust::Str bterm, rust::Str io_type) {
+  dbBlock* b = require_block(h);
+  dbBTerm* bt = b->findBTerm(s(bterm).c_str());
+  if (!bt) throw std::runtime_error("vyges-opendb: bterm not found: " + s(bterm));
+  bt->setIoType(odb::dbIoType(s(io_type).c_str()));
+}
+
+// ⚠️ **`def_units_` is NOT the database scale.** `getDbUnitsPerMicron` returns `dbu_per_micron_`,
+// which `dbBlock` takes from the TECH when the block is created (`dbBlock.cpp:2953`) — so micron
+// conversions work without this. What `setDefUnits` sets is the DEF output units, default 100;
+// `Verilog2db::makeBlock` passes `tech->getLefUnits()` so a written DEF says 1000 on sky130 rather
+// than 100. It is serialized and compared, so it is part of database equality.
+void block_set_def_units(const OdbDb& h, int32_t units) {
+  require_block(h)->setDefUnits(units);
+}
+
 void read_lef(const OdbDb& h, rust::Str lef_path) {
   odb::dbDatabase* db = h.db;
   std::string path = s(lef_path);
