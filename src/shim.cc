@@ -487,6 +487,21 @@ void chip_create(const OdbDb& h, rust::Str name, rust::Str tech, rust::Str chip_
     throw std::runtime_error("vyges-opendb: chip_create failed (duplicate name?): " + s(name));
 }
 
+// ⛔ **The generator skips `setBusDelimiters`** — it takes two chars rather than one scalar, so it
+// sits in the registry as Unimpl. It is not optional for a design built from Verilog:
+// `Verilog2db::makeBlock` calls `block_->setBusDelimiters('[', ']')` immediately after creating the
+// block (`dbReadVerilog.cc:266`), and without it bus names do not round-trip — `a[3]` written back
+// is not the name anything else looks up.
+//
+// ⚠️ The sibling call there, `setDefUnits(tech->getLefUnits())`, is already bridged as
+// `block_set_def_units`; both are needed and neither is implied by block creation.
+void block_set_bus_delimiters(const OdbDb& h, rust::Str left, rust::Str right) {
+  dbBlock* b = require_block(h);
+  const std::string l = s(left), r = s(right);
+  if (l.size() != 1 || r.size() != 1)
+    throw std::runtime_error("vyges-opendb: bus delimiters must be one character each");
+  b->setBusDelimiters(l[0], r[0]);
+}
 void chip_block_create(const OdbDb& h, rust::Str chip, rust::Str name) {
   // A chip carries its own dbBlock — the die's design. The TOP chip needs one for the
   // block-level accessors to resolve through it, and a die needs one to hold the instances its

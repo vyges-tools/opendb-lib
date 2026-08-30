@@ -5,7 +5,7 @@
   "scope": "all",
   "class_count": 121,
   "method_count": 2639,
-  "bridged_count": 1572,
+  "bridged_count": 1574,
   "classes": [
     {
       "name": "dbAccessPoint",
@@ -1713,7 +1713,7 @@
           ],
           "const": false,
           "kind": "setter",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "getBusDelimiters",
@@ -9338,7 +9338,7 @@
           ],
           "const": false,
           "kind": "setter",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "getBusDelimiters",
