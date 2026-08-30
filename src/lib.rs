@@ -63,6 +63,8 @@ mod ffi {
         fn create_inst(db: &OdbDb, master: &str, name: &str) -> Result<()>;
         fn set_inst_location(db: &OdbDb, inst: &str, x: i32, y: i32) -> Result<()>;
         fn set_inst_orient(db: &OdbDb, inst: &str, orient: &str) -> Result<()>;
+        fn add_track_pattern_x(db: &OdbDb, layer: &str, origin: i32, count: i32, step: i32) -> Result<()>;
+        fn add_track_pattern_y(db: &OdbDb, layer: &str, origin: i32, count: i32, step: i32) -> Result<()>;
         fn add_obstruction(db: &OdbDb, layer: &str, x1: i32, y1: i32, x2: i32, y2: i32) -> Result<()>;
         fn num_obstructions(db: &OdbDb) -> usize;
         fn clear_obstructions(db: &OdbDb) -> usize;
@@ -391,6 +393,7 @@ pub use ffi::{
     num_insts, num_iterms, num_nets, num_obstructions, open_db, output_pin, place_bterm,
     swap_master,
     net_is_special, net_sigtype, nth_net_bterm, nth_net_iterm, nth_net_name, num_net_bterms,
+    add_track_pattern_x, add_track_pattern_y,
     num_net_iterms, read_def, set_inst_location, set_inst_orient, total_wire_length, write_db,
     write_def, OdbDb,
     clear_rows, nth_site_name, num_rows, num_sites, row_create, tech_manufacturing_grid,

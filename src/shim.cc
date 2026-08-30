@@ -228,6 +228,30 @@ void set_inst_orient(const OdbDb& h, rust::Str inst, rust::Str orient) {
   // dbOrientType parses "R0"/"R90"/"R180"/"R270"/"MX"/"MY"/"MXR90"/"MYR90".
   require_inst(h, inst)->setOrient(odb::dbOrientType(s(orient).c_str()));
 }
+// ⛔ **Track grids had READS but no WRITER**, so `make_tracks` could not be built at all — the
+// familiar shape: every accessor `InitFloorplan::makeTracks` needs was already present, and only
+// the write side was missing.
+//
+// 🔑 **Find-or-create, matching `makeTracks`**: it calls `block->findTrackGrid(layer)` and creates
+// one only when absent, so repeated calls for one layer ADD patterns to the same grid rather than
+// replacing it. A create-always shim would silently produce a second grid.
+static odb::dbTrackGrid* grid_for(const OdbDb& h, rust::Str layer) {
+  dbBlock* b = require_block(h);
+  dbTech* tech = b->getTech();
+  dbTechLayer* l = tech ? tech->findLayer(s(layer).c_str()) : nullptr;
+  if (!l) throw std::runtime_error("vyges-opendb: tech layer not found: " + s(layer));
+  odb::dbTrackGrid* g = b->findTrackGrid(l);
+  if (!g) g = odb::dbTrackGrid::create(b, l);
+  return g;
+}
+void add_track_pattern_x(const OdbDb& h, rust::Str layer, int32_t origin, int32_t count,
+                         int32_t step) {
+  grid_for(h, layer)->addGridPatternX(origin, count, step);
+}
+void add_track_pattern_y(const OdbDb& h, rust::Str layer, int32_t origin, int32_t count,
+                         int32_t step) {
+  grid_for(h, layer)->addGridPatternY(origin, count, step);
+}
 void add_obstruction(const OdbDb& h, rust::Str layer, int32_t x1, int32_t y1, int32_t x2,
                      int32_t y2) {
   dbBlock* b = require_block(h);

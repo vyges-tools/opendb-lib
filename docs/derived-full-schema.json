@@ -5,7 +5,7 @@
   "scope": "all",
   "class_count": 121,
   "method_count": 2639,
-  "bridged_count": 1570,
+  "bridged_count": 1572,
   "classes": [
     {
       "name": "dbAccessPoint",
@@ -5872,7 +5872,7 @@
           ],
           "const": false,
           "kind": "setter",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "addGridPatternY",
@@ -5893,7 +5893,7 @@
           ],
           "const": false,
           "kind": "setter",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "getNumGridPatternsX",
