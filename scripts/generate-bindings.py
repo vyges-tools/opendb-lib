@@ -1079,12 +1079,29 @@ def main() -> int:
         b = snake(method)
         return any(x == b or x.startswith(b + "_") for x in impl_fields.get(cls, ()))
 
+    # ⛔ **A method the GENERATOR did not bind is not necessarily unbound.** Some are exported by
+    # the hand-written shim instead — `setIoType`, `setDefUnits`, `setBusDelimiters` all are,
+    # because writes belong in the audited surface. Reporting those as "no binding yet" is simply
+    # false, and `miss()` is what a caller sees.
+    #
+    # 🔑 The test is the shim's own naming convention, `{key}_{field}` — `dbBTerm` + `set_io_type`
+    # is `bterm_set_io_type` — checked against the names the hand-written bridge actually exports.
+    # ⚠️ NOT the schema's `bridged` flag: that greps the shim for any `->method(` call, so it also
+    # matches incidental uses like `findBTerm`, which would over-claim here.
+    hand_fns = reserved_ffi()
+
+    def is_hand(cls, field):
+        key = TARGETS[cls]["key"]
+        return f"{key}_{field}" in hand_fns
+
     unimpl = sorted(
-        (cls, snake(m["name"]), m["name"], m["kind"], m["return"].strip())
+        (cls, snake(m["name"]), m["name"], m["kind"], m["return"].strip(),
+         is_hand(cls, snake(m["name"])))
         for cls in TARGETS for m in by_name[cls]["methods"] if not is_impl(cls, m["name"]))
     unimpl_lit = "\n".join(
-        f'    Unimpl {{ class: "{c}", field: "{f}", method: "{meth}", kind: "{k}", ret: {chr(34)+rt.replace(chr(34), chr(39))+chr(34)} }},'
-        for c, f, meth, k, rt in unimpl)
+        f'    Unimpl {{ class: "{c}", field: "{f}", method: "{meth}", kind: "{k}", '
+        f'ret: {chr(34)+rt.replace(chr(34), chr(39))+chr(34)}, hand_written: {str(hw).lower()} }},'
+        for c, f, meth, k, rt, hw in unimpl)
     known_classes_lit = ",\n    ".join(f'"{c}"' for c in sorted(set(all_classes)))
 
     (API / "src/generated_registry.rs").write_text(
@@ -1109,8 +1126,14 @@ def main() -> int:
         "/// A real odb method the generator did NOT bind (for assertive 'not implemented' answers).\n"
         "pub struct Unimpl {\n"
         "    pub class: &'static str,\n    pub field: &'static str,\n    pub method: &'static str,\n"
-        "    pub kind: &'static str,\n    pub ret: &'static str,\n}\n\n"
-        "/// Every real odb method on a targeted class that is not yet bound.\n"
+        "    pub kind: &'static str,\n    pub ret: &'static str,\n"
+        "    /// ⛔ **Bound BY HAND, just not through this generic path.** The generic `get`/`set`\n"
+        "    /// dispatch is generated, so a hand-written binding is absent from it — but the method\n"
+        "    /// IS callable, as a `Db` method. Saying \"no binding yet\" about those is false, and\n"
+        "    /// writes live in the hand-written surface on purpose (the L2 governance boundary).\n"
+        "    pub hand_written: bool,\n}\n\n"
+        "/// Every real odb method on a targeted class the GENERATOR did not bind.\n"
+        "/// ⚠️ Not the same as unimplemented — check `hand_written`.\n"
         "pub const UNIMPLEMENTED: &[Unimpl] = &[\n" + unimpl_lit + "\n];\n\n"
         "/// Every odb class name (to tell a real-but-unbound class from a typo).\n"
         "pub const KNOWN_CLASSES: &[&str] = &[\n    " + known_classes_lit + ",\n];\n\n"
@@ -1129,11 +1152,18 @@ def main() -> int:
         "    );\n}\n\n"
         "/// Fallback for an unmatched (class, field): emit a structured miss event, and answer\n"
         "/// assertively — distinguishing a real-but-unbound odb API from an unknown field / non-odb\n"
-        "/// class. Codes: ODB-0900 unimplemented API · ODB-0901 unknown field · ODB-0902 unknown class.\n"
+        "/// class. Codes: ODB-0900 unimplemented API · ODB-0901 unknown field · ODB-0902 unknown class ·\n/// ODB-0903 implemented by hand, not reachable through this generic path.\n"
         "fn miss<T>(op: &str, class: &str, field: &str) -> crate::Result<T> {\n"
         "    if let Some(u) = UNIMPLEMENTED.iter().find(|u| u.class == class && u.field == field) {\n"
+        "        if u.hand_written {\n"
+        "            let raw = format!(\n"
+        "                \"{class}::{} is implemented as a hand-written binding, not through get/set \\\n"
+        "                 - call the Db method directly\", u.method);\n"
+        "            record_miss(\"ODB-0903\", class, field, u.method, &raw);\n"
+        "            return Err(crate::Error::Odb(raw));\n"
+        "        }\n"
         "        let raw = format!(\n"
-        "            \"{class}::{} not implemented — real odb API ({} returning {}), no binding yet\",\n"
+        "            \"{class}::{} not implemented - real odb API ({} returning {}), no binding yet\",\n"
         "            u.method, u.kind, u.ret);\n"
         "        record_miss(\"ODB-0900\", class, field, u.method, &raw);\n"
         "        return Err(crate::Error::Odb(raw));\n"
