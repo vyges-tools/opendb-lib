@@ -69,6 +69,7 @@ mod ffi_gen_write {
         fn net_set1st_r_seg_id(db: &OdbDb, net: &str, rseg_id: u32) -> Result<()>;
         fn net_set1st_cap_node_id(db: &OdbDb, net: &str, capn_id: u32) -> Result<()>;
         fn net_set_term_ext_ids(db: &OdbDb, net: &str, cap_id: i32) -> Result<()>;
+        fn net_set_non_default_rule(db: &OdbDb, net: &str, rule: &str) -> Result<()>;
         fn net_clear_guides(db: &OdbDb, net: &str) -> Result<()>;
         fn net_clear_tracks(db: &OdbDb, net: &str) -> Result<()>;
         fn net_set_jumpers(db: &OdbDb, net: &str, has_jumpers: bool) -> Result<()>;
@@ -78,10 +79,15 @@ mod ffi_gen_write {
         fn bterm_set_mark(db: &OdbDb, bterm: &str, v: u32) -> Result<()>;
         fn bterm_set_ext_id(db: &OdbDb, bterm: &str, v: u32) -> Result<()>;
         fn bterm_set_special(db: &OdbDb, bterm: &str) -> Result<()>;
+        fn bterm_set_ground_pin(db: &OdbDb, bterm: &str, pin: &str) -> Result<()>;
+        fn bterm_set_supply_pin(db: &OdbDb, bterm: &str, pin: &str) -> Result<()>;
+        fn bterm_set_mirrored_b_term(db: &OdbDb, bterm: &str, mirrored_bterm: &str) -> Result<()>;
         fn master_set_origin(db: &OdbDb, master: &str, x: i32, y: i32) -> Result<()>;
         fn master_set_width(db: &OdbDb, master: &str, width: u32) -> Result<()>;
         fn master_set_height(db: &OdbDb, master: &str, height: u32) -> Result<()>;
         fn master_set_backside_bridge(db: &OdbDb, master: &str, is_bridge: bool) -> Result<()>;
+        fn master_set_l_e_q(db: &OdbDb, master: &str, a0: &str) -> Result<()>;
+        fn master_set_e_e_q(db: &OdbDb, master: &str, a0: &str) -> Result<()>;
         fn master_set_symmetry_x(db: &OdbDb, master: &str) -> Result<()>;
         fn master_set_symmetry_y(db: &OdbDb, master: &str) -> Result<()>;
         fn master_set_symmetry_r90(db: &OdbDb, master: &str) -> Result<()>;
@@ -89,6 +95,7 @@ mod ffi_gen_write {
         fn master_set_sequential(db: &OdbDb, master: &str, v: bool) -> Result<()>;
         fn master_set_mark(db: &OdbDb, master: &str, mark: u32) -> Result<()>;
         fn master_set_special_power(db: &OdbDb, master: &str, v: bool) -> Result<()>;
+        fn master_set_site(db: &OdbDb, master: &str, site: &str) -> Result<()>;
         fn master_clear_pin_access(db: &OdbDb, master: &str, pin_access_idx: i32) -> Result<()>;
         fn iterm_set_spef(db: &OdbDb, inst: &str, pin: &str, v: u32) -> Result<()>;
         fn iterm_set_ext_id(db: &OdbDb, inst: &str, pin: &str, v: u32) -> Result<()>;
@@ -135,6 +142,7 @@ mod ffi_gen_write {
         fn techvia_set_resistance(db: &OdbDb, via: &str, res: f64) -> Result<()>;
         fn techvia_set_pattern(db: &OdbDb, via: &str, pattern: &str) -> Result<()>;
         fn ndr_set_hard_spacing(db: &OdbDb, rule: &str, value: bool) -> Result<()>;
+        fn ndr_set_min_cuts(db: &OdbDb, rule: &str, cut_layer: &str, count: i32) -> Result<()>;
         fn site_set_width(db: &OdbDb, site: &str, width: i32) -> Result<()>;
         fn site_set_height(db: &OdbDb, site: &str, height: i32) -> Result<()>;
         fn site_set_symmetry_x(db: &OdbDb, site: &str) -> Result<()>;
@@ -151,6 +159,7 @@ mod ffi_gen_write {
         fn wire_set_property(db: &OdbDb, net: &str, jid: i32, property: i32) -> Result<()>;
         fn box_set_soft(db: &OdbDb, idx: usize, value: bool) -> Result<()>;
         fn box_set_layer_mask(db: &OdbDb, idx: usize, mask: u32) -> Result<()>;
+        fn module_set_mod_inst(db: &OdbDb, module: &str, mod_inst: &str) -> Result<()>;
         fn region_set_invalid(db: &OdbDb, region: &str, v: bool) -> Result<()>;
         fn blockage_set_pushed_down(db: &OdbDb, idx: usize) -> Result<()>;
         fn blockage_set_soft(db: &OdbDb, idx: usize) -> Result<()>;
@@ -164,14 +173,22 @@ mod ffi_gen_write {
         fn marker_set_visited(db: &OdbDb, category: &str, idx: usize, visited: bool) -> Result<()>;
         fn marker_set_visible(db: &OdbDb, category: &str, idx: usize, visible: bool) -> Result<()>;
         fn marker_set_waived(db: &OdbDb, category: &str, idx: usize, waived: bool) -> Result<()>;
+        fn marker_set_tech_layer(db: &OdbDb, category: &str, idx: usize, layer: &str) -> Result<()>;
+        fn modbterm_set_mod_net(db: &OdbDb, module: &str, idx: usize, mod_net: &str) -> Result<()>;
+        fn moditerm_set_mod_net(db: &OdbDb, modinst: &str, idx: usize, mod_net: &str) -> Result<()>;
         fn pwr_domain_set_top(db: &OdbDb, name: &str, top: bool) -> Result<()>;
+        fn pwr_domain_set_parent(db: &OdbDb, name: &str, parent: &str) -> Result<()>;
         fn pwr_domain_set_voltage(db: &OdbDb, name: &str, voltage: f32) -> Result<()>;
+        fn pwr_domain_set_group(db: &OdbDb, name: &str, group: &str) -> Result<()>;
+        fn pwr_switch_set_power_domain(db: &OdbDb, name: &str, power_domain: &str) -> Result<()>;
         fn pwr_switch_set_out_supply_port(db: &OdbDb, name: &str, out_port: &str, net: &str) -> Result<()>;
+        fn pwr_switch_set_lib_cell(db: &OdbDb, name: &str, master: &str) -> Result<()>;
         fn isolation_set_applies_to(db: &OdbDb, name: &str, applies_to: &str) -> Result<()>;
         fn isolation_set_clamp_value(db: &OdbDb, name: &str, clamp_value: &str) -> Result<()>;
         fn isolation_set_isolation_signal(db: &OdbDb, name: &str, isolation_signal: &str) -> Result<()>;
         fn isolation_set_isolation_sense(db: &OdbDb, name: &str, isolation_sense: &str) -> Result<()>;
         fn isolation_set_location(db: &OdbDb, name: &str, location: &str) -> Result<()>;
+        fn isolation_set_power_domain(db: &OdbDb, name: &str, power_domain: &str) -> Result<()>;
         fn level_shifter_set_source(db: &OdbDb, name: &str, source: &str) -> Result<()>;
         fn level_shifter_set_sink(db: &OdbDb, name: &str, sink: &str) -> Result<()>;
         fn level_shifter_set_use_functional_equivalence(db: &OdbDb, name: &str, use_functional_equivalence: bool) -> Result<()>;
@@ -272,6 +289,7 @@ mod ffi_gen_write {
         fn cutenclosurerule_set_below_enclosure_valid(db: &OdbDb, layer: &str, idx: usize, below_enclosure_valid: bool) -> Result<()>;
         fn cutenclosurerule_set_concave_corners_valid(db: &OdbDb, layer: &str, idx: usize, concave_corners_valid: bool) -> Result<()>;
         fn cutspacingrule_set_cut_spacing(db: &OdbDb, layer: &str, idx: usize, cut_spacing: i32) -> Result<()>;
+        fn cutspacingrule_set_second_layer(db: &OdbDb, layer: &str, idx: usize, second_layer: &str) -> Result<()>;
         fn cutspacingrule_set_orthogonal_spacing(db: &OdbDb, layer: &str, idx: usize, orthogonal_spacing: i32) -> Result<()>;
         fn cutspacingrule_set_width(db: &OdbDb, layer: &str, idx: usize, width: i32) -> Result<()>;
         fn cutspacingrule_set_enclosure(db: &OdbDb, layer: &str, idx: usize, enclosure: i32) -> Result<()>;
@@ -331,6 +349,7 @@ mod ffi_gen_write {
         fn cutspacingrule_set_below(db: &OdbDb, layer: &str, idx: usize, below: bool) -> Result<()>;
         fn cutspacingrule_set_par_within_enclosure_valid(db: &OdbDb, layer: &str, idx: usize, par_within_enclosure_valid: bool) -> Result<()>;
         fn cutspacingtablerule_set_default(db: &OdbDb, layer: &str, idx: usize, spacing: i32) -> Result<()>;
+        fn cutspacingtablerule_set_second_layer(db: &OdbDb, layer: &str, idx: usize, second_layer: &str) -> Result<()>;
         fn cutspacingtablerule_set_prl(db: &OdbDb, layer: &str, idx: usize, prl: i32) -> Result<()>;
         fn cutspacingtablerule_set_extension(db: &OdbDb, layer: &str, idx: usize, extension: i32) -> Result<()>;
         fn cutspacingtablerule_set_default_valid(db: &OdbDb, layer: &str, idx: usize, default_valid: bool) -> Result<()>;
@@ -383,6 +402,8 @@ mod ffi_gen_write {
         fn chip_set_tsv(db: &OdbDb, chip: &str, tsv: bool) -> Result<()>;
         fn chipinst_set_orient(db: &OdbDb, chip: &str, inst: &str, orient: &str) -> Result<()>;
         fn chipinst_set_loc(db: &OdbDb, chip: &str, inst: &str, x: i32, y: i32, z: i32) -> Result<()>;
+        fn chipbump_set_net(db: &OdbDb, chip: &str, region: &str, idx: usize, net: &str) -> Result<()>;
+        fn chipbump_set_b_term(db: &OdbDb, chip: &str, region: &str, idx: usize, bterm: &str) -> Result<()>;
         fn chipconn_set_thickness(db: &OdbDb, chip: &str, conn: &str, thickness: i32) -> Result<()>;
     }
 }
@@ -408,10 +429,13 @@ pub use ffi_gen_write::{
     bpin_set_min_spacing,
     bpin_set_placement_status,
     bterm_set_ext_id,
+    bterm_set_ground_pin,
     bterm_set_mark,
+    bterm_set_mirrored_b_term,
     bterm_set_sig_type,
     bterm_set_special,
     bterm_set_spef_mark,
+    bterm_set_supply_pin,
     capnode_set_b_term_flag,
     capnode_set_branch_flag,
     capnode_set_capacitance,
@@ -441,6 +465,8 @@ pub use ffi_gen_write::{
     chip_set_thickness,
     chip_set_tsv,
     chip_set_width,
+    chipbump_set_b_term,
+    chipbump_set_net,
     chipconn_set_thickness,
     chipinst_set_loc,
     chipinst_set_orient,
@@ -539,6 +565,7 @@ pub use ffi_gen_write::{
     cutspacingrule_set_same_metal,
     cutspacingrule_set_same_net,
     cutspacingrule_set_same_via,
+    cutspacingrule_set_second_layer,
     cutspacingrule_set_second_within,
     cutspacingrule_set_short_edge_only,
     cutspacingrule_set_side_parallel_overlap,
@@ -570,6 +597,7 @@ pub use ffi_gen_write::{
     cutspacingtablerule_set_same_metal,
     cutspacingtablerule_set_same_net,
     cutspacingtablerule_set_same_via,
+    cutspacingtablerule_set_second_layer,
     cutspacingtablerule_set_side_extension_valid,
     cutspacingtablerule_set_vertical,
     inst_clear_user_flag1,
@@ -596,6 +624,7 @@ pub use ffi_gen_write::{
     isolation_set_isolation_sense,
     isolation_set_isolation_signal,
     isolation_set_location,
+    isolation_set_power_domain,
     iterm_clear_connected,
     iterm_clear_pref_access_points,
     iterm_clear_special,
@@ -670,25 +699,33 @@ pub use ffi_gen_write::{
     marker_cat_set_source,
     marker_set_comment,
     marker_set_line_number,
+    marker_set_tech_layer,
     marker_set_visible,
     marker_set_visited,
     marker_set_waived,
     master_clear_pin_access,
     master_set_backside_bridge,
+    master_set_e_e_q,
     master_set_frozen,
     master_set_height,
+    master_set_l_e_q,
     master_set_mark,
     master_set_origin,
     master_set_sequential,
+    master_set_site,
     master_set_special_power,
     master_set_symmetry_r90,
     master_set_symmetry_x,
     master_set_symmetry_y,
     master_set_width,
+    modbterm_set_mod_net,
+    moditerm_set_mod_net,
+    module_set_mod_inst,
     mpin_clear_pin_access,
     mterm_set_mark,
     mterm_set_sig_type,
     ndr_set_hard_spacing,
+    ndr_set_min_cuts,
     net_clear_guides,
     net_clear_special,
     net_clear_tracks,
@@ -710,6 +747,7 @@ pub use ffi_gen_write::{
     net_set_jumpers,
     net_set_mark,
     net_set_mark_1,
+    net_set_non_default_rule,
     net_set_r_c_disconnected,
     net_set_r_cgraph,
     net_set_ref_cc,
@@ -732,9 +770,13 @@ pub use ffi_gen_write::{
     obs_set_min_spacing,
     obs_set_pushed_down,
     obs_set_slot_obstruction,
+    pwr_domain_set_group,
+    pwr_domain_set_parent,
     pwr_domain_set_top,
     pwr_domain_set_voltage,
+    pwr_switch_set_lib_cell,
     pwr_switch_set_out_supply_port,
+    pwr_switch_set_power_domain,
     region_set_invalid,
     rseg_set_capacitance,
     rseg_set_coords,

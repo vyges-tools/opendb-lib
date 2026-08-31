@@ -4,6 +4,13 @@
 #include "shim.h"
 
 inline std::string gs(rust::Str v) { return std::string(v.data(), v.size()); }
+// A db-object PARAM addressed by name. ⛔ Throws rather than passing nullptr: the odb
+// setters that take a pointer dereference it unconditionally -- dbBTerm::setGroundPin is
+// `pin->getImpl()->getOID()` with no null check -- so a missing name would be a segfault,
+// not a no-op. There is no 'clear' spelling for these.
+template <class T> inline T* gen_req(T* p, const char* what) {
+  if (!p) throw std::runtime_error(std::string("vyges-opendb: ") + what + " not found");
+  return p; }
 inline odb::dbBlock* gen_block(const OdbDb& h) {
   odb::dbChip* c = h.db->getChip(); return c ? c->getBlock() : nullptr; }
 inline odb::dbInst* gen_inst(const OdbDb& h, rust::Str n) {

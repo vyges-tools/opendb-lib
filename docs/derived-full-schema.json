@@ -5,7 +5,7 @@
   "scope": "all",
   "class_count": 121,
   "method_count": 2639,
-  "bridged_count": 1574,
+  "bridged_count": 1594,
   "classes": [
     {
       "name": "dbAccessPoint",
@@ -738,7 +738,7 @@
           ],
           "const": false,
           "kind": "setter",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "getSupplyPin",
@@ -760,7 +760,7 @@
           ],
           "const": false,
           "kind": "setter",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "staVertexId",
@@ -823,7 +823,7 @@
           ],
           "const": false,
           "kind": "setter",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "getMirroredBTerm",
@@ -4688,7 +4688,7 @@
           ],
           "const": false,
           "kind": "setter",
-          "bridged": false
+          "bridged": true
         }
       ],
       "hand_written": false
@@ -8694,7 +8694,7 @@
           ],
           "const": false,
           "kind": "setter",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "getPowerDomain",
@@ -10028,7 +10028,7 @@
           ],
           "const": false,
           "kind": "setter",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "addSource",
@@ -10481,7 +10481,7 @@
           ],
           "const": false,
           "kind": "setter",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "getEEQ",
@@ -10503,7 +10503,7 @@
           ],
           "const": false,
           "kind": "setter",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "setSymmetryX",
@@ -10759,7 +10759,7 @@
           ],
           "const": false,
           "kind": "setter",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "getSite",
@@ -11186,7 +11186,7 @@
           ],
           "const": false,
           "kind": "setter",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "getModNet",
@@ -11342,7 +11342,7 @@
           ],
           "const": false,
           "kind": "setter",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "getModNet",
@@ -11786,7 +11786,7 @@
           ],
           "const": false,
           "kind": "setter",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "getModInst",
@@ -13325,7 +13325,7 @@
           ],
           "const": false,
           "kind": "setter",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "getNonDefaultRule",
@@ -13990,7 +13990,7 @@
           ],
           "const": false,
           "kind": "setter",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "getParent",
@@ -14033,7 +14033,7 @@
           ],
           "const": false,
           "kind": "setter",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "addElement",
@@ -14171,7 +14171,7 @@
           ],
           "const": false,
           "kind": "setter",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "getPowerDomain",
@@ -14227,7 +14227,7 @@
           ],
           "const": false,
           "kind": "setter",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "addPortMap",
@@ -20345,7 +20345,7 @@
           ],
           "const": false,
           "kind": "setter",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "setOrthogonalSpacing",
@@ -21665,7 +21665,7 @@
           ],
           "const": false,
           "kind": "setter",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "setPrl",
@@ -27018,7 +27018,7 @@
           ],
           "const": false,
           "kind": "setter",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "getMinCuts",

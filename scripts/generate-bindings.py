@@ -408,7 +408,14 @@ class Emit:
 
             mp = marshal_param(p["type"], f"a{i}")
             if mp is None:
-                return False
+                # ⭐ **A db-object pointer param, addressed BY NAME.** `setGroundPin(dbBTerm*)` and
+                # friends were unbridged purely because a pointer is not marshallable — but every
+                # nameable target already has a resolver, so the name IS the marshalling.
+                # ⚠️ Only for classes addressed by a SINGLE name: `dbBPin` needs (bterm, idx) and
+                # `dbBlock` needs nothing, and inventing a spelling for either would be guessing.
+                mp = self._marshal_db_ptr(p["type"], f"a{i}")
+                if mp is None:
+                    return False
             cxx_t, rust_t, expr = mp
             pn = p.get("name")
             if pn and re.fullmatch(r"[A-Za-z_]\w*", pn):
@@ -459,6 +466,37 @@ class Emit:
         arm = f'        ("{cls}", "{field}") => {{ db.{fn}({", ".join(parts)})?; Ok(()) }},'
         self.wreg.append((cls, field, value_types, keys_desc, arm))
         return True
+
+    @staticmethod
+    def _marshal_db_ptr(ctype, placeholder):
+        """`dbFoo*` -> a name string, resolved (and required) at the call site.
+
+        Returns (cxx_type, rust_type, call_expr) or None when the class is not addressable by a
+        single name. ⚠️ The resolver FUNCTION name is taken from the target's `resolve` string,
+        not built from its key: `dbTechLayer`'s key is `layer` but its resolver is
+        `gen_techlayer`, so `gen_{key}` would emit a call to a function that does not exist.
+        """
+        # ⛔ **The pointer must be the WHOLE type, not merely inside it.** A `search` here matched
+        # `dbTechLayer*` inside `const std::vector<dbTechLayer*>&` and marshalled a whole vector
+        # parameter as one name — which compiled into
+        # `setComponentMaskShift(dbTechLayer*)` and failed on the conversion. A container of db
+        # pointers is a different marshalling problem and is left unbridged.
+        norm_t = re.sub(r"\bconst\b", "", ctype).replace("&", "").strip()
+        m = re.fullmatch(r"(db[A-Za-z0-9_]+)\s*\*", norm_t)
+        if not m:
+            return None
+        target = m.group(1)
+        spec = TARGETS.get(target)
+        if not spec:
+            return None
+        args = spec.get("args", [])
+        if len(args) != 1 or not isinstance(args[0], str):
+            return None
+        fnm = re.match(r"(\w+)\(", spec["resolve"])
+        if not fnm:
+            return None
+        return ("rust::Str", "&str",
+                f'gen_req({fnm.group(1)}(h, {placeholder}), "{target}")')
 
     def add_outparam_getter(self, cls, spec, m, reserved_fn, reserved_db, seen):
         """A `void get*(int& a, int& b, ...)` reader (all params are scalar out-refs) -> one scalar
@@ -776,6 +814,13 @@ def main() -> int:
     resolvers = (
         "namespace {\n"
         "static std::string gs(rust::Str v) { return std::string(v.data(), v.size()); }\n"
+        "// A db-object PARAM addressed by name. ⛔ Throws rather than passing nullptr: the odb\n"
+        "// setters that take a pointer dereference it unconditionally -- dbBTerm::setGroundPin is\n"
+        "// `pin->getImpl()->getOID()` with no null check -- so a missing name would be a segfault,\n"
+        "// not a no-op. There is no 'clear' spelling for these.\n"
+        "template <class T> static T* gen_req(T* p, const char* what) {\n"
+        "  if (!p) throw std::runtime_error(std::string(\"vyges-opendb: \") + what + \" not found\");\n"
+        "  return p; }\n"
         "static odb::dbBlock* gen_block(const OdbDb& h) {\n"
         "  odb::dbChip* c = h.db->getChip(); return c ? c->getBlock() : nullptr; }\n"
         "static odb::dbInst* gen_inst(const OdbDb& h, rust::Str n) {\n"
