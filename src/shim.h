@@ -648,6 +648,19 @@ bool cut_spacing_table_is_center_and_edge(const OdbDb& db, rust::Str layer, std:
 bool cut_spacing_table_is_center_to_center(const OdbDb& db, rust::Str layer, std::size_t idx, rust::Str cls);
 void swire_add_box_shaped(const OdbDb& db, rust::Str net, bool fixed, rust::Str layer,
                           int32_t x1, int32_t y1, int32_t x2, int32_t y2, rust::Str shape);
+// A DIAGONAL (octilinear) special wire — a 45-degree RDL route segment.
+//
+// ⛔ **A different `dbSBox::create` overload, not a rectangle.** The reference passes the segment's
+// two RAW ENDPOINTS plus `dbSBox::OCTILINEAR` and the wire width; the bounding box it computes for
+// the axis-aligned case is deliberately discarded on this branch, and no end-point correction is
+// applied. See `RDLRouter::writeToDb`.
+//
+// ⚠️ Without this the caller has no way to express a diagonal at all, and dropping the piece
+// leaves the straight wires either side of it not meeting — a disconnected net rather than a
+// slightly shorter one.
+void swire_add_box_octilinear(const OdbDb& db, rust::Str net, bool fixed, rust::Str layer,
+                              int32_t x1, int32_t y1, int32_t x2, int32_t y2,
+                              int32_t width, rust::Str shape);
 void swire_add_box(const OdbDb& db, rust::Str net, bool fixed, rust::Str layer,
                    int32_t x1, int32_t y1, int32_t x2, int32_t y2);
 
