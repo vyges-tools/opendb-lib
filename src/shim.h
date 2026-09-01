@@ -576,6 +576,8 @@ rust::Vec<int32_t> mterm_pin_boxes(const OdbDb& db, rust::Str master, rust::Str 
 rust::Vec<int32_t> mterm_pin_boxes_excluding_polygons(const OdbDb& db, rust::Str master,
                                                       rust::Str term);
 rust::Vec<int32_t> iterm_pin_polygons(const OdbDb& db, rust::Str iterm);
+int32_t iterm_bool_property(const OdbDb& db, rust::Str iterm, rust::Str name);
+int32_t mterm_bool_property(const OdbDb& db, rust::Str master, rust::Str term, rust::Str name);
 rust::Vec<int32_t> polygon_bloat(rust::Slice<const int32_t> pts, int32_t margin);
 
 // Pin rectangles of ONE MPin of one terminal, 5 i32 each, in MASTER coordinates.

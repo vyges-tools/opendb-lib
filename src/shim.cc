@@ -1604,6 +1604,32 @@ rust::Vec<int32_t> mterm_pin_boxes(const OdbDb& h, rust::Str master, rust::Str t
     for (odb::dbBox* b : p->getGeometry()) push_box(out, b->getTechLayer(), b->getBox());
   return out;
 }
+// A boolean property on an instance terminal, or on the master terminal behind it.
+//
+// 🔑 Returns -1 when the property is ABSENT, 0 or 1 when present. Absent is not false: the
+// reference skips a terminal only when the property exists AND is false, so the three states have
+// to survive the boundary.
+int32_t iterm_bool_property(const OdbDb& h, rust::Str iterm, rust::Str name) {
+  odb::dbBlock* b = h.db->getChip() ? h.db->getChip()->getBlock() : nullptr;
+  if (!b) return -1;
+  std::string full = s(iterm);
+  std::size_t slash = full.rfind('/');
+  if (slash == std::string::npos) return -1;
+  odb::dbInst* inst = b->findInst(full.substr(0, slash).c_str());
+  if (!inst) return -1;
+  odb::dbITerm* it = inst->findITerm(full.substr(slash + 1).c_str());
+  if (!it) return -1;
+  odb::dbBoolProperty* p = odb::dbBoolProperty::find(it, s(name).c_str());
+  return p ? (p->getValue() ? 1 : 0) : -1;
+}
+int32_t mterm_bool_property(const OdbDb& h, rust::Str master, rust::Str term, rust::Str name) {
+  odb::dbMaster* m = h.db->findMaster(s(master).c_str());
+  if (!m) return -1;
+  odb::dbMTerm* t = m->findMTerm(s(term).c_str());
+  if (!t) return -1;
+  odb::dbBoolProperty* p = odb::dbBoolProperty::find(t, s(name).c_str());
+  return p ? (p->getValue() ? 1 : 0) : -1;
+}
 // ⚠️ `dbMPin::getGeometry()` defaults to include_decomposed_polygons = TRUE, so a POLYGON port
 // comes back as the rectangles it decomposes into. A caller that also reads `getPolygonGeometry()`
 // would then see the same shape twice, in two different forms. This variant passes FALSE.
