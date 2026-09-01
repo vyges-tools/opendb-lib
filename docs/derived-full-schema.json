@@ -5,7 +5,7 @@
   "scope": "all",
   "class_count": 121,
   "method_count": 2639,
-  "bridged_count": 1597,
+  "bridged_count": 1598,
   "classes": [
     {
       "name": "dbAccessPoint",
@@ -15167,7 +15167,7 @@
           "params": [],
           "const": true,
           "kind": "getter",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "getViaBottomLayerMask",
