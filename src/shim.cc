@@ -1802,6 +1802,11 @@ void swire_add_via(const OdbDb& h, rust::Str net, bool fixed, rust::Str via,
   if (!v && !tv) throw std::runtime_error("no via named " + s(via));
   const odb::dbWireType want = fixed ? odb::dbWireType::FIXED : odb::dbWireType::ROUTED;
   odb::dbSWire* w = nullptr;
+  // ⚠️ The FIRST match is the NEWEST swire: `dbSet` iterates a net's swires in reverse
+  // creation order. `writeToDb` creates one per segment and writes into the one it just
+  // made, so "most recently created" is what this has to find — and here that is the first,
+  // not the last. Taking the last put every segment's wires into swire number one and left
+  // the rest empty, which the DEF shows as a run of bare `+ FIXED` entries.
   for (odb::dbSWire* e : n->getSWires()) { if (e->getWireType() == want) { w = e; break; } }
   if (!w) w = odb::dbSWire::create(n, want);
   const odb::dbWireShapeType st(s(shape).c_str());
@@ -2207,6 +2212,11 @@ void swire_add_box_shaped(const OdbDb& h, rust::Str net, bool fixed, rust::Str l
   if (!l) throw std::runtime_error("no layer named " + s(layer));
   const odb::dbWireType want = fixed ? odb::dbWireType::FIXED : odb::dbWireType::ROUTED;
   odb::dbSWire* w = nullptr;
+  // ⚠️ The FIRST match is the NEWEST swire: `dbSet` iterates a net's swires in reverse
+  // creation order. `writeToDb` creates one per segment and writes into the one it just
+  // made, so "most recently created" is what this has to find — and here that is the first,
+  // not the last. Taking the last put every segment's wires into swire number one and left
+  // the rest empty, which the DEF shows as a run of bare `+ FIXED` entries.
   for (odb::dbSWire* e : n->getSWires()) { if (e->getWireType() == want) { w = e; break; } }
   if (!w) w = odb::dbSWire::create(n, want);
   odb::dbSBox::create(w, l, x1, y1, x2, y2, odb::dbWireShapeType(s(shape).c_str()));
@@ -2224,6 +2234,11 @@ void swire_add_box_octilinear(const OdbDb& h, rust::Str net, bool fixed, rust::S
   if (width <= 0) throw std::runtime_error("a diagonal wire needs a positive width");
   const odb::dbWireType want = fixed ? odb::dbWireType::FIXED : odb::dbWireType::ROUTED;
   odb::dbSWire* w = nullptr;
+  // ⚠️ The FIRST match is the NEWEST swire: `dbSet` iterates a net's swires in reverse
+  // creation order. `writeToDb` creates one per segment and writes into the one it just
+  // made, so "most recently created" is what this has to find — and here that is the first,
+  // not the last. Taking the last put every segment's wires into swire number one and left
+  // the rest empty, which the DEF shows as a run of bare `+ FIXED` entries.
   for (odb::dbSWire* e : n->getSWires()) { if (e->getWireType() == want) { w = e; break; } }
   if (!w) w = odb::dbSWire::create(n, want);
   // ⛔ Endpoints, NOT a bounding box: the two points are the segment's centre line and `width`
@@ -2242,9 +2257,26 @@ void swire_add_box(const OdbDb& h, rust::Str net, bool fixed, rust::Str layer,
   if (!l) throw std::runtime_error("no layer named " + s(layer));
   const odb::dbWireType want = fixed ? odb::dbWireType::FIXED : odb::dbWireType::ROUTED;
   odb::dbSWire* w = nullptr;
+  // ⚠️ The FIRST match is the NEWEST swire: `dbSet` iterates a net's swires in reverse
+  // creation order. `writeToDb` creates one per segment and writes into the one it just
+  // made, so "most recently created" is what this has to find — and here that is the first,
+  // not the last. Taking the last put every segment's wires into swire number one and left
+  // the rest empty, which the DEF shows as a run of bare `+ FIXED` entries.
   for (odb::dbSWire* e : n->getSWires()) { if (e->getWireType() == want) { w = e; break; } }
   if (!w) w = odb::dbSWire::create(n, want);
   odb::dbSBox::create(w, l, x1, y1, x2, y2, odb::dbWireShapeType::IOWIRE);
+}
+// Start a fresh special wire on a net, so what follows is grouped separately.
+//
+// 🔑 `RDLRouter::writeToDb` calls `dbSWire::create` once per SEGMENT, so a routed net ends up with
+// one swire per segment rather than one for the whole net. That grouping is visible in the DEF —
+// each swire prints its own status keyword and the rest of its wires print `NEW` — so a writer that
+// creates one swire per net emits a different file for identical geometry.
+void net_new_swire(const OdbDb& h, rust::Str net, bool fixed) {
+  dbBlock* b = require_block(h);
+  odb::dbNet* n = b->findNet(s(net).c_str());
+  if (!n) throw std::runtime_error("no net named " + s(net));
+  odb::dbSWire::create(n, fixed ? odb::dbWireType::FIXED : odb::dbWireType::ROUTED);
 }
 std::size_t swire_clear_routed(const OdbDb& h, rust::Str net) {
   dbBlock* b = require_block(h);
