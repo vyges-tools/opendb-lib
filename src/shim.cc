@@ -1971,6 +1971,55 @@ rust::Vec<int64_t> net_swire_shapes(const OdbDb& h, rust::Str net) {
   return out;
 }
 
+// Every special-wire box of one net, in the form `RDLRouter::populateObstructions` needs:
+// `(layer number, is_fixed, is_octilinear, x0, y0, x1, y1, width)`.
+//
+// The router inserts every swire box on its routing layer as an obstruction, and discriminates on
+// the SWIRE's wire type -- `swire->getWireType() != dbWireType::FIXED` -- to skip the wires it is
+// about to destroy and rebuild on the nets it is routing now. `net_swire_shapes` cannot answer
+// that: it reports each box's `getWireShapeType()` (IOWIRE/STRIPE), which is a different field,
+// and it flattens an octagon to its bounding rectangle.
+//
+// For an OCTILINEAR box the two points are the octagon's centre-low and centre-high and `width`
+// is its width, so the caller can rebuild the true shape; for a rectangle they are the box and
+// `width` is 0. A via box carries no tech layer and is skipped, which is what the reference's own
+// `box->getTechLayer() != layer_` test does with it.
+rust::Vec<int64_t> net_swire_obstacles(const OdbDb& h, rust::Str net) {
+  rust::Vec<int64_t> out;
+  dbBlock* b = require_block(h);
+  odb::dbNet* n = b->findNet(s(net).c_str());
+  if (!n) return out;
+  for (odb::dbSWire* sw : n->getSWires()) {
+    const int64_t is_fixed = sw->getWireType() == odb::dbWireType::FIXED ? 1 : 0;
+    for (odb::dbSBox* sbox : sw->getWires()) {
+      odb::dbTechLayer* layer = sbox->getTechLayer();
+      if (layer == nullptr) continue;
+      out.push_back(layer->getNumber());
+      out.push_back(is_fixed);
+      if (sbox->getDirection() == odb::dbSBox::OCTILINEAR) {
+        const odb::Oct o = sbox->getOct();
+        const odb::Point lo = o.getCenterLow();
+        const odb::Point hi = o.getCenterHigh();
+        out.push_back(1);
+        out.push_back(lo.x());
+        out.push_back(lo.y());
+        out.push_back(hi.x());
+        out.push_back(hi.y());
+        out.push_back(o.getWidth());
+      } else {
+        const odb::Rect r = sbox->getBox();
+        out.push_back(0);
+        out.push_back(r.xMin());
+        out.push_back(r.yMin());
+        out.push_back(r.xMax());
+        out.push_back(r.yMax());
+        out.push_back(0);
+      }
+    }
+  }
+  return out;
+}
+
 rust::Vec<int32_t> tech_via_boxes(const OdbDb& h, rust::Str via) {
   rust::Vec<int32_t> out;
   odb::dbTech* tech = h.db->getTech();

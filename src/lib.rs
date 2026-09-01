@@ -192,6 +192,7 @@ mod ffi {
         fn bpin_layer_boxes(db: &OdbDb, bterm: &str, pin: usize) -> Result<Vec<i32>>;
         fn region_boundaries(db: &OdbDb, region: &str) -> Result<Vec<i32>>;
         fn net_swire_shapes(db: &OdbDb, net: &str) -> Result<Vec<i64>>;
+        fn net_swire_obstacles(db: &OdbDb, net: &str) -> Result<Vec<i64>>;
         fn tech_via_layer(db: &OdbDb, via: &str, which: &str) -> Result<String>;
         fn num_v54_spacing_rules(db: &OdbDb, layer: &str) -> Result<usize>;
         fn v54_spacing_rule_adjacent_cuts(db: &OdbDb, layer: &str, idx: usize) -> Result<u32>;
@@ -436,7 +437,7 @@ pub use ffi::{
     bterm_top_layer_grid, bterm_top_layer_grid_layer, bterm_top_layer_grid_is_rect,
     die_area_polygon, master_obstruction_boxes, master_pin_boxes, mterm_pin_boxes,
     mterm_pin_boxes_excluding_polygons, iterm_pin_polygons, net_new_swire, iterm_bool_property, mterm_bool_property, polygon_bloat, mpin_boxes, inst_halo,
-    net_destroy, iterm_get_id, inst_get_id, layer_find_v55_spacing, layer_find_tw_spacing, layer_get_spacing_for, layer_min_area, tech_via_boxes, tech_via_layer, bpin_layer_boxes, region_boundaries, net_swire_shapes, num_v54_spacing_rules, v54_spacing_rule_adjacent_cuts, v54_spacing_rule_adjacent_spacing, v54_spacing_rule_adjacent_except_same_pgnet, num_array_spacing_rules, array_spacing_rule_cut_class, array_spacing_rule_is_parallel_overlap, array_spacing_rule_is_long_array, array_spacing_rule_array_width, array_spacing_rule_cut_spacing, array_spacing_rule_cuts_spacing, num_cut_spacing_table_rules, cut_spacing_table_max_spacing, cut_spacing_table_spacing, cut_spacing_table_is_center_and_edge, cut_spacing_table_is_center_to_center, num_width_table_rules, width_table_rule_is_wrong_direction, width_table_rule_widths, techvialayerrule_rect, via_create_generated, swire_add_via, swire_add_box, swire_add_box_shaped, swire_add_box_octilinear, swire_clear_routed, bterm_create, bterm_create_pin, bterm_clear_unfixed_bpins, bterm_add_pin_box, bterm_destroy, layer_get_type,
+    net_destroy, iterm_get_id, inst_get_id, layer_find_v55_spacing, layer_find_tw_spacing, layer_get_spacing_for, layer_min_area, tech_via_boxes, tech_via_layer, bpin_layer_boxes, region_boundaries, net_swire_shapes, net_swire_obstacles, num_v54_spacing_rules, v54_spacing_rule_adjacent_cuts, v54_spacing_rule_adjacent_spacing, v54_spacing_rule_adjacent_except_same_pgnet, num_array_spacing_rules, array_spacing_rule_cut_class, array_spacing_rule_is_parallel_overlap, array_spacing_rule_is_long_array, array_spacing_rule_array_width, array_spacing_rule_cut_spacing, array_spacing_rule_cuts_spacing, num_cut_spacing_table_rules, cut_spacing_table_max_spacing, cut_spacing_table_spacing, cut_spacing_table_is_center_and_edge, cut_spacing_table_is_center_to_center, num_width_table_rules, width_table_rule_is_wrong_direction, width_table_rule_widths, techvialayerrule_rect, via_create_generated, swire_add_via, swire_add_box, swire_add_box_shaped, swire_add_box_octilinear, swire_clear_routed, bterm_create, bterm_create_pin, bterm_clear_unfixed_bpins, bterm_add_pin_box, bterm_destroy, layer_get_type,
     layer_thickness, mterm_antenna_gate_area, net_wire_area_on_layer, net_wire_perimeter_on_layer,
     nth_net_wire_layer, num_net_wire_layers,
     mterm_antenna_diff_area, layerantenna_diff_pwl_index, layerantenna_diff_pwl_ratio,

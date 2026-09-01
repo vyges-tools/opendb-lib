@@ -636,6 +636,7 @@ rust::Vec<int32_t> tech_via_boxes(const OdbDb& db, rust::Str via);
 rust::Vec<int32_t> bpin_layer_boxes(const OdbDb& db, rust::Str bterm, std::size_t pin);
 rust::Vec<int32_t> region_boundaries(const OdbDb& db, rust::Str region);
 rust::Vec<int64_t> net_swire_shapes(const OdbDb& db, rust::Str net);
+rust::Vec<int64_t> net_swire_obstacles(const OdbDb& db, rust::Str net);
 rust::String tech_via_layer(const OdbDb& db, rust::Str via, rust::Str which);
 std::size_t num_v54_spacing_rules(const OdbDb& h, rust::Str layer);
 uint32_t v54_spacing_rule_adjacent_cuts(const OdbDb& h, rust::Str layer, std::size_t idx);
