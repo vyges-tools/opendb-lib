@@ -1165,6 +1165,25 @@ rust::String site_get_class(const OdbDb& h, rust::Str site) {
   odb::dbSite* st = find_site(h, s(site));
   return st ? rust::String(st->getClass().getString()) : rust::String();
 }
+rust::String group_get_type(const OdbDb& h, rust::Str group) {
+  dbBlock* b = require_block(h);
+  odb::dbGroup* g = b->findGroup(s(group).c_str());
+  // Throw rather than return "": an empty string would read as a type, and a caller filtering
+  // for VOLTAGE_DOMAIN would silently skip a group it could not find.
+  if (!g) throw std::runtime_error("vyges-opendb: no such group: " + s(group));
+  return rust::String(g->getType().getString());
+}
+void block_cut_rows_at_blockages(const OdbDb& h, int32_t min_row_width, int32_t min_row_height,
+                                 int32_t halo_x, int32_t halo_y) {
+  dbBlock* b = require_block(h);
+  // Every blockage in the block, which is exactly what `ifp`'s `makeRows` passes. `cutRows`
+  // returns immediately on an empty vector, so this is a no-op on a design that declares none.
+  std::vector<odb::dbBox*> blockages;
+  for (odb::dbBlockage* blockage : b->getBlockages())
+    blockages.push_back(blockage->getBBox());
+  odb::cutRows(b, min_row_width, min_row_height, blockages, halo_x, halo_y,
+               const_cast<utl::Logger*>(&h.logger));
+}
 void create_physical_inst(const OdbDb& h, rust::Str master, rust::Str name) {
   dbBlock* b = require_block(h);
   dbMaster* m = h.db->findMaster(s(master).c_str());

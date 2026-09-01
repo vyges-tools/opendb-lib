@@ -345,6 +345,34 @@ rust::String nth_row_name(const OdbDb& db, std::size_t i);
 // the region standard cells occupy, so `tap` has to be able to tell them apart.
 rust::String site_get_class(const OdbDb& db, rust::Str site);
 
+// A group's TYPE — PHYSICAL_CLUSTER, VOLTAGE_DOMAIN, POWER_DOMAIN or VISUAL_DEBUG.
+//
+// Hand-written for the same reason as `site_get_class` and `master_get_type`: the accessor
+// returns a `dbGroupType`, and the schema generator has no shape for an enum class, so
+// `dbGroup::getType` sits in the registry as `Unimpl`.
+//
+// ⛔ **`ifp` cannot do without it.** `updateVoltageDomain` acts on VOLTAGE_DOMAIN and
+// POWER_DOMAIN groups only, and nothing else distinguishes them: every group has a name, and a
+// physical cluster may carry a region too. Any proxy for "is this a domain" would be a guess that
+// holds by coincidence on the designs that happen to be at hand — the failure mode this
+// programme's divergence registers rank as the most dangerous, because it survives every gate
+// until the one design where the coincidence stops.
+rust::String group_get_type(const OdbDb& db, rust::Str group);
+
+// Row cutting against the BLOCK'S OWN BLOCKAGES, which is the call `ifp` makes.
+//
+// `block_cut_rows` above cuts around named INSTANCES, because `tap` chooses its blockages from
+// placed macros. `ifp` does not choose: `makeRows` ends by passing every `dbBlockage` in the
+// block, unconditionally, and `cutRows` returns immediately when there are none. The two callers
+// need the same odb algorithm over different inputs, and a `dbBox*` cannot cross the bridge, so
+// the selection has to happen on this side either way.
+//
+// ⚠️ Measured 2026-09-01: without this call our `ifp` kept three rows upstream removes on
+// `placement_blockage2`, and left `placement_blockage1`'s rows uncut where upstream splits them
+// into `_1`/`_2` pieces. Neither showed up in any log line.
+void block_cut_rows_at_blockages(const OdbDb& db, int32_t min_row_width, int32_t min_row_height,
+                                 int32_t halo_x, int32_t halo_y);
+
 // Create a PHYSICAL-ONLY instance — a cell that exists in the layout but not the netlist, which
 // is what every tap, endcap and filler is. `create_inst` makes an ordinary netlist instance;
 // using it for physical cells would put them in the hierarchy, where nothing should see them.

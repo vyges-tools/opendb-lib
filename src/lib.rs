@@ -114,6 +114,11 @@ mod ffi {
         // by NAME, and nothing enumerates them. See shim.h.
         fn nth_row_name(db: &OdbDb, i: usize) -> Result<String>;
         fn site_get_class(db: &OdbDb, site: &str) -> Result<String>;
+        // A group's type, and row cutting against the block's own blockages -- both needed by
+        // `ifp`'s `makeRows`, and both hand-written. See shim.h.
+        fn group_get_type(db: &OdbDb, group: &str) -> Result<String>;
+        fn block_cut_rows_at_blockages(db: &OdbDb, min_row_width: i32, min_row_height: i32,
+                                       halo_x: i32, halo_y: i32) -> Result<()>;
         // Physical-only instance creation (taps, endcaps, fillers) -- see shim.h.
         fn create_physical_inst(db: &OdbDb, master: &str, name: &str) -> Result<()>;
         fn inst_bbox(db: &OdbDb, inst: &str) -> Result<Vec<i32>>;
@@ -403,7 +408,7 @@ pub use ffi::{
     write_def, OdbDb,
     clear_rows, nth_site_name, num_rows, num_sites, row_create, tech_manufacturing_grid,
     site_row_pattern_len, site_row_pattern_orient, site_row_pattern_site,
-    block_cut_rows, has_one_site_master, nth_row_name, site_get_class, create_physical_inst, inst_bbox, num_masters, nth_master_name, master_get_type,
+    block_cut_rows, block_cut_rows_at_blockages, group_get_type, has_one_site_master, nth_row_name, site_get_class, create_physical_inst, inst_bbox, num_masters, nth_master_name, master_get_type,
     nth_row_bbox, nth_row_site, nth_row_orient, nth_row_direction, destroy_inst,
     inst_shapes, obstruction_boxes, blockage_boxes, swire_boxes, blockage_create, num_blockages, blockage_destroy,
     fill_create, num_fills, clear_fills,
