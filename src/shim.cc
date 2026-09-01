@@ -1604,6 +1604,67 @@ rust::Vec<int32_t> mterm_pin_boxes(const OdbDb& h, rust::Str master, rust::Str t
     for (odb::dbBox* b : p->getGeometry()) push_box(out, b->getTechLayer(), b->getBox());
   return out;
 }
+// ⚠️ `dbMPin::getGeometry()` defaults to include_decomposed_polygons = TRUE, so a POLYGON port
+// comes back as the rectangles it decomposes into. A caller that also reads `getPolygonGeometry()`
+// would then see the same shape twice, in two different forms. This variant passes FALSE.
+rust::Vec<int32_t> mterm_pin_boxes_excluding_polygons(const OdbDb& h, rust::Str master,
+                                                      rust::Str term) {
+  rust::Vec<int32_t> out;
+  odb::dbMaster* m = h.db->findMaster(s(master).c_str());
+  if (!m) return out;
+  odb::dbMTerm* t = m->findMTerm(s(term).c_str());
+  if (!t) return out;
+  for (odb::dbMPin* p : t->getMPins())
+    for (odb::dbBox* b : p->getGeometry(false)) push_box(out, b->getTechLayer(), b->getBox());
+  return out;
+}
+// The POLYGON ports of an instance terminal, already through the instance transform.
+//
+// Flattened as `layer, point count, x0, y0, x1, y1, ...` per polygon. The transform is applied
+// here so callers do not have to reimplement `dbTransform` on a polygon.
+rust::Vec<int32_t> iterm_pin_polygons(const OdbDb& h, rust::Str iterm) {
+  rust::Vec<int32_t> out;
+  odb::dbBlock* b = h.db->getChip() ? h.db->getChip()->getBlock() : nullptr;
+  if (!b) return out;
+  std::string full = s(iterm);
+  std::size_t slash = full.rfind('/');
+  if (slash == std::string::npos) return out;
+  odb::dbInst* inst = b->findInst(full.substr(0, slash).c_str());
+  if (!inst) return out;
+  odb::dbITerm* it = inst->findITerm(full.substr(slash + 1).c_str());
+  if (!it) return out;
+  const odb::dbTransform xform = inst->getTransform();
+  for (odb::dbMPin* p : it->getMTerm()->getMPins()) {
+    for (odb::dbPolygon* geom : p->getPolygonGeometry()) {
+      odb::dbTechLayer* layer = geom->getTechLayer();
+      if (!layer) continue;
+      odb::Polygon poly = geom->getPolygon();
+      xform.apply(poly);
+      const std::vector<odb::Point> pts = poly.getPoints();
+      out.push_back(layer->getNumber());
+      out.push_back(static_cast<int32_t>(pts.size()));
+      for (const odb::Point& pt : pts) { out.push_back(pt.x()); out.push_back(pt.y()); }
+    }
+  }
+  return out;
+}
+// `odb::Polygon::bloat` — boost::polygon's resize, returning a closed counter-clockwise ring.
+//
+// 🔑 Bound rather than reimplemented: a 45-degree polygon's offset is not a per-edge shift, and a
+// hand-rolled version would diverge from the reference silently.
+rust::Vec<int32_t> polygon_bloat(rust::Slice<const int32_t> pts, int32_t margin) {
+  rust::Vec<int32_t> out;
+  if (pts.size() < 6 || pts.size() % 2 != 0) return out;
+  std::vector<odb::Point> in;
+  in.reserve(pts.size() / 2);
+  for (std::size_t i = 0; i + 1 < pts.size(); i += 2) in.emplace_back(pts[i], pts[i + 1]);
+  const odb::Polygon poly(in);
+  for (const odb::Point& pt : poly.bloat(margin).getPoints()) {
+    out.push_back(pt.x());
+    out.push_back(pt.y());
+  }
+  return out;
+}
 rust::Vec<int32_t> mpin_boxes(const OdbDb& h, rust::Str master, rust::Str term, std::size_t idx) {
   rust::Vec<int32_t> out;
   odb::dbMaster* m = h.db->findMaster(s(master).c_str());

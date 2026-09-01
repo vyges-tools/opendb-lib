@@ -5,7 +5,7 @@
   "scope": "hand-written core only",
   "class_count": 44,
   "method_count": 1140,
-  "bridged_count": 780,
+  "bridged_count": 781,
   "classes": [
     {
       "name": "dbBPin",
@@ -5098,7 +5098,7 @@
           "params": [],
           "const": false,
           "kind": "iterator",
-          "bridged": false,
+          "bridged": true,
           "element": "dbPolygon"
         },
         {

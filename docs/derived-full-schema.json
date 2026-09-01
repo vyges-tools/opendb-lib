@@ -5,7 +5,7 @@
   "scope": "all",
   "class_count": 121,
   "method_count": 2639,
-  "bridged_count": 1595,
+  "bridged_count": 1597,
   "classes": [
     {
       "name": "dbAccessPoint",
@@ -9425,7 +9425,7 @@
           "params": [],
           "const": false,
           "kind": "iterator",
-          "bridged": false,
+          "bridged": true,
           "element": "dbPolygon"
         },
         {
@@ -13893,7 +13893,7 @@
           "params": [],
           "const": true,
           "kind": "getter",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "getDesignRuleWidth",
