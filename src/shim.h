@@ -281,6 +281,12 @@ double layerantenna_diff_pwl_ratio(const OdbDb& db, rust::Str layer, rust::Str w
 // `Rect`, `setCoreArea` a `Polygon`, and `dbRow::create` is a static factory. Same reason the
 // dbChip*::create surface is hand-written.
 void block_set_die_area(const OdbDb& db, int32_t x1, int32_t y1, int32_t x2, int32_t y2);
+// A NON-RECTANGULAR die, as a flat [x0, y0, x1, y1, ...] list of vertices — `ifp`'s polygon
+// floorplan. `die_area_polygon` already reads one back; this is the write side, and there is
+// no generated equivalent because `setDieArea` is overloaded on `odb::Polygon`.
+// ⚠️ Fewer than 4 vertices, or an odd number of coordinates, throws rather than storing a
+// degenerate outline — the caller's own validation (IFP-987/988) runs before this.
+void block_set_die_area_polygon(const OdbDb& db, rust::Slice<const int32_t> xy);
 void block_set_core_area(const OdbDb& db, int32_t x1, int32_t y1, int32_t x2, int32_t y2);
 // Replace the core area with what the ROWS actually cover — upstream's
 // `setCoreArea(computeCoreArea())`. Polygon-to-polygon, so nothing is lost to a bbox.

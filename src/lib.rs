@@ -88,6 +88,8 @@ mod ffi {
         // floorplan writes (vyges-ifp). Hand-written rather than generated: setDieArea takes a
         // Rect, setCoreArea a Polygon, and dbRow::create is a static factory.
         fn block_set_die_area(db: &OdbDb, x1: i32, y1: i32, x2: i32, y2: i32) -> Result<()>;
+        // A non-rectangular die, as a flat [x, y, ...] list -- see shim.h.
+        fn block_set_die_area_polygon(db: &OdbDb, xy: &[i32]) -> Result<()>;
         fn block_set_core_area(db: &OdbDb, x1: i32, y1: i32, x2: i32, y2: i32) -> Result<()>;
         fn block_set_core_area_from_rows(db: &OdbDb) -> Result<()>;
         fn block_compute_core_area(db: &OdbDb) -> Result<Vec<i32>>;
@@ -389,7 +391,7 @@ pub use generated_write_bridge::*;
 #[cfg(unix)]
 pub use ffi::{
     add_obstruction, block_compute_core_area, block_name, block_set_core_area,
-    block_set_core_area_from_rows, block_set_die_area, bterm_direction, bterm_net, bterm_x, bterm_y, check_3dblox,
+    block_set_core_area_from_rows, block_set_die_area, block_set_die_area_polygon, bterm_direction, bterm_net, bterm_x, bterm_y, check_3dblox,
     eco_begin, eco_commit, eco_empty, eco_end, eco_undo,
     clear_obstructions, construct_unfolded_model,
     chip_block_create, chip_bump_create, chip_conn_create, chip_create, chip_inst_create,

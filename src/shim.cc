@@ -1055,6 +1055,16 @@ static odb::dbSite* find_site(const OdbDb& h, const std::string& name) {
 void block_set_die_area(const OdbDb& h, int32_t x1, int32_t y1, int32_t x2, int32_t y2) {
   require_block(h)->setDieArea(odb::Rect(x1, y1, x2, y2));
 }
+void block_set_die_area_polygon(const OdbDb& h, rust::Slice<const int32_t> xy) {
+  if (xy.size() % 2 != 0)
+    throw std::runtime_error("vyges-opendb: die polygon needs an even number of coordinates");
+  if (xy.size() < 8)
+    throw std::runtime_error("vyges-opendb: die polygon needs at least 4 vertices");
+  std::vector<odb::Point> pts;
+  pts.reserve(xy.size() / 2);
+  for (std::size_t i = 0; i + 1 < xy.size(); i += 2) pts.emplace_back(xy[i], xy[i + 1]);
+  require_block(h)->setDieArea(odb::Polygon(pts));
+}
 void block_set_core_area(const OdbDb& h, int32_t x1, int32_t y1, int32_t x2, int32_t y2) {
   require_block(h)->setCoreArea(odb::Rect(x1, y1, x2, y2));
 }
