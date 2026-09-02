@@ -580,6 +580,9 @@ void net_new_swire(const OdbDb& db, rust::Str net, bool fixed);
 int32_t iterm_bool_property(const OdbDb& db, rust::Str iterm, rust::Str name);
 int32_t mterm_bool_property(const OdbDb& db, rust::Str master, rust::Str term, rust::Str name);
 rust::Vec<int32_t> polygon_bloat(rust::Slice<const int32_t> pts, int32_t margin);
+rust::Vec<int32_t> rdl_preprocess(rust::Slice<const int32_t> source_rects,
+                                  rust::Slice<const int32_t> dest_rects,
+                                  int32_t min_dist);
 
 // Pin rectangles of ONE MPin of one terminal, 5 i32 each, in MASTER coordinates.
 //

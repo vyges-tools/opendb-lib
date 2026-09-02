@@ -20,6 +20,7 @@
 #include <stdexcept>
 #include <string>
 #include <vector>
+#include "boost/polygon/polygon.hpp"
 
 using odb::dbBlock;
 using odb::dbBox;
@@ -1691,6 +1692,86 @@ rust::Vec<int32_t> polygon_bloat(rust::Slice<const int32_t> pts, int32_t margin)
   }
   return out;
 }
+// `RDLSegment::preprocess`'s geometry, in the reference's own boost::polygon calls and order.
+//
+// 🔑 **Bound rather than reimplemented, and `interact` is the reason.** `polygon_90_set_data::
+// interact(that)` is TOUCH connectivity, not a boolean AND: it decomposes the set, builds a touch
+// graph through `touch_90_operation` -- the same scanline machinery behind
+// `connectivity_extraction_90` -- and keeps WHOLE polygons whose label touches `that`'s. Two shapes
+// sharing an edge with zero gap interact; their intersection is empty. Substituting `a & b` reads
+// as an obvious simplification and silently routes a pair the reference locks.
+//
+// The bloat/union/shrink/subtract below is boost's standard morphological closing, which is how the
+// reference builds the stub that bridges a sub-spacing gap.
+//
+// Returns `[verdict, x0, y0, x1, y1, ...]`:
+//   0  the shapes do not interact, even bloated -- a route is needed
+//   1  the shapes interact as they are -- locked, and NO wire is written
+//   2  they interact once bloated by `min_dist` -- locked, and the rects that follow are the stubs
+rust::Vec<int32_t> rdl_preprocess(rust::Slice<const int32_t> source_rects,
+                                  rust::Slice<const int32_t> dest_rects,
+                                  int32_t min_dist) {
+  using Rectangle = boost::polygon::rectangle_data<int>;
+  using Polygon90Set = boost::polygon::polygon_90_set_data<int>;
+  using boost::polygon::operators::operator+=;
+  using boost::polygon::operators::operator-=;
+
+  rust::Vec<int32_t> out;
+  if (source_rects.size() % 4 != 0 || dest_rects.size() % 4 != 0) return out;
+  if (source_rects.empty() || dest_rects.empty()) {
+    out.push_back(0);
+    return out;
+  }
+
+  auto build = [](rust::Slice<const int32_t> r) {
+    Polygon90Set ps;
+    for (std::size_t i = 0; i + 3 < r.size(); i += 4) {
+      ps += Rectangle(r[i], r[i + 1], r[i + 2], r[i + 3]);
+    }
+    return ps;
+  };
+
+  const Polygon90Set source = build(source_rects);
+  const Polygon90Set dest = build(dest_rects);
+
+  // 1. "check if route is even needed, ie, shapes overlap"
+  {
+    Polygon90Set check = dest;
+    check.interact(source);
+    if (!check.empty()) {
+      out.push_back(1);
+      return out;
+    }
+  }
+
+  // 2. within the layer's spacing: locked, and the gap is filled with stubs
+  {
+    Polygon90Set check = dest;
+    check.bloat(min_dist, min_dist, min_dist, min_dist);
+    check.interact(source);
+    if (!check.empty()) {
+      Polygon90Set source_bloat = source;
+      source_bloat.bloat(min_dist, min_dist, min_dist, min_dist);
+      check += source_bloat;
+      check.shrink(min_dist, min_dist, min_dist, min_dist);
+      check -= source;
+      std::vector<Rectangle> rects;
+      check.get_rectangles(rects);
+      out.push_back(2);
+      for (const Rectangle& r : rects) {
+        out.push_back(boost::polygon::xl(r));
+        out.push_back(boost::polygon::yl(r));
+        out.push_back(boost::polygon::xh(r));
+        out.push_back(boost::polygon::yh(r));
+      }
+      return out;
+    }
+  }
+
+  out.push_back(0);
+  return out;
+}
+
 rust::Vec<int32_t> mpin_boxes(const OdbDb& h, rust::Str master, rust::Str term, std::size_t idx) {
   rust::Vec<int32_t> out;
   odb::dbMaster* m = h.db->findMaster(s(master).c_str());
