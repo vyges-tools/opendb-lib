@@ -665,6 +665,35 @@ void bump_master_create(const OdbDb& h, rust::Str name, int32_t width, int32_t h
   m->setFrozen();
 }
 
+void fake_site_create(const OdbDb& h, rust::Str name, int32_t width, int32_t height) {
+  // `ICeWall::makeFakeSite` — a site for a pad ring whose LEF defines no IO site of its own.
+  //
+  // ⛔ The library name is **`FAKE_IO`** and it is not decorative: `kFakeLibraryName` in
+  // `ICeWall.h`, found-or-created, so repeated calls land in ONE library rather than accumulating
+  // libraries. `skywater130_caravel` and `skywater130_coyote_tc` each call the command twice.
+  //
+  // 🔑 The class is **PAD**, which is what makes the site usable by `make_io_sites`; a site left
+  // at the default class is found by name and then behaves as core.
+  //
+  // ⚠️ Width and height arrive in DATABASE UNITS. Upstream's Tcl wrapper converts with
+  // `ord::microns_to_dbu` before reaching this function, so the conversion belongs at the CLI
+  // boundary here too — not in this shim, which is the transcription of the C++ half only.
+  odb::dbLib* lib = h.db->findLib("FAKE_IO");
+  if (!lib) {
+    odb::dbTech* t = h.db->getTech();
+    if (!t) throw std::runtime_error("vyges-opendb: no technology to attach the FAKE_IO library to");
+    // ⚠️ `'/'` is `dbLib::create`'s DEFAULT hierarchy delimiter, and upstream takes the default by
+    // calling the three-argument form. Passing it explicitly is the same call, not a divergence.
+    lib = odb::dbLib::create(h.db, "FAKE_IO", t, '/');
+    if (!lib) throw std::runtime_error("vyges-opendb: could not create the FAKE_IO library");
+  }
+  odb::dbSite* site = odb::dbSite::create(lib, s(name).c_str());
+  if (!site) throw std::runtime_error("vyges-opendb: fake_site_create failed: " + s(name));
+  site->setWidth(width);
+  site->setHeight(height);
+  site->setClass(odb::dbSiteClass::PAD);
+}
+
 void tech_create(const OdbDb& h, rust::Str name) {
   // odb refuses to create a DIE chip without a technology, which is why a .3dbv points each
   // chiplet at its own APR_tech_file. A geometry-only read has no LEF to give it one, so it

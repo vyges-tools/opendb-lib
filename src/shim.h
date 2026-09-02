@@ -119,6 +119,9 @@ std::unique_ptr<OdbDb> new_db();   // an empty database, for building rather tha
 void tech_from_lef(const OdbDb& db, rust::Str name, rust::Str lef_path);
 void lib_from_lef(const OdbDb& db, rust::Str lib_name, rust::Str tech_name, rust::Str lef_path);
 void bump_master_create(const OdbDb& db, rust::Str name, int32_t width, int32_t height);
+/// `ICeWall::makeFakeSite` — a PAD-class site in the found-or-created `FAKE_IO` library.
+/// ⚠️ `width`/`height` are DATABASE UNITS; upstream's Tcl converts from microns before this.
+void fake_site_create(const OdbDb& db, rust::Str name, int32_t width, int32_t height);
 void tech_create(const OdbDb& db, rust::Str name);
 int32_t dbu_per_micron(const OdbDb& db);
 void set_dbu_per_micron(const OdbDb& db, int32_t dbu);

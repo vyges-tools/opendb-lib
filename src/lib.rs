@@ -334,6 +334,10 @@ mod ffi {
         /// while a bump map records its ORIGIN, so any other size moves the bump by half the
         /// master on a round trip.
         fn bump_master_create(db: &OdbDb, name: &str, width: i32, height: i32) -> Result<()>;
+        /// `ICeWall::makeFakeSite` — a PAD-class site in the `FAKE_IO` library, for a ring
+        /// whose LEF defines no IO site. **Width and height are DATABASE UNITS**; upstream's Tcl
+        /// converts from microns before the C++ sees them, so the caller converts here too.
+        fn fake_site_create(db: &OdbDb, name: &str, width: i32, height: i32) -> Result<()>;
         fn tech_create(db: &OdbDb, name: &str) -> Result<()>;
         fn dbu_per_micron(db: &OdbDb) -> i32;
         fn set_dbu_per_micron(db: &OdbDb, dbu: i32);
@@ -414,7 +418,7 @@ pub use ffi::{
     chip_block_create, chip_bump_create, chip_conn_create, chip_create, chip_inst_create,
     chip_net_create, chip_net_add_bump, chip_path_create, chip_region_create,
     chip_region_set_box, alignment_marker_rule_create, set_top_chip,
-    bump_master_create, dbu_per_micron, set_dbu_per_micron, lib_from_lef, new_db, tech_create,
+    bump_master_create, dbu_per_micron, fake_site_create, set_dbu_per_micron, lib_from_lef, new_db, tech_create,
     tech_from_lef,
     connect, create_inst, create_net, disconnect, find_master, first_master_name, input_pin,
     inst_master, inst_x, inst_y, log_capture_begin, log_capture_end, net_of, nth_bterm_name, nth_inst_name, nth_iterm_name, num_bterms,

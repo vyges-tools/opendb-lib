@@ -5,7 +5,7 @@
   "scope": "all",
   "class_count": 121,
   "method_count": 2639,
-  "bridged_count": 1598,
+  "bridged_count": 1599,
   "classes": [
     {
       "name": "dbAccessPoint",
@@ -15835,7 +15835,7 @@
           ],
           "const": false,
           "kind": "setter",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "setSymmetryX",

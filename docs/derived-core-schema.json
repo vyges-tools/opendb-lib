@@ -5,7 +5,7 @@
   "scope": "hand-written core only",
   "class_count": 44,
   "method_count": 1140,
-  "bridged_count": 782,
+  "bridged_count": 783,
   "classes": [
     {
       "name": "dbBPin",
@@ -8861,7 +8861,7 @@
           ],
           "const": false,
           "kind": "setter",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "setSymmetryX",
