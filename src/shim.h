@@ -119,6 +119,10 @@ std::unique_ptr<OdbDb> new_db();   // an empty database, for building rather tha
 void tech_from_lef(const OdbDb& db, rust::Str name, rust::Str lef_path);
 void lib_from_lef(const OdbDb& db, rust::Str lib_name, rust::Str tech_name, rust::Str lef_path);
 void bump_master_create(const OdbDb& db, rust::Str name, int32_t width, int32_t height);
+/// `dbITerm::isOutputSignal(io=true)` — OUTPUT or INOUT, and not a supply pin.
+bool iterm_is_output_signal(const OdbDb& db, rust::Str inst, rust::Str pin);
+/// `dbBTerm::getFirstPinLocation` — centre of the first PLACED pin box; false if there is none.
+bool bterm_first_pin_location(const OdbDb& db, rust::Str bterm, int32_t& x, int32_t& y);
 /// Does the LEF state an antenna DIFFUSION area for this pin? (`dbMTerm::getDiffArea` non-empty)
 bool mterm_has_diff_area(const OdbDb& db, rust::Str master, rust::Str term);
 /// Does the LEF state an antenna GATE area for this pin? (default model present and non-empty)

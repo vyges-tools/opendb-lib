@@ -334,6 +334,10 @@ mod ffi {
         /// while a bump map records its ORIGIN, so any other size moves the bump by half the
         /// master on a round trip.
         fn bump_master_create(db: &OdbDb, name: &str, width: i32, height: i32) -> Result<()>;
+        /// `dbITerm::isOutputSignal(io=true)` — OUTPUT or INOUT, and not a supply pin.
+        fn iterm_is_output_signal(db: &OdbDb, inst: &str, pin: &str) -> bool;
+        /// `dbBTerm::getFirstPinLocation` — centre of the first PLACED pin box.
+        fn bterm_first_pin_location(db: &OdbDb, bterm: &str, x: &mut i32, y: &mut i32) -> bool;
         /// Does the LEF state an antenna DIFFUSION area for this pin?
         fn mterm_has_diff_area(db: &OdbDb, master: &str, term: &str) -> bool;
         /// Does the LEF state an antenna GATE area for this pin?
@@ -422,7 +426,7 @@ pub use ffi::{
     chip_block_create, chip_bump_create, chip_conn_create, chip_create, chip_inst_create,
     chip_net_create, chip_net_add_bump, chip_path_create, chip_region_create,
     chip_region_set_box, alignment_marker_rule_create, set_top_chip,
-    bump_master_create, dbu_per_micron, fake_site_create, mterm_has_diff_area, mterm_has_gate_area, set_dbu_per_micron, lib_from_lef, new_db, tech_create,
+    bump_master_create, dbu_per_micron, fake_site_create, iterm_is_output_signal, bterm_first_pin_location, mterm_has_diff_area, mterm_has_gate_area, set_dbu_per_micron, lib_from_lef, new_db, tech_create,
     tech_from_lef,
     connect, create_inst, create_net, disconnect, find_master, first_master_name, input_pin,
     inst_master, inst_x, inst_y, log_capture_begin, log_capture_end, net_of, nth_bterm_name, nth_inst_name, nth_iterm_name, num_bterms,

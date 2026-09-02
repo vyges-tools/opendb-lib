@@ -666,6 +666,26 @@ void bump_master_create(const OdbDb& h, rust::Str name, int32_t width, int32_t h
   m->setFrozen();
 }
 
+bool iterm_is_output_signal(const OdbDb& h, rust::Str inst, rust::Str pin) {
+  // `dbITerm::isOutputSignal(io = true)` — used by the diode placer to find a net's driver.
+  // ⚠️ **INOUT counts as an output here**, because the default `io` argument is true and the
+  // reference calls it with no argument. Reading it as "OUTPUT only" would miss every pad driver.
+  auto* it = gen_iterm(h, inst, pin);
+  return it ? it->isOutputSignal() : false;
+}
+
+bool bterm_first_pin_location(const OdbDb& h, rust::Str bterm, int32_t& x, int32_t& y) {
+  // `dbBTerm::getFirstPinLocation` — the CENTRE of the first placed, non-via pin box.
+  // ⚠️ It skips bpins whose placement status is UNPLACED or NONE, so an unplaced port answers
+  // false rather than (0,0); the caller must not read the coordinates when this returns false.
+  auto* bt = gen_bterm(h, bterm);
+  if (!bt) { x = 0; y = 0; return false; }
+  int xx = 0, yy = 0;
+  const bool ok = bt->getFirstPinLocation(xx, yy);
+  x = xx; y = yy;
+  return ok;
+}
+
 bool mterm_has_diff_area(const OdbDb& h, rust::Str master, rust::Str term) {
   // ⚠️ **A PREDICATE, not the accessor, and that is the transcription.** `dbMTerm::getDiffArea()`
   // returns `vector<pair<double, dbTechLayer*>>`, but the reference
