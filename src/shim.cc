@@ -4,6 +4,7 @@
 #include "odb/util.h"  // odb::cutRows / odb::hasOneSiteMaster (tap delegates row cutting)
 #include "odb/lefin.h"
 
+#include "generated_resolvers.h"  // gen_mterm and friends — the by-name lookups
 #include "lint3d.h"      // 3D structural lint (compiled into libodb; see that header)
 #include "odb/dbShape.h"  // dbShape + dbWireShapeItr — db.h only forward-declares dbShape
 #include "odb/defin.h"   // LEF/DEF I/O (libodb v1)
@@ -663,6 +664,34 @@ void bump_master_create(const OdbDb& h, rust::Str name, int32_t width, int32_t h
   m->setHeight(height);
   m->setType(odb::dbMasterType::COVER_BUMP);
   m->setFrozen();
+}
+
+bool mterm_has_diff_area(const OdbDb& h, rust::Str master, rust::Str term) {
+  // ⚠️ **A PREDICATE, not the accessor, and that is the transcription.** `dbMTerm::getDiffArea()`
+  // returns `vector<pair<double, dbTechLayer*>>`, but the reference
+  // (`librelane/scripts/odbpy/check_antenna_properties.py`) only ever asks `len(diff_area)` —
+  // whether the LEF states one at all. Marshalling the pairs across the bridge would be more
+  // surface for a question nobody asks.
+  // ⚠️ odb returns these through an OUT-PARAMETER (`void getDiffArea(vector<...>& data)`), not by
+  // value — the Python binding's `len(mterm.getDiffArea())` hides that.
+  auto* m = gen_mterm(h, master, term);
+  if (!m) return false;
+  std::vector<std::pair<double, odb::dbTechLayer*>> data;
+  m->getDiffArea(data);
+  return !data.empty();
+}
+
+bool mterm_has_gate_area(const OdbDb& h, rust::Str master, rust::Str term) {
+  // The reference's expression is `getDefaultAntennaModel() and ...getGateArea() or []`, so a
+  // missing MODEL and a model with an empty gate-area list are the same answer. Both are "the
+  // LEF does not state it".
+  auto* m = gen_mterm(h, master, term);
+  if (!m || !m->hasDefaultAntennaModel()) return false;
+  auto* model = m->getDefaultAntennaModel();
+  if (!model) return false;
+  std::vector<std::pair<double, odb::dbTechLayer*>> data;
+  model->getGateArea(data);
+  return !data.empty();
 }
 
 void fake_site_create(const OdbDb& h, rust::Str name, int32_t width, int32_t height) {
