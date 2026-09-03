@@ -1673,6 +1673,25 @@ rust::Vec<int32_t> master_obstruction_boxes(const OdbDb& h, rust::Str master) {
   for (odb::dbBox* b : m->getObstructions()) push_box(out, b->getTechLayer(), b->getBox());
   return out;
 }
+// Every terminal of a master, as "name\tSIGTYPE" per entry.
+//
+// 🔑 The SIGNAL TYPE has to come across with the name. `dpl`'s power-rail alignment
+// (`getMasterPwrs`) selects terminals by `dbSigType::POWER` / `GROUND`, and a caller that gets
+// only names has no way to tell a supply pin from a signal pin without guessing at conventions.
+//
+// ⚠️ One string per terminal rather than two parallel vectors, so the pairing cannot drift.
+rust::Vec<rust::String> master_mterms(const OdbDb& h, rust::Str master) {
+  rust::Vec<rust::String> out;
+  odb::dbMaster* m = h.db->findMaster(s(master).c_str());
+  if (!m) return out;
+  for (odb::dbMTerm* t : m->getMTerms()) {
+    std::string row = t->getName();
+    row += '\t';
+    row += t->getSigType().getString();
+    out.push_back(rust::String(row));
+  }
+  return out;
+}
 rust::Vec<int32_t> mterm_pin_boxes(const OdbDb& h, rust::Str master, rust::Str term) {
   rust::Vec<int32_t> out;
   odb::dbMaster* m = h.db->findMaster(s(master).c_str());

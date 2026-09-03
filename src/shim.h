@@ -583,6 +583,8 @@ rust::Vec<int32_t> master_pin_boxes(const OdbDb& db, rust::Str master);
 // y_max), in MASTER coordinates.
 // `master_pin_boxes` merges every terminal's shapes together, which loses the question "do these
 // two cells touch on the SAME pin" -- connection by abutment is exactly that question.
+// Each terminal of a master as "name\tSIGTYPE" (POWER/GROUND/SIGNAL/…). Empty if not found.
+rust::Vec<rust::String> master_mterms(const OdbDb& db, rust::Str master);
 rust::Vec<int32_t> mterm_pin_boxes(const OdbDb& db, rust::Str master, rust::Str term);
 rust::Vec<int32_t> mterm_pin_boxes_excluding_polygons(const OdbDb& db, rust::Str master,
                                                       rust::Str term);
