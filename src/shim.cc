@@ -22,6 +22,7 @@
 #include <string>
 #include <vector>
 #include "boost/polygon/polygon.hpp"
+#include "odb/geom_boost.h"  // odb::geom::toPolygonSet / extractPolygons — see polygon_bloat
 
 using odb::dbBlock;
 using odb::dbBox;
@@ -1776,14 +1777,32 @@ rust::Vec<int32_t> iterm_pin_polygons(const OdbDb& h, rust::Str iterm) {
 //
 // 🔑 Bound rather than reimplemented: a 45-degree polygon's offset is not a per-edge shift, and a
 // hand-rolled version would diverge from the reference silently.
+//
+// ⛔ UPSTREAM REMOVED `Polygon::bloat` in `dd643b2e74` (odb, 2026-08-26) — it had no caller left in
+// OpenROAD, and we were its only consumer. **The four lines below are that deleted body verbatim**,
+// re-expressed against the `odb::geom` helpers it already called, so this stays a transcription of
+// the reference rather than a reimplementation of it:
+//
+//     const geom::BoostPolygonSet poly_out_set = geom::toPolygonSet(*this) + margin;
+//     const auto polygons = geom::extractPolygons(poly_out_set);
+//     if (polygons.empty()) { return Polygon(); }
+//     return polygons[0];
+//
+// 🔑 `operator+` on a polygon SET is boost's resize (bloat), not a union — the `using` declaration
+// below is what selects it, and dropping it silently changes the meaning. An empty result yields an
+// empty ring, which is upstream's `Polygon()`.
 rust::Vec<int32_t> polygon_bloat(rust::Slice<const int32_t> pts, int32_t margin) {
+  using boost::polygon::operators::operator+;
   rust::Vec<int32_t> out;
   if (pts.size() < 6 || pts.size() % 2 != 0) return out;
   std::vector<odb::Point> in;
   in.reserve(pts.size() / 2);
   for (std::size_t i = 0; i + 1 < pts.size(); i += 2) in.emplace_back(pts[i], pts[i + 1]);
   const odb::Polygon poly(in);
-  for (const odb::Point& pt : poly.bloat(margin).getPoints()) {
+  const odb::geom::BoostPolygonSet bloated = odb::geom::toPolygonSet(poly) + margin;
+  const std::vector<odb::Polygon> polygons = odb::geom::extractPolygons(bloated);
+  if (polygons.empty()) return out;
+  for (const odb::Point& pt : polygons[0].getPoints()) {
     out.push_back(pt.x());
     out.push_back(pt.y());
   }

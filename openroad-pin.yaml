@@ -3,7 +3,7 @@
 # Bump deliberately (manual), then re-run the build workflow.
 upstream:
   source: https://github.com/The-OpenROAD-Project/OpenROAD
-  commit: 945a9f48dc6e5cc91d865daa92c45a1094cb682c   # == vyges-openroad 2026.08.0
+  commit: 7d490b8ecd357199c0c0e9f3e32becd5eb507c34   # == vyges-openroad 2026.09.0
   subtree:                                            # only these are sparse-checked-out
     - src/odb
     - src/utl
