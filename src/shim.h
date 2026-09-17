@@ -435,6 +435,8 @@ rust::Vec<int64_t> inst_shapes(const OdbDb& db);
 // Routing/PDN obstruction rectangles, 5 i64 each (layer_number, x_min, y_min, x_max, y_max).
 // `num_obstructions` counts them; this is the geometry.
 rust::Vec<int64_t> obstruction_boxes(const OdbDb& db);
+// Only obstructions marked `+ FILLS` -- the ones that actually exclude metal fill.
+rust::Vec<int64_t> fill_obstruction_boxes(const OdbDb& db);
 
 // Placement blockage rectangles, 4 i32 each (x_min, y_min, x_max, y_max).
 // A blockage is resolvable by index in the generated surface, but its box arrives through a

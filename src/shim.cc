@@ -1388,6 +1388,37 @@ rust::Vec<int64_t> obstruction_boxes(const OdbDb& h) {
   }
   return out;
 }
+// Block obstructions that forbid metal FILL, as (layer, x0, y0, x1, y1) per entry.
+//
+// Upstream rule -- OpenROAD src/fin/src/DensityFill.cpp, orNonFills(), added by PR #11380
+// (our issue #11285): ONLY a blockage declared `+ FILLS` in DEF excludes fill,
+//     if (obstruction->isFillObstruction() && box->getTechLayer() == layer)
+// A plain routing obstruction does NOT block fill -- it constrains the router, metal fill is
+// not routed, and upstream deliberately keeps filling inside it. LEF/DEF `+ FILLS` is the
+// only marker that means "no fill here".
+//
+// Filtered HERE, in C++, rather than by pairing obstruction_boxes() with the generated
+// obs_is_fill_obstruction(idx): that pairing is UNSOUND. obstruction_boxes() skips any
+// obstruction whose box carries no tech layer, while idx indexes the full getObstructions()
+// list, so the two go out of step the moment such an obstruction exists.
+rust::Vec<int64_t> fill_obstruction_boxes(const OdbDb& h) {
+  rust::Vec<int64_t> out;
+  dbBlock* b = block_of(h);
+  if (!b) return out;
+  for (odb::dbObstruction* o : b->getObstructions()) {
+    if (!o->isFillObstruction()) continue;
+    odb::dbBox* box = o->getBBox();
+    if (!box) continue;
+    odb::dbTechLayer* layer = box->getTechLayer();
+    if (!layer) continue;
+    out.push_back(layer->getNumber());
+    out.push_back(box->xMin());
+    out.push_back(box->yMin());
+    out.push_back(box->xMax());
+    out.push_back(box->yMax());
+  }
+  return out;
+}
 rust::Vec<int32_t> blockage_boxes(const OdbDb& h) {
   rust::Vec<int32_t> out;
   dbBlock* b = block_of(h);
