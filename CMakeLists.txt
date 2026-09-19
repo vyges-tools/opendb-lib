@@ -39,9 +39,9 @@ set(FMT_INSTALL            OFF CACHE BOOL "" FORCE)
 set(SPDLOG_INSTALL         OFF CACHE BOOL "" FORCE)
 set(SPDLOG_FMT_EXTERNAL    ON  CACHE BOOL "" FORCE)  # use our pinned fmt, not spdlog's bundled copy
 
-FetchContent_Declare(fmt    GIT_REPOSITORY https://github.com/fmtlib/fmt.git        GIT_TAG 11.0.2     GIT_SHALLOW TRUE)
-FetchContent_Declare(absl   GIT_REPOSITORY https://github.com/abseil/abseil-cpp.git GIT_TAG 20250127.0 GIT_SHALLOW TRUE)
-FetchContent_Declare(spdlog GIT_REPOSITORY https://github.com/gabime/spdlog.git     GIT_TAG v1.15.3    GIT_SHALLOW TRUE)
+FetchContent_Declare(fmt    GIT_REPOSITORY https://github.com/fmtlib/fmt.git        GIT_TAG 11.2.0     GIT_SHALLOW TRUE)
+FetchContent_Declare(absl   GIT_REPOSITORY https://github.com/abseil/abseil-cpp.git GIT_TAG 20260107.1 GIT_SHALLOW TRUE)
+FetchContent_Declare(spdlog GIT_REPOSITORY https://github.com/gabime/spdlog.git     GIT_TAG v1.17.0    GIT_SHALLOW TRUE)
 FetchContent_MakeAvailable(fmt absl)   # fmt before spdlog (SPDLOG_FMT_EXTERNAL)
 FetchContent_MakeAvailable(spdlog)
 

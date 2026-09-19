@@ -13,10 +13,15 @@ upstream:
     # OpenROAD CMake file, so upstream deleting its CMake build does not break this compile.
 # C++ deps built FROM SOURCE at these pinned versions + static-linked (not the system's, which
 # lag and break the compile). These + the build base go into the release provenance manifest.
+# ⛔ These track what OpenROAD's MODULE.bazel selects AT THE PIN ABOVE, not whatever was
+# current when they were chosen. Upstream is retiring CMake, so once it goes the Bazel-selected
+# versions are the only ones anyone tests; a frozen set here would drift out of that coverage
+# silently. Re-read MODULE.bazel at every re-pin and move these with it.
 deps:
-  fmt:    "11.0.2"        # fmtlib/fmt
-  abseil: "20250127.0"    # abseil/abseil-cpp
-  spdlog: "v1.15.3"       # gabime/spdlog (built with SPDLOG_FMT_EXTERNAL against the pinned fmt)
+  fmt:    "11.2.0"        # fmtlib/fmt        — MODULE.bazel: fmt 11.2.0.bcr.1
+  abseil: "20260107.1"    # abseil/abseil-cpp — MODULE.bazel: abseil-cpp 20260107.1
+  spdlog: "v1.17.0"       # gabime/spdlog     — MODULE.bazel: spdlog 1.17.0 (built with
+                          #                     SPDLOG_FMT_EXTERNAL against the pinned fmt)
   # boost: headers only (system); zlib: system (dynamic)
 license:
   spdx: BSD-3-Clause                                  # OpenROAD source
