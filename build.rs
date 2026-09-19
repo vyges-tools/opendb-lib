@@ -166,14 +166,52 @@ fn ordered_archives(mut a: Vec<PathBuf>) -> Vec<PathBuf> {
 
 /// Local `vendor/OpenROAD` if present (dev); otherwise auto-fetch the pinned sparse subtree
 /// into `OUT_DIR/OpenROAD` (self-contained dist build-from-source).
+/// The checked-out SHA of an OpenROAD tree, or None if it is not a git checkout.
+fn tree_sha(dir: &Path) -> Option<String> {
+    let out = std::process::Command::new("git")
+        .args(["-C", dir.to_str()?, "rev-parse", "HEAD"])
+        .output()
+        .ok()?;
+    out.status
+        .success()
+        .then(|| String::from_utf8_lossy(&out.stdout).trim().to_string())
+}
+
 fn source_tree() -> PathBuf {
+    let sha = pinned_sha();
+
+    // ⛔ A developer's vendor/ checkout wins, but it must be AT THE PIN. Silently
+    // compiling against a vendor tree that sits at a different commit is how you get
+    // generated.cc calling methods the headers do not declare.
     let vendor = PathBuf::from("vendor/OpenROAD");
     if vendor.join("src/odb/include/odb/db.h").exists() {
+        match tree_sha(&vendor) {
+            Some(got) if got != sha => panic!(
+                "vendor/OpenROAD is at {got}, but openroad-pin.yaml pins {sha}.\n\
+                 Move it, or delete it and let the build fetch the pin:\n\
+                 \x20   git -C vendor/OpenROAD fetch origin {sha} && \
+                 git -C vendor/OpenROAD checkout {sha}"
+            ),
+            _ => {}
+        }
         return std::fs::canonicalize(&vendor).expect("canonicalize vendor/OpenROAD");
     }
+
     let out = PathBuf::from(std::env::var("OUT_DIR").unwrap());
     let dest = out.join("OpenROAD");
-    if !dest.join("src/odb/include/odb/db.h").exists() {
+
+    // ⛔ EXISTENCE IS NOT FRESHNESS. This used to fetch only when db.h was absent, so a
+    // pin bump left the previously fetched subtree in place and the build compiled the
+    // NEW generated.cc against the OLD headers. Measured 2026-09-19 on the test box: all
+    // seven engines failed with `class odb::dbModNet has no member named
+    // isConnectedToInputPort` — the three getters the pin had just added. The Mac did not
+    // reproduce it, because there vendor/ exists and short-circuits above. A cached
+    // artifact keyed on presence rather than identity is invisible to every gate we have.
+    let stale = dest.join("src/odb/include/odb/db.h").exists() && tree_sha(&dest).as_deref() != Some(sha.as_str());
+    if stale {
+        println!("cargo:warning=vyges-opendb-lib: cached OpenROAD subtree is not at {sha}; re-fetching");
+    }
+    if !dest.join("src/odb/include/odb/db.h").exists() || stale {
         fetch_openroad(&dest);
     }
     dest
@@ -216,6 +254,11 @@ fn fetch_openroad(dest: &Path) {
         std::fs::create_dir_all(dest).unwrap();
         run(&["clone", "--quiet", "--filter=blob:none", "--no-checkout", src, dest.to_str().unwrap()], None);
     }
-    run(&["sparse-checkout", "set", "--cone", "src/odb", "src/utl", "cmake"], Some(dest));
+    // ⚠️ A clone taken at an earlier pin has no objects for a NEWER commit, so `checkout`
+    // alone fails on a re-pin. Fetch the exact SHA first; on a fresh clone this is a no-op.
+    run(&["fetch", "--quiet", "--filter=blob:none", "origin", &sha], Some(dest));
+    // `cmake` is deliberately not in the set — upstream is retiring its CMake build and our
+    // CMakeLists reads only src/odb and src/utl. Keep in step with scripts/fetch-odb-src.sh.
+    run(&["sparse-checkout", "set", "--cone", "src/odb", "src/utl"], Some(dest));
     run(&["checkout", "--quiet", &sha], Some(dest));
 }
