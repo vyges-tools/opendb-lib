@@ -3,7 +3,7 @@
 # OpenROAD subtree. No SWIG, no Tcl, no OpenROAD engines. C++20. BISON at build time (LEF/DEF).
 #
 # The source layout is pinned (see openroad-pin.yaml); scripts/fetch-odb-src.sh
-# sparse-checks-out src/odb + src/utl + cmake into vendor/OpenROAD.
+# sparse-checks-out src/odb + src/utl into vendor/OpenROAD.
 cmake_minimum_required(VERSION 3.20)
 project(vyges_odb LANGUAGES CXX)
 
@@ -15,7 +15,7 @@ if(NOT CMAKE_BUILD_TYPE)
 endif()
 
 set(OPENROAD_SRC "${CMAKE_SOURCE_DIR}/vendor/OpenROAD"
-    CACHE PATH "Root of the sparse OpenROAD subtree (src/odb, src/utl, cmake)")
+    CACHE PATH "Root of the sparse OpenROAD subtree (src/odb, src/utl)")
 if(NOT EXISTS "${OPENROAD_SRC}/src/odb/include/odb/db.h")
   message(FATAL_ERROR
     "OpenROAD odb source not found at ${OPENROAD_SRC}.\n"

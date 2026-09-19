@@ -556,6 +556,8 @@ mod ffi_gen {
         fn modnet_get_const_name(db: &OdbDb, name: &str) -> String;
         fn modnet_get_hierarchical_name(db: &OdbDb, name: &str) -> String;
         fn modnet_find_related_net(db: &OdbDb, name: &str) -> String;
+        fn modnet_is_connected_to_input_port(db: &OdbDb, name: &str) -> bool;
+        fn modnet_is_connected_to_output_port(db: &OdbDb, name: &str) -> bool;
         fn num_modnet_get_next_mod_nets_in_fanin(db: &OdbDb, name: &str) -> usize;
         fn nth_modnet_get_next_mod_nets_in_fanin(db: &OdbDb, name: &str, i: usize) -> String;
         fn num_modnet_get_next_mod_nets_in_fanout(db: &OdbDb, name: &str) -> usize;
@@ -983,6 +985,7 @@ mod ffi_gen {
         fn nth_chipconn_get_bottom_region_path(db: &OdbDb, chip: &str, conn: &str, i: usize) -> String;
         fn chipnet_get_name(db: &OdbDb, chip: &str, net: &str) -> String;
         fn chipnet_get_chip(db: &OdbDb, chip: &str, net: &str) -> String;
+        fn chipnet_get_total_capacitance(db: &OdbDb, chip: &str, net: &str) -> f32;
         fn chipnet_get_num_bump_insts(db: &OdbDb, chip: &str, net: &str) -> u32;
         fn chippath_get_name(db: &OdbDb, chip: &str, path: &str) -> String;
         fn chippath_get_chip(db: &OdbDb, chip: &str, path: &str) -> String;
@@ -1173,6 +1176,7 @@ pub use ffi_gen::{
     chipnet_get_chip,
     chipnet_get_name,
     chipnet_get_num_bump_insts,
+    chipnet_get_total_capacitance,
     chippath_get_chip,
     chippath_get_name,
     chipregion_get_box_dx,
@@ -1569,6 +1573,8 @@ pub use ffi_gen::{
     modnet_get_hierarchical_name,
     modnet_get_name,
     modnet_get_parent,
+    modnet_is_connected_to_input_port,
+    modnet_is_connected_to_output_port,
     module_get_db_inst_count,
     module_get_hierarchical_name,
     module_get_mod_inst,

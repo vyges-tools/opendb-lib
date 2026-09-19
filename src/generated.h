@@ -551,6 +551,8 @@ rust::String modnet_get_name(const OdbDb& db, rust::Str name);
 rust::String modnet_get_const_name(const OdbDb& db, rust::Str name);
 rust::String modnet_get_hierarchical_name(const OdbDb& db, rust::Str name);
 rust::String modnet_find_related_net(const OdbDb& db, rust::Str name);
+bool modnet_is_connected_to_input_port(const OdbDb& db, rust::Str name);
+bool modnet_is_connected_to_output_port(const OdbDb& db, rust::Str name);
 std::size_t num_modnet_get_next_mod_nets_in_fanin(const OdbDb& db, rust::Str name);
 rust::String nth_modnet_get_next_mod_nets_in_fanin(const OdbDb& db, rust::Str name, std::size_t i);
 std::size_t num_modnet_get_next_mod_nets_in_fanout(const OdbDb& db, rust::Str name);
@@ -978,6 +980,7 @@ std::size_t num_chipconn_get_bottom_region_path(const OdbDb& db, rust::Str chip,
 rust::String nth_chipconn_get_bottom_region_path(const OdbDb& db, rust::Str chip, rust::Str conn, std::size_t i);
 rust::String chipnet_get_name(const OdbDb& db, rust::Str chip, rust::Str net);
 rust::String chipnet_get_chip(const OdbDb& db, rust::Str chip, rust::Str net);
+float chipnet_get_total_capacitance(const OdbDb& db, rust::Str chip, rust::Str net);
 uint32_t chipnet_get_num_bump_insts(const OdbDb& db, rust::Str chip, rust::Str net);
 rust::String chippath_get_name(const OdbDb& db, rust::Str chip, rust::Str path);
 rust::String chippath_get_chip(const OdbDb& db, rust::Str chip, rust::Str path);

@@ -4,8 +4,8 @@
   "note": "Method-based schema derived from the hand-written core classes; parallels OpenROAD's field-based codeGenerator schema for the classes it does not cover.",
   "scope": "all",
   "class_count": 121,
-  "method_count": 2639,
-  "bridged_count": 1599,
+  "method_count": 2642,
+  "bridged_count": 1604,
   "classes": [
     {
       "name": "dbAccessPoint",
@@ -5030,6 +5030,14 @@
           "kind": "iterator",
           "bridged": false,
           "element": "dbChipCapNode"
+        },
+        {
+          "name": "getTotalCapacitance",
+          "return": "float",
+          "params": [],
+          "const": true,
+          "kind": "getter",
+          "bridged": true
         },
         {
           "name": "getChipRSegs",
@@ -11736,6 +11744,22 @@
           "bridged": true
         },
         {
+          "name": "isConnectedToInputPort",
+          "return": "bool",
+          "params": [],
+          "const": true,
+          "kind": "predicate",
+          "bridged": true
+        },
+        {
+          "name": "isConnectedToOutputPort",
+          "return": "bool",
+          "params": [],
+          "const": true,
+          "kind": "predicate",
+          "bridged": true
+        },
+        {
           "name": "getNextModNetsInFanin",
           "return": "std::vector<dbModNet*>",
           "params": [],
@@ -13286,7 +13310,7 @@
           ],
           "const": false,
           "kind": "other",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "getTotalCouplingCap",
@@ -14592,7 +14616,7 @@
           ],
           "const": false,
           "kind": "other",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "getCapacitance",

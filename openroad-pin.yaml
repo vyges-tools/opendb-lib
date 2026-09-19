@@ -3,11 +3,14 @@
 # Bump deliberately (manual), then re-run the build workflow.
 upstream:
   source: https://github.com/The-OpenROAD-Project/OpenROAD
-  commit: 7d490b8ecd357199c0c0e9f3e32becd5eb507c34   # == vyges-openroad 2026.09.0
+  commit: da9f29f18b6487825aa880597176e0fa97110b31   # nightly-da9f29f18b64, 2026-09-19
   subtree:                                            # only these are sparse-checked-out
     - src/odb
     - src/utl
-    - cmake
+    # ⛔ `cmake` dropped 2026-09-19: upstream is retiring its CMake build, and we never
+    # referenced the directory. Our CMakeLists.txt reads only ${OPENROAD_SRC}/src/odb and
+    # /src/utl (nine globs, one FetchContent) and deliberately never add_subdirectory()s an
+    # OpenROAD CMake file, so upstream deleting its CMake build does not break this compile.
 # C++ deps built FROM SOURCE at these pinned versions + static-linked (not the system's, which
 # lag and break the compile). These + the build base go into the release provenance manifest.
 deps:

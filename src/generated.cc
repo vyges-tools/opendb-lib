@@ -553,6 +553,8 @@ rust::String modnet_get_name(const OdbDb& h, rust::Str name) { auto* p = gen_mod
 rust::String modnet_get_const_name(const OdbDb& h, rust::Str name) { auto* p = gen_modnet(h, name); if (!p) return rust::String(); const char* v = p->getConstName(); return rust::String(v ? v : ""); }
 rust::String modnet_get_hierarchical_name(const OdbDb& h, rust::Str name) { auto* p = gen_modnet(h, name); return p ? rust::String(p->getHierarchicalName()) : rust::String(); }
 rust::String modnet_find_related_net(const OdbDb& h, rust::Str name) { auto* p = gen_modnet(h, name); if (!p) return rust::String(); auto* t = p->findRelatedNet(); return t ? rust::String(t->getConstName()) : rust::String(); }
+bool modnet_is_connected_to_input_port(const OdbDb& h, rust::Str name) { auto* p = gen_modnet(h, name); return p ? p->isConnectedToInputPort() : false; }
+bool modnet_is_connected_to_output_port(const OdbDb& h, rust::Str name) { auto* p = gen_modnet(h, name); return p ? p->isConnectedToOutputPort() : false; }
 std::size_t num_modnet_get_next_mod_nets_in_fanin(const OdbDb& h, rust::Str name) { auto* p = gen_modnet(h, name); return p ? p->getNextModNetsInFanin().size() : 0; }
 rust::String nth_modnet_get_next_mod_nets_in_fanin(const OdbDb& h, rust::Str name, std::size_t i) { auto* p = gen_modnet(h, name); if (!p) return rust::String(); auto v = p->getNextModNetsInFanin(); if (i >= v.size()) return rust::String(); auto* e = v[i]; return rust::String(e->getConstName()); }
 std::size_t num_modnet_get_next_mod_nets_in_fanout(const OdbDb& h, rust::Str name) { auto* p = gen_modnet(h, name); return p ? p->getNextModNetsInFanout().size() : 0; }
@@ -980,6 +982,7 @@ std::size_t num_chipconn_get_bottom_region_path(const OdbDb& h, rust::Str chip, 
 rust::String nth_chipconn_get_bottom_region_path(const OdbDb& h, rust::Str chip, rust::Str conn, std::size_t i) { auto* p = gen_chipconn(h, chip, conn); if (!p) return rust::String(); auto v = p->getBottomRegionPath(); if (i >= v.size()) return rust::String(); auto* e = v[i]; return rust::String(e->getName()); }
 rust::String chipnet_get_name(const OdbDb& h, rust::Str chip, rust::Str net) { auto* p = gen_chipnet(h, chip, net); return p ? rust::String(p->getName()) : rust::String(); }
 rust::String chipnet_get_chip(const OdbDb& h, rust::Str chip, rust::Str net) { auto* p = gen_chipnet(h, chip, net); if (!p) return rust::String(); auto* t = p->getChip(); return t ? rust::String(t->getName()) : rust::String(); }
+float chipnet_get_total_capacitance(const OdbDb& h, rust::Str chip, rust::Str net) { auto* p = gen_chipnet(h, chip, net); return p ? p->getTotalCapacitance() : 0.0f; }
 uint32_t chipnet_get_num_bump_insts(const OdbDb& h, rust::Str chip, rust::Str net) { auto* p = gen_chipnet(h, chip, net); return p ? p->getNumBumpInsts() : 0; }
 rust::String chippath_get_name(const OdbDb& h, rust::Str chip, rust::Str path) { auto* p = gen_chippath(h, chip, path); if (!p) return rust::String(); const char* v = p->getName(); return rust::String(v ? v : ""); }
 rust::String chippath_get_chip(const OdbDb& h, rust::Str chip, rust::Str path) { auto* p = gen_chippath(h, chip, path); if (!p) return rust::String(); auto* t = p->getChip(); return t ? rust::String(t->getName()) : rust::String(); }

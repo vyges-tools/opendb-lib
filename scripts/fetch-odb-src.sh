@@ -16,6 +16,6 @@ if [ ! -d "$dest/.git" ]; then
   git clone --quiet --filter=blob:none --no-checkout "$src" "$dest"
 fi
 cd "$dest"
-git sparse-checkout set --cone src/odb src/utl cmake
+git sparse-checkout set --cone src/odb src/utl
 git checkout --quiet "$sha"
 echo "OpenROAD odb subtree @ $(git rev-parse --short HEAD) -> $dest ($(du -sh . | cut -f1))"
