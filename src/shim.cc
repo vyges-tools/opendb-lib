@@ -1388,6 +1388,33 @@ rust::Vec<int64_t> obstruction_boxes(const OdbDb& h) {
   }
   return out;
 }
+// ⛔ **Only `+ FILLS` obstructions**, mirroring upstream `DensityFill.cpp::orNonFills()`:
+//     if (obstruction->isFillObstruction() && box->getTechLayer() == layer)
+// A plain ROUTING obstruction does not exclude metal fill — it constrains the router, and fill is
+// not routed. OpenROAD issue #11285 (ours) -> PR#11380.
+//
+// 🔑 **Filtered HERE and not in Rust over `obstruction_boxes`.** That function SKIPS any
+// obstruction whose box carries no tech layer, so its output is not a dense index into
+// `getObstructions()` — pairing it with the indexed `obs_is_fill_obstruction(i)` would be off by
+// one per skipped obstruction, silently and only on designs that have one.
+rust::Vec<int64_t> fill_obstruction_boxes(const OdbDb& h) {
+  rust::Vec<int64_t> out;
+  dbBlock* b = block_of(h);
+  if (!b) return out;
+  for (odb::dbObstruction* o : b->getObstructions()) {
+    if (!o->isFillObstruction()) continue;
+    odb::dbBox* box = o->getBBox();
+    if (!box) continue;
+    odb::dbTechLayer* layer = box->getTechLayer();
+    if (!layer) continue;
+    out.push_back(layer->getNumber());
+    out.push_back(box->xMin());
+    out.push_back(box->yMin());
+    out.push_back(box->xMax());
+    out.push_back(box->yMax());
+  }
+  return out;
+}
 rust::Vec<int32_t> blockage_boxes(const OdbDb& h) {
   rust::Vec<int32_t> out;
   dbBlock* b = block_of(h);
