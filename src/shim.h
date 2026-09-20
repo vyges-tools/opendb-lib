@@ -60,6 +60,7 @@ void add_track_pattern_y(const OdbDb& db, rust::Str layer, int32_t origin, int32
                          int32_t step);
 void add_obstruction(const OdbDb& db, rust::Str layer, int32_t x1, int32_t y1, int32_t x2, int32_t y2);  // routing/PDN obstruction rect on a layer (throws if layer missing)
 void add_guide(const OdbDb& db, rust::Str net, rust::Str layer, rust::Str via_layer, int32_t x1, int32_t y1, int32_t x2, int32_t y2, bool is_congested);  // global-route guide on a net (pass layer twice for a wire segment; throws if net/layer missing)
+bool reverse_guides(const OdbDb& db, rust::Str net);  // ⛔ back into CREATION order -- saveGuides' last act
 std::size_t clear_guides(const OdbDb& db);  // drop every net's guides; returns how many were removed
 
 // ---- Global-routing congestion grid (dbGCellGrid). ONE per block. `setCapacity`/`setUsage` are

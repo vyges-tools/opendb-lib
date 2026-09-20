@@ -284,6 +284,29 @@ void add_guide(const OdbDb& h, rust::Str net, rust::Str layer, rust::Str via_lay
   if (!odb::dbGuide::create(n, l, vl, odb::Rect(x1, y1, x2, y2), is_congested))
     throw std::runtime_error("vyges-opendb: add_guide failed for net " + s(net));
 }
+// ⛔ Put a net's guides back into CREATION order.
+//
+// This is the last thing GlobalRouter::saveGuides does, and it is easy to miss because it sits
+// after the loop that does the visible work:
+//
+//   auto dbGuides = db_net->getGuides();
+//   if (dbGuides.orderReversed() && dbGuides.reversible()) dbGuides.reverse();
+//
+// odb's dbSet PREPENDS, so a freshly written set iterates NEWEST-FIRST; upstream normalises that
+// away so the guide file comes out in the order the segments were emitted. ⟹ An engine that
+// writes guides and skips this produces the right guides in the wrong order, and every .guideok
+// golden is an ordered diff. Returns whether a reversal was actually performed.
+bool reverse_guides(const OdbDb& h, rust::Str net) {
+  dbBlock* b = require_block(h);
+  dbNet* n = b->findNet(s(net).c_str());
+  if (!n) throw std::runtime_error("vyges-opendb: net not found: " + s(net));
+  auto guides = n->getGuides();
+  if (guides.orderReversed() && guides.reversible()) {
+    guides.reverse();
+    return true;
+  }
+  return false;
+}
 std::size_t clear_guides(const OdbDb& h) {
   dbBlock* b = block_of(h);
   if (!b) return 0;
