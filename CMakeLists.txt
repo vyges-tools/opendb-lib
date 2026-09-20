@@ -220,8 +220,7 @@ endif()
 # OpenROAD's `tst::Fixture` framework (tst/fixture.h, {sky130,nangate45}_fixture.h,
 # IntegratedFixture.h), which #includes db_sta/dbSta + sta/Liberty + tcl.h + Bazel runfiles — none
 # of which exist in a Tcl/SWIG/engine-free libodb. Expanding this gate toward parity = writing a
-# minimal standalone `tst` shim (db + Logger + LEF load via our lefin, no STA/Tcl); see
-# docs (opendb-conformance-gate.md) in vyges-tools-internal.
+# minimal standalone `tst` shim (db + Logger + LEF load via our lefin, no STA/Tcl).
 option(VYGES_ODB_GTEST "Build OpenROAD's standalone odb C++ GTests against our libodb" OFF)
 if(VYGES_ODB_GTEST)
   FetchContent_Declare(googletest GIT_REPOSITORY https://github.com/google/googletest.git

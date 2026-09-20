@@ -211,7 +211,7 @@ void disconnect(const OdbDb& db, rust::Str inst, rust::Str pin);               /
 // The numerator and denominator of the antenna ratio, read off the ROUTED database — the
 // substrate OpenROAD's `ant` uses, and the one where RepairAntennas can still act. (The
 // GDS-substrate antenna check in vyges-drc is the same ratio computed post-stream.)
-// Consumed by vyges-ant; see vyges-tools-internal/docs/loom/flow-ir-crate-roadmap.md.
+// Consumed by vyges-ant.
 //
 // Metal is grouped by routing layer because the charge model is per-layer and cumulative:
 // a net legal on its own worst layer can still violate the cumulative ratio. Callers that

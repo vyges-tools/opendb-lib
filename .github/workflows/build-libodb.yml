@@ -80,7 +80,8 @@ jobs:
       - name: Conformance gate (OpenROAD's odb GTests vs our libodb)
         # Runs OpenROAD's OWN gtests against our standalone libodb — behavioral conformance +
         # drift tripwire. Only TestGeom builds standalone today (the rest need OpenROAD's tst/STA
-        # framework); see docs/openroad/opendb-conformance-gate.md for the parity roadmap.
+        # framework). Expanding it toward parity means a standalone `tst` shim: db + Logger +
+        # LEF load through our lefin, with no STA or Tcl.
         run: |
           [ "${{ runner.os }}" = "macOS" ] && export PATH="$(brew --prefix bison)/bin:$PATH"
           cmake -S . -B build -DVYGES_ODB_GTEST=ON >/dev/null
