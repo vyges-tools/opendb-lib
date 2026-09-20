@@ -151,6 +151,8 @@ void obs_set_effective_width(const OdbDb& db, std::size_t idx, int32_t w);
 void obs_set_min_spacing(const OdbDb& db, std::size_t idx, int32_t w);
 void obs_set_is_system_reserved(const OdbDb& db, std::size_t idx, bool is_system_reserved);
 void swire_set_wire_type(const OdbDb& db, rust::Str net, std::size_t idx, rust::Str a0);
+void guide_set_is_jumper(const OdbDb& db, rust::Str net, std::size_t idx, bool jumper);
+void guide_set_is_connected_to_term(const OdbDb& db, rust::Str net, std::size_t idx, bool is_connected);
 void wire_set_property(const OdbDb& db, rust::Str net, int32_t jid, int32_t property);
 void box_set_soft(const OdbDb& db, std::size_t idx, bool value);
 void box_set_layer_mask(const OdbDb& db, std::size_t idx, uint32_t mask);

@@ -191,6 +191,7 @@ int32_t net_get_term_b_box_dx(const OdbDb& h, rust::Str net) { auto* p = gen_net
 int32_t net_get_term_b_box_dy(const OdbDb& h, rust::Str net) { auto* p = gen_net(h, net); return p ? p->getTermBBox().dy() : 0; }
 rust::String net_find_main_parent_mod_inst(const OdbDb& h, rust::Str net) { auto* p = gen_net(h, net); if (!p) return rust::String(); auto* t = p->findMainParentModInst(); return t ? rust::String(t->getName()) : rust::String(); }
 rust::String net_find_main_parent_module(const OdbDb& h, rust::Str net) { auto* p = gen_net(h, net); if (!p) return rust::String(); auto* t = p->findMainParentModule(); return t ? rust::String(t->getName()) : rust::String(); }
+std::size_t num_net_get_guides(const OdbDb& h, rust::Str net) { auto* p = gen_net(h, net); return p ? p->getGuides().size() : 0; }
 bool net_has_jumpers(const OdbDb& h, rust::Str net) { auto* p = gen_net(h, net); return p ? p->hasJumpers() : false; }
 bool net_is_auto_taper_enabled(const OdbDb& h, rust::Str net) { auto* p = gen_net(h, net); return p ? p->isAutoTaperEnabled() : false; }
 rust::String net_find_mod_net_in_highest_hier(const OdbDb& h, rust::Str net) { auto* p = gen_net(h, net); if (!p) return rust::String(); auto* t = p->findModNetInHighestHier(); return t ? rust::String(t->getConstName()) : rust::String(); }
@@ -426,6 +427,18 @@ rust::String swire_get_net(const OdbDb& h, rust::Str net, std::size_t idx) { aut
 rust::String swire_get_wire_type(const OdbDb& h, rust::Str net, std::size_t idx) { auto* p = gen_swire(h, net, idx); return p ? rust::String(p->getWireType().getString()) : rust::String(); }
 rust::String swire_get_shield(const OdbDb& h, rust::Str net, std::size_t idx) { auto* p = gen_swire(h, net, idx); if (!p) return rust::String(); auto* t = p->getShield(); return t ? rust::String(t->getConstName()) : rust::String(); }
 std::size_t num_swire_get_wires(const OdbDb& h, rust::Str net, std::size_t idx) { auto* p = gen_swire(h, net, idx); return p ? p->getWires().size() : 0; }
+int32_t guide_get_box_x_min(const OdbDb& h, rust::Str net, std::size_t idx) { auto* p = gen_guide(h, net, idx); return p ? p->getBox().xMin() : 0; }
+int32_t guide_get_box_y_min(const OdbDb& h, rust::Str net, std::size_t idx) { auto* p = gen_guide(h, net, idx); return p ? p->getBox().yMin() : 0; }
+int32_t guide_get_box_x_max(const OdbDb& h, rust::Str net, std::size_t idx) { auto* p = gen_guide(h, net, idx); return p ? p->getBox().xMax() : 0; }
+int32_t guide_get_box_y_max(const OdbDb& h, rust::Str net, std::size_t idx) { auto* p = gen_guide(h, net, idx); return p ? p->getBox().yMax() : 0; }
+int32_t guide_get_box_dx(const OdbDb& h, rust::Str net, std::size_t idx) { auto* p = gen_guide(h, net, idx); return p ? p->getBox().dx() : 0; }
+int32_t guide_get_box_dy(const OdbDb& h, rust::Str net, std::size_t idx) { auto* p = gen_guide(h, net, idx); return p ? p->getBox().dy() : 0; }
+rust::String guide_get_net(const OdbDb& h, rust::Str net, std::size_t idx) { auto* p = gen_guide(h, net, idx); if (!p) return rust::String(); auto* t = p->getNet(); return t ? rust::String(t->getConstName()) : rust::String(); }
+rust::String guide_get_layer(const OdbDb& h, rust::Str net, std::size_t idx) { auto* p = gen_guide(h, net, idx); if (!p) return rust::String(); auto* t = p->getLayer(); return t ? rust::String(t->getConstName()) : rust::String(); }
+rust::String guide_get_via_layer(const OdbDb& h, rust::Str net, std::size_t idx) { auto* p = gen_guide(h, net, idx); if (!p) return rust::String(); auto* t = p->getViaLayer(); return t ? rust::String(t->getConstName()) : rust::String(); }
+bool guide_is_congested(const OdbDb& h, rust::Str net, std::size_t idx) { auto* p = gen_guide(h, net, idx); return p ? p->isCongested() : false; }
+bool guide_is_jumper(const OdbDb& h, rust::Str net, std::size_t idx) { auto* p = gen_guide(h, net, idx); return p ? p->isJumper() : false; }
+bool guide_is_connected_to_term(const OdbDb& h, rust::Str net, std::size_t idx) { auto* p = gen_guide(h, net, idx); return p ? p->isConnectedToTerm() : false; }
 rust::String wire_get_block(const OdbDb& h, rust::Str net) { auto* p = gen_wire(h, net); if (!p) return rust::String(); auto* t = p->getBlock(); return t ? rust::String(t->getConstName()) : rust::String(); }
 rust::String wire_get_net(const OdbDb& h, rust::Str net) { auto* p = gen_wire(h, net); if (!p) return rust::String(); auto* t = p->getNet(); return t ? rust::String(t->getConstName()) : rust::String(); }
 bool wire_is_global_wire(const OdbDb& h, rust::Str net) { auto* p = gen_wire(h, net); return p ? p->isGlobalWire() : false; }

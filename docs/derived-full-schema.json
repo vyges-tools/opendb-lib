@@ -5,7 +5,7 @@
   "scope": "all",
   "class_count": 121,
   "method_count": 2642,
-  "bridged_count": 1604,
+  "bridged_count": 1611,
   "classes": [
     {
       "name": "dbAccessPoint",
@@ -7327,7 +7327,7 @@
           "params": [],
           "const": true,
           "kind": "relation",
-          "bridged": false,
+          "bridged": true,
           "target": "dbTechLayer"
         },
         {
@@ -7336,7 +7336,7 @@
           "params": [],
           "const": true,
           "kind": "predicate",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "isJumper",
@@ -7344,7 +7344,7 @@
           "params": [],
           "const": true,
           "kind": "predicate",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "setIsJumper",
@@ -7357,7 +7357,7 @@
           ],
           "const": false,
           "kind": "setter",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "isConnectedToTerm",
@@ -7365,7 +7365,7 @@
           "params": [],
           "const": true,
           "kind": "predicate",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "setIsConnectedToTerm",
@@ -7378,7 +7378,7 @@
           ],
           "const": false,
           "kind": "setter",
-          "bridged": false
+          "bridged": true
         }
       ],
       "hand_written": false
@@ -13501,7 +13501,7 @@
           "params": [],
           "const": true,
           "kind": "iterator",
-          "bridged": false,
+          "bridged": true,
           "element": "dbGuide"
         },
         {

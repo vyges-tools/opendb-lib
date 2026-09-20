@@ -263,6 +263,34 @@ void add_obstruction(const OdbDb& h, rust::Str layer, int32_t x1, int32_t y1, in
   if (!l) throw std::runtime_error("vyges-opendb: tech layer not found: " + s(layer));
   dbObstruction::create(b, l, x1, y1, x2, y2);
 }
+// Route guides -- global routing's output. `grt` emits these from GlobalRouter::saveGuides via
+// dbGuide::create(net, layer, via_layer, box, is_congested).
+//
+// ⚠️ via_layer is NOT optional in odb's signature. For a wire segment upstream passes the SAME
+// layer twice; only a via segment passes two different ones. Callers must mirror that, because
+// getViaLayer() is what tells a reader whether the guide is a via, and the .guideok goldens
+// distinguish the two.
+void add_guide(const OdbDb& h, rust::Str net, rust::Str layer, rust::Str via_layer,
+               int32_t x1, int32_t y1, int32_t x2, int32_t y2, bool is_congested) {
+  dbBlock* b = require_block(h);
+  dbNet* n = b->findNet(s(net).c_str());
+  if (!n) throw std::runtime_error("vyges-opendb: net not found: " + s(net));
+  dbTech* tech = b->getTech();
+  dbTechLayer* l = tech ? tech->findLayer(s(layer).c_str()) : nullptr;
+  if (!l) throw std::runtime_error("vyges-opendb: tech layer not found: " + s(layer));
+  dbTechLayer* vl = tech ? tech->findLayer(s(via_layer).c_str()) : nullptr;
+  if (!vl) throw std::runtime_error("vyges-opendb: tech layer not found: " + s(via_layer));
+  // odb::Rect normalises (xlo,xhi) = minmax(x1,x2), so callers need not pre-order the corners.
+  if (!odb::dbGuide::create(n, l, vl, odb::Rect(x1, y1, x2, y2), is_congested))
+    throw std::runtime_error("vyges-opendb: add_guide failed for net " + s(net));
+}
+std::size_t clear_guides(const OdbDb& h) {
+  dbBlock* b = block_of(h);
+  if (!b) return 0;
+  std::size_t n = 0;
+  for (dbNet* net : b->getNets()) { n += net->getGuides().size(); net->clearGuides(); }
+  return n;
+}
 std::size_t num_obstructions(const OdbDb& h) {
   dbBlock* b = block_of(h);
   return b ? b->getObstructions().size() : 0;

@@ -70,6 +70,8 @@ mod ffi {
         fn add_track_pattern_x(db: &OdbDb, layer: &str, origin: i32, count: i32, step: i32) -> Result<()>;
         fn add_track_pattern_y(db: &OdbDb, layer: &str, origin: i32, count: i32, step: i32) -> Result<()>;
         fn add_obstruction(db: &OdbDb, layer: &str, x1: i32, y1: i32, x2: i32, y2: i32) -> Result<()>;
+        fn add_guide(db: &OdbDb, net: &str, layer: &str, via_layer: &str, x1: i32, y1: i32, x2: i32, y2: i32, is_congested: bool) -> Result<()>;
+        fn clear_guides(db: &OdbDb) -> usize;
         fn num_obstructions(db: &OdbDb) -> usize;
         fn clear_obstructions(db: &OdbDb) -> usize;
         fn bterm_direction(db: &OdbDb, bterm: &str) -> String;
@@ -421,8 +423,8 @@ pub use generated_write_bridge::*;
 
 #[cfg(unix)]
 pub use ffi::{
-    add_obstruction, block_compute_core_area, block_name, block_set_core_area,
-    block_set_core_area_from_rows, block_set_die_area, block_set_die_area_polygon, bterm_direction, bterm_net, bterm_x, bterm_y, check_3dblox,
+    add_guide, add_obstruction, block_compute_core_area, block_name, block_set_core_area,
+    block_set_core_area_from_rows, block_set_die_area, block_set_die_area_polygon, bterm_direction, bterm_net, bterm_x, bterm_y, check_3dblox, clear_guides,
     eco_begin, eco_commit, eco_empty, eco_end, eco_undo,
     clear_obstructions, construct_unfolded_model,
     chip_block_create, chip_bump_create, chip_conn_create, chip_create, chip_inst_create,

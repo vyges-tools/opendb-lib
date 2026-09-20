@@ -156,6 +156,8 @@ mod ffi_gen_write {
         fn obs_set_min_spacing(db: &OdbDb, idx: usize, w: i32) -> Result<()>;
         fn obs_set_is_system_reserved(db: &OdbDb, idx: usize, is_system_reserved: bool) -> Result<()>;
         fn swire_set_wire_type(db: &OdbDb, net: &str, idx: usize, a0: &str) -> Result<()>;
+        fn guide_set_is_jumper(db: &OdbDb, net: &str, idx: usize, jumper: bool) -> Result<()>;
+        fn guide_set_is_connected_to_term(db: &OdbDb, net: &str, idx: usize, is_connected: bool) -> Result<()>;
         fn wire_set_property(db: &OdbDb, net: &str, jid: i32, property: i32) -> Result<()>;
         fn box_set_soft(db: &OdbDb, idx: usize, value: bool) -> Result<()>;
         fn box_set_layer_mask(db: &OdbDb, idx: usize, mask: u32) -> Result<()>;
@@ -600,6 +602,8 @@ pub use ffi_gen_write::{
     cutspacingtablerule_set_second_layer,
     cutspacingtablerule_set_side_extension_valid,
     cutspacingtablerule_set_vertical,
+    guide_set_is_connected_to_term,
+    guide_set_is_jumper,
     inst_clear_user_flag1,
     inst_clear_user_flag2,
     inst_clear_user_flag3,

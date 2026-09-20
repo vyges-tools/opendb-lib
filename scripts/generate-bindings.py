@@ -52,6 +52,10 @@ TARGETS = {
     # index-addressed collections (no names) — addressed by position, and dbBox/dbWire by owner.
     "dbObstruction": {"key": "obs",  "args": [{"name": "idx", "type": "idx"}], "resolve": "gen_obstruction(h, idx)"},
     "dbSWire":     {"key": "swire",  "args": ["net", {"name": "idx", "type": "idx"}], "resolve": "gen_swire(h, net, idx)"},
+    # Route guides -- global routing's OUTPUT, one dbSet per net, addressed by position.
+    # `grt` writes these via dbGuide::create; the CREATE side stays hand-written (L2 boundary),
+    # this is the read surface the .guideok goldens are diffed through.
+    "dbGuide":     {"key": "guide",  "args": ["net", {"name": "idx", "type": "idx"}], "resolve": "gen_guide(h, net, idx)"},
     "dbWire":      {"key": "wire",   "args": ["net"],             "resolve": "gen_wire(h, net)"},
     "dbFill":      {"key": "fill",   "args": [{"name": "idx", "type": "idx"}], "resolve": "gen_fill(h, idx)"},
     "dbBox":       {"key": "box",    "args": [{"name": "idx", "type": "idx"}], "resolve": "gen_box(h, idx)"},
@@ -861,6 +865,9 @@ def main() -> int:
         "static odb::dbSWire* gen_swire(const OdbDb& h, rust::Str net, std::size_t i) {\n"
         "  odb::dbNet* n = gen_net(h, net); if (!n) return nullptr;\n"
         "  std::size_t k = 0; for (odb::dbSWire* w : n->getSWires()) { if (k++ == i) return w; } return nullptr; }\n"
+        "static odb::dbGuide* gen_guide(const OdbDb& h, rust::Str net, std::size_t i) {\n"
+        "  odb::dbNet* n = gen_net(h, net); if (!n) return nullptr;\n"
+        "  std::size_t k = 0; for (odb::dbGuide* g : n->getGuides()) { if (k++ == i) return g; } return nullptr; }\n"
         "static odb::dbWire* gen_wire(const OdbDb& h, rust::Str net) {\n"
         "  odb::dbNet* n = gen_net(h, net); return n ? n->getWire() : nullptr; }\n"
         "static odb::dbFill* gen_fill(const OdbDb& h, std::size_t i) {\n"

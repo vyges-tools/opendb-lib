@@ -194,6 +194,7 @@ mod ffi_gen {
         fn net_get_term_b_box_dy(db: &OdbDb, net: &str) -> i32;
         fn net_find_main_parent_mod_inst(db: &OdbDb, net: &str) -> String;
         fn net_find_main_parent_module(db: &OdbDb, net: &str) -> String;
+        fn num_net_get_guides(db: &OdbDb, net: &str) -> usize;
         fn net_has_jumpers(db: &OdbDb, net: &str) -> bool;
         fn net_is_auto_taper_enabled(db: &OdbDb, net: &str) -> bool;
         fn net_find_mod_net_in_highest_hier(db: &OdbDb, net: &str) -> String;
@@ -429,6 +430,18 @@ mod ffi_gen {
         fn swire_get_wire_type(db: &OdbDb, net: &str, idx: usize) -> String;
         fn swire_get_shield(db: &OdbDb, net: &str, idx: usize) -> String;
         fn num_swire_get_wires(db: &OdbDb, net: &str, idx: usize) -> usize;
+        fn guide_get_box_x_min(db: &OdbDb, net: &str, idx: usize) -> i32;
+        fn guide_get_box_y_min(db: &OdbDb, net: &str, idx: usize) -> i32;
+        fn guide_get_box_x_max(db: &OdbDb, net: &str, idx: usize) -> i32;
+        fn guide_get_box_y_max(db: &OdbDb, net: &str, idx: usize) -> i32;
+        fn guide_get_box_dx(db: &OdbDb, net: &str, idx: usize) -> i32;
+        fn guide_get_box_dy(db: &OdbDb, net: &str, idx: usize) -> i32;
+        fn guide_get_net(db: &OdbDb, net: &str, idx: usize) -> String;
+        fn guide_get_layer(db: &OdbDb, net: &str, idx: usize) -> String;
+        fn guide_get_via_layer(db: &OdbDb, net: &str, idx: usize) -> String;
+        fn guide_is_congested(db: &OdbDb, net: &str, idx: usize) -> bool;
+        fn guide_is_jumper(db: &OdbDb, net: &str, idx: usize) -> bool;
+        fn guide_is_connected_to_term(db: &OdbDb, net: &str, idx: usize) -> bool;
         fn wire_get_block(db: &OdbDb, net: &str) -> String;
         fn wire_get_net(db: &OdbDb, net: &str) -> String;
         fn wire_is_global_wire(db: &OdbDb, net: &str) -> bool;
@@ -1335,6 +1348,18 @@ pub use ffi_gen::{
     group_get_name,
     group_get_parent_group,
     group_get_region,
+    guide_get_box_dx,
+    guide_get_box_dy,
+    guide_get_box_x_max,
+    guide_get_box_x_min,
+    guide_get_box_y_max,
+    guide_get_box_y_min,
+    guide_get_layer,
+    guide_get_net,
+    guide_get_via_layer,
+    guide_is_congested,
+    guide_is_connected_to_term,
+    guide_is_jumper,
     inst_get_block,
     inst_get_child,
     inst_get_const_name,
@@ -1818,6 +1843,7 @@ pub use ffi_gen::{
     num_mterm_get_m_pins,
     num_net_get_b_terms,
     num_net_get_cap_nodes,
+    num_net_get_guides,
     num_net_get_i_terms,
     num_net_get_r_segs,
     num_net_get_s_wires,
