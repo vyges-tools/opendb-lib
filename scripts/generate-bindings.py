@@ -56,6 +56,12 @@ TARGETS = {
     # `grt` writes these via dbGuide::create; the CREATE side stays hand-written (L2 boundary),
     # this is the read surface the .guideok goldens are diffed through.
     "dbGuide":     {"key": "guide",  "args": ["net", {"name": "idx", "type": "idx"}], "resolve": "gen_guide(h, net, idx)"},
+    # Global-routing congestion grid -- ONE per block, so it resolves like dbBlock/dbTech with no
+    # address. ⚠️ Most of this class takes parameters (setCapacity(layer,x,y,v), getGridPatternX(i,
+    # &origin,&count,&step)) or returns a dbMatrix, and the generator emits neither -- so what is
+    # generated here is only getBlock + the two pattern COUNTS + the two resets. The rest is
+    # hand-written in shim.cc, which is also where the dbMatrix gets flattened.
+    "dbGCellGrid": {"key": "gcell",  "args": [], "resolve": "gen_gcellgrid(h)"},
     "dbWire":      {"key": "wire",   "args": ["net"],             "resolve": "gen_wire(h, net)"},
     "dbFill":      {"key": "fill",   "args": [{"name": "idx", "type": "idx"}], "resolve": "gen_fill(h, idx)"},
     "dbBox":       {"key": "box",    "args": [{"name": "idx", "type": "idx"}], "resolve": "gen_box(h, idx)"},
@@ -865,6 +871,8 @@ def main() -> int:
         "static odb::dbSWire* gen_swire(const OdbDb& h, rust::Str net, std::size_t i) {\n"
         "  odb::dbNet* n = gen_net(h, net); if (!n) return nullptr;\n"
         "  std::size_t k = 0; for (odb::dbSWire* w : n->getSWires()) { if (k++ == i) return w; } return nullptr; }\n"
+        "static odb::dbGCellGrid* gen_gcellgrid(const OdbDb& h) {\n"
+        "  odb::dbBlock* b = gen_block(h); return b ? b->getGCellGrid() : nullptr; }\n"
         "static odb::dbGuide* gen_guide(const OdbDb& h, rust::Str net, std::size_t i) {\n"
         "  odb::dbNet* n = gen_net(h, net); if (!n) return nullptr;\n"
         "  std::size_t k = 0; for (odb::dbGuide* g : n->getGuides()) { if (k++ == i) return g; } return nullptr; }\n"

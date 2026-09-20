@@ -89,6 +89,10 @@ mod ffi_gen {
         fn nth_block_get_non_default_rules(db: &OdbDb, i: usize) -> String;
         fn num_block_get_marker_categories(db: &OdbDb) -> usize;
         fn nth_block_get_marker_categories(db: &OdbDb, i: usize) -> String;
+        fn block_get_ext_count_num_of_net(db: &OdbDb) -> i32;
+        fn block_get_ext_count_num_of_r_seg(db: &OdbDb) -> i32;
+        fn block_get_ext_count_num_of_cap_node(db: &OdbDb) -> i32;
+        fn block_get_ext_count_num_of_c_c_seg(db: &OdbDb) -> i32;
         fn inst_get_name(db: &OdbDb, inst: &str) -> String;
         fn inst_get_const_name(db: &OdbDb, inst: &str) -> String;
         fn inst_get_origin_x(db: &OdbDb, inst: &str) -> i32;
@@ -442,6 +446,9 @@ mod ffi_gen {
         fn guide_is_congested(db: &OdbDb, net: &str, idx: usize) -> bool;
         fn guide_is_jumper(db: &OdbDb, net: &str, idx: usize) -> bool;
         fn guide_is_connected_to_term(db: &OdbDb, net: &str, idx: usize) -> bool;
+        fn gcell_get_block(db: &OdbDb) -> String;
+        fn gcell_get_num_grid_patterns_x(db: &OdbDb) -> i32;
+        fn gcell_get_num_grid_patterns_y(db: &OdbDb) -> i32;
         fn wire_get_block(db: &OdbDb, net: &str) -> String;
         fn wire_get_net(db: &OdbDb, net: &str) -> String;
         fn wire_is_global_wire(db: &OdbDb, net: &str) -> bool;
@@ -525,6 +532,9 @@ mod ffi_gen {
         fn trackgrid_get_block(db: &OdbDb, idx: usize) -> String;
         fn trackgrid_get_num_grid_patterns_x(db: &OdbDb, idx: usize) -> i32;
         fn trackgrid_get_num_grid_patterns_y(db: &OdbDb, idx: usize) -> i32;
+        fn trackgrid_get_average_track_spacing_track_step(db: &OdbDb, idx: usize) -> i32;
+        fn trackgrid_get_average_track_spacing_track_init(db: &OdbDb, idx: usize) -> i32;
+        fn trackgrid_get_average_track_spacing_num_tracks(db: &OdbDb, idx: usize) -> i32;
         fn marker_cat_get_name(db: &OdbDb, category: &str) -> String;
         fn marker_cat_get_description(db: &OdbDb, category: &str) -> String;
         fn marker_cat_get_max_markers(db: &OdbDb, category: &str) -> i32;
@@ -1042,6 +1052,10 @@ pub use ffi_gen::{
     block_get_die_area_x_min,
     block_get_die_area_y_max,
     block_get_die_area_y_min,
+    block_get_ext_count_num_of_c_c_seg,
+    block_get_ext_count_num_of_cap_node,
+    block_get_ext_count_num_of_net,
+    block_get_ext_count_num_of_r_seg,
     block_get_ext_db_count,
     block_get_g_cell_tile_size,
     block_get_max_layer_for_clock,
@@ -1345,6 +1359,9 @@ pub use ffi_gen::{
     fill_get_tech_layer,
     fill_mask_number,
     fill_needs_o_p_c,
+    gcell_get_block,
+    gcell_get_num_grid_patterns_x,
+    gcell_get_num_grid_patterns_y,
     group_get_name,
     group_get_parent_group,
     group_get_region,
@@ -1980,6 +1997,9 @@ pub use ffi_gen::{
     techviarule_get_name,
     techviarule_get_via_count,
     techviarule_get_via_layer_rule_count,
+    trackgrid_get_average_track_spacing_num_tracks,
+    trackgrid_get_average_track_spacing_track_init,
+    trackgrid_get_average_track_spacing_track_step,
     trackgrid_get_block,
     trackgrid_get_num_grid_patterns_x,
     trackgrid_get_num_grid_patterns_y,

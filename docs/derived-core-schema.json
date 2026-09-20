@@ -3,9 +3,9 @@
   "source": "OpenDB public headers (src/odb/include/odb/db.h)",
   "note": "Method-based schema derived from the hand-written core classes; parallels OpenROAD's field-based codeGenerator schema for the classes it does not cover.",
   "scope": "hand-written core only",
-  "class_count": 44,
-  "method_count": 1140,
-  "bridged_count": 786,
+  "class_count": 45,
+  "method_count": 1178,
+  "bridged_count": 803,
   "classes": [
     {
       "name": "dbBPin",
@@ -788,6 +788,40 @@
           "bridged": false
         },
         {
+          "name": "addBTermConstraintByDirection",
+          "return": "void",
+          "params": [
+            {
+              "type": "dbIoType",
+              "name": "direction"
+            },
+            {
+              "type": "const Rect&",
+              "name": "constraint_region"
+            }
+          ],
+          "const": false,
+          "kind": "setter",
+          "bridged": false
+        },
+        {
+          "name": "addBTermsToConstraint",
+          "return": "void",
+          "params": [
+            {
+              "type": "const std::vector<dbBTerm*>&",
+              "name": "bterms"
+            },
+            {
+              "type": "const Rect&",
+              "name": "constraint_region"
+            }
+          ],
+          "const": false,
+          "kind": "setter",
+          "bridged": false
+        },
+        {
           "name": "getITerms",
           "return": "dbSet<dbITerm>",
           "params": [],
@@ -958,6 +992,35 @@
           ],
           "const": false,
           "kind": "other",
+          "bridged": false
+        },
+        {
+          "name": "addGlobalConnect",
+          "return": "int",
+          "params": [
+            {
+              "type": "dbRegion*",
+              "name": "region"
+            },
+            {
+              "type": "const char*",
+              "name": "instPattern"
+            },
+            {
+              "type": "const char*",
+              "name": "pinPattern"
+            },
+            {
+              "type": "dbNet*",
+              "name": "net"
+            },
+            {
+              "type": "bool",
+              "name": "do_connect"
+            }
+          ],
+          "const": false,
+          "kind": "setter",
           "bridged": false
         },
         {
@@ -1297,7 +1360,7 @@
           "params": [],
           "const": false,
           "kind": "relation",
-          "bridged": false,
+          "bridged": true,
           "target": "dbGCellGrid"
         },
         {
@@ -1463,6 +1526,64 @@
           "bridged": false
         },
         {
+          "name": "getExtCount",
+          "return": "void",
+          "params": [
+            {
+              "type": "int&",
+              "name": "numOfNet"
+            },
+            {
+              "type": "int&",
+              "name": "numOfRSeg"
+            },
+            {
+              "type": "int&",
+              "name": "numOfCapNode"
+            },
+            {
+              "type": "int&",
+              "name": "numOfCCSeg"
+            }
+          ],
+          "const": false,
+          "kind": "setter",
+          "bridged": true
+        },
+        {
+          "name": "copyExtDb",
+          "return": "void",
+          "params": [
+            {
+              "type": "uint32_t",
+              "name": "fr"
+            },
+            {
+              "type": "uint32_t",
+              "name": "to"
+            },
+            {
+              "type": "uint32_t",
+              "name": "extDbCnt"
+            },
+            {
+              "type": "double",
+              "name": "resFactor"
+            },
+            {
+              "type": "double",
+              "name": "ccFactor"
+            },
+            {
+              "type": "double",
+              "name": "gndcFactor"
+            }
+          ],
+          "const": false,
+          "kind": "setter",
+          "bridged": false
+        },
+        {
           "name": "adjustRC",
           "return": "void",
           "params": [
@@ -1490,6 +1611,31 @@
             {
               "type": "float",
               "name": "gndFactor"
+            }
+          ],
+          "const": false,
+          "kind": "other",
+          "bridged": false
+        },
+        {
+          "name": "adjustCC",
+          "return": "bool",
+          "params": [
+            {
+              "type": "float",
+              "name": "adjFactor"
+            },
+            {
+              "type": "double",
+              "name": "ccThreshHold"
+            },
+            {
+              "type": "std::vector<dbNet*>&",
+              "name": "nets"
+            },
+            {
+              "type": "std::vector<dbNet*>&",
+              "name": "halonets"
             }
           ],
           "const": false,
@@ -2025,6 +2171,23 @@
           "bridged": false
         },
         {
+          "name": "getCcHaloNets",
+          "return": "void",
+          "params": [
+            {
+              "type": "std::vector<dbNet*>&",
+              "name": "changedNets"
+            },
+            {
+              "type": "std::vector<dbNet*>&",
+              "name": "ccHaloNets"
+            }
+          ],
+          "const": false,
+          "kind": "setter",
+          "bridged": false
+        },
+        {
           "name": "preExttreeMergeRC",
           "return": "void",
           "params": [
@@ -2081,6 +2244,56 @@
           ],
           "const": false,
           "kind": "setter",
+          "bridged": false
+        },
+        {
+          "name": "makeNewNetName",
+          "return": "std::string",
+          "params": [
+            {
+              "type": "const dbModule*",
+              "name": "parent"
+            },
+            {
+              "type": "const char*",
+              "name": "base_name"
+            },
+            {
+              "type": "const dbNameUniquifyType&",
+              "name": "uniquify"
+            },
+            {
+              "type": "dbNet*",
+              "name": "corresponding_flat_net"
+            },
+            {
+              "type": "const dbBTerm*",
+              "name": "associated_bterm"
+            }
+          ],
+          "const": false,
+          "kind": "other",
+          "bridged": false
+        },
+        {
+          "name": "makeNewInstName",
+          "return": "std::string",
+          "params": [
+            {
+              "type": "dbModInst*",
+              "name": "parent"
+            },
+            {
+              "type": "const char*",
+              "name": "base_name"
+            },
+            {
+              "type": "const dbNameUniquifyType&",
+              "name": "uniquify"
+            }
+          ],
+          "const": false,
+          "kind": "other",
           "bridged": false
         },
         {
@@ -2378,7 +2591,7 @@
           ],
           "const": false,
           "kind": "setter",
-          "bridged": false
+          "bridged": true
         }
       ],
       "hand_written": true
@@ -3149,6 +3362,31 @@
           "bridged": false
         },
         {
+          "name": "adjustCC",
+          "return": "void",
+          "params": [
+            {
+              "type": "uint32_t",
+              "name": "adjOrder"
+            },
+            {
+              "type": "float",
+              "name": "adjFactor"
+            },
+            {
+              "type": "std::vector<dbCCSeg*>&",
+              "name": "adjustedCC"
+            },
+            {
+              "type": "std::vector<dbNet*>&",
+              "name": "halonets"
+            }
+          ],
+          "const": false,
+          "kind": "setter",
+          "bridged": false
+        },
+        {
           "name": "getCapacitance",
           "return": "double",
           "params": [
@@ -3590,7 +3828,7 @@
           ],
           "const": false,
           "kind": "setter",
-          "bridged": false
+          "bridged": true
         }
       ],
       "hand_written": true
@@ -4610,6 +4848,23 @@
           "target": "dbITerm"
         },
         {
+          "name": "getConnectivity",
+          "return": "void",
+          "params": [
+            {
+              "type": "std::vector<dbInst*>&",
+              "name": "neighbors"
+            },
+            {
+              "type": "dbSigType::Value",
+              "name": "value"
+            }
+          ],
+          "const": false,
+          "kind": "setter",
+          "bridged": false
+        },
+        {
           "name": "bindBlock",
           "return": "bool",
           "params": [
@@ -4902,7 +5157,7 @@
           ],
           "const": false,
           "kind": "setter",
-          "bridged": false
+          "bridged": true
         }
       ],
       "hand_written": true
@@ -5410,6 +5665,19 @@
         },
         {
           "name": "getPartialMetalArea",
+          "return": "void",
+          "params": [
+            {
+              "type": "std::vector<std::pair<double, dbTechLayer*>>&",
+              "name": "data"
+            }
+          ],
+          "const": false,
+          "kind": "setter",
+          "bridged": false
+        },
+        {
+          "name": "getPartialMetalSideArea",
           "return": "void",
           "params": [
             {
@@ -6878,6 +7146,52 @@
           "bridged": true
         },
         {
+          "name": "adjustCC",
+          "return": "bool",
+          "params": [
+            {
+              "type": "uint32_t",
+              "name": "adjOrder"
+            },
+            {
+              "type": "float",
+              "name": "adjFactor"
+            },
+            {
+              "type": "double",
+              "name": "ccThreshHold"
+            },
+            {
+              "type": "std::vector<dbCCSeg*>&",
+              "name": "adjustedCC"
+            },
+            {
+              "type": "std::vector<dbNet*>&",
+              "name": "halonets"
+            }
+          ],
+          "const": false,
+          "kind": "other",
+          "bridged": false
+        },
+        {
+          "name": "undoAdjustedCC",
+          "return": "void",
+          "params": [
+            {
+              "type": "std::vector<dbCCSeg*>&",
+              "name": "adjustedCC"
+            },
+            {
+              "type": "std::vector<dbNet*>&",
+              "name": "halonets"
+            }
+          ],
+          "const": false,
+          "kind": "setter",
+          "bridged": false
+        },
+        {
           "name": "groundCC",
           "return": "bool",
           "params": [
@@ -7227,6 +7541,27 @@
           "bridged": false
         },
         {
+          "name": "getCouplingNets",
+          "return": "void",
+          "params": [
+            {
+              "type": "uint32_t",
+              "name": "corner"
+            },
+            {
+              "type": "double",
+              "name": "ccThreshold"
+            },
+            {
+              "type": "odb::PtrSet<dbNet>&",
+              "name": "cnets"
+            }
+          ],
+          "const": false,
+          "kind": "setter",
+          "bridged": false
+        },
+        {
           "name": "destroyCCSegs",
           "return": "void",
           "params": [],
@@ -7306,6 +7641,35 @@
           "kind": "relation",
           "bridged": true,
           "target": "dbTechNonDefaultRule"
+        },
+        {
+          "name": "getNetStats",
+          "return": "void",
+          "params": [
+            {
+              "type": "uint32_t&",
+              "name": "wireCnt"
+            },
+            {
+              "type": "uint32_t&",
+              "name": "viaCnt"
+            },
+            {
+              "type": "uint32_t&",
+              "name": "len"
+            },
+            {
+              "type": "uint32_t&",
+              "name": "layerCnt"
+            },
+            {
+              "type": "uint32_t*",
+              "name": "levelTable"
+            }
+          ],
+          "const": false,
+          "kind": "setter",
+          "bridged": false
         },
         {
           "name": "getWireCount",
@@ -7623,6 +7987,150 @@
           "const": true,
           "kind": "setter",
           "bridged": false
+        },
+        {
+          "name": "insertBufferBeforeLoad",
+          "return": "dbInst*",
+          "params": [
+            {
+              "type": "dbObject*",
+              "name": "load_input_term"
+            },
+            {
+              "type": "const dbMaster*",
+              "name": "buffer_master"
+            },
+            {
+              "type": "const Point*",
+              "name": "loc"
+            },
+            {
+              "type": "const char*",
+              "name": "new_buf_base_name"
+            },
+            {
+              "type": "const char*",
+              "name": "new_net_base_name"
+            },
+            {
+              "type": "const dbNameUniquifyType&",
+              "name": "uniquify"
+            }
+          ],
+          "const": false,
+          "kind": "relation",
+          "bridged": false,
+          "target": "dbInst"
+        },
+        {
+          "name": "insertBufferAfterDriver",
+          "return": "dbInst*",
+          "params": [
+            {
+              "type": "dbObject*",
+              "name": "drvr_output_term"
+            },
+            {
+              "type": "const dbMaster*",
+              "name": "buffer_master"
+            },
+            {
+              "type": "const Point*",
+              "name": "loc"
+            },
+            {
+              "type": "const char*",
+              "name": "new_buf_base_name"
+            },
+            {
+              "type": "const char*",
+              "name": "new_net_base_name"
+            },
+            {
+              "type": "const dbNameUniquifyType&",
+              "name": "uniquify"
+            }
+          ],
+          "const": false,
+          "kind": "relation",
+          "bridged": false,
+          "target": "dbInst"
+        },
+        {
+          "name": "insertBufferBeforeLoads",
+          "return": "dbInst*",
+          "params": [
+            {
+              "type": "const odb::PtrSet<dbObject>&",
+              "name": "load_pins"
+            },
+            {
+              "type": "const dbMaster*",
+              "name": "buffer_master"
+            },
+            {
+              "type": "const Point*",
+              "name": "loc"
+            },
+            {
+              "type": "const char*",
+              "name": "new_buf_base_name"
+            },
+            {
+              "type": "const char*",
+              "name": "new_net_base_name"
+            },
+            {
+              "type": "const dbNameUniquifyType&",
+              "name": "uniquify"
+            },
+            {
+              "type": "bool",
+              "name": "loads_on_diff_nets"
+            }
+          ],
+          "const": false,
+          "kind": "relation",
+          "bridged": false,
+          "target": "dbInst"
+        },
+        {
+          "name": "insertBufferBeforeLoads",
+          "return": "dbInst*",
+          "params": [
+            {
+              "type": "const std::vector<dbObject*>&",
+              "name": "load_pins"
+            },
+            {
+              "type": "const dbMaster*",
+              "name": "buffer_master"
+            },
+            {
+              "type": "const Point*",
+              "name": "loc"
+            },
+            {
+              "type": "const char*",
+              "name": "new_buf_base_name"
+            },
+            {
+              "type": "const char*",
+              "name": "new_net_base_name"
+            },
+            {
+              "type": "const dbNameUniquifyType&",
+              "name": "uniquify"
+            },
+            {
+              "type": "bool",
+              "name": "loads_on_diff_nets"
+            }
+          ],
+          "const": false,
+          "kind": "relation",
+          "bridged": false,
+          "target": "dbInst"
         },
         {
           "name": "hierarchicalConnect",
@@ -8983,7 +9491,7 @@
           ],
           "const": false,
           "kind": "setter",
-          "bridged": false
+          "bridged": true
         }
       ],
       "hand_written": true
@@ -9907,6 +10415,91 @@
           "return": "void",
           "params": [
             {
+              "type": "const std::vector<double>&",
+              "name": "diff_idx"
+            },
+            {
+              "type": "const std::vector<double>&",
+              "name": "ratios"
+            }
+          ],
+          "const": false,
+          "kind": "setter",
+          "bridged": true
+        },
+        {
+          "name": "setDiffCAR",
+          "return": "void",
+          "params": [
+            {
+              "type": "const std::vector<double>&",
+              "name": "diff_idx"
+            },
+            {
+              "type": "const std::vector<double>&",
+              "name": "ratios"
+            }
+          ],
+          "const": false,
+          "kind": "setter",
+          "bridged": true
+        },
+        {
+          "name": "setDiffPSR",
+          "return": "void",
+          "params": [
+            {
+              "type": "const std::vector<double>&",
+              "name": "diff_idx"
+            },
+            {
+              "type": "const std::vector<double>&",
+              "name": "ratios"
+            }
+          ],
+          "const": false,
+          "kind": "setter",
+          "bridged": true
+        },
+        {
+          "name": "setDiffCSR",
+          "return": "void",
+          "params": [
+            {
+              "type": "const std::vector<double>&",
+              "name": "diff_idx"
+            },
+            {
+              "type": "const std::vector<double>&",
+              "name": "ratios"
+            }
+          ],
+          "const": false,
+          "kind": "setter",
+          "bridged": true
+        },
+        {
+          "name": "setGatePlusDiffPWL",
+          "return": "void",
+          "params": [
+            {
+              "type": "const std::vector<double>&",
+              "name": "diff_idx"
+            },
+            {
+              "type": "const std::vector<double>&",
+              "name": "ratios"
+            }
+          ],
+          "const": false,
+          "kind": "setter",
+          "bridged": false
+        },
+        {
+          "name": "setDiffPAR",
+          "return": "void",
+          "params": [
+            {
               "type": "double",
               "name": "ratio"
             }
@@ -9953,6 +10546,23 @@
           "const": false,
           "kind": "setter",
           "bridged": true
+        },
+        {
+          "name": "setAreaDiffReduce",
+          "return": "void",
+          "params": [
+            {
+              "type": "const std::vector<double>&",
+              "name": "areas"
+            },
+            {
+              "type": "const std::vector<double>&",
+              "name": "factors"
+            }
+          ],
+          "const": false,
+          "kind": "setter",
+          "bridged": false
         }
       ],
       "hand_written": true
@@ -10297,6 +10907,31 @@
           "bridged": false
         },
         {
+          "name": "getAdjacentCuts",
+          "return": "bool",
+          "params": [
+            {
+              "type": "uint32_t&",
+              "name": "numcuts"
+            },
+            {
+              "type": "uint32_t&",
+              "name": "within"
+            },
+            {
+              "type": "uint32_t&",
+              "name": "spacing"
+            },
+            {
+              "type": "bool&",
+              "name": "except_same_pgnet"
+            }
+          ],
+          "const": true,
+          "kind": "other",
+          "bridged": true
+        },
+        {
           "name": "getCutLayer4Spacing",
           "return": "bool",
           "params": [
@@ -10486,6 +11121,31 @@
           "bridged": false
         },
         {
+          "name": "setAdjacentCuts",
+          "return": "void",
+          "params": [
+            {
+              "type": "uint32_t",
+              "name": "numcuts"
+            },
+            {
+              "type": "uint32_t",
+              "name": "within"
+            },
+            {
+              "type": "uint32_t",
+              "name": "spacing"
+            },
+            {
+              "type": "bool",
+              "name": "except_same_pgnet"
+            }
+          ],
+          "const": false,
+          "kind": "setter",
+          "bridged": true
+        },
+        {
           "name": "setCutLayer4Spacing",
           "return": "void",
           "params": [
@@ -10562,6 +11222,72 @@
           "const": false,
           "kind": "setter",
           "bridged": true
+        },
+        {
+          "name": "setEol",
+          "return": "void",
+          "params": [
+            {
+              "type": "uint32_t",
+              "name": "width"
+            },
+            {
+              "type": "uint32_t",
+              "name": "within"
+            },
+            {
+              "type": "bool",
+              "name": "parallelEdge"
+            },
+            {
+              "type": "uint32_t",
+              "name": "parallelSpace"
+            },
+            {
+              "type": "uint32_t",
+              "name": "parallelWithin"
+            },
+            {
+              "type": "bool",
+              "name": "twoEdges"
+            }
+          ],
+          "const": false,
+          "kind": "setter",
+          "bridged": false
+        },
+        {
+          "name": "getEol",
+          "return": "bool",
+          "params": [
+            {
+              "type": "uint32_t&",
+              "name": "width"
+            },
+            {
+              "type": "uint32_t&",
+              "name": "within"
+            },
+            {
+              "type": "bool&",
+              "name": "parallelEdge"
+            },
+            {
+              "type": "uint32_t&",
+              "name": "parallelSpace"
+            },
+            {
+              "type": "uint32_t&",
+              "name": "parallelWithin"
+            },
+            {
+              "type": "bool&",
+              "name": "twoEdges"
+            }
+          ],
+          "const": true,
+          "kind": "other",
+          "bridged": false
         }
       ],
       "hand_written": true
@@ -10585,6 +11311,31 @@
           ],
           "const": true,
           "kind": "other",
+          "bridged": false
+        },
+        {
+          "name": "setMinimumCuts",
+          "return": "void",
+          "params": [
+            {
+              "type": "uint32_t",
+              "name": "numcuts"
+            },
+            {
+              "type": "uint32_t",
+              "name": "width"
+            },
+            {
+              "type": "bool",
+              "name": "above_only"
+            },
+            {
+              "type": "bool",
+              "name": "below_only"
+            }
+          ],
+          "const": false,
+          "kind": "setter",
           "bridged": false
         },
         {
@@ -10996,6 +11747,55 @@
           "params": [],
           "const": false,
           "kind": "getter",
+          "bridged": false
+        }
+      ],
+      "hand_written": true
+    },
+    {
+      "name": "dbTechV55InfluenceEntry",
+      "parent": "dbObject",
+      "methods": [
+        {
+          "name": "getV55InfluenceEntry",
+          "return": "bool",
+          "params": [
+            {
+              "type": "uint32_t&",
+              "name": "width"
+            },
+            {
+              "type": "uint32_t&",
+              "name": "within"
+            },
+            {
+              "type": "uint32_t&",
+              "name": "spacing"
+            }
+          ],
+          "const": true,
+          "kind": "other",
+          "bridged": false
+        },
+        {
+          "name": "setV55InfluenceEntry",
+          "return": "void",
+          "params": [
+            {
+              "type": "const uint32_t&",
+              "name": "width"
+            },
+            {
+              "type": "const uint32_t&",
+              "name": "within"
+            },
+            {
+              "type": "const uint32_t&",
+              "name": "spacing"
+            }
+          ],
+          "const": false,
+          "kind": "setter",
           "bridged": false
         }
       ],
@@ -11669,6 +12469,64 @@
           "target": "dbBlock"
         },
         {
+          "name": "addGridPatternX",
+          "return": "void",
+          "params": [
+            {
+              "type": "int",
+              "name": "origin_x"
+            },
+            {
+              "type": "int",
+              "name": "line_count"
+            },
+            {
+              "type": "int",
+              "name": "step"
+            },
+            {
+              "type": "int",
+              "name": "first_mask"
+            },
+            {
+              "type": "bool",
+              "name": "samemask"
+            }
+          ],
+          "const": false,
+          "kind": "setter",
+          "bridged": true
+        },
+        {
+          "name": "addGridPatternY",
+          "return": "void",
+          "params": [
+            {
+              "type": "int",
+              "name": "origin_y"
+            },
+            {
+              "type": "int",
+              "name": "line_count"
+            },
+            {
+              "type": "int",
+              "name": "step"
+            },
+            {
+              "type": "int",
+              "name": "first_mask"
+            },
+            {
+              "type": "bool",
+              "name": "samemask"
+            }
+          ],
+          "const": false,
+          "kind": "setter",
+          "bridged": true
+        },
+        {
           "name": "getNumGridPatternsX",
           "return": "int",
           "params": [],
@@ -11710,6 +12568,39 @@
           "bridged": true
         },
         {
+          "name": "getGridPatternX",
+          "return": "void",
+          "params": [
+            {
+              "type": "int",
+              "name": "i"
+            },
+            {
+              "type": "int&",
+              "name": "origin_x"
+            },
+            {
+              "type": "int&",
+              "name": "line_count"
+            },
+            {
+              "type": "int&",
+              "name": "step"
+            },
+            {
+              "type": "int&",
+              "name": "first_mask"
+            },
+            {
+              "type": "bool&",
+              "name": "samemask"
+            }
+          ],
+          "const": false,
+          "kind": "setter",
+          "bridged": true
+        },
+        {
           "name": "getGridPatternY",
           "return": "void",
           "params": [
@@ -11728,6 +12619,60 @@
             {
               "type": "int&",
               "name": "step"
+            }
+          ],
+          "const": false,
+          "kind": "setter",
+          "bridged": true
+        },
+        {
+          "name": "getGridPatternY",
+          "return": "void",
+          "params": [
+            {
+              "type": "int",
+              "name": "i"
+            },
+            {
+              "type": "int&",
+              "name": "origin_y"
+            },
+            {
+              "type": "int&",
+              "name": "line_count"
+            },
+            {
+              "type": "int&",
+              "name": "step"
+            },
+            {
+              "type": "int&",
+              "name": "first_mask"
+            },
+            {
+              "type": "bool&",
+              "name": "samemask"
+            }
+          ],
+          "const": false,
+          "kind": "setter",
+          "bridged": true
+        },
+        {
+          "name": "getAverageTrackSpacing",
+          "return": "void",
+          "params": [
+            {
+              "type": "int&",
+              "name": "track_step"
+            },
+            {
+              "type": "int&",
+              "name": "track_init"
+            },
+            {
+              "type": "int&",
+              "name": "num_tracks"
             }
           ],
           "const": false,

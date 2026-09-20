@@ -86,6 +86,10 @@ std::size_t num_block_get_non_default_rules(const OdbDb& h) { auto* p = gen_bloc
 rust::String nth_block_get_non_default_rules(const OdbDb& h, std::size_t i) { auto* p = gen_block(h); if (!p) return rust::String(); std::size_t k = 0; for (auto* e : p->getNonDefaultRules()) { if (k++ == i) return rust::String(e->getConstName()); } return rust::String(); }
 std::size_t num_block_get_marker_categories(const OdbDb& h) { auto* p = gen_block(h); return p ? p->getMarkerCategories().size() : 0; }
 rust::String nth_block_get_marker_categories(const OdbDb& h, std::size_t i) { auto* p = gen_block(h); if (!p) return rust::String(); std::size_t k = 0; for (auto* e : p->getMarkerCategories()) { if (k++ == i) return rust::String(e->getName()); } return rust::String(); }
+int32_t block_get_ext_count_num_of_net(const OdbDb& h) { int v0 = 0; int v1 = 0; int v2 = 0; int v3 = 0; auto* p = gen_block(h); if (p) p->getExtCount(v0, v1, v2, v3); return v0; }
+int32_t block_get_ext_count_num_of_r_seg(const OdbDb& h) { int v0 = 0; int v1 = 0; int v2 = 0; int v3 = 0; auto* p = gen_block(h); if (p) p->getExtCount(v0, v1, v2, v3); return v1; }
+int32_t block_get_ext_count_num_of_cap_node(const OdbDb& h) { int v0 = 0; int v1 = 0; int v2 = 0; int v3 = 0; auto* p = gen_block(h); if (p) p->getExtCount(v0, v1, v2, v3); return v2; }
+int32_t block_get_ext_count_num_of_c_c_seg(const OdbDb& h) { int v0 = 0; int v1 = 0; int v2 = 0; int v3 = 0; auto* p = gen_block(h); if (p) p->getExtCount(v0, v1, v2, v3); return v3; }
 rust::String inst_get_name(const OdbDb& h, rust::Str inst) { auto* p = gen_inst(h, inst); return p ? rust::String(p->getName()) : rust::String(); }
 rust::String inst_get_const_name(const OdbDb& h, rust::Str inst) { auto* p = gen_inst(h, inst); if (!p) return rust::String(); const char* v = p->getConstName(); return rust::String(v ? v : ""); }
 int32_t inst_get_origin_x(const OdbDb& h, rust::Str inst) { auto* p = gen_inst(h, inst); return p ? p->getOrigin().getX() : 0; }
@@ -439,6 +443,9 @@ rust::String guide_get_via_layer(const OdbDb& h, rust::Str net, std::size_t idx)
 bool guide_is_congested(const OdbDb& h, rust::Str net, std::size_t idx) { auto* p = gen_guide(h, net, idx); return p ? p->isCongested() : false; }
 bool guide_is_jumper(const OdbDb& h, rust::Str net, std::size_t idx) { auto* p = gen_guide(h, net, idx); return p ? p->isJumper() : false; }
 bool guide_is_connected_to_term(const OdbDb& h, rust::Str net, std::size_t idx) { auto* p = gen_guide(h, net, idx); return p ? p->isConnectedToTerm() : false; }
+rust::String gcell_get_block(const OdbDb& h) { auto* p = gen_gcellgrid(h); if (!p) return rust::String(); auto* t = p->getBlock(); return t ? rust::String(t->getConstName()) : rust::String(); }
+int32_t gcell_get_num_grid_patterns_x(const OdbDb& h) { auto* p = gen_gcellgrid(h); return p ? p->getNumGridPatternsX() : 0; }
+int32_t gcell_get_num_grid_patterns_y(const OdbDb& h) { auto* p = gen_gcellgrid(h); return p ? p->getNumGridPatternsY() : 0; }
 rust::String wire_get_block(const OdbDb& h, rust::Str net) { auto* p = gen_wire(h, net); if (!p) return rust::String(); auto* t = p->getBlock(); return t ? rust::String(t->getConstName()) : rust::String(); }
 rust::String wire_get_net(const OdbDb& h, rust::Str net) { auto* p = gen_wire(h, net); if (!p) return rust::String(); auto* t = p->getNet(); return t ? rust::String(t->getConstName()) : rust::String(); }
 bool wire_is_global_wire(const OdbDb& h, rust::Str net) { auto* p = gen_wire(h, net); return p ? p->isGlobalWire() : false; }
@@ -522,6 +529,9 @@ rust::String trackgrid_get_tech_layer(const OdbDb& h, std::size_t idx) { auto* p
 rust::String trackgrid_get_block(const OdbDb& h, std::size_t idx) { auto* p = gen_trackgrid(h, idx); if (!p) return rust::String(); auto* t = p->getBlock(); return t ? rust::String(t->getConstName()) : rust::String(); }
 int32_t trackgrid_get_num_grid_patterns_x(const OdbDb& h, std::size_t idx) { auto* p = gen_trackgrid(h, idx); return p ? p->getNumGridPatternsX() : 0; }
 int32_t trackgrid_get_num_grid_patterns_y(const OdbDb& h, std::size_t idx) { auto* p = gen_trackgrid(h, idx); return p ? p->getNumGridPatternsY() : 0; }
+int32_t trackgrid_get_average_track_spacing_track_step(const OdbDb& h, std::size_t idx) { int v0 = 0; int v1 = 0; int v2 = 0; auto* p = gen_trackgrid(h, idx); if (p) p->getAverageTrackSpacing(v0, v1, v2); return v0; }
+int32_t trackgrid_get_average_track_spacing_track_init(const OdbDb& h, std::size_t idx) { int v0 = 0; int v1 = 0; int v2 = 0; auto* p = gen_trackgrid(h, idx); if (p) p->getAverageTrackSpacing(v0, v1, v2); return v1; }
+int32_t trackgrid_get_average_track_spacing_num_tracks(const OdbDb& h, std::size_t idx) { int v0 = 0; int v1 = 0; int v2 = 0; auto* p = gen_trackgrid(h, idx); if (p) p->getAverageTrackSpacing(v0, v1, v2); return v2; }
 rust::String marker_cat_get_name(const OdbDb& h, rust::Str category) { auto* p = gen_marker_cat(h, category); if (!p) return rust::String(); const char* v = p->getName(); return rust::String(v ? v : ""); }
 rust::String marker_cat_get_description(const OdbDb& h, rust::Str category) { auto* p = gen_marker_cat(h, category); return p ? rust::String(p->getDescription()) : rust::String(); }
 int32_t marker_cat_get_max_markers(const OdbDb& h, rust::Str category) { auto* p = gen_marker_cat(h, category); return p ? p->getMaxMarkers() : 0; }

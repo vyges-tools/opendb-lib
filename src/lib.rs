@@ -72,6 +72,24 @@ mod ffi {
         fn add_obstruction(db: &OdbDb, layer: &str, x1: i32, y1: i32, x2: i32, y2: i32) -> Result<()>;
         fn add_guide(db: &OdbDb, net: &str, layer: &str, via_layer: &str, x1: i32, y1: i32, x2: i32, y2: i32, is_congested: bool) -> Result<()>;
         fn clear_guides(db: &OdbDb) -> usize;
+        fn ensure_gcell_grid(db: &OdbDb) -> Result<()>;
+        fn has_gcell_grid(db: &OdbDb) -> bool;
+        fn gcell_reset_grid(db: &OdbDb) -> Result<()>;
+        fn gcell_reset_congestion_map(db: &OdbDb) -> Result<()>;
+        fn gcell_add_grid_pattern_x(db: &OdbDb, origin: i32, count: i32, step: i32) -> Result<()>;
+        fn gcell_add_grid_pattern_y(db: &OdbDb, origin: i32, count: i32, step: i32) -> Result<()>;
+        fn gcell_grid_x(db: &OdbDb) -> Result<Vec<i32>>;
+        fn gcell_grid_y(db: &OdbDb) -> Result<Vec<i32>>;
+        fn gcell_grid_pattern_x(db: &OdbDb, i: usize) -> Result<Vec<i32>>;
+        fn gcell_grid_pattern_y(db: &OdbDb, i: usize) -> Result<Vec<i32>>;
+        fn gcell_x_idx(db: &OdbDb, x: i32) -> Result<u32>;
+        fn gcell_y_idx(db: &OdbDb, y: i32) -> Result<u32>;
+        fn gcell_capacity(db: &OdbDb, layer: &str, x: u32, y: u32) -> Result<f32>;
+        fn gcell_usage(db: &OdbDb, layer: &str, x: u32, y: u32) -> Result<f32>;
+        fn gcell_layer_congestion(db: &OdbDb, layer: &str) -> Result<Vec<f64>>;
+        fn gcell_direction_congestion(db: &OdbDb, direction: &str) -> Result<Vec<f64>>;
+        fn block_bool_property(db: &OdbDb, name: &str) -> Result<i32>;
+        fn block_set_bool_property(db: &OdbDb, name: &str, value: bool) -> Result<()>;
         fn num_obstructions(db: &OdbDb) -> usize;
         fn clear_obstructions(db: &OdbDb) -> usize;
         fn bterm_direction(db: &OdbDb, bterm: &str) -> String;
@@ -423,7 +441,12 @@ pub use generated_write_bridge::*;
 
 #[cfg(unix)]
 pub use ffi::{
-    add_guide, add_obstruction, block_compute_core_area, block_name, block_set_core_area,
+    add_guide, add_obstruction, block_bool_property, block_set_bool_property,
+    block_compute_core_area,
+    ensure_gcell_grid, has_gcell_grid, gcell_reset_grid, gcell_reset_congestion_map,
+    gcell_add_grid_pattern_x, gcell_add_grid_pattern_y, gcell_grid_x, gcell_grid_y,
+    gcell_grid_pattern_x, gcell_grid_pattern_y, gcell_x_idx, gcell_y_idx,
+    gcell_capacity, gcell_usage, gcell_layer_congestion, gcell_direction_congestion, block_name, block_set_core_area,
     block_set_core_area_from_rows, block_set_die_area, block_set_die_area_polygon, bterm_direction, bterm_net, bterm_x, bterm_y, check_3dblox, clear_guides,
     eco_begin, eco_commit, eco_empty, eco_end, eco_undo,
     clear_obstructions, construct_unfolded_model,

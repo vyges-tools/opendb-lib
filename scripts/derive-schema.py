@@ -154,11 +154,41 @@ def classify(name: str, ret: str, params: list[dict]) -> tuple[str, dict]:
     return "other", extra
 
 
+def logical_lines(body: str):
+    """Yield declarations as ONE line each, joining those whose parameter list wraps.
+
+    ⛔ **This is not cosmetic.** `METHOD_RE` is anchored to a single line, so before this existed
+    every declaration whose parameters spanned lines was invisible — 123 of them across db.h,
+    ~10% of the surface. It hit real, wanted methods: `dbGCellGrid::setCapacity` (which `grt`
+    calls for every gcell), `dbTrackGrid::addGridPatternX/Y`, `dbNet::create`,
+    `dbBlock::addGlobalConnect`. Worse than the missing bindings, the COVERAGE MAP counted only
+    what it could see, so its denominator — and every "N of M bridged" figure derived from it —
+    was quietly wrong. clang-format decides where a signature wraps; that must not decide what we
+    bind.
+
+    Joining is by paren DEPTH, not by a heuristic: accumulate while unbalanced. A single-line
+    declaration is yielded unchanged, so nothing that parsed before parses differently now.
+    """
+    buf, depth = "", 0
+    for line in body.splitlines():
+        stripped = line.strip()
+        if not buf and stripped.startswith("//"):
+            yield line
+            continue
+        buf = line if not buf else buf + " " + stripped
+        depth += line.count("(") - line.count(")")
+        if depth <= 0:
+            yield buf
+            buf, depth = "", 0
+    if buf:
+        yield buf
+
+
 def parse_class(name: str, base: str, body: str, bridged: set[str]) -> dict:
     # walk lines, tracking the current access section (default: private for a class)
     access = "private"
     methods = []
-    for line in body.splitlines():
+    for line in logical_lines(body):
         s = line.strip()
         if s in ("public:", "protected:", "private:"):
             access = s[:-1]

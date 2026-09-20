@@ -291,6 +291,115 @@ std::size_t clear_guides(const OdbDb& h) {
   for (dbNet* net : b->getNets()) { n += net->getGuides().size(); net->clearGuides(); }
   return n;
 }
+// ---- Global-routing congestion grid (dbGCellGrid) ------------------------------------------
+// ONE per block. `grt`'s FastRouteCore::updateDbCongestion does: getGCellGrid() -> resetGrid()
+// (or create) -> addGridPatternX/Y -> setCapacity/setUsage per (layer, x, y).
+//
+// ⚠️ Everything below is hand-written because the generator emits neither parameterised READ
+// methods nor static factories; `setCapacity`/`setUsage` ARE generated and are not repeated here.
+static odb::dbGCellGrid* gcell_of(const OdbDb& h) {
+  dbBlock* b = block_of(h);
+  return b ? b->getGCellGrid() : nullptr;
+}
+static odb::dbGCellGrid* require_gcell(const OdbDb& h) {
+  odb::dbGCellGrid* g = gcell_of(h);
+  if (!g) throw std::runtime_error("vyges-opendb: block has no gcell grid (call ensure_gcell_grid)");
+  return g;
+}
+// Get-or-create, mirroring grt: an absent grid is created, an existing one is left alone.
+void ensure_gcell_grid(const OdbDb& h) {
+  dbBlock* b = require_block(h);
+  if (!b->getGCellGrid()) odb::dbGCellGrid::create(b);
+}
+bool has_gcell_grid(const OdbDb& h) { return gcell_of(h) != nullptr; }
+// ⚠️ resetGrid drops the grid PATTERNS as well as the congestion data; resetCongestionMap keeps
+// the patterns and zeroes only usage/capacity. grt calls the former before re-adding its patterns.
+void gcell_reset_grid(const OdbDb& h) { require_gcell(h)->resetGrid(); }
+void gcell_reset_congestion_map(const OdbDb& h) { require_gcell(h)->resetCongestionMap(); }
+void gcell_add_grid_pattern_x(const OdbDb& h, int32_t origin, int32_t count, int32_t step) {
+  require_gcell(h)->addGridPatternX(origin, count, step);
+}
+void gcell_add_grid_pattern_y(const OdbDb& h, int32_t origin, int32_t count, int32_t step) {
+  require_gcell(h)->addGridPatternY(origin, count, step);
+}
+rust::Vec<int32_t> gcell_grid_x(const OdbDb& h) {
+  std::vector<int> v; require_gcell(h)->getGridX(v);
+  rust::Vec<int32_t> out; out.reserve(v.size());
+  for (int x : v) out.push_back(x);
+  return out;
+}
+rust::Vec<int32_t> gcell_grid_y(const OdbDb& h) {
+  std::vector<int> v; require_gcell(h)->getGridY(v);
+  rust::Vec<int32_t> out; out.reserve(v.size());
+  for (int y : v) out.push_back(y);
+  return out;
+}
+// (origin, line_count, step) for pattern `i`. Three out-params flattened into three values.
+rust::Vec<int32_t> gcell_grid_pattern_x(const OdbDb& h, std::size_t i) {
+  odb::dbGCellGrid* g = require_gcell(h);
+  if (static_cast<int>(i) >= g->getNumGridPatternsX())
+    throw std::runtime_error("vyges-opendb: gcell grid pattern x index out of range");
+  int origin = 0, count = 0, step = 0;
+  g->getGridPatternX(static_cast<int>(i), origin, count, step);
+  rust::Vec<int32_t> out; out.push_back(origin); out.push_back(count); out.push_back(step);
+  return out;
+}
+rust::Vec<int32_t> gcell_grid_pattern_y(const OdbDb& h, std::size_t i) {
+  odb::dbGCellGrid* g = require_gcell(h);
+  if (static_cast<int>(i) >= g->getNumGridPatternsY())
+    throw std::runtime_error("vyges-opendb: gcell grid pattern y index out of range");
+  int origin = 0, count = 0, step = 0;
+  g->getGridPatternY(static_cast<int>(i), origin, count, step);
+  rust::Vec<int32_t> out; out.push_back(origin); out.push_back(count); out.push_back(step);
+  return out;
+}
+uint32_t gcell_x_idx(const OdbDb& h, int32_t x) { return require_gcell(h)->getXIdx(x); }
+uint32_t gcell_y_idx(const OdbDb& h, int32_t y) { return require_gcell(h)->getYIdx(y); }
+static odb::dbTechLayer* gcell_layer(const OdbDb& h, rust::Str layer) {
+  dbBlock* b = require_block(h);
+  dbTech* tech = b->getTech();
+  dbTechLayer* l = tech ? tech->findLayer(s(layer).c_str()) : nullptr;
+  if (!l) throw std::runtime_error("vyges-opendb: tech layer not found: " + s(layer));
+  return l;
+}
+float gcell_capacity(const OdbDb& h, rust::Str layer, uint32_t x, uint32_t y) {
+  return require_gcell(h)->getCapacity(gcell_layer(h, layer), x, y);
+}
+float gcell_usage(const OdbDb& h, rust::Str layer, uint32_t x, uint32_t y) {
+  return require_gcell(h)->getUsage(gcell_layer(h, layer), x, y);
+}
+// The congestion map, FLATTENED TO ROWS: four doubles per gcell -- x_idx, y_idx, usage, capacity.
+//
+// 🔑 A bulk read, deliberately. odb hands this back as `dbMatrix<GCellData>`, which does not cross
+// cxx; and fetching a whole layer one `getCapacity` call at a time is O(nx*ny) FFI round trips,
+// which is exactly what a correlation gate has to do for every layer of every design. Row-major,
+// i over numRows (x) then j over numCols (y), so the order is the matrix's own.
+//
+// ⚠️ f64 rather than f32 for the whole row: it represents a u32 index exactly, so the indices stay
+// lossless while usage/capacity widen from f32 without rounding.
+static rust::Vec<double> flatten_congestion(const odb::dbMatrix<odb::dbGCellGrid::GCellData>& m) {
+  rust::Vec<double> out;
+  out.reserve(static_cast<std::size_t>(m.numRows()) * m.numCols() * 4);
+  for (int i = 0; i < m.numRows(); i++) {
+    for (int j = 0; j < m.numCols(); j++) {
+      const odb::dbGCellGrid::GCellData& d = m(i, j);
+      out.push_back(static_cast<double>(i));
+      out.push_back(static_cast<double>(j));
+      out.push_back(static_cast<double>(d.usage));
+      out.push_back(static_cast<double>(d.capacity));
+    }
+  }
+  return out;
+}
+rust::Vec<double> gcell_layer_congestion(const OdbDb& h, rust::Str layer) {
+  return flatten_congestion(require_gcell(h)->getLayerCongestionMap(gcell_layer(h, layer)));
+}
+// `direction` is odb's own spelling ("HORIZONTAL" / "VERTICAL"); dbTechLayerDir has a const char*
+// constructor, so the string crosses without a bespoke enum mapping.
+rust::Vec<double> gcell_direction_congestion(const OdbDb& h, rust::Str direction) {
+  odb::dbTechLayerDir dir(s(direction).c_str());
+  return flatten_congestion(require_gcell(h)->getDirectionCongestionMap(dir));
+}
 std::size_t num_obstructions(const OdbDb& h) {
   dbBlock* b = block_of(h);
   return b ? b->getObstructions().size() : 0;
@@ -1763,6 +1872,31 @@ rust::Vec<int32_t> mterm_pin_boxes(const OdbDb& h, rust::Str master, rust::Str t
 // 🔑 Returns -1 when the property is ABSENT, 0 or 1 when present. Absent is not false: the
 // reference skips a terminal only when the property exists AND is false, so the three states have
 // to survive the boundary.
+// Block-level bool properties. `grt` stamps one on the block in saveGuides:
+//
+//   if (auto* prop = dbBoolProperty::find(block_, kUseCugrProperty)) prop->setValue(use_cugr_);
+//   else dbBoolProperty::create(block_, kUseCugrProperty, use_cugr_);
+//
+// ⚠️ Tri-state, matching the existing `*_bool_property` accessors: -1 = the property is ABSENT,
+// 0/1 = present and false/true. Absent and false are different facts — a reader that folded them
+// together could not tell "this design was not routed by CUGR" from "nobody recorded which".
+int32_t block_bool_property(const OdbDb& h, rust::Str name) {
+  odb::dbBlock* b = block_of(h);
+  if (!b) return -1;
+  odb::dbBoolProperty* p = odb::dbBoolProperty::find(b, s(name).c_str());
+  return p ? (p->getValue() ? 1 : 0) : -1;
+}
+// Set-or-create, the same order grt uses: an existing property is updated in place rather than
+// duplicated.
+void block_set_bool_property(const OdbDb& h, rust::Str name, bool value) {
+  odb::dbBlock* b = require_block(h);
+  std::string n = s(name);
+  if (odb::dbBoolProperty* p = odb::dbBoolProperty::find(b, n.c_str())) {
+    p->setValue(value);
+  } else if (!odb::dbBoolProperty::create(b, n.c_str(), value)) {
+    throw std::runtime_error("vyges-opendb: could not create bool property " + n);
+  }
+}
 int32_t iterm_bool_property(const OdbDb& h, rust::Str iterm, rust::Str name) {
   odb::dbBlock* b = h.db->getChip() ? h.db->getChip()->getBlock() : nullptr;
   if (!b) return -1;

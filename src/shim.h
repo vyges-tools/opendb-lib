@@ -61,6 +61,27 @@ void add_track_pattern_y(const OdbDb& db, rust::Str layer, int32_t origin, int32
 void add_obstruction(const OdbDb& db, rust::Str layer, int32_t x1, int32_t y1, int32_t x2, int32_t y2);  // routing/PDN obstruction rect on a layer (throws if layer missing)
 void add_guide(const OdbDb& db, rust::Str net, rust::Str layer, rust::Str via_layer, int32_t x1, int32_t y1, int32_t x2, int32_t y2, bool is_congested);  // global-route guide on a net (pass layer twice for a wire segment; throws if net/layer missing)
 std::size_t clear_guides(const OdbDb& db);  // drop every net's guides; returns how many were removed
+
+// ---- Global-routing congestion grid (dbGCellGrid). ONE per block. `setCapacity`/`setUsage` are
+// GENERATED (gcell_set_capacity / gcell_set_usage); everything here needs a hand binding because
+// the generator emits neither parameterised reads nor static factories.
+void ensure_gcell_grid(const OdbDb& db);            // get-or-create, as grt does
+bool has_gcell_grid(const OdbDb& db);
+void gcell_reset_grid(const OdbDb& db);             // drops PATTERNS as well as congestion data
+void gcell_reset_congestion_map(const OdbDb& db);   // keeps patterns, zeroes usage/capacity
+void gcell_add_grid_pattern_x(const OdbDb& db, int32_t origin, int32_t count, int32_t step);
+void gcell_add_grid_pattern_y(const OdbDb& db, int32_t origin, int32_t count, int32_t step);
+rust::Vec<int32_t> gcell_grid_x(const OdbDb& db);
+rust::Vec<int32_t> gcell_grid_y(const OdbDb& db);
+rust::Vec<int32_t> gcell_grid_pattern_x(const OdbDb& db, std::size_t i);  // (origin, count, step)
+rust::Vec<int32_t> gcell_grid_pattern_y(const OdbDb& db, std::size_t i);
+uint32_t gcell_x_idx(const OdbDb& db, int32_t x);
+uint32_t gcell_y_idx(const OdbDb& db, int32_t y);
+float gcell_capacity(const OdbDb& db, rust::Str layer, uint32_t x, uint32_t y);
+float gcell_usage(const OdbDb& db, rust::Str layer, uint32_t x, uint32_t y);
+// Congestion maps FLATTENED TO ROWS: 4 doubles per gcell (x_idx, y_idx, usage, capacity).
+rust::Vec<double> gcell_layer_congestion(const OdbDb& db, rust::Str layer);
+rust::Vec<double> gcell_direction_congestion(const OdbDb& db, rust::Str direction);
 std::size_t num_obstructions(const OdbDb& db);
 std::size_t clear_obstructions(const OdbDb& db);   // destroy all obstructions, returns the count removed
 rust::String bterm_direction(const OdbDb& db, rust::Str bterm);   // port direction: INPUT/OUTPUT/INOUT/…
@@ -594,6 +615,10 @@ rust::Vec<int32_t> mterm_pin_boxes_excluding_polygons(const OdbDb& db, rust::Str
                                                       rust::Str term);
 rust::Vec<int32_t> iterm_pin_polygons(const OdbDb& db, rust::Str iterm);
 void net_new_swire(const OdbDb& db, rust::Str net, bool fixed);
+// Block-level bool properties (grt stamps kUseCugrProperty here). ⚠️ Tri-state: -1 = ABSENT,
+// 0/1 = present and false/true -- absent and false are different facts.
+int32_t block_bool_property(const OdbDb& db, rust::Str name);
+void block_set_bool_property(const OdbDb& db, rust::Str name, bool value);  // set-or-create
 int32_t iterm_bool_property(const OdbDb& db, rust::Str iterm, rust::Str name);
 int32_t mterm_bool_property(const OdbDb& db, rust::Str master, rust::Str term, rust::Str name);
 rust::Vec<int32_t> polygon_bloat(rust::Slice<const int32_t> pts, int32_t margin);

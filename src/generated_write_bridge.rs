@@ -132,6 +132,7 @@ mod ffi_gen_write {
         fn layer_set_min_step(db: &OdbDb, layer: &str, min_step: u32) -> Result<()>;
         fn layer_set_min_step_max_length(db: &OdbDb, layer: &str, length: u32) -> Result<()>;
         fn layer_set_min_step_max_edges(db: &OdbDb, layer: &str, edges: u32) -> Result<()>;
+        fn layer_set_protrusion(db: &OdbDb, layer: &str, pt_width: u32, pt_length: u32, pt_from_width: u32) -> Result<()>;
         fn layer_set_resistance(db: &OdbDb, layer: &str, res: f64) -> Result<()>;
         fn layer_set_capacitance(db: &OdbDb, layer: &str, cap: f64) -> Result<()>;
         fn layer_set_edge_capacitance(db: &OdbDb, layer: &str, cap: f64) -> Result<()>;
@@ -158,6 +159,8 @@ mod ffi_gen_write {
         fn swire_set_wire_type(db: &OdbDb, net: &str, idx: usize, a0: &str) -> Result<()>;
         fn guide_set_is_jumper(db: &OdbDb, net: &str, idx: usize, jumper: bool) -> Result<()>;
         fn guide_set_is_connected_to_term(db: &OdbDb, net: &str, idx: usize, is_connected: bool) -> Result<()>;
+        fn gcell_set_capacity(db: &OdbDb, layer: &str, x_idx: u32, y_idx: u32, capacity: f32) -> Result<()>;
+        fn gcell_set_usage(db: &OdbDb, layer: &str, x_idx: u32, y_idx: u32, a3: f32) -> Result<()>;
         fn wire_set_property(db: &OdbDb, net: &str, jid: i32, property: i32) -> Result<()>;
         fn box_set_soft(db: &OdbDb, idx: usize, value: bool) -> Result<()>;
         fn box_set_layer_mask(db: &OdbDb, idx: usize, mask: u32) -> Result<()>;
@@ -375,6 +378,8 @@ mod ffi_gen_write {
         fn cutspacingtablerule_set_prl_horizontal(db: &OdbDb, layer: &str, idx: usize, prl_horizontal: bool) -> Result<()>;
         fn cutspacingtablerule_set_vertical(db: &OdbDb, layer: &str, idx: usize, vertical: bool) -> Result<()>;
         fn cutspacingtablerule_set_prl_vertical(db: &OdbDb, layer: &str, idx: usize, prl_vertical: bool) -> Result<()>;
+        fn cutspacingtablerule_set_non_opposite_enclosure_spacing_valid(db: &OdbDb, layer: &str, idx: usize, non_opposite_enclosure_spacing_valid: bool) -> Result<()>;
+        fn cutspacingtablerule_set_opposite_enclosure_resize_spacing_valid(db: &OdbDb, layer: &str, idx: usize, opposite_enclosure_resize_spacing_valid: bool) -> Result<()>;
         fn layerantenna_set_gate_plus_diff_factor(db: &OdbDb, layer: &str, factor: f64) -> Result<()>;
         fn layerantenna_set_area_minus_diff_factor(db: &OdbDb, layer: &str, factor: f64) -> Result<()>;
         fn layerantenna_set_area_factor(db: &OdbDb, layer: &str, factor: f64, diffuse: bool) -> Result<()>;
@@ -589,7 +594,9 @@ pub use ffi_gen_write::{
     cutspacingtablerule_set_max_x_y,
     cutspacingtablerule_set_no_prl,
     cutspacingtablerule_set_no_stack,
+    cutspacingtablerule_set_non_opposite_enclosure_spacing_valid,
     cutspacingtablerule_set_non_zero_enclosure,
+    cutspacingtablerule_set_opposite_enclosure_resize_spacing_valid,
     cutspacingtablerule_set_prl,
     cutspacingtablerule_set_prl_for_aligned_cut,
     cutspacingtablerule_set_prl_horizontal,
@@ -602,6 +609,8 @@ pub use ffi_gen_write::{
     cutspacingtablerule_set_second_layer,
     cutspacingtablerule_set_side_extension_valid,
     cutspacingtablerule_set_vertical,
+    gcell_set_capacity,
+    gcell_set_usage,
     guide_set_is_connected_to_term,
     guide_set_is_jumper,
     inst_clear_user_flag1,
@@ -655,6 +664,7 @@ pub use ffi_gen_write::{
     layer_set_offset_x_y,
     layer_set_pitch,
     layer_set_pitch_x_y,
+    layer_set_protrusion,
     layer_set_rect_only,
     layer_set_rect_only_except_non_core_pins,
     layer_set_resistance,

@@ -127,6 +127,7 @@ void layer_set_min_width(const OdbDb& db, rust::Str layer, uint32_t max_width);
 void layer_set_min_step(const OdbDb& db, rust::Str layer, uint32_t min_step);
 void layer_set_min_step_max_length(const OdbDb& db, rust::Str layer, uint32_t length);
 void layer_set_min_step_max_edges(const OdbDb& db, rust::Str layer, uint32_t edges);
+void layer_set_protrusion(const OdbDb& db, rust::Str layer, uint32_t pt_width, uint32_t pt_length, uint32_t pt_from_width);
 void layer_set_resistance(const OdbDb& db, rust::Str layer, double res);
 void layer_set_capacitance(const OdbDb& db, rust::Str layer, double cap);
 void layer_set_edge_capacitance(const OdbDb& db, rust::Str layer, double cap);
@@ -153,6 +154,8 @@ void obs_set_is_system_reserved(const OdbDb& db, std::size_t idx, bool is_system
 void swire_set_wire_type(const OdbDb& db, rust::Str net, std::size_t idx, rust::Str a0);
 void guide_set_is_jumper(const OdbDb& db, rust::Str net, std::size_t idx, bool jumper);
 void guide_set_is_connected_to_term(const OdbDb& db, rust::Str net, std::size_t idx, bool is_connected);
+void gcell_set_capacity(const OdbDb& db, rust::Str layer, uint32_t x_idx, uint32_t y_idx, float capacity);
+void gcell_set_usage(const OdbDb& db, rust::Str layer, uint32_t x_idx, uint32_t y_idx, float a3);
 void wire_set_property(const OdbDb& db, rust::Str net, int32_t jid, int32_t property);
 void box_set_soft(const OdbDb& db, std::size_t idx, bool value);
 void box_set_layer_mask(const OdbDb& db, std::size_t idx, uint32_t mask);
@@ -370,6 +373,8 @@ void cutspacingtablerule_set_horizontal(const OdbDb& db, rust::Str layer, std::s
 void cutspacingtablerule_set_prl_horizontal(const OdbDb& db, rust::Str layer, std::size_t idx, bool prl_horizontal);
 void cutspacingtablerule_set_vertical(const OdbDb& db, rust::Str layer, std::size_t idx, bool vertical);
 void cutspacingtablerule_set_prl_vertical(const OdbDb& db, rust::Str layer, std::size_t idx, bool prl_vertical);
+void cutspacingtablerule_set_non_opposite_enclosure_spacing_valid(const OdbDb& db, rust::Str layer, std::size_t idx, bool non_opposite_enclosure_spacing_valid);
+void cutspacingtablerule_set_opposite_enclosure_resize_spacing_valid(const OdbDb& db, rust::Str layer, std::size_t idx, bool opposite_enclosure_resize_spacing_valid);
 void layerantenna_set_gate_plus_diff_factor(const OdbDb& db, rust::Str layer, double factor);
 void layerantenna_set_area_minus_diff_factor(const OdbDb& db, rust::Str layer, double factor);
 void layerantenna_set_area_factor(const OdbDb& db, rust::Str layer, double factor, bool diffuse);

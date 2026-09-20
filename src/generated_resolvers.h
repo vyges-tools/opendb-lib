@@ -51,6 +51,8 @@ inline odb::dbObstruction* gen_obstruction(const OdbDb& h, std::size_t i) {
 inline odb::dbSWire* gen_swire(const OdbDb& h, rust::Str net, std::size_t i) {
   odb::dbNet* n = gen_net(h, net); if (!n) return nullptr;
   std::size_t k = 0; for (odb::dbSWire* w : n->getSWires()) { if (k++ == i) return w; } return nullptr; }
+inline odb::dbGCellGrid* gen_gcellgrid(const OdbDb& h) {
+  odb::dbBlock* b = gen_block(h); return b ? b->getGCellGrid() : nullptr; }
 inline odb::dbGuide* gen_guide(const OdbDb& h, rust::Str net, std::size_t i) {
   odb::dbNet* n = gen_net(h, net); if (!n) return nullptr;
   std::size_t k = 0; for (odb::dbGuide* g : n->getGuides()) { if (k++ == i) return g; } return nullptr; }
