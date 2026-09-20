@@ -6,6 +6,12 @@
 # hand-written per API. This job re-runs the generators against the pinned db.h and fails if the
 # committed output drifted, so an OpenROAD SHA bump (or a generator edit) can never land with stale
 # generated code. See docs/derived-core-schema.md for the full binding-generator reference.
+#
+# ⚠️ A cross-repo generator change lands in TWO pushes and cannot be made atomic, so the repo
+# pushed FIRST will fail here against a sibling whose half has not landed yet — real drift, but
+# transient. The sibling runs the same gate (vyges-tools-opendb/.github/workflows/
+# generated-freshness.yml), so whichever push lands SECOND turns the pair green. A red that
+# survives BOTH pushes is a genuine drift; one that clears on re-run was this race.
 name: generated-freshness
 
 on:
