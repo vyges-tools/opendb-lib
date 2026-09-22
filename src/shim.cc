@@ -557,12 +557,16 @@ void read_lef(const OdbDb& h, rust::Str lef_path) {
 
   odb::lefin reader(db, const_cast<utl::Logger*>(&h.logger), false);
   odb::dbTech* tech = db->getTech();
+  // ⚠️ The returned LIBRARY is not a success flag: odb creates it lazily at the first MACRO, so a
+  // technology-only LEF (layers, vias, no masters) returns null having read everything. OpenROAD's
+  // `readLef` ignores the return for the same reason; a real LEF error is raised through the
+  // logger (ODB-289) and throws on its own.
   if (!tech) {
-    if (!reader.createTechAndLib(base.c_str(), base.c_str(), path.c_str()))
-      throw std::runtime_error("vyges-opendb: could not read tech+lib from LEF: " + path);
+    reader.createTechAndLib(base.c_str(), base.c_str(), path.c_str());
+    if (!db->getTech())
+      throw std::runtime_error("vyges-opendb: could not read tech from LEF: " + path);
   } else {
-    if (!reader.createLib(tech, base.c_str(), path.c_str()))
-      throw std::runtime_error("vyges-opendb: could not read lib from LEF: " + path);
+    reader.createLib(tech, base.c_str(), path.c_str());
   }
 }
 void read_def(const OdbDb& h, rust::Str def_path, rust::Str mode) {
