@@ -2555,6 +2555,45 @@ bool v54_spacing_rule_adjacent_except_same_pgnet(const OdbDb& h, rust::Str layer
   return except_same_pgnet;
 }
 
+// ── Whether a net has a routed wire at all ─────────────────────────────────────
+// `dbNet::getWire() != nullptr` — the object, not its content: a global router's "has wires"
+// flag is exactly this, and a net can carry a wire object before any segment is decoded from it.
+bool net_has_wire(const OdbDb& h, rust::Str net) {
+  dbBlock* b = block_of(h);
+  odb::dbNet* n = b ? b->findNet(s(net).c_str()) : nullptr;
+  return n && n->getWire() != nullptr;
+}
+
+// ── A tech via's string property ──────────────────────────────────────────────
+// Whether a via carries a string property of this name. ⚠️ Not `dbTechVia::isDefault`: the
+// `OR_DEFAULT` property that `dbBlock::getDefaultVias` reads is a separate LEF `PROPERTY`, and a
+// `DEFAULT` via without it is not one of those defaults.
+bool techvia_has_string_property(const OdbDb& h, rust::Str via, rust::Str name) {
+  odb::dbTech* tech = h.db->getTech();
+  odb::dbTechVia* v = tech ? tech->findVia(s(via).c_str()) : nullptr;
+  return v && odb::dbStringProperty::find(v, s(name).c_str()) != nullptr;
+}
+
+// ── V5.4 spacing, the rule itself ──────────────────────────────────────────────
+// A routing layer's LEF 5.4 `SPACING <s> [RANGE <min> <max>]` rules: the spacing, and the width
+// range the rule is limited to — empty where it has none (`hasRange` false).
+uint32_t v54_spacing_rule_spacing(const OdbDb& h, rust::Str layer, std::size_t idx) {
+  auto* r = v54_rule(h, layer, idx);
+  return r ? r->getSpacing() : 0;
+}
+
+rust::Vec<uint32_t> v54_spacing_rule_range(const OdbDb& h, rust::Str layer, std::size_t idx) {
+  rust::Vec<uint32_t> out;
+  auto* r = v54_rule(h, layer, idx);
+  if (r && r->hasRange()) {
+    uint32_t rmin = 0, rmax = 0;
+    r->getRange(rmin, rmax);
+    out.push_back(rmin);
+    out.push_back(rmax);
+  }
+  return out;
+}
+
 std::size_t num_array_spacing_rules(const OdbDb& h, rust::Str layer) {
   odb::dbTech* tech = h.db->getTech();
   odb::dbTechLayer* l = tech ? tech->findLayer(s(layer).c_str()) : nullptr;

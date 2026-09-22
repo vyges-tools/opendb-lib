@@ -5,7 +5,7 @@
   "scope": "all",
   "class_count": 122,
   "method_count": 2711,
-  "bridged_count": 1647,
+  "bridged_count": 1649,
   "classes": [
     {
       "name": "dbAccessPoint",
@@ -26886,7 +26886,7 @@
           ],
           "const": true,
           "kind": "other",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "setSpacingNotchLengthValid",
@@ -26936,7 +26936,7 @@
           "params": [],
           "const": true,
           "kind": "predicate",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "hasLengthThreshold",
