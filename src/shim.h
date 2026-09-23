@@ -761,6 +761,8 @@ std::size_t swire_clear_routed(const OdbDb& db, rust::Str net);
 // Ordering rules in the reference tools break ties with it, and it reflects creation order, so it
 // cannot be reconstructed from geometry or names.
 uint32_t iterm_get_id(const OdbDb& db, rust::Str inst, rust::Str pin);
+// A block terminal's database id (`dbBTerm::getId`) -- the timer orders pins by it (`PinIdLess`).
+uint32_t bterm_get_id(const OdbDb& db, rust::Str bterm);
 
 // The same, for an instance. Maps keyed by instance iterate in this order.
 uint32_t inst_get_id(const OdbDb& db, rust::Str inst);

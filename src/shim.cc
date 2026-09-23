@@ -2889,6 +2889,12 @@ uint32_t iterm_get_id(const OdbDb& h, rust::Str inst, rust::Str pin) {
   if (!t) throw std::runtime_error("no terminal " + s(pin) + " on " + s(inst));
   return t->getId();
 }
+uint32_t bterm_get_id(const OdbDb& h, rust::Str bterm) {
+  dbBlock* b = require_block(h);
+  odb::dbBTerm* t = b->findBTerm(s(bterm).c_str());
+  if (!t) throw std::runtime_error("no block terminal named " + s(bterm));
+  return t->getId();
+}
 void bterm_create(const OdbDb& h, rust::Str net, rust::Str name) {
   dbBlock* b = require_block(h);
   odb::dbNet* n = b->findNet(s(net).c_str());
