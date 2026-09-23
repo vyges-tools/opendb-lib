@@ -5,7 +5,7 @@
   "scope": "hand-written core only",
   "class_count": 45,
   "method_count": 1178,
-  "bridged_count": 805,
+  "bridged_count": 808,
   "classes": [
     {
       "name": "dbBPin",
@@ -6034,7 +6034,7 @@
           "params": [],
           "const": false,
           "kind": "iterator",
-          "bridged": false,
+          "bridged": true,
           "element": "dbMasterEdgeType"
         },
         {
@@ -6112,7 +6112,7 @@
           ],
           "const": false,
           "kind": "setter",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "transform",
@@ -9935,7 +9935,7 @@
           "params": [],
           "const": false,
           "kind": "iterator",
-          "bridged": false,
+          "bridged": true,
           "element": "dbCellEdgeSpacing"
         },
         {

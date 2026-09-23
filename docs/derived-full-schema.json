@@ -5,7 +5,7 @@
   "scope": "all",
   "class_count": 122,
   "method_count": 2711,
-  "bridged_count": 1649,
+  "bridged_count": 1662,
   "classes": [
     {
       "name": "dbAccessPoint",
@@ -4256,7 +4256,7 @@
           "params": [],
           "const": true,
           "kind": "getter",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "setSecondEdgeType",
@@ -4277,7 +4277,7 @@
           "params": [],
           "const": true,
           "kind": "getter",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "setSpacing",
@@ -4319,7 +4319,7 @@
           "params": [],
           "const": true,
           "kind": "predicate",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "setExceptNonFillerInBetween",
@@ -4403,7 +4403,7 @@
           "params": [],
           "const": true,
           "kind": "predicate",
-          "bridged": false
+          "bridged": true
         }
       ],
       "hand_written": false
@@ -10972,7 +10972,7 @@
           "params": [],
           "const": false,
           "kind": "iterator",
-          "bridged": false,
+          "bridged": true,
           "element": "dbMasterEdgeType"
         },
         {
@@ -11050,7 +11050,7 @@
           ],
           "const": false,
           "kind": "setter",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "transform",
@@ -11242,7 +11242,7 @@
           "params": [],
           "const": true,
           "kind": "getter",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "setCellRow",
@@ -11263,7 +11263,7 @@
           "params": [],
           "const": true,
           "kind": "getter",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "setHalfRow",
@@ -11284,7 +11284,7 @@
           "params": [],
           "const": true,
           "kind": "getter",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "setRangeBegin",
@@ -11305,7 +11305,7 @@
           "params": [],
           "const": true,
           "kind": "getter",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "setRangeEnd",
@@ -11326,7 +11326,7 @@
           "params": [],
           "const": true,
           "kind": "getter",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "setEdgeDir",
@@ -11347,7 +11347,7 @@
           "params": [],
           "const": true,
           "kind": "getter",
-          "bridged": false
+          "bridged": true
         }
       ],
       "hand_written": false
@@ -17176,7 +17176,7 @@
           "params": [],
           "const": false,
           "kind": "iterator",
-          "bridged": false,
+          "bridged": true,
           "element": "dbCellEdgeSpacing"
         },
         {
