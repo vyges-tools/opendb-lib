@@ -151,6 +151,11 @@ mod ffi {
         fn master_edge_type_params(db: &OdbDb, master: &str) -> Result<Vec<i32>>;
         fn tech_cell_edge_spacing_types(db: &OdbDb) -> Result<Vec<String>>;
         fn tech_cell_edge_spacing_params(db: &OdbDb) -> Result<Vec<i32>>;
+        // Non-default rules: create, set a layer's width/spacing, read the layer rules -- see shim.h.
+        fn ndr_create(db: &OdbDb, name: &str) -> Result<bool>;
+        fn ndr_layer_rule_set(db: &OdbDb, ndr: &str, layer: &str, what: i32, value: i32) -> Result<bool>;
+        fn ndr_layer_rule_layers(db: &OdbDb, ndr: &str) -> Result<Vec<String>>;
+        fn ndr_layer_rule_params(db: &OdbDb, ndr: &str) -> Result<Vec<i32>>;
         // Master enumeration + LEF master type -- see shim.h.
         fn num_masters(db: &OdbDb) -> Result<usize>;
         fn nth_master_name(db: &OdbDb, i: usize) -> Result<String>;
@@ -479,7 +484,7 @@ pub use ffi::{
     write_def, OdbDb,
     clear_rows, nth_site_name, num_rows, num_sites, row_create, tech_manufacturing_grid,
     site_row_pattern_len, site_row_pattern_orient, site_row_pattern_site,
-    block_cut_rows, block_cut_rows_at_blockages, group_get_type, has_one_site_master, nth_row_name, site_get_class, create_physical_inst, inst_bbox, master_placement_boundary, master_edge_type_names, master_edge_type_params, tech_cell_edge_spacing_types, tech_cell_edge_spacing_params, num_masters, nth_master_name, master_get_type,
+    block_cut_rows, block_cut_rows_at_blockages, group_get_type, has_one_site_master, nth_row_name, site_get_class, create_physical_inst, inst_bbox, master_placement_boundary, master_edge_type_names, master_edge_type_params, tech_cell_edge_spacing_types, tech_cell_edge_spacing_params, ndr_create, ndr_layer_rule_set, ndr_layer_rule_layers, ndr_layer_rule_params, num_masters, nth_master_name, master_get_type,
     nth_row_bbox, nth_row_site, nth_row_orient, nth_row_direction, destroy_inst,
     inst_shapes, obstruction_boxes, fill_obstruction_boxes, blockage_boxes, swire_boxes, special_wire_boxes, wire_shape_type_name, blockage_create, num_blockages, blockage_destroy,
     fill_create, num_fills, clear_fills,

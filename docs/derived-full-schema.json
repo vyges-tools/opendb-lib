@@ -5,7 +5,7 @@
   "scope": "all",
   "class_count": 122,
   "method_count": 2711,
-  "bridged_count": 1662,
+  "bridged_count": 1664,
   "classes": [
     {
       "name": "dbAccessPoint",
@@ -28238,7 +28238,7 @@
           ],
           "const": false,
           "kind": "relation",
-          "bridged": false,
+          "bridged": true,
           "target": "dbTechLayerRule"
         },
         {
@@ -28252,7 +28252,7 @@
           ],
           "const": false,
           "kind": "setter",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "getVias",

@@ -3045,3 +3045,40 @@ rust::Vec<int32_t> width_table_rule_widths(const OdbDb& h, rust::Str layer, std:
   }
   return out;
 }
+
+bool ndr_create(const OdbDb& h, rust::Str name) {
+  dbBlock* b = require_block(h);
+  return odb::dbTechNonDefaultRule::create(b, s(name).c_str()) != nullptr;
+}
+bool ndr_layer_rule_set(const OdbDb& h, rust::Str ndr, rust::Str layer, int32_t what, int32_t value) {
+  odb::dbTechNonDefaultRule* r = gen_ndr(h, ndr);
+  dbTech* tech = h.db->getTech();
+  dbTechLayer* l = tech ? tech->findLayer(s(layer).c_str()) : nullptr;
+  if (!r || !l) return false;
+  odb::dbTechLayerRule* lr = r->getLayerRule(l);
+  if (!lr) lr = odb::dbTechLayerRule::create(r, l);
+  if (!lr) return false;
+  if (what == 0) lr->setWidth(value); else lr->setSpacing(value);
+  return true;
+}
+rust::Vec<rust::String> ndr_layer_rule_layers(const OdbDb& h, rust::Str ndr) {
+  rust::Vec<rust::String> out;
+  odb::dbTechNonDefaultRule* r = gen_ndr(h, ndr);
+  if (!r) return out;
+  std::vector<odb::dbTechLayerRule*> rules;
+  r->getLayerRules(rules);
+  for (odb::dbTechLayerRule* lr : rules) out.push_back(rust::String(lr->getLayer()->getName()));
+  return out;
+}
+rust::Vec<int32_t> ndr_layer_rule_params(const OdbDb& h, rust::Str ndr) {
+  rust::Vec<int32_t> out;
+  odb::dbTechNonDefaultRule* r = gen_ndr(h, ndr);
+  if (!r) return out;
+  std::vector<odb::dbTechLayerRule*> rules;
+  r->getLayerRules(rules);
+  for (odb::dbTechLayerRule* lr : rules) {
+    out.push_back(lr->getWidth());
+    out.push_back(lr->getSpacing());
+  }
+  return out;
+}

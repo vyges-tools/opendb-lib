@@ -792,3 +792,17 @@ rust::String layer_get_type(const OdbDb& db, rust::Str layer);
 std::size_t num_width_table_rules(const OdbDb& db, rust::Str layer);
 bool width_table_rule_is_wrong_direction(const OdbDb& db, rust::Str layer, std::size_t idx);
 rust::Vec<int32_t> width_table_rule_widths(const OdbDb& db, rust::Str layer, std::size_t idx);
+
+// Non-default rules, as `create_ndr` (odb.tcl) builds them and `computeTrackConsumption` (grt)
+// reads them. Hand-written: `dbTechNonDefaultRule::create` and `dbTechLayerRule::create` are static
+// factories, and `getLayerRules` fills a vector of objects the generator has no shape for.
+//   ndr_create             `dbTechNonDefaultRule::create(block, name)`; false when one of that
+//                          name already exists (ODB-1005), as the factory's NULL says.
+//   ndr_layer_rule_set     `getLayerRule(layer)`, created when absent, then `setWidth` (what=0) or
+//                          `setSpacing` (what=1). False when the rule or layer is unknown.
+//   ndr_layer_rule_layers  one layer name per `getLayerRules` entry, in its order
+//   ndr_layer_rule_params  2 per entry: width, spacing
+bool ndr_create(const OdbDb& db, rust::Str name);
+bool ndr_layer_rule_set(const OdbDb& db, rust::Str ndr, rust::Str layer, int32_t what, int32_t value);
+rust::Vec<rust::String> ndr_layer_rule_layers(const OdbDb& db, rust::Str ndr);
+rust::Vec<int32_t> ndr_layer_rule_params(const OdbDb& db, rust::Str ndr);
