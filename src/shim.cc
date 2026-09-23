@@ -1743,6 +1743,33 @@ rust::Vec<int64_t> swire_boxes(const OdbDb& h) {
   }
   return out;
 }
+rust::Vec<int64_t> special_wire_boxes(const OdbDb& h) {
+  rust::Vec<int64_t> out;
+  dbBlock* b = block_of(h);
+  if (!b) return out;
+  for (odb::dbNet* net : b->getNets()) {
+    if (!net->isSpecial()) continue;
+    for (odb::dbSWire* sw : net->getSWires()) {
+      for (odb::dbSBox* sbox : sw->getWires()) {
+        if (sbox->isVia()) continue;
+        odb::dbTechLayer* layer = sbox->getTechLayer();
+        if (!layer) continue;
+        const odb::Rect r = sbox->getBox();
+        out.push_back(layer->getNumber());
+        out.push_back(r.xMin());
+        out.push_back(r.yMin());
+        out.push_back(r.xMax());
+        out.push_back(r.yMax());
+        out.push_back(static_cast<int64_t>(sbox->getWireShapeType().getValue()));
+      }
+    }
+  }
+  return out;
+}
+rust::String wire_shape_type_name(int32_t value) {
+  return rust::String(
+      odb::dbWireShapeType(static_cast<odb::dbWireShapeType::Value>(value)).getString());
+}
 static rust::Vec<int32_t> track_grid(const OdbDb& h, rust::Str layer, bool horizontal) {
   rust::Vec<int32_t> out;
   dbBlock* b = block_of(h);

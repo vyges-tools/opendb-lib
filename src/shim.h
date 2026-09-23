@@ -529,6 +529,16 @@ rust::String layer_direction(const OdbDb& db, rust::Str layer);   // HORIZONTAL/
 // routed signal wires. Density fill that misses them fills straight over the PDN.
 rust::Vec<int64_t> swire_boxes(const OdbDb& db);
 
+// The WIRE (non-via) boxes of every SPECIAL net, 6 i64 each: (layer_number, x_min, y_min, x_max,
+// y_max, wire_shape_type) — the last is `dbWireShapeType::Value`, named by `wire_shape_type_name`.
+//
+// Not `swire_boxes`: that one serves density fill, so it decomposes vias onto their layers, keeps
+// every shape type and does not ask whether the net is special. Detailed placement's
+// `Grid::markBlocked` asks all three the other way — `net->isSpecial()`, `!sbox->isVia()`, and
+// `DRCFILL` skipped — and a caller cannot recover that selection from the fill-oriented list.
+rust::Vec<int64_t> special_wire_boxes(const OdbDb& db);
+rust::String wire_shape_type_name(int32_t value);   // e.g. "STRIPE", "DRCFILL"
+
 // Routing track coordinates for a layer — the positions pins and wires may legally sit on.
 //
 // These are the foundation of pin placement: every legal pin slot is a track. `getGridX` fills a
