@@ -5,7 +5,7 @@
   "scope": "all",
   "class_count": 122,
   "method_count": 2711,
-  "bridged_count": 1664,
+  "bridged_count": 1668,
   "classes": [
     {
       "name": "dbAccessPoint",
@@ -426,7 +426,7 @@
           "params": [],
           "const": true,
           "kind": "getter",
-          "bridged": false
+          "bridged": true
         }
       ],
       "hand_written": true
@@ -1248,7 +1248,7 @@
           "params": [],
           "const": false,
           "kind": "iterator",
-          "bridged": false,
+          "bridged": true,
           "element": "dbAccessPoint"
         },
         {
@@ -8117,7 +8117,7 @@
           "params": [],
           "const": true,
           "kind": "getter",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "getAccessPoints",
@@ -8125,7 +8125,7 @@
           "params": [],
           "const": true,
           "kind": "getter",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "clearPrefAccessPoints",

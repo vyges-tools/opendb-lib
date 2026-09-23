@@ -806,3 +806,10 @@ bool ndr_create(const OdbDb& db, rust::Str name);
 bool ndr_layer_rule_set(const OdbDb& db, rust::Str ndr, rust::Str layer, int32_t what, int32_t value);
 rust::Vec<rust::String> ndr_layer_rule_layers(const OdbDb& db, rust::Str ndr);
 rust::Vec<int32_t> ndr_layer_rule_params(const OdbDb& db, rust::Str ndr);
+
+// How many access points the block's terminals carry: every instance terminal's preferred access
+// points (`dbITerm::getPrefAccessPoints`) plus every block pin's (`dbBPin::getAccessPoints`). grt
+// reads pin positions from them when present (`findPinAccessPointPositions`), and the antenna
+// checker binds guides to them; an engine that does not model them must know when they exist.
+// Hand-written: `dbAccessPoint` has no generated shape.
+std::size_t block_access_point_count(const OdbDb& db);

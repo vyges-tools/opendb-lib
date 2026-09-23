@@ -3082,3 +3082,15 @@ rust::Vec<int32_t> ndr_layer_rule_params(const OdbDb& h, rust::Str ndr) {
   }
   return out;
 }
+
+std::size_t block_access_point_count(const OdbDb& h) {
+  dbBlock* b = require_block(h);
+  std::size_t n = 0;
+  for (odb::dbInst* inst : b->getInsts()) {
+    for (odb::dbITerm* it : inst->getITerms()) n += it->getPrefAccessPoints().size();
+  }
+  for (odb::dbBTerm* bt : b->getBTerms()) {
+    for (odb::dbBPin* bp : bt->getBPins()) n += bp->getAccessPoints().size();
+  }
+  return n;
+}
