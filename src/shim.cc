@@ -231,6 +231,9 @@ void set_inst_orient(const OdbDb& h, rust::Str inst, rust::Str orient) {
   // dbOrientType parses "R0"/"R90"/"R180"/"R270"/"MX"/"MY"/"MXR90"/"MYR90".
   require_inst(h, inst)->setOrient(odb::dbOrientType(s(orient).c_str()));
 }
+void set_inst_location_orient(const OdbDb& h, rust::Str inst, rust::Str orient) {
+  require_inst(h, inst)->setLocationOrient(odb::dbOrientType(s(orient).c_str()));
+}
 // ⛔ **Track grids had READS but no WRITER**, so `make_tracks` could not be built at all — the
 // familiar shape: every accessor `InitFloorplan::makeTracks` needs was already present, and only
 // the write side was missing.
