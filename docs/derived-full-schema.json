@@ -5,7 +5,7 @@
   "scope": "all",
   "class_count": 122,
   "method_count": 2711,
-  "bridged_count": 1668,
+  "bridged_count": 1673,
   "classes": [
     {
       "name": "dbAccessPoint",
@@ -2989,7 +2989,7 @@
           ],
           "const": true,
           "kind": "setter",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "getViaLayerBoxes",
@@ -13011,7 +13011,7 @@
           "params": [],
           "const": true,
           "kind": "relation",
-          "bridged": false,
+          "bridged": true,
           "target": "dbObject"
         },
         {
@@ -17954,7 +17954,7 @@
           ],
           "const": true,
           "kind": "other",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "getV55SpacingTable",
@@ -17967,7 +17967,7 @@
           ],
           "const": true,
           "kind": "other",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "initV55LengthIndex",
@@ -30421,7 +30421,7 @@
           ],
           "const": false,
           "kind": "other",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "isGlobalWire",

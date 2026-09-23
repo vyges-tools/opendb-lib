@@ -2543,6 +2543,88 @@ rust::String tech_via_layer(const OdbDb& h, rust::Str via, rust::Str which) {
   return rust::String(l ? l->getName() : "");
 }
 
+// A routing layer's own minimum AREA, as `dbTechLayer::getArea` returns it: the layer's AREA value,
+// 0 when it sets none. ⚠️ NOT `layer_min_area`, which lets LEF58 AREA rules govern — a reader that
+// takes the raw field (the CUGR router's min-length rule) needs this one.
+int64_t layer_get_area(const OdbDb& h, rust::Str layer) {
+  odb::dbTech* tech = h.db->getTech();
+  odb::dbTechLayer* l = tech ? tech->findLayer(s(layer).c_str()) : nullptr;
+  return l ? l->getArea() : 0;
+}
+
+// A layer's V55 parallel-run spacing table exactly as its two getters return it, flattened:
+//   [ok_wl, n_widths, n_lengths, widths..., lengths..., ok_table, rows, cols, table row-major...]
+// `ok_wl` is `getV55SpacingWidthsAndLengths`' result (false unless the layer has V55 rules) and
+// `ok_table` is `getV55SpacingTable`'s (false when the matrix holds no element). The two are
+// independent calls upstream, so both flags are reported rather than one standing for the other.
+// Rows are widths, columns lengths.
+rust::Vec<uint32_t> layer_v55_spacing_table(const OdbDb& h, rust::Str layer) {
+  rust::Vec<uint32_t> out;
+  odb::dbTech* tech = h.db->getTech();
+  odb::dbTechLayer* l = tech ? tech->findLayer(s(layer).c_str()) : nullptr;
+  std::vector<uint32_t> widths, lengths;
+  const bool ok_wl = l != nullptr && l->getV55SpacingWidthsAndLengths(widths, lengths);
+  out.push_back(ok_wl ? 1 : 0);
+  out.push_back(static_cast<uint32_t>(widths.size()));
+  out.push_back(static_cast<uint32_t>(lengths.size()));
+  for (uint32_t w : widths) out.push_back(w);
+  for (uint32_t v : lengths) out.push_back(v);
+  std::vector<std::vector<uint32_t>> table;
+  const bool ok_table = l != nullptr && l->getV55SpacingTable(table);
+  out.push_back(ok_table ? 1 : 0);
+  out.push_back(static_cast<uint32_t>(table.size()));
+  out.push_back(static_cast<uint32_t>(table.empty() ? 0 : table[0].size()));
+  for (const auto& row : table) {
+    for (uint32_t v : row) out.push_back(v);
+  }
+  return out;
+}
+
+// `dbNet::getFirstDriverTerm`, by name: "I:<inst>/<mterm>" for an instance terminal, "B:<bterm>"
+// for a block terminal, "" when there is none (a supply net, or no driving terminal).
+rust::String net_first_driver_term(const OdbDb& h, rust::Str net) {
+  dbBlock* b = require_block(h);
+  odb::dbNet* n = b->findNet(s(net).c_str());
+  odb::dbObject* t = n ? n->getFirstDriverTerm() : nullptr;
+  if (t == nullptr) return rust::String("");
+  if (t->getObjectType() == odb::dbITermObj) {
+    auto* it = static_cast<odb::dbITerm*>(t);
+    return rust::String("I:" + it->getInst()->getName() + "/" + it->getMTerm()->getName());
+  }
+  return rust::String("B:" + static_cast<odb::dbBTerm*>(t)->getName());
+}
+
+// Every box of a net's special wires with each VIA expanded into its shapes (`dbSBox::getViaBoxes`,
+// the via's boxes moved to its point), flat `(layer number, from_via, x0, y0, x1, y1)`, in
+// `getSWires()` then `getWires()` order. A box with no tech layer reports layer number -1. An
+// octilinear wire box reports its bounding box, as `getBox` does.
+rust::Vec<int64_t> net_swire_expanded_boxes(const OdbDb& h, rust::Str net) {
+  rust::Vec<int64_t> out;
+  dbBlock* b = require_block(h);
+  odb::dbNet* n = b->findNet(s(net).c_str());
+  if (!n) return out;
+  auto push = [&](odb::dbTechLayer* layer, int64_t from_via, const odb::Rect& r) {
+    out.push_back(layer ? layer->getNumber() : -1);
+    out.push_back(from_via);
+    out.push_back(r.xMin());
+    out.push_back(r.yMin());
+    out.push_back(r.xMax());
+    out.push_back(r.yMax());
+  };
+  std::vector<odb::dbShape> via_boxes;
+  for (odb::dbSWire* sw : n->getSWires()) {
+    for (odb::dbSBox* sbox : sw->getWires()) {
+      if (sbox->isVia()) {
+        sbox->getViaBoxes(via_boxes);
+        for (const odb::dbShape& shape : via_boxes) push(shape.getTechLayer(), 1, shape.getBox());
+      } else {
+        push(sbox->getTechLayer(), 0, sbox->getBox());
+      }
+    }
+  }
+  return out;
+}
+
 // LEF58 cut spacing tables, addressed by (layer, index).
 //
 // ⚠️ These take a CUT CLASS and side flags, so the binding generator cannot synthesise them —
