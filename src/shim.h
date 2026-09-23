@@ -428,6 +428,22 @@ rust::Vec<int32_t> inst_bbox(const OdbDb& db, rust::Str inst);
 // answer "which cell is the bottom-left endcap?" -- that is a question about the master's TYPE
 // (ENDCAP_LEF58_LEFTBOTTOMCORNER and friends), and nothing enumerated masters at all.
 // The type STRING is returned so the matching stays in the engine, where the policy belongs.
+// LEF58 cell-edge geometry and the technology's cell-edge spacing table, for `dpl`'s
+// `checkEdgeSpacing` (`PlacementDRC` + `Network::addMaster`). Hand-written: `dbMaster::getEdgeTypes`
+// and `dbTech::getCellEdgeSpacingTable` are dbSet iterators of objects the generator has no shape
+// for. Returned FLAT, in the database's own order, so the engine transcribes the rest:
+//   master_placement_boundary      [x_min, y_min, x_max, y_max]  (`getPlacementBoundary`)
+//   master_edge_type_names         one edge-type name per `dbMasterEdgeType`
+//   master_edge_type_params        5 per edge: dir (TOP=0 RIGHT=1 LEFT=2 BOTTOM=3), cell_row,
+//                                  half_row, range_begin, range_end (-1 = unset)
+//   tech_cell_edge_spacing_types   2 per rule: first, second edge type
+//   tech_cell_edge_spacing_params  3 per rule: spacing, is_exact, is_except_abutted
+// Unknown master: empty vectors.
+rust::Vec<int32_t> master_placement_boundary(const OdbDb& db, rust::Str master);
+rust::Vec<rust::String> master_edge_type_names(const OdbDb& db, rust::Str master);
+rust::Vec<int32_t> master_edge_type_params(const OdbDb& db, rust::Str master);
+rust::Vec<rust::String> tech_cell_edge_spacing_types(const OdbDb& db);
+rust::Vec<int32_t> tech_cell_edge_spacing_params(const OdbDb& db);
 std::size_t num_masters(const OdbDb& db);
 rust::String nth_master_name(const OdbDb& db, std::size_t i);
 rust::String master_get_type(const OdbDb& db, rust::Str master);

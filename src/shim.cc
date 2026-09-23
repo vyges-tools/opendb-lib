@@ -1458,6 +1458,59 @@ rust::Vec<int32_t> inst_bbox(const OdbDb& h, rust::Str inst) {
   out.push_back(r.yMax());
   return out;
 }
+rust::Vec<int32_t> master_placement_boundary(const OdbDb& h, rust::Str master) {
+  rust::Vec<int32_t> out;
+  dbMaster* m = h.db->findMaster(s(master).c_str());
+  if (!m) return out;
+  odb::Rect r;
+  m->getPlacementBoundary(r);
+  out.push_back(r.xMin());
+  out.push_back(r.yMin());
+  out.push_back(r.xMax());
+  out.push_back(r.yMax());
+  return out;
+}
+rust::Vec<rust::String> master_edge_type_names(const OdbDb& h, rust::Str master) {
+  rust::Vec<rust::String> out;
+  dbMaster* m = h.db->findMaster(s(master).c_str());
+  if (!m) return out;
+  for (odb::dbMasterEdgeType* e : m->getEdgeTypes()) out.push_back(rust::String(e->getEdgeType()));
+  return out;
+}
+rust::Vec<int32_t> master_edge_type_params(const OdbDb& h, rust::Str master) {
+  rust::Vec<int32_t> out;
+  dbMaster* m = h.db->findMaster(s(master).c_str());
+  if (!m) return out;
+  for (odb::dbMasterEdgeType* e : m->getEdgeTypes()) {
+    out.push_back(static_cast<int32_t>(e->getEdgeDir()));
+    out.push_back(e->getCellRow());
+    out.push_back(e->getHalfRow());
+    out.push_back(e->getRangeBegin());
+    out.push_back(e->getRangeEnd());
+  }
+  return out;
+}
+rust::Vec<rust::String> tech_cell_edge_spacing_types(const OdbDb& h) {
+  rust::Vec<rust::String> out;
+  odb::dbTech* t = h.db->getTech();
+  if (!t) return out;
+  for (odb::dbCellEdgeSpacing* r : t->getCellEdgeSpacingTable()) {
+    out.push_back(rust::String(r->getFirstEdgeType()));
+    out.push_back(rust::String(r->getSecondEdgeType()));
+  }
+  return out;
+}
+rust::Vec<int32_t> tech_cell_edge_spacing_params(const OdbDb& h) {
+  rust::Vec<int32_t> out;
+  odb::dbTech* t = h.db->getTech();
+  if (!t) return out;
+  for (odb::dbCellEdgeSpacing* r : t->getCellEdgeSpacingTable()) {
+    out.push_back(r->getSpacing());
+    out.push_back(r->isExact() ? 1 : 0);
+    out.push_back(r->isExceptAbutted() ? 1 : 0);
+  }
+  return out;
+}
 std::size_t num_masters(const OdbDb& h) {
   std::size_t n = 0;
   for (odb::dbLib* lib : h.db->getLibs()) n += lib->getMasters().size();
