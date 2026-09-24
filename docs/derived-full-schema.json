@@ -5,7 +5,7 @@
   "scope": "all",
   "class_count": 122,
   "method_count": 2711,
-  "bridged_count": 1673,
+  "bridged_count": 1674,
   "classes": [
     {
       "name": "dbAccessPoint",
@@ -30,7 +30,7 @@
           "params": [],
           "const": true,
           "kind": "getter",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "setLayer",

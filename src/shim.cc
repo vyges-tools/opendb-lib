@@ -3171,6 +3171,52 @@ rust::Vec<int32_t> ndr_layer_rule_params(const OdbDb& h, rust::Str ndr) {
   return out;
 }
 
+// An instance terminal's PREFERRED access points (`dbITerm::getPrefAccessPoints`, in its order:
+// by master pin id), flattened as x, y, routing level per point. The point is as stored —
+// relative to the instance's location.
+rust::Vec<int32_t> iterm_pref_access_points(const OdbDb& h, rust::Str inst, rust::Str pin) {
+  rust::Vec<int32_t> out;
+  dbITerm* t = require_inst(h, inst)->findITerm(s(pin).c_str());
+  if (!t) return out;
+  for (odb::dbAccessPoint* ap : t->getPrefAccessPoints()) {
+    const odb::Point p = ap->getPoint();
+    out.push_back(p.x());
+    out.push_back(p.y());
+    out.push_back(ap->getLayer() != nullptr ? ap->getLayer()->getRoutingLevel() : 0);
+  }
+  return out;
+}
+
+// How many access points an instance terminal has over ALL its master pins (`getAccessPoints`).
+std::size_t iterm_access_point_count(const OdbDb& h, rust::Str inst, rust::Str pin) {
+  dbITerm* t = require_inst(h, inst)->findITerm(s(pin).c_str());
+  if (!t) return 0;
+  std::size_t n = 0;
+  for (const auto& [mpin, aps] : t->getAccessPoints()) n += aps.size();
+  return n;
+}
+
+// A block pin's access points (`dbBPin::getAccessPoints`, stored order), flattened as x, y,
+// routing level — absolute coordinates.
+rust::Vec<int32_t> bpin_access_points(const OdbDb& h, rust::Str bterm, std::size_t pin) {
+  rust::Vec<int32_t> out;
+  dbBlock* b = require_block(h);
+  odb::dbBTerm* bt = b->findBTerm(s(bterm).c_str());
+  if (!bt) return out;
+  std::size_t k = 0;
+  for (odb::dbBPin* bp : bt->getBPins()) {
+    if (k++ != pin) continue;
+    for (odb::dbAccessPoint* ap : bp->getAccessPoints()) {
+      const odb::Point p = ap->getPoint();
+      out.push_back(p.x());
+      out.push_back(p.y());
+      out.push_back(ap->getLayer() != nullptr ? ap->getLayer()->getRoutingLevel() : 0);
+    }
+    break;
+  }
+  return out;
+}
+
 std::size_t block_access_point_count(const OdbDb& h) {
   dbBlock* b = require_block(h);
   std::size_t n = 0;

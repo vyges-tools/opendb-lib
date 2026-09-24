@@ -819,3 +819,6 @@ rust::Vec<int32_t> ndr_layer_rule_params(const OdbDb& db, rust::Str ndr);
 // checker binds guides to them; an engine that does not model them must know when they exist.
 // Hand-written: `dbAccessPoint` has no generated shape.
 std::size_t block_access_point_count(const OdbDb& db);
+rust::Vec<int32_t> iterm_pref_access_points(const OdbDb& db, rust::Str inst, rust::Str pin);
+std::size_t iterm_access_point_count(const OdbDb& db, rust::Str inst, rust::Str pin);
+rust::Vec<int32_t> bpin_access_points(const OdbDb& db, rust::Str bterm, std::size_t pin);
