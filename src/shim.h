@@ -812,10 +812,13 @@ rust::Vec<int32_t> width_table_rule_widths(const OdbDb& db, rust::Str layer, std
 //                          `setSpacing` (what=1). False when the rule or layer is unknown.
 //   ndr_layer_rule_layers  one layer name per `getLayerRules` entry, in its order
 //   ndr_layer_rule_params  2 per entry: width, spacing
+//   ndr_add_use_via        `addUseVia(tech via)` (create_ndr -via, in order). False when the rule
+//                          or the technology via is unknown.
 bool ndr_create(const OdbDb& db, rust::Str name);
 bool ndr_layer_rule_set(const OdbDb& db, rust::Str ndr, rust::Str layer, int32_t what, int32_t value);
 rust::Vec<rust::String> ndr_layer_rule_layers(const OdbDb& db, rust::Str ndr);
 rust::Vec<int32_t> ndr_layer_rule_params(const OdbDb& db, rust::Str ndr);
+bool ndr_add_use_via(const OdbDb& db, rust::Str ndr, rust::Str via);
 
 // How many access points the block's terminals carry: every instance terminal's preferred access
 // points (`dbITerm::getPrefAccessPoints`) plus every block pin's (`dbBPin::getAccessPoints`). grt
@@ -845,3 +848,17 @@ int32_t mpin_add_access_point(const OdbDb& db, rust::Str master, rust::Str term,
 void iterm_set_access_point(const OdbDb& db, rust::Str inst, rust::Str term, std::size_t pin, uint32_t pin_access_idx, int32_t ap);
 void bpin_add_access_point(const OdbDb& db, rust::Str bterm, std::size_t pin, int32_t x, int32_t y, rust::Str layer, uint8_t accesses,
                            int32_t low_type, int32_t high_type, rust::Slice<const rust::String> vias, rust::Slice<const int32_t> segs);
+// A net's routing replaced by paths from a flat op stream (a fixed-length record per op):
+//   0 layer ndr        a new ROUTED path on layer names[layer]; ndr 1: with the net's rule for it
+//   1 x y              a point
+//   2 x y ext          a point with its extension
+//   3 via              the tech via names[via]
+//   4 via              the block via names[via]
+//   5 xl yl xh yh      a rectangle about the last point (a patch)
+void net_write_wire(const OdbDb& db, rust::Str net, rust::Slice<const int32_t> ops, rust::Slice<const rust::String> names);
+// A via the router made, as a default block via (none when it exists): boxes as records
+// (0 layer1 / 1 cut / 2 layer2, xl, yl, xh, yh), created in the order given.
+void block_create_via(const OdbDb& db, rust::Str name, rust::Str layer1, rust::Str cut, rust::Str layer2, rust::Slice<const int32_t> boxes);
+// The block's gcell grid set to one uniform pattern per axis (origin, count, step): created
+// when absent, kept when identical, refused when different (libodb cannot remove one).
+void block_set_gcell_grid(const OdbDb& db, int32_t x0, int32_t nx, int32_t sx, int32_t y0, int32_t ny, int32_t sy);

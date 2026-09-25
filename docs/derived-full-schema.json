@@ -5,7 +5,7 @@
   "scope": "all",
   "class_count": 122,
   "method_count": 2711,
-  "bridged_count": 1704,
+  "bridged_count": 1706,
   "classes": [
     {
       "name": "dbAccessPoint",
@@ -28330,7 +28330,7 @@
           ],
           "const": false,
           "kind": "setter",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "getUseVias",
@@ -29078,7 +29078,7 @@
           ],
           "const": false,
           "kind": "setter",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "getViaCount",

@@ -7,6 +7,7 @@
 #include "generated_resolvers.h"  // gen_mterm and friends — the by-name lookups
 #include "lint3d.h"      // 3D structural lint (compiled into libodb; see that header)
 #include "odb/dbShape.h"  // dbShape + dbWireShapeItr — db.h only forward-declares dbShape
+#include "odb/dbWireCodec.h"  // dbWireEncoder (writing a net's routing)
 #include "odb/defin.h"   // LEF/DEF I/O (libodb v1)
 #include "odb/defout.h"
 #include "spdlog/sinks/callback_sink.h"   // forward libodb's utl::Logger -> Rust -> vyges-events
@@ -3162,6 +3163,14 @@ bool ndr_layer_rule_set(const OdbDb& h, rust::Str ndr, rust::Str layer, int32_t 
   if (what == 0) lr->setWidth(value); else lr->setSpacing(value);
   return true;
 }
+bool ndr_add_use_via(const OdbDb& h, rust::Str ndr, rust::Str via) {
+  odb::dbTechNonDefaultRule* r = gen_ndr(h, ndr);
+  dbTech* tech = h.db->getTech();
+  odb::dbTechVia* v = tech ? tech->findVia(s(via).c_str()) : nullptr;
+  if (!r || !v) return false;
+  r->addUseVia(v);
+  return true;
+}
 rust::Vec<rust::String> ndr_layer_rule_layers(const OdbDb& h, rust::Str ndr) {
   rust::Vec<rust::String> out;
   odb::dbTechNonDefaultRule* r = gen_ndr(h, ndr);
@@ -3325,6 +3334,115 @@ void bpin_add_access_point(const OdbDb& h, rust::Str bterm, std::size_t pin, int
     return;
   }
   throw std::runtime_error("no pin " + std::to_string(pin) + " of " + s(bterm));
+}
+
+void net_write_wire(const OdbDb& h, rust::Str net, rust::Slice<const int32_t> ops, rust::Slice<const rust::String> names) {
+  dbBlock* b = require_block(h);
+  odb::dbNet* n = b->findNet(s(net).c_str());
+  if (!n) throw std::runtime_error("no net " + s(net));
+  odb::dbTech* tech = h.db->getTech();
+  auto name = [&](int32_t k) -> std::string {
+    if (k < 0 || static_cast<std::size_t>(k) >= names.size()) throw std::runtime_error("net_write_wire: name index out of range");
+    return std::string(names[k]);
+  };
+  if (odb::dbWire* old = n->getWire()) odb::dbWire::destroy(old);
+  odb::dbWire* wire = odb::dbWire::create(n);
+  odb::dbWireEncoder enc;
+  enc.begin(wire);
+  std::size_t i = 0;
+  auto need = [&](std::size_t k) {
+    if (i + k > ops.size()) throw std::runtime_error("net_write_wire: truncated op");
+  };
+  while (i < ops.size()) {
+    int32_t op = ops[i++];
+    switch (op) {
+      case 0: {
+        need(2);
+        odb::dbTechLayer* l = tech->findLayer(name(ops[i]).c_str());
+        if (!l) throw std::runtime_error("net_write_wire: no layer " + name(ops[i]));
+        if (ops[i + 1] && n->getNonDefaultRule()) {
+          enc.newPath(l, odb::dbWireType("ROUTED"), n->getNonDefaultRule()->getLayerRule(l));
+        } else {
+          enc.newPath(l, odb::dbWireType("ROUTED"));
+        }
+        i += 2;
+        break;
+      }
+      case 1:
+        need(2);
+        enc.addPoint(ops[i], ops[i + 1]);
+        i += 2;
+        break;
+      case 2:
+        need(3);
+        enc.addPoint(ops[i], ops[i + 1], ops[i + 2], 0);
+        i += 3;
+        break;
+      case 3: {
+        need(1);
+        odb::dbTechVia* v = tech->findVia(name(ops[i]).c_str());
+        if (!v) throw std::runtime_error("net_write_wire: no tech via " + name(ops[i]));
+        enc.addTechVia(v);
+        i += 1;
+        break;
+      }
+      case 4: {
+        need(1);
+        odb::dbVia* v = b->findVia(name(ops[i]).c_str());
+        if (!v) throw std::runtime_error("net_write_wire: no block via " + name(ops[i]));
+        enc.addVia(v);
+        i += 1;
+        break;
+      }
+      case 5:
+        need(4);
+        enc.addRect(ops[i], ops[i + 1], ops[i + 2], ops[i + 3]);
+        i += 4;
+        break;
+      default:
+        enc.clear();
+        throw std::runtime_error("net_write_wire: unknown op " + std::to_string(op));
+    }
+  }
+  enc.end();
+  n->setWireOrdered(false);
+}
+
+void block_create_via(const OdbDb& h, rust::Str name, rust::Str layer1, rust::Str cut, rust::Str layer2, rust::Slice<const int32_t> boxes) {
+  dbBlock* b = require_block(h);
+  if (b->findVia(s(name).c_str())) return;
+  odb::dbTech* tech = h.db->getTech();
+  odb::dbTechLayer* ls[3] = {tech->findLayer(s(layer1).c_str()), tech->findLayer(s(cut).c_str()), tech->findLayer(s(layer2).c_str())};
+  for (auto* l : ls) {
+    if (!l) throw std::runtime_error("block_create_via: a layer of " + s(name) + " is not in the technology");
+  }
+  if (boxes.size() % 5 != 0) throw std::runtime_error("block_create_via: boxes are records of 5");
+  odb::dbVia* v = odb::dbVia::create(b, s(name).c_str());
+  v->setDefault(true);
+  for (std::size_t k = 0; k < boxes.size(); k += 5) {
+    int32_t t = boxes[k];
+    if (t < 0 || t > 2) throw std::runtime_error("block_create_via: box layer tag");
+    odb::dbBox::create(v, ls[t], boxes[k + 1], boxes[k + 2], boxes[k + 3], boxes[k + 4]);
+  }
+}
+
+void block_set_gcell_grid(const OdbDb& h, int32_t x0, int32_t nx, int32_t sx, int32_t y0, int32_t ny, int32_t sy) {
+  dbBlock* b = require_block(h);
+  odb::dbGCellGrid* g = b->getGCellGrid();
+  if (g) {
+    // libodb has no way to remove a grid or its patterns: an identical one is kept, a
+    // different one refused.
+    int ox = 0, cx = 0, px = 0, oy = 0, cy = 0, py = 0;
+    if (g->getNumGridPatternsX() == 1 && g->getNumGridPatternsY() == 1) {
+      g->getGridPatternX(0, ox, cx, px);
+      g->getGridPatternY(0, oy, cy, py);
+      if (ox == x0 && cx == nx && px == sx && oy == y0 && cy == ny && py == sy) return;
+    }
+    throw std::runtime_error("block_set_gcell_grid: the block already has a different gcell grid");
+  }
+  g = odb::dbGCellGrid::create(b);
+  g->addGridPatternX(x0, nx, sx);
+  g->addGridPatternY(y0, ny, sy);
 }
 
 std::size_t block_access_point_count(const OdbDb& h) {

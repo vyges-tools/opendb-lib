@@ -156,6 +156,7 @@ mod ffi {
         fn ndr_layer_rule_set(db: &OdbDb, ndr: &str, layer: &str, what: i32, value: i32) -> Result<bool>;
         fn ndr_layer_rule_layers(db: &OdbDb, ndr: &str) -> Result<Vec<String>>;
         fn ndr_layer_rule_params(db: &OdbDb, ndr: &str) -> Result<Vec<i32>>;
+        fn ndr_add_use_via(db: &OdbDb, ndr: &str, via: &str) -> Result<bool>;
         // Access points on the block's terminals, counted -- see shim.h.
         fn block_access_point_count(db: &OdbDb) -> Result<usize>;
         fn iterm_pref_access_points(db: &OdbDb, inst: &str, pin: &str) -> Result<Vec<i32>>;
@@ -168,6 +169,9 @@ mod ffi {
         fn mpin_add_access_point(db: &OdbDb, master: &str, term: &str, pin: usize, pin_access_idx: u32, x: i32, y: i32, layer: &str, accesses: u8, low_type: i32, high_type: i32, vias: &[String], segs: &[i32]) -> Result<i32>;
         fn iterm_set_access_point(db: &OdbDb, inst: &str, term: &str, pin: usize, pin_access_idx: u32, ap: i32) -> Result<()>;
         fn bpin_add_access_point(db: &OdbDb, bterm: &str, pin: usize, x: i32, y: i32, layer: &str, accesses: u8, low_type: i32, high_type: i32, vias: &[String], segs: &[i32]) -> Result<()>;
+        fn net_write_wire(db: &OdbDb, net: &str, ops: &[i32], names: &[String]) -> Result<()>;
+        fn block_create_via(db: &OdbDb, name: &str, layer1: &str, cut: &str, layer2: &str, boxes: &[i32]) -> Result<()>;
+        fn block_set_gcell_grid(db: &OdbDb, x0: i32, nx: i32, sx: i32, y0: i32, ny: i32, sy: i32) -> Result<()>;
         // Master enumeration + LEF master type -- see shim.h.
         fn num_masters(db: &OdbDb) -> Result<usize>;
         fn nth_master_name(db: &OdbDb, i: usize) -> Result<String>;
@@ -502,7 +506,7 @@ pub use ffi::{
     write_def, OdbDb,
     clear_rows, nth_site_name, num_rows, num_sites, row_create, tech_manufacturing_grid,
     site_row_pattern_len, site_row_pattern_orient, site_row_pattern_site,
-    block_cut_rows, block_cut_rows_at_blockages, group_get_type, has_one_site_master, nth_row_name, site_get_class, create_physical_inst, inst_bbox, master_placement_boundary, master_edge_type_names, master_edge_type_params, tech_cell_edge_spacing_types, tech_cell_edge_spacing_params, ndr_create, ndr_layer_rule_set, ndr_layer_rule_layers, ndr_layer_rule_params, block_access_point_count, iterm_pref_access_points, iterm_access_point_count, bpin_access_points, net_guides, layer_lef58_type, layer_rule_census, mpin_add_access_point, iterm_set_access_point, bpin_add_access_point, num_masters, nth_master_name, master_get_type,
+    block_cut_rows, block_cut_rows_at_blockages, group_get_type, has_one_site_master, nth_row_name, site_get_class, create_physical_inst, inst_bbox, master_placement_boundary, master_edge_type_names, master_edge_type_params, tech_cell_edge_spacing_types, tech_cell_edge_spacing_params, ndr_create, ndr_layer_rule_set, ndr_layer_rule_layers, ndr_layer_rule_params, ndr_add_use_via, block_access_point_count, iterm_pref_access_points, iterm_access_point_count, bpin_access_points, net_guides, layer_lef58_type, layer_rule_census, mpin_add_access_point, iterm_set_access_point, bpin_add_access_point, net_write_wire, block_create_via, block_set_gcell_grid, num_masters, nth_master_name, master_get_type,
     nth_row_bbox, nth_row_site, nth_row_orient, nth_row_direction, destroy_inst,
     inst_shapes, obstruction_boxes, fill_obstruction_boxes, blockage_boxes, swire_boxes, special_wire_boxes, wire_shape_type_name, blockage_create, num_blockages, blockage_destroy,
     fill_create, num_fills, clear_fills,
