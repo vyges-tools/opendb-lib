@@ -3217,6 +3217,89 @@ rust::Vec<int32_t> bpin_access_points(const OdbDb& h, rust::Str bterm, std::size
   return out;
 }
 
+// ---- Writing access points (see shim.h) ----------------------------------------------------------
+static void fill_access_point(const OdbDb& h, odb::dbAccessPoint* ap, int32_t x, int32_t y, rust::Str layer, uint8_t accesses,
+                              int32_t low_type, int32_t high_type, rust::Slice<const rust::String> vias,
+                              rust::Slice<const int32_t> segs) {
+  odb::dbTech* tech = h.db->getTech();
+  ap->setPoint(odb::Point(x, y));
+  const odb::dbDirection::Value dirs[] = {odb::dbDirection::NORTH, odb::dbDirection::SOUTH, odb::dbDirection::EAST,
+                                          odb::dbDirection::WEST, odb::dbDirection::UP, odb::dbDirection::DOWN};
+  for (int k = 0; k < 6; k++) {
+    if (accesses & (1 << k)) ap->setAccess(true, dirs[k]);
+  }
+  odb::dbTechLayer* l = tech->findLayer(s(layer).c_str());
+  if (!l) throw std::runtime_error("access point: no layer " + s(layer));
+  ap->setLayer(l);
+  ap->setLowType(static_cast<odb::dbAccessType::Value>(low_type));
+  ap->setHighType(static_cast<odb::dbAccessType::Value>(high_type));
+  for (const rust::String& v : vias) {
+    const std::string name(v);
+    if (odb::dbTechVia* tv = tech->findVia(name.c_str())) {
+      ap->addTechVia(1, tv);
+    } else if (odb::dbVia* bv = require_block(h)->findVia(name.c_str())) {
+      ap->addBlockVia(1, bv);
+    } else {
+      throw std::runtime_error("access point: no via " + name);
+    }
+  }
+  for (std::size_t k = 0; k + 5 < segs.size(); k += 6) {
+    ap->addSegment(odb::Rect(odb::Point(segs[k], segs[k + 1]), odb::Point(segs[k + 2], segs[k + 3])), segs[k + 4] != 0,
+                   segs[k + 5] != 0);
+  }
+}
+
+int32_t mpin_add_access_point(const OdbDb& h, rust::Str master, rust::Str term, std::size_t pin, uint32_t pin_access_idx,
+                              int32_t x, int32_t y, rust::Str layer, uint8_t accesses, int32_t low_type, int32_t high_type,
+                              rust::Slice<const rust::String> vias, rust::Slice<const int32_t> segs) {
+  odb::dbMTerm* mt = find_mterm(h, master, term);
+  if (!mt) throw std::runtime_error("no terminal " + s(master) + "/" + s(term));
+  std::size_t k = 0;
+  for (odb::dbMPin* mp : mt->getMPins()) {
+    if (k++ != pin) continue;
+    odb::dbAccessPoint* ap = odb::dbAccessPoint::create(require_block(h), mp, pin_access_idx);
+    fill_access_point(h, ap, x, y, layer, accesses, low_type, high_type, vias, segs);
+    const auto pa = mp->getPinAccess();
+    return pin_access_idx < pa.size() ? static_cast<int32_t>(pa[pin_access_idx].size()) - 1 : -1;
+  }
+  throw std::runtime_error("no pin " + std::to_string(pin) + " of " + s(master) + "/" + s(term));
+}
+
+// The pin's preferred point: the `ap`-th of its master pin's points at `pin_access_idx` — none
+// when `ap` is negative.
+void iterm_set_access_point(const OdbDb& h, rust::Str inst, rust::Str term, std::size_t pin, uint32_t pin_access_idx, int32_t ap) {
+  dbITerm* t = require_inst(h, inst)->findITerm(s(term).c_str());
+  if (!t) throw std::runtime_error("no terminal " + s(inst) + "/" + s(term));
+  std::size_t k = 0;
+  for (odb::dbMPin* mp : t->getMTerm()->getMPins()) {
+    if (k++ != pin) continue;
+    odb::dbAccessPoint* p = nullptr;
+    if (ap >= 0) {
+      const auto pa = mp->getPinAccess();
+      if (pin_access_idx >= pa.size() || static_cast<std::size_t>(ap) >= pa[pin_access_idx].size()) {
+        throw std::runtime_error("no access point " + std::to_string(ap) + " on " + s(inst) + "/" + s(term));
+      }
+      p = pa[pin_access_idx][ap];
+    }
+    t->setAccessPoint(mp, p);
+    return;
+  }
+  throw std::runtime_error("no pin " + std::to_string(pin) + " of " + s(inst) + "/" + s(term));
+}
+
+void bpin_add_access_point(const OdbDb& h, rust::Str bterm, std::size_t pin, int32_t x, int32_t y, rust::Str layer, uint8_t accesses,
+                           int32_t low_type, int32_t high_type, rust::Slice<const rust::String> vias, rust::Slice<const int32_t> segs) {
+  odb::dbBTerm* bt = require_block(h)->findBTerm(s(bterm).c_str());
+  if (!bt) throw std::runtime_error("no block terminal " + s(bterm));
+  std::size_t k = 0;
+  for (odb::dbBPin* bp : bt->getBPins()) {
+    if (k++ != pin) continue;
+    fill_access_point(h, odb::dbAccessPoint::create(bp), x, y, layer, accesses, low_type, high_type, vias, segs);
+    return;
+  }
+  throw std::runtime_error("no pin " + std::to_string(pin) + " of " + s(bterm));
+}
+
 std::size_t block_access_point_count(const OdbDb& h) {
   dbBlock* b = require_block(h);
   std::size_t n = 0;

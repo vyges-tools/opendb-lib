@@ -5,7 +5,7 @@
   "scope": "hand-written core only",
   "class_count": 45,
   "method_count": 1178,
-  "bridged_count": 817,
+  "bridged_count": 819,
   "classes": [
     {
       "name": "dbBPin",
@@ -4314,7 +4314,7 @@
           ],
           "const": false,
           "kind": "setter",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "getPrefAccessPoints",
@@ -5370,7 +5370,7 @@
           "params": [],
           "const": true,
           "kind": "getter",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "clearPinAccess",

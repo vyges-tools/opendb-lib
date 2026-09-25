@@ -822,3 +822,15 @@ std::size_t block_access_point_count(const OdbDb& db);
 rust::Vec<int32_t> iterm_pref_access_points(const OdbDb& db, rust::Str inst, rust::Str pin);
 std::size_t iterm_access_point_count(const OdbDb& db, rust::Str inst, rust::Str pin);
 rust::Vec<int32_t> bpin_access_points(const OdbDb& db, rust::Str bterm, std::size_t pin);
+// Writing access points — what a pin-access analysis stores (`io::Writer::updateDbAccessPoints`):
+// per master pin and unique-class index, every access point (`dbAccessPoint::create(block, mpin,
+// idx)`: point relative to the class, layer, accesses, low/high cost type, single-cut tech vias,
+// path segments); per instance terminal pin its preferred point; per block pin its points.
+// (`dbMaster::clearPinAccess` and `dbInst::setPinAccessIdx` are generated setters, `gen-write`.) `accesses` bits: N 1, S 2, E 4, W 8, U 16, D 32 (the order the
+// writer sets them). `segs`: x0 y0 x1 y1 begin_trunc end_trunc per segment. Hand-written.
+int32_t mpin_add_access_point(const OdbDb& db, rust::Str master, rust::Str term, std::size_t pin, uint32_t pin_access_idx,
+                              int32_t x, int32_t y, rust::Str layer, uint8_t accesses, int32_t low_type, int32_t high_type,
+                              rust::Slice<const rust::String> vias, rust::Slice<const int32_t> segs);
+void iterm_set_access_point(const OdbDb& db, rust::Str inst, rust::Str term, std::size_t pin, uint32_t pin_access_idx, int32_t ap);
+void bpin_add_access_point(const OdbDb& db, rust::Str bterm, std::size_t pin, int32_t x, int32_t y, rust::Str layer, uint8_t accesses,
+                           int32_t low_type, int32_t high_type, rust::Slice<const rust::String> vias, rust::Slice<const int32_t> segs);

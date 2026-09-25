@@ -161,6 +161,10 @@ mod ffi {
         fn iterm_pref_access_points(db: &OdbDb, inst: &str, pin: &str) -> Result<Vec<i32>>;
         fn iterm_access_point_count(db: &OdbDb, inst: &str, pin: &str) -> Result<usize>;
         fn bpin_access_points(db: &OdbDb, bterm: &str, pin: usize) -> Result<Vec<i32>>;
+        // Writing access points -- see shim.h.
+        fn mpin_add_access_point(db: &OdbDb, master: &str, term: &str, pin: usize, pin_access_idx: u32, x: i32, y: i32, layer: &str, accesses: u8, low_type: i32, high_type: i32, vias: &[String], segs: &[i32]) -> Result<i32>;
+        fn iterm_set_access_point(db: &OdbDb, inst: &str, term: &str, pin: usize, pin_access_idx: u32, ap: i32) -> Result<()>;
+        fn bpin_add_access_point(db: &OdbDb, bterm: &str, pin: usize, x: i32, y: i32, layer: &str, accesses: u8, low_type: i32, high_type: i32, vias: &[String], segs: &[i32]) -> Result<()>;
         // Master enumeration + LEF master type -- see shim.h.
         fn num_masters(db: &OdbDb) -> Result<usize>;
         fn nth_master_name(db: &OdbDb, i: usize) -> Result<String>;
@@ -494,7 +498,7 @@ pub use ffi::{
     write_def, OdbDb,
     clear_rows, nth_site_name, num_rows, num_sites, row_create, tech_manufacturing_grid,
     site_row_pattern_len, site_row_pattern_orient, site_row_pattern_site,
-    block_cut_rows, block_cut_rows_at_blockages, group_get_type, has_one_site_master, nth_row_name, site_get_class, create_physical_inst, inst_bbox, master_placement_boundary, master_edge_type_names, master_edge_type_params, tech_cell_edge_spacing_types, tech_cell_edge_spacing_params, ndr_create, ndr_layer_rule_set, ndr_layer_rule_layers, ndr_layer_rule_params, block_access_point_count, iterm_pref_access_points, iterm_access_point_count, bpin_access_points, num_masters, nth_master_name, master_get_type,
+    block_cut_rows, block_cut_rows_at_blockages, group_get_type, has_one_site_master, nth_row_name, site_get_class, create_physical_inst, inst_bbox, master_placement_boundary, master_edge_type_names, master_edge_type_params, tech_cell_edge_spacing_types, tech_cell_edge_spacing_params, ndr_create, ndr_layer_rule_set, ndr_layer_rule_layers, ndr_layer_rule_params, block_access_point_count, iterm_pref_access_points, iterm_access_point_count, bpin_access_points, mpin_add_access_point, iterm_set_access_point, bpin_add_access_point, num_masters, nth_master_name, master_get_type,
     nth_row_bbox, nth_row_site, nth_row_orient, nth_row_direction, destroy_inst,
     inst_shapes, obstruction_boxes, fill_obstruction_boxes, blockage_boxes, swire_boxes, special_wire_boxes, wire_shape_type_name, blockage_create, num_blockages, blockage_destroy,
     fill_create, num_fills, clear_fills,
