@@ -719,6 +719,10 @@ rust::Vec<uint32_t> layer_v55_spacing_table(const OdbDb& db, rust::Str layer);
 rust::String net_first_driver_term(const OdbDb& db, rust::Str net);
 rust::Vec<int64_t> net_swire_expanded_boxes(const OdbDb& db, rust::Str net);
 std::size_t num_v54_spacing_rules(const OdbDb& h, rust::Str layer);
+// A LEF 5.4 spacing rule's END-OF-LINE clause (`dbTechLayerSpacingRule::getEol`): empty when it
+// has none, else width, within, has-parallel-edge (0/1), parallel space, parallel within,
+// two-edges (0/1). Hand-written.
+rust::Vec<int32_t> v54_spacing_rule_eol(const OdbDb& db, rust::Str layer, std::size_t idx);
 uint32_t v54_spacing_rule_adjacent_cuts(const OdbDb& h, rust::Str layer, std::size_t idx);
 int32_t v54_spacing_rule_adjacent_spacing(const OdbDb& h, rust::Str layer, std::size_t idx);
 bool v54_spacing_rule_adjacent_except_same_pgnet(const OdbDb& h, rust::Str layer, std::size_t idx);

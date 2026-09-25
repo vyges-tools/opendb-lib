@@ -5,7 +5,7 @@
   "scope": "hand-written core only",
   "class_count": 45,
   "method_count": 1178,
-  "bridged_count": 819,
+  "bridged_count": 820,
   "classes": [
     {
       "name": "dbBPin",
@@ -11287,7 +11287,7 @@
           ],
           "const": true,
           "kind": "other",
-          "bridged": false
+          "bridged": true
         }
       ],
       "hand_written": true

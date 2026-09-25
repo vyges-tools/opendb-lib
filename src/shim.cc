@@ -2699,6 +2699,19 @@ std::size_t num_v54_spacing_rules(const OdbDb& h, rust::Str layer) {
   return n;
 }
 
+rust::Vec<int32_t> v54_spacing_rule_eol(const OdbDb& h, rust::Str layer, std::size_t idx) {
+  rust::Vec<int32_t> out;
+  auto* r = v54_rule(h, layer, idx);
+  uint32_t width = 0, within = 0, par_space = 0, par_within = 0;
+  bool parallel = false, two_edges = false;
+  if (!r || !r->getEol(width, within, parallel, par_space, par_within, two_edges)) return out;
+  for (int32_t v : {static_cast<int32_t>(width), static_cast<int32_t>(within), static_cast<int32_t>(parallel),
+                    static_cast<int32_t>(par_space), static_cast<int32_t>(par_within), static_cast<int32_t>(two_edges)}) {
+    out.push_back(v);
+  }
+  return out;
+}
+
 // 0 where the rule carries no adjacent-cut clause at all.
 uint32_t v54_spacing_rule_adjacent_cuts(const OdbDb& h, rust::Str layer, std::size_t idx) {
   auto* r = v54_rule(h, layer, idx);

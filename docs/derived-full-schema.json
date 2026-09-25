@@ -5,7 +5,7 @@
   "scope": "all",
   "class_count": 122,
   "method_count": 2711,
-  "bridged_count": 1688,
+  "bridged_count": 1689,
   "classes": [
     {
       "name": "dbAccessPoint",
@@ -27382,7 +27382,7 @@
           ],
           "const": true,
           "kind": "other",
-          "bridged": false
+          "bridged": true
         }
       ],
       "hand_written": true
