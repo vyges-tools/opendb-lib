@@ -5,7 +5,7 @@
   "scope": "all",
   "class_count": 122,
   "method_count": 2711,
-  "bridged_count": 1689,
+  "bridged_count": 1704,
   "classes": [
     {
       "name": "dbAccessPoint",
@@ -17167,7 +17167,7 @@
           "params": [],
           "const": false,
           "kind": "iterator",
-          "bridged": false,
+          "bridged": true,
           "element": "dbMetalWidthViaMap"
         },
         {
@@ -17471,7 +17471,7 @@
           "params": [],
           "const": true,
           "kind": "iterator",
-          "bridged": false,
+          "bridged": true,
           "element": "dbTechLayerSpacingEolRule"
         },
         {
@@ -17489,7 +17489,7 @@
           "params": [],
           "const": true,
           "kind": "iterator",
-          "bridged": false,
+          "bridged": true,
           "element": "dbTechLayerMinStepRule"
         },
         {
@@ -17498,7 +17498,7 @@
           "params": [],
           "const": true,
           "kind": "iterator",
-          "bridged": false,
+          "bridged": true,
           "element": "dbTechLayerCornerSpacingRule"
         },
         {
@@ -17516,7 +17516,7 @@
           "params": [],
           "const": true,
           "kind": "iterator",
-          "bridged": false,
+          "bridged": true,
           "element": "dbTechLayerEolExtensionRule"
         },
         {
@@ -17534,7 +17534,7 @@
           "params": [],
           "const": true,
           "kind": "iterator",
-          "bridged": false,
+          "bridged": true,
           "element": "dbTechLayerEolKeepOutRule"
         },
         {
@@ -17561,7 +17561,7 @@
           "params": [],
           "const": true,
           "kind": "iterator",
-          "bridged": false,
+          "bridged": true,
           "element": "dbTechLayerMinCutRule"
         },
         {
@@ -17579,7 +17579,7 @@
           "params": [],
           "const": true,
           "kind": "iterator",
-          "bridged": false,
+          "bridged": true,
           "element": "dbTechLayerKeepOutZoneRule"
         },
         {
@@ -18065,7 +18065,7 @@
           "params": [],
           "const": false,
           "kind": "iterator",
-          "bridged": false,
+          "bridged": true,
           "element": "dbTechV55InfluenceEntry"
         },
         {
@@ -18302,7 +18302,7 @@
           "params": [],
           "const": false,
           "kind": "iterator",
-          "bridged": false,
+          "bridged": true,
           "element": "dbTechMinCutRule"
         },
         {
@@ -27037,7 +27037,7 @@
           ],
           "const": true,
           "kind": "other",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "getCutStacking",
@@ -27045,7 +27045,7 @@
           "params": [],
           "const": true,
           "kind": "getter",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "getCutCenterToCenter",
@@ -27053,7 +27053,7 @@
           "params": [],
           "const": true,
           "kind": "getter",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "getCutSameNet",
@@ -27061,7 +27061,7 @@
           "params": [],
           "const": true,
           "kind": "getter",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "getCutParallelOverlap",
@@ -27069,7 +27069,7 @@
           "params": [],
           "const": true,
           "kind": "getter",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "getCutArea",

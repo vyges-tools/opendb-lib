@@ -3230,6 +3230,20 @@ rust::Vec<int32_t> bpin_access_points(const OdbDb& h, rust::Str bterm, std::size
   return out;
 }
 
+rust::Vec<rust::String> net_guides(const OdbDb& h, rust::Str net) {
+  rust::Vec<rust::String> out;
+  odb::dbNet* n = require_block(h)->findNet(s(net).c_str());
+  if (!n) return out;
+  for (odb::dbGuide* g : n->getGuides()) {
+    const odb::Rect b = g->getBox();
+    const std::string via = g->getViaLayer() ? g->getViaLayer()->getName() : std::string();
+    out.push_back(rust::String(g->getLayer()->getName() + "," + via + "," + std::to_string(b.xMin()) + "," +
+                               std::to_string(b.yMin()) + "," + std::to_string(b.xMax()) + "," + std::to_string(b.yMax()) + "," +
+                               std::to_string(static_cast<int>(g->isCongested()))));
+  }
+  return out;
+}
+
 // ---- Writing access points (see shim.h) ----------------------------------------------------------
 static void fill_access_point(const OdbDb& h, odb::dbAccessPoint* ap, int32_t x, int32_t y, rust::Str layer, uint8_t accesses,
                               int32_t low_type, int32_t high_type, rust::Slice<const rust::String> vias,
@@ -3323,4 +3337,72 @@ std::size_t block_access_point_count(const OdbDb& h) {
     for (odb::dbBPin* bp : bt->getBPins()) n += bp->getAccessPoints().size();
   }
   return n;
+}
+
+rust::String layer_lef58_type(const OdbDb& h, rust::Str layer) {
+  odb::dbTech* tech = h.db->getTech();
+  odb::dbTechLayer* l = tech ? tech->findLayer(s(layer).c_str()) : nullptr;
+  if (!l) return rust::String("");
+  return rust::String(l->getLef58TypeString());
+}
+
+// The rule families a layer carries, for a consumer to refuse what it does not model: each
+// family present, as "family=count". LEF 5.4 cut spacing rules are split by their clauses (a
+// plain rule is "cut_spacing"); the technology-wide width-via map is reported on every layer it
+// names as its cut layer.
+rust::Vec<rust::String> layer_rule_census(const OdbDb& h, rust::Str layer) {
+  rust::Vec<rust::String> out;
+  odb::dbTech* tech = h.db->getTech();
+  odb::dbTechLayer* l = tech ? tech->findLayer(s(layer).c_str()) : nullptr;
+  if (!l) return out;
+  auto put = [&](const char* name, std::size_t n) {
+    if (n) out.push_back(rust::String(std::string(name) + "=" + std::to_string(n)));
+  };
+  auto count = [](auto set) {
+    std::size_t n = 0;
+    for (auto* r : set) {
+      (void) r;
+      n++;
+    }
+    return n;
+  };
+  put("min_step", l->hasMinStep() ? 1 : 0);
+  put("lef58_min_step", count(l->getTechLayerMinStepRules()));
+  put("min_cut", count(l->getMinCutRules()));
+  put("lef58_min_cut", count(l->getTechLayerMinCutRules()));
+  put("two_widths_spacing", l->hasTwoWidthsSpacingRules() ? 1 : 0);
+  put("v55_influence", count(l->getV55InfluenceRules()));
+  put("lef58_cut_class", count(l->getTechLayerCutClassRules()));
+  put("lef58_cut_spacing", count(l->getTechLayerCutSpacingRules()));
+  put("lef58_cut_spacing_table", count(l->getTechLayerCutSpacingTableDefRules()) + count(l->getTechLayerCutSpacingTableOrthRules()));
+  put("lef58_spacing_eol", count(l->getTechLayerSpacingEolRules()));
+  put("lef58_eol_keepout", count(l->getTechLayerEolKeepOutRules()));
+  put("lef58_eol_extension", count(l->getTechLayerEolExtensionRules()));
+  put("lef58_spacing_table_prl", count(l->getTechLayerSpacingTablePrlRules()));
+  put("lef58_corner_spacing", count(l->getTechLayerCornerSpacingRules()));
+  put("lef58_area", count(l->getTechLayerAreaRules()));
+  put("lef58_forbidden_spacing", count(l->getTechLayerForbiddenSpacingRules()));
+  put("lef58_keepout_zone", count(l->getTechLayerKeepOutZoneRules()));
+  std::size_t plain = 0, clause = 0;
+  if (l->getType() == odb::dbTechLayerType::CUT) {
+    for (auto* r : l->getV54SpacingRules()) {
+      odb::dbTechLayer* second = nullptr;
+      uint32_t numcuts = 0, within = 0, spacing = 0;
+      bool except = false;
+      if (r->getCutStacking() || r->getCutCenterToCenter() || r->getCutSameNet() || r->getCutParallelOverlap()
+          || r->getCutLayer4Spacing(second) || r->getAdjacentCuts(numcuts, within, spacing, except)) {
+        clause++;
+      } else {
+        plain++;
+      }
+    }
+  }
+  put("cut_spacing", plain);
+  put("cut_spacing_with_clauses", clause);
+  std::size_t wvm = 0;
+  for (auto* m : tech->getMetalWidthViaMap()) {
+    if (m->getCutLayer() == l) wvm++;
+  }
+  put("metal_width_via_map", wvm);
+  return out;
 }

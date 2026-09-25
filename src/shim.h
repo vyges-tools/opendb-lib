@@ -826,6 +826,13 @@ std::size_t block_access_point_count(const OdbDb& db);
 rust::Vec<int32_t> iterm_pref_access_points(const OdbDb& db, rust::Str inst, rust::Str pin);
 std::size_t iterm_access_point_count(const OdbDb& db, rust::Str inst, rust::Str pin);
 rust::Vec<int32_t> bpin_access_points(const OdbDb& db, rust::Str bterm, std::size_t pin);
+// A net's global-route guides, in stored order (`dbNet::getGuides`): each as
+// "layer,via_layer,xl,yl,xh,yh,congested". Hand-written.
+rust::Vec<rust::String> net_guides(const OdbDb& db, rust::Str net);
+// A layer's LEF58_TYPE ("NWELL", "PWELL", "DIFFUSION", ...; "NONE" when it has none).
+rust::String layer_lef58_type(const OdbDb& db, rust::Str layer);
+// Which rule families a layer carries, as "family=count" for each present (see shim.cc).
+rust::Vec<rust::String> layer_rule_census(const OdbDb& db, rust::Str layer);
 // Writing access points — what a pin-access analysis stores (`io::Writer::updateDbAccessPoints`):
 // per master pin and unique-class index, every access point (`dbAccessPoint::create(block, mpin,
 // idx)`: point relative to the class, layer, accesses, low/high cost type, single-cut tech vias,
