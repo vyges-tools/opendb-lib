@@ -814,11 +814,17 @@ rust::Vec<int32_t> width_table_rule_widths(const OdbDb& db, rust::Str layer, std
 //   ndr_layer_rule_params  2 per entry: width, spacing
 //   ndr_add_use_via        `addUseVia(tech via)` (create_ndr -via, in order). False when the rule
 //                          or the technology via is unknown.
+//   ndr_use_vias           `getUseVias`: the via names, in order
+//   ndr_use_via_rules      `getUseViaRules`: the via generate rule names, in order
+//   ndr_layer_rule_wire_exts  one `getWireExtension` per `getLayerRules` entry
 bool ndr_create(const OdbDb& db, rust::Str name);
 bool ndr_layer_rule_set(const OdbDb& db, rust::Str ndr, rust::Str layer, int32_t what, int32_t value);
 rust::Vec<rust::String> ndr_layer_rule_layers(const OdbDb& db, rust::Str ndr);
 rust::Vec<int32_t> ndr_layer_rule_params(const OdbDb& db, rust::Str ndr);
 bool ndr_add_use_via(const OdbDb& db, rust::Str ndr, rust::Str via);
+rust::Vec<rust::String> ndr_use_vias(const OdbDb& db, rust::Str ndr);
+rust::Vec<rust::String> ndr_use_via_rules(const OdbDb& db, rust::Str ndr);
+rust::Vec<int32_t> ndr_layer_rule_wire_exts(const OdbDb& db, rust::Str ndr);
 
 // How many access points the block's terminals carry: every instance terminal's preferred access
 // points (`dbITerm::getPrefAccessPoints`) plus every block pin's (`dbBPin::getAccessPoints`). grt

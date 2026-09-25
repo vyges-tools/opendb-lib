@@ -5,7 +5,7 @@
   "scope": "all",
   "class_count": 122,
   "method_count": 2711,
-  "bridged_count": 1706,
+  "bridged_count": 1708,
   "classes": [
     {
       "name": "dbAccessPoint",
@@ -28343,7 +28343,7 @@
           ],
           "const": false,
           "kind": "setter",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "addUseViaRule",
@@ -28369,7 +28369,7 @@
           ],
           "const": false,
           "kind": "setter",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "setMinCuts",

@@ -3171,6 +3171,33 @@ bool ndr_add_use_via(const OdbDb& h, rust::Str ndr, rust::Str via) {
   r->addUseVia(v);
   return true;
 }
+rust::Vec<rust::String> ndr_use_vias(const OdbDb& h, rust::Str ndr) {
+  rust::Vec<rust::String> out;
+  odb::dbTechNonDefaultRule* r = gen_ndr(h, ndr);
+  if (!r) return out;
+  std::vector<odb::dbTechVia*> vias;
+  r->getUseVias(vias);
+  for (odb::dbTechVia* v : vias) out.push_back(rust::String(v->getName()));
+  return out;
+}
+rust::Vec<rust::String> ndr_use_via_rules(const OdbDb& h, rust::Str ndr) {
+  rust::Vec<rust::String> out;
+  odb::dbTechNonDefaultRule* r = gen_ndr(h, ndr);
+  if (!r) return out;
+  std::vector<odb::dbTechViaGenerateRule*> rules;
+  r->getUseViaRules(rules);
+  for (odb::dbTechViaGenerateRule* g : rules) out.push_back(rust::String(g->getName()));
+  return out;
+}
+rust::Vec<int32_t> ndr_layer_rule_wire_exts(const OdbDb& h, rust::Str ndr) {
+  rust::Vec<int32_t> out;
+  odb::dbTechNonDefaultRule* r = gen_ndr(h, ndr);
+  if (!r) return out;
+  std::vector<odb::dbTechLayerRule*> rules;
+  r->getLayerRules(rules);
+  for (odb::dbTechLayerRule* lr : rules) out.push_back(lr->getWireExtension());
+  return out;
+}
 rust::Vec<rust::String> ndr_layer_rule_layers(const OdbDb& h, rust::Str ndr) {
   rust::Vec<rust::String> out;
   odb::dbTechNonDefaultRule* r = gen_ndr(h, ndr);

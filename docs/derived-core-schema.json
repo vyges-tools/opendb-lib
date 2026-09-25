@@ -5,7 +5,7 @@
   "scope": "hand-written core only",
   "class_count": 45,
   "method_count": 1178,
-  "bridged_count": 828,
+  "bridged_count": 830,
   "classes": [
     {
       "name": "dbBPin",
@@ -11620,7 +11620,7 @@
           ],
           "const": false,
           "kind": "setter",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "addUseViaRule",
@@ -11646,7 +11646,7 @@
           ],
           "const": false,
           "kind": "setter",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "setMinCuts",
