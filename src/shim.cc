@@ -3280,6 +3280,62 @@ rust::Vec<rust::String> net_guides(const OdbDb& h, rust::Str net) {
   return out;
 }
 
+rust::Vec<rust::String> net_wire_decode(const OdbDb& h, rust::Str net) {
+  rust::Vec<rust::String> out;
+  odb::dbNet* n = require_block(h)->findNet(s(net).c_str());
+  if (!n || !n->getWire()) return out;
+  odb::dbWireDecoder d;
+  d.begin(n->getWire());
+  odb::dbWireDecoder::OpCode op = d.next();
+  out.push_back(rust::String(std::string("T|") + d.getWireType().getString()));
+  const auto num = [](int v) { return std::to_string(v); };
+  while (true) {
+    std::string r = num(static_cast<int>(op));
+    switch (op) {
+      case odb::dbWireDecoder::PATH:
+      case odb::dbWireDecoder::JUNCTION:
+      case odb::dbWireDecoder::SHORT:
+      case odb::dbWireDecoder::VWIRE:
+        r += "|" + std::string(d.getLayer()->getName());
+        break;
+      case odb::dbWireDecoder::POINT: {
+        int x, y;
+        d.getPoint(x, y);
+        r += "|" + num(x) + "|" + num(y);
+        break;
+      }
+      case odb::dbWireDecoder::POINT_EXT: {
+        int x, y, e;
+        d.getPoint(x, y, e);
+        r += "|" + num(x) + "|" + num(y) + "|" + num(e);
+        break;
+      }
+      case odb::dbWireDecoder::VIA: {
+        odb::dbVia* v = d.getVia();
+        r += "|" + std::string(v->getName()) + "|" + v->getBottomLayer()->getName() + "|" + v->getTopLayer()->getName();
+        break;
+      }
+      case odb::dbWireDecoder::TECH_VIA: {
+        odb::dbTechVia* v = d.getTechVia();
+        r += "|" + std::string(v->getName()) + "|" + v->getBottomLayer()->getName() + "|" + v->getTopLayer()->getName();
+        break;
+      }
+      case odb::dbWireDecoder::RECT: {
+        int l, b, rr, t;
+        d.getRect(l, b, rr, t);
+        r += "|" + num(l) + "|" + num(b) + "|" + num(rr) + "|" + num(t);
+        break;
+      }
+      default:
+        break;
+    }
+    out.push_back(rust::String(r));
+    if (op == odb::dbWireDecoder::END_DECODE) break;
+    op = d.next();
+  }
+  return out;
+}
+
 // ---- Writing access points (see shim.h) ----------------------------------------------------------
 static void fill_access_point(const OdbDb& h, odb::dbAccessPoint* ap, int32_t x, int32_t y, rust::Str layer, uint8_t accesses,
                               int32_t low_type, int32_t high_type, rust::Slice<const rust::String> vias,

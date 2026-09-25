@@ -838,6 +838,12 @@ rust::Vec<int32_t> bpin_access_points(const OdbDb& db, rust::Str bterm, std::siz
 // A net's global-route guides, in stored order (`dbNet::getGuides`): each as
 // "layer,via_layer,xl,yl,xh,yh,congested". Hand-written.
 rust::Vec<rust::String> net_guides(const OdbDb& db, rust::Str net);
+// A net's routed wire as the wire DECODER walks it, one record per op: first `T|<wire type>` (read
+// after the first op, as the decoder reports it), then `<opcode>|fields` with opcodes numbered as
+// the decoder's (0 path, 1 junction, 2 short, 3 virtual wire: `|layer`; 4 point `|x|y`; 5 point with
+// extension `|x|y|ext`; 6 block via, 7 tech via: `|name|bottom layer|top layer`; 8 rect
+// `|l|b|r|t`; 9 iterm, 10 bterm, 11 rule), ending `12`. Empty for a net without a wire.
+rust::Vec<rust::String> net_wire_decode(const OdbDb& db, rust::Str net);
 // A layer's LEF58_TYPE ("NWELL", "PWELL", "DIFFUSION", ...; "NONE" when it has none).
 rust::String layer_lef58_type(const OdbDb& db, rust::Str layer);
 // Which rule families a layer carries, as "family=count" for each present (see shim.cc).
