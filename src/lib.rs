@@ -475,11 +475,55 @@ fn odb_log_sink_installed() -> bool {
     LOG_SINK.get().is_some()
 }
 
-/// Called from C++ per libodb log message; forwards to the installed sink (no-op if unset).
+/// Called from C++ per libodb log message; forwards to the installed sink (no-op if unset), and
+/// records warnings and errors for [`take_diagnostics`].
 #[cfg(unix)]
 fn odb_forward_log(level: i32, message: &str) {
+    if level >= SPDLOG_WARN {
+        if let Ok(mut d) = DIAGNOSTICS.lock() {
+            if d.len() == DIAGNOSTICS_CAP {
+                d.pop_front();
+            }
+            d.push_back((level, message.to_string()));
+        }
+    }
     if let Some(f) = LOG_SINK.get() {
         f(level, message);
+    }
+}
+
+/// spdlog's `warn` level; `err` and `critical` are above it.
+#[cfg(unix)]
+const SPDLOG_WARN: i32 = 3;
+#[cfg(unix)]
+const DIAGNOSTICS_CAP: usize = 4096;
+
+/// The warnings and errors libodb has logged since the last [`take_diagnostics`] /
+/// [`clear_diagnostics`], oldest first, as (spdlog level, formatted "[WARNING ODB-0092] …" text).
+///
+/// ⛔ **Why this exists.** `utl::Logger::error` logs the message and then throws an exception whose
+/// text is ONLY the code (`ODB-0421`), so a caller that reports the exception reports a bare code.
+/// Worse, the readers log the actual input mistakes as WARNINGS prefixed `error:` (`ODB-0092 error:
+/// unknown library cell referenced …`) and only then fail with a generic error (`ODB-0421 DEF parser
+/// returns an error!`). The cause is in the log, never in the exception. Recording is independent of
+/// where the log goes (stdout, events, nowhere); a capture (`log_capture_begin`) detaches the
+/// forwarder, so what is logged inside one is in the captured text instead.
+#[cfg(unix)]
+static DIAGNOSTICS: std::sync::Mutex<std::collections::VecDeque<(i32, String)>> =
+    std::sync::Mutex::new(std::collections::VecDeque::new());
+
+/// Drain the recorded warnings and errors (see [`DIAGNOSTICS`]).
+#[cfg(unix)]
+pub fn take_diagnostics() -> Vec<(i32, String)> {
+    DIAGNOSTICS.lock().map(|mut d| d.drain(..).collect()).unwrap_or_default()
+}
+
+/// Forget the recorded warnings and errors — at the start of an operation, so an earlier one's
+/// warnings are never reported as the cause of a later failure.
+#[cfg(unix)]
+pub fn clear_diagnostics() {
+    if let Ok(mut d) = DIAGNOSTICS.lock() {
+        d.clear();
     }
 }
 
