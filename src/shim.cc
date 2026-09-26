@@ -3564,6 +3564,22 @@ void block_set_gcell_grid(const OdbDb& h, int32_t x0, int32_t nx, int32_t sx, in
   g->addGridPatternY(y0, ny, sy);
 }
 
+// The block's gcell grid, REPLACED: get or create it, resetGrid() (which clears the patterns and
+// the congestion map), then one pattern per axis -- global routing's updateDbCongestion (FastRoute
+// and CUGR alike) writes it this way after every route. Unlike block_set_gcell_grid, a grid already
+// present is replaced, not refused: a database a previous route wrote carries one.
+void block_reset_gcell_grid(const OdbDb& h, int32_t x0, int32_t nx, int32_t sx, int32_t y0, int32_t ny, int32_t sy) {
+  dbBlock* b = require_block(h);
+  odb::dbGCellGrid* g = b->getGCellGrid();
+  if (g) {
+    g->resetGrid();
+  } else {
+    g = odb::dbGCellGrid::create(b);
+  }
+  g->addGridPatternX(x0, nx, sx);
+  g->addGridPatternY(y0, ny, sy);
+}
+
 std::size_t block_access_point_count(const OdbDb& h) {
   dbBlock* b = require_block(h);
   std::size_t n = 0;
