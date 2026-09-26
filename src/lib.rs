@@ -447,19 +447,32 @@ mod ffi {
     // (which owns vyges-events), keeping this low-level crate free of that dependency.
     extern "Rust" {
         fn odb_forward_log(level: i32, message: &str);
+        /// Whether an events sink is installed — a database created after it logs EVENTS-ONLY.
+        fn odb_log_sink_installed() -> bool;
     }
 }
 
 /// The installed forwarder for libodb log messages (level, formatted "[INFO ODB-0127] …" text).
 /// `None` until the engine calls [`set_log_sink`]; unset = libodb logs go only to its own stdout.
+/// Set = a database created afterwards logs only here (see [`set_log_sink`]).
 #[cfg(unix)]
 static LOG_SINK: std::sync::OnceLock<fn(i32, &str)> = std::sync::OnceLock::new();
 
 /// Install the sink that receives libodb's native log messages (the opendb crate points this at a
 /// `vyges-events` emitter). Idempotent — only the first call wins.
+///
+/// ⛔ Call it BEFORE creating a database: a database created afterwards logs EVENTS-ONLY (libodb's
+/// stdout sink detached, so stdout stays machine-readable); one created before keeps writing to
+/// stdout as well.
 #[cfg(unix)]
 pub fn set_log_sink(f: fn(i32, &str)) {
     let _ = LOG_SINK.set(f);
+}
+
+/// Called from C++ when a database is created: an installed sink means events-only logging.
+#[cfg(unix)]
+fn odb_log_sink_installed() -> bool {
+    LOG_SINK.get().is_some()
 }
 
 /// Called from C++ per libodb log message; forwards to the installed sink (no-op if unset).

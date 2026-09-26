@@ -63,18 +63,36 @@ static dbITerm* require_iterm(const OdbDb& h, rust::Str inst, rust::Str pin) {
 // Rust forwarder, which hands it to the installed events sink. Added alongside utl's default stdout
 // sink (so nothing that already worked breaks); the forwarder is a no-op until the engine installs
 // a sink, so this is free when unused.
-static void install_log_forwarding(utl::Logger& logger) {
-  logger.addSink(std::make_shared<spdlog::sinks::callback_sink_mt>(
+//
+// ⛔ Once the engine HAS installed a sink (`init_events_logging`), the stdout sink must go: libodb
+// writes "[INFO ODB-…]" lines to STDOUT, and an engine's stdout is the JSON report its caller
+// parses. utl::Logger gives no handle on that sink, so the logger is put in a permanent string
+// redirect (which detaches every sink) and the forwarder is re-attached on top. Diagnostics then
+// reach the events trail (stderr) and nothing else. The redirect's own buffer keeps the text; it is
+// small (libodb's diagnostics, not the engine's output) and dropped on every capture.
+static void enter_events_only(OdbDb& h) {
+  h.logger.redirectStringBegin();
+  h.logger.removeSink(h.forwarder);  // from the saved list, so re-adding does not duplicate it
+  h.logger.addSink(h.forwarder);     // onto the redirected logger (and back into the saved list)
+  h.events_only = true;
+}
+
+static void install_log_forwarding(OdbDb& h) {
+  h.forwarder = std::make_shared<spdlog::sinks::callback_sink_mt>(
       [](const spdlog::details::log_msg& m) {
         odb_forward_log(static_cast<int32_t>(m.level),
                         rust::Str(m.payload.data(), m.payload.size()));
-      }));
+      });
+  h.logger.addSink(h.forwarder);
+  if (odb_log_sink_installed()) {
+    enter_events_only(h);
+  }
 }
 
 // ---- open / write ------------------------------------------------------------
 std::unique_ptr<OdbDb> open_db(rust::Str path) {
   auto h = std::make_unique<OdbDb>();
-  install_log_forwarding(h->logger);
+  install_log_forwarding(*h);
   std::string p = s(path);
   std::ifstream in(p, std::ios::binary);
   if (!in) throw std::runtime_error("vyges-opendb: cannot open " + p);
@@ -787,7 +805,13 @@ void chip_path_create(const OdbDb& h, rust::Str chip, rust::Str name) {
     throw std::runtime_error("vyges-opendb: chip_path_create failed: " + s(name));
 }
 
-std::unique_ptr<OdbDb> new_db() { return std::make_unique<OdbDb>(); }
+// ⚠️ A new database forwards its logs too. It did not, so everything read into one — every engine's
+// LEF and DEF — bypassed the events trail and wrote to stdout even with a sink installed.
+std::unique_ptr<OdbDb> new_db() {
+  auto h = std::make_unique<OdbDb>();
+  install_log_forwarding(*h);
+  return h;
+}
 
 void tech_from_lef(const OdbDb& h, rust::Str name, rust::Str lef_path) {
   // A .3dbv points each chiplet at its own APR_tech_file, and a per-chip dbTech is the whole
@@ -988,10 +1012,22 @@ void log_capture_begin(const OdbDb& h) {
   // human-readable text goes. utl::Logger's redirect detaches every sink for the duration --
   // including our events forwarder -- and restores them on end, so diagnostics emitted while
   // captured reach the events trail only via whatever the caller does with the returned text.
-  const_cast<utl::Logger&>(h.logger).redirectStringBegin();
+  //
+  // Events-only: leave the permanent redirect first (a second redirect is an error in utl), then
+  // capture as usual — which detaches the forwarder, as it always has.
+  auto& m = const_cast<OdbDb&>(h);
+  if (m.events_only) {
+    m.logger.redirectStringEnd();
+  }
+  m.logger.redirectStringBegin();
 }
 rust::String log_capture_end(const OdbDb& h) {
-  return rust::String(const_cast<utl::Logger&>(h.logger).redirectStringEnd());
+  auto& m = const_cast<OdbDb&>(h);
+  rust::String out(m.logger.redirectStringEnd());
+  if (m.events_only) {
+    enter_events_only(m);
+  }
+  return out;
 }
 void eco_begin(const OdbDb& h) { odb::dbDatabase::beginEco(require_block(h)); }
 void eco_end(const OdbDb& h) { odb::dbDatabase::endEco(require_block(h)); }

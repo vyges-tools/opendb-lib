@@ -15,6 +15,10 @@
 struct OdbDb {
   utl::Logger logger;
   odb::dbDatabase* db;
+  // The events forwarder (see install_log_forwarding), and whether this logger runs EVENTS-ONLY:
+  // libodb's own stdout sink detached, so its diagnostics reach the events trail and nothing else.
+  spdlog::sink_ptr forwarder;
+  bool events_only = false;
   OdbDb() : db(odb::dbDatabase::create()) { db->setLogger(&logger); }
 };
 
