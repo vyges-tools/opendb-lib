@@ -878,4 +878,5 @@ void block_create_via(const OdbDb& db, rust::Str name, rust::Str layer1, rust::S
 // The block's gcell grid set to one uniform pattern per axis (origin, count, step): created
 // when absent, kept when identical, refused when different (libodb cannot remove one).
 void block_set_gcell_grid(const OdbDb& db, int32_t x0, int32_t nx, int32_t sx, int32_t y0, int32_t ny, int32_t sy);
+rust::Vec<int64_t> layer_min_enclosed_areas(const OdbDb& db, rust::Str layer);  // MINENCLOSEDAREA rules without a width
 void block_reset_gcell_grid(const OdbDb& db, int32_t x0, int32_t nx, int32_t sx, int32_t y0, int32_t ny, int32_t sy);  // resetGrid + one pattern per axis

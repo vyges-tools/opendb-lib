@@ -3580,6 +3580,26 @@ void block_reset_gcell_grid(const OdbDb& h, int32_t x0, int32_t nx, int32_t sx, 
   g->addGridPatternY(y0, ny, sy);
 }
 
+// A routing layer's MINENCLOSEDAREA rules, as the detailed router keeps them (io::Parser): the area
+// of each rule WITHOUT a width -- a rule with one is skipped there ("not supported", DRT-139).
+// Empty when the layer has none or is not found.
+rust::Vec<int64_t> layer_min_enclosed_areas(const OdbDb& h, rust::Str layer) {
+  rust::Vec<int64_t> out;
+  odb::dbTech* tech = h.db->getTech();
+  odb::dbTechLayer* l = tech ? tech->findLayer(s(layer).c_str()) : nullptr;
+  if (!l) return out;
+  std::vector<odb::dbTechMinEncRule*> rules;
+  l->getMinEnclosureRules(rules);
+  for (odb::dbTechMinEncRule* r : rules) {
+    uint32_t width = 0;
+    if (r->getEnclosureWidth(width)) continue;
+    int64_t area = 0;
+    r->getEnclosure(area);
+    out.push_back(area);
+  }
+  return out;
+}
+
 std::size_t block_access_point_count(const OdbDb& h) {
   dbBlock* b = require_block(h);
   std::size_t n = 0;
