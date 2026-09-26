@@ -5,7 +5,7 @@
   "scope": "all",
   "class_count": 122,
   "method_count": 2711,
-  "bridged_count": 1708,
+  "bridged_count": 1710,
   "classes": [
     {
       "name": "dbAccessPoint",
@@ -18294,7 +18294,7 @@
           ],
           "const": false,
           "kind": "other",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "getMinCutRules",
@@ -28181,7 +28181,7 @@
           ],
           "const": true,
           "kind": "other",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "setEnclosureWidth",

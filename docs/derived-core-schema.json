@@ -5,7 +5,7 @@
   "scope": "hand-written core only",
   "class_count": 45,
   "method_count": 1178,
-  "bridged_count": 830,
+  "bridged_count": 831,
   "classes": [
     {
       "name": "dbBPin",
@@ -11458,7 +11458,7 @@
           ],
           "const": true,
           "kind": "other",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "setEnclosureWidth",
