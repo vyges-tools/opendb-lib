@@ -17,44 +17,62 @@ mod ffi_gen {
         fn block_get_top_module(db: &OdbDb) -> String;
         fn num_block_get_children(db: &OdbDb) -> usize;
         fn nth_block_get_children(db: &OdbDb, i: usize) -> String;
+        fn all_block_get_children(db: &OdbDb) -> Vec<String>;
         fn num_block_get_b_terms(db: &OdbDb) -> usize;
         fn nth_block_get_b_terms(db: &OdbDb, i: usize) -> String;
+        fn all_block_get_b_terms(db: &OdbDb) -> Vec<String>;
         fn num_block_get_i_terms(db: &OdbDb) -> usize;
         fn nth_block_get_i_terms(db: &OdbDb, i: usize) -> String;
+        fn all_block_get_i_terms(db: &OdbDb) -> Vec<String>;
         fn num_block_get_insts(db: &OdbDb) -> usize;
         fn nth_block_get_insts(db: &OdbDb, i: usize) -> String;
+        fn all_block_get_insts(db: &OdbDb) -> Vec<String>;
         fn num_block_get_modules(db: &OdbDb) -> usize;
         fn nth_block_get_modules(db: &OdbDb, i: usize) -> String;
+        fn all_block_get_modules(db: &OdbDb) -> Vec<String>;
         fn num_block_get_mod_insts(db: &OdbDb) -> usize;
         fn nth_block_get_mod_insts(db: &OdbDb, i: usize) -> String;
+        fn all_block_get_mod_insts(db: &OdbDb) -> Vec<String>;
         fn num_block_get_mod_nets(db: &OdbDb) -> usize;
         fn nth_block_get_mod_nets(db: &OdbDb, i: usize) -> String;
+        fn all_block_get_mod_nets(db: &OdbDb) -> Vec<String>;
         fn num_block_get_mod_b_terms(db: &OdbDb) -> usize;
         fn nth_block_get_mod_b_terms(db: &OdbDb, i: usize) -> String;
+        fn all_block_get_mod_b_terms(db: &OdbDb) -> Vec<String>;
         fn num_block_get_mod_i_terms(db: &OdbDb) -> usize;
         fn nth_block_get_mod_i_terms(db: &OdbDb, i: usize) -> String;
+        fn all_block_get_mod_i_terms(db: &OdbDb) -> Vec<String>;
         fn num_block_get_power_domains(db: &OdbDb) -> usize;
         fn nth_block_get_power_domains(db: &OdbDb, i: usize) -> String;
+        fn all_block_get_power_domains(db: &OdbDb) -> Vec<String>;
         fn num_block_get_logic_ports(db: &OdbDb) -> usize;
         fn nth_block_get_logic_ports(db: &OdbDb, i: usize) -> String;
+        fn all_block_get_logic_ports(db: &OdbDb) -> Vec<String>;
         fn num_block_get_power_switches(db: &OdbDb) -> usize;
         fn nth_block_get_power_switches(db: &OdbDb, i: usize) -> String;
+        fn all_block_get_power_switches(db: &OdbDb) -> Vec<String>;
         fn num_block_get_isolations(db: &OdbDb) -> usize;
         fn nth_block_get_isolations(db: &OdbDb, i: usize) -> String;
+        fn all_block_get_isolations(db: &OdbDb) -> Vec<String>;
         fn num_block_get_level_shifters(db: &OdbDb) -> usize;
         fn nth_block_get_level_shifters(db: &OdbDb, i: usize) -> String;
+        fn all_block_get_level_shifters(db: &OdbDb) -> Vec<String>;
         fn num_block_get_groups(db: &OdbDb) -> usize;
         fn nth_block_get_groups(db: &OdbDb, i: usize) -> String;
+        fn all_block_get_groups(db: &OdbDb) -> Vec<String>;
         fn num_block_get_component_mask_shift(db: &OdbDb) -> usize;
         fn nth_block_get_component_mask_shift(db: &OdbDb, i: usize) -> String;
+        fn all_block_get_component_mask_shift(db: &OdbDb) -> Vec<String>;
         fn num_block_get_obstructions(db: &OdbDb) -> usize;
         fn num_block_get_blockages(db: &OdbDb) -> usize;
         fn num_block_get_nets(db: &OdbDb) -> usize;
         fn nth_block_get_nets(db: &OdbDb, i: usize) -> String;
+        fn all_block_get_nets(db: &OdbDb) -> Vec<String>;
         fn num_block_get_cap_nodes(db: &OdbDb) -> usize;
         fn num_block_get_r_segs(db: &OdbDb) -> usize;
         fn num_block_get_vias(db: &OdbDb) -> usize;
         fn nth_block_get_vias(db: &OdbDb, i: usize) -> String;
+        fn all_block_get_vias(db: &OdbDb) -> Vec<String>;
         fn block_get_def_units(db: &OdbDb) -> i32;
         fn block_get_db_units_per_micron(db: &OdbDb) -> i32;
         fn block_get_corner_count(db: &OdbDb) -> i32;
@@ -64,6 +82,7 @@ mod ffi_gen {
         fn num_block_get_track_grids(db: &OdbDb) -> usize;
         fn num_block_get_rows(db: &OdbDb) -> usize;
         fn nth_block_get_rows(db: &OdbDb, i: usize) -> String;
+        fn all_block_get_rows(db: &OdbDb) -> Vec<String>;
         fn num_block_get_fills(db: &OdbDb) -> usize;
         fn block_get_die_area_x_min(db: &OdbDb) -> i32;
         fn block_get_die_area_y_min(db: &OdbDb) -> i32;
@@ -85,10 +104,13 @@ mod ffi_gen {
         fn num_block_get_c_c_segs(db: &OdbDb) -> usize;
         fn num_block_get_regions(db: &OdbDb) -> usize;
         fn nth_block_get_regions(db: &OdbDb, i: usize) -> String;
+        fn all_block_get_regions(db: &OdbDb) -> Vec<String>;
         fn num_block_get_non_default_rules(db: &OdbDb) -> usize;
         fn nth_block_get_non_default_rules(db: &OdbDb, i: usize) -> String;
+        fn all_block_get_non_default_rules(db: &OdbDb) -> Vec<String>;
         fn num_block_get_marker_categories(db: &OdbDb) -> usize;
         fn nth_block_get_marker_categories(db: &OdbDb, i: usize) -> String;
+        fn all_block_get_marker_categories(db: &OdbDb) -> Vec<String>;
         fn block_get_ext_count_num_of_net(db: &OdbDb) -> i32;
         fn block_get_ext_count_num_of_r_seg(db: &OdbDb) -> i32;
         fn block_get_ext_count_num_of_cap_node(db: &OdbDb) -> i32;
@@ -115,6 +137,7 @@ mod ffi_gen {
         fn inst_get_group(db: &OdbDb, inst: &str) -> String;
         fn num_inst_get_i_terms(db: &OdbDb, inst: &str) -> usize;
         fn nth_inst_get_i_terms(db: &OdbDb, inst: &str, i: usize) -> String;
+        fn all_inst_get_i_terms(db: &OdbDb, inst: &str) -> Vec<String>;
         fn inst_get_first_input(db: &OdbDb, inst: &str) -> String;
         fn inst_get_first_output(db: &OdbDb, inst: &str) -> String;
         fn inst_get_region(db: &OdbDb, inst: &str) -> String;
@@ -123,6 +146,7 @@ mod ffi_gen {
         fn inst_get_parent(db: &OdbDb, inst: &str) -> String;
         fn num_inst_get_children(db: &OdbDb, inst: &str) -> usize;
         fn nth_inst_get_children(db: &OdbDb, inst: &str, i: usize) -> String;
+        fn all_inst_get_children(db: &OdbDb, inst: &str) -> Vec<String>;
         fn inst_is_hierarchical(db: &OdbDb, inst: &str) -> bool;
         fn inst_is_physical_only(db: &OdbDb, inst: &str) -> bool;
         fn inst_get_transformed_halo_x_min(db: &OdbDb, inst: &str) -> i32;
@@ -161,11 +185,13 @@ mod ffi_gen {
         fn net_get_block(db: &OdbDb, net: &str) -> String;
         fn num_net_get_i_terms(db: &OdbDb, net: &str) -> usize;
         fn nth_net_get_i_terms(db: &OdbDb, net: &str, i: usize) -> String;
+        fn all_net_get_i_terms(db: &OdbDb, net: &str) -> Vec<String>;
         fn net_get1st_i_term(db: &OdbDb, net: &str) -> String;
         fn net_get_first_driver_inst(db: &OdbDb, net: &str) -> String;
         fn net_get_first_output(db: &OdbDb, net: &str) -> String;
         fn num_net_get_b_terms(db: &OdbDb, net: &str) -> usize;
         fn nth_net_get_b_terms(db: &OdbDb, net: &str, i: usize) -> String;
+        fn all_net_get_b_terms(db: &OdbDb, net: &str) -> Vec<String>;
         fn net_get1st_b_term(db: &OdbDb, net: &str) -> String;
         fn num_net_get_s_wires(db: &OdbDb, net: &str) -> usize;
         fn net_is_connected_by_abutment(db: &OdbDb, net: &str) -> bool;
@@ -255,6 +281,7 @@ mod ffi_gen {
         fn master_get_symmetry_r90(db: &OdbDb, master: &str) -> bool;
         fn num_master_get_m_terms(db: &OdbDb, master: &str) -> usize;
         fn nth_master_get_m_terms(db: &OdbDb, master: &str, i: usize) -> String;
+        fn all_master_get_m_terms(db: &OdbDb, master: &str) -> Vec<String>;
         fn master_get_lib(db: &OdbDb, master: &str) -> String;
         fn master_is_frozen(db: &OdbDb, master: &str) -> bool;
         fn master_is_sequential(db: &OdbDb, master: &str) -> bool;
@@ -305,6 +332,7 @@ mod ffi_gen {
         fn layer_get_layer_adjustment(db: &OdbDb, layer: &str) -> f32;
         fn num_layer_get_tech_layer_cut_class_rules(db: &OdbDb, layer: &str) -> usize;
         fn nth_layer_get_tech_layer_cut_class_rules(db: &OdbDb, layer: &str, i: usize) -> String;
+        fn all_layer_get_tech_layer_cut_class_rules(db: &OdbDb, layer: &str) -> Vec<String>;
         fn num_layer_get_tech_layer_cut_spacing_rules(db: &OdbDb, layer: &str) -> usize;
         fn num_layer_get_tech_layer_cut_enclosure_rules(db: &OdbDb, layer: &str) -> usize;
         fn layer_is_rect_only(db: &OdbDb, layer: &str) -> bool;
@@ -486,18 +514,25 @@ mod ffi_gen {
         fn module_get_owner(db: &OdbDb, module: &str) -> String;
         fn num_module_get_children(db: &OdbDb, module: &str) -> usize;
         fn nth_module_get_children(db: &OdbDb, module: &str, i: usize) -> String;
+        fn all_module_get_children(db: &OdbDb, module: &str) -> Vec<String>;
         fn num_module_get_mod_insts(db: &OdbDb, module: &str) -> usize;
         fn nth_module_get_mod_insts(db: &OdbDb, module: &str, i: usize) -> String;
+        fn all_module_get_mod_insts(db: &OdbDb, module: &str) -> Vec<String>;
         fn num_module_get_mod_nets(db: &OdbDb, module: &str) -> usize;
         fn nth_module_get_mod_nets(db: &OdbDb, module: &str, i: usize) -> String;
+        fn all_module_get_mod_nets(db: &OdbDb, module: &str) -> Vec<String>;
         fn num_module_get_ports(db: &OdbDb, module: &str) -> usize;
         fn nth_module_get_ports(db: &OdbDb, module: &str, i: usize) -> String;
+        fn all_module_get_ports(db: &OdbDb, module: &str) -> Vec<String>;
         fn num_module_get_mod_b_terms(db: &OdbDb, module: &str) -> usize;
         fn nth_module_get_mod_b_terms(db: &OdbDb, module: &str, i: usize) -> String;
+        fn all_module_get_mod_b_terms(db: &OdbDb, module: &str) -> Vec<String>;
         fn num_module_get_insts(db: &OdbDb, module: &str) -> usize;
         fn nth_module_get_insts(db: &OdbDb, module: &str, i: usize) -> String;
+        fn all_module_get_insts(db: &OdbDb, module: &str) -> Vec<String>;
         fn num_module_get_leaf_insts(db: &OdbDb, module: &str) -> usize;
         fn nth_module_get_leaf_insts(db: &OdbDb, module: &str, i: usize) -> String;
+        fn all_module_get_leaf_insts(db: &OdbDb, module: &str) -> Vec<String>;
         fn module_get_mod_inst_count(db: &OdbDb, module: &str) -> i32;
         fn module_get_db_inst_count(db: &OdbDb, module: &str) -> i32;
         fn module_is_top(db: &OdbDb, module: &str) -> bool;
@@ -506,21 +541,28 @@ mod ffi_gen {
         fn group_get_region(db: &OdbDb, group: &str) -> String;
         fn num_group_get_mod_insts(db: &OdbDb, group: &str) -> usize;
         fn nth_group_get_mod_insts(db: &OdbDb, group: &str, i: usize) -> String;
+        fn all_group_get_mod_insts(db: &OdbDb, group: &str) -> Vec<String>;
         fn num_group_get_insts(db: &OdbDb, group: &str) -> usize;
         fn nth_group_get_insts(db: &OdbDb, group: &str, i: usize) -> String;
+        fn all_group_get_insts(db: &OdbDb, group: &str) -> Vec<String>;
         fn num_group_get_groups(db: &OdbDb, group: &str) -> usize;
         fn nth_group_get_groups(db: &OdbDb, group: &str, i: usize) -> String;
+        fn all_group_get_groups(db: &OdbDb, group: &str) -> Vec<String>;
         fn num_group_get_power_nets(db: &OdbDb, group: &str) -> usize;
         fn nth_group_get_power_nets(db: &OdbDb, group: &str, i: usize) -> String;
+        fn all_group_get_power_nets(db: &OdbDb, group: &str) -> Vec<String>;
         fn num_group_get_ground_nets(db: &OdbDb, group: &str) -> usize;
         fn nth_group_get_ground_nets(db: &OdbDb, group: &str, i: usize) -> String;
+        fn all_group_get_ground_nets(db: &OdbDb, group: &str) -> Vec<String>;
         fn region_get_name(db: &OdbDb, region: &str) -> String;
         fn num_region_get_region_insts(db: &OdbDb, region: &str) -> usize;
         fn nth_region_get_region_insts(db: &OdbDb, region: &str, i: usize) -> String;
+        fn all_region_get_region_insts(db: &OdbDb, region: &str) -> Vec<String>;
         fn region_is_invalid(db: &OdbDb, region: &str) -> bool;
         fn num_region_get_boundaries(db: &OdbDb, region: &str) -> usize;
         fn num_region_get_groups(db: &OdbDb, region: &str) -> usize;
         fn nth_region_get_groups(db: &OdbDb, region: &str, i: usize) -> String;
+        fn all_region_get_groups(db: &OdbDb, region: &str) -> Vec<String>;
         fn region_get_block(db: &OdbDb, region: &str) -> String;
         fn blockage_get_instance(db: &OdbDb, idx: usize) -> String;
         fn blockage_is_pushed_down(db: &OdbDb, idx: usize) -> bool;
@@ -540,8 +582,10 @@ mod ffi_gen {
         fn marker_cat_get_max_markers(db: &OdbDb, category: &str) -> i32;
         fn num_marker_cat_get_markers(db: &OdbDb, category: &str) -> usize;
         fn nth_marker_cat_get_markers(db: &OdbDb, category: &str, i: usize) -> String;
+        fn all_marker_cat_get_markers(db: &OdbDb, category: &str) -> Vec<String>;
         fn num_marker_cat_get_marker_categories(db: &OdbDb, category: &str) -> usize;
         fn nth_marker_cat_get_marker_categories(db: &OdbDb, category: &str, i: usize) -> String;
+        fn all_marker_cat_get_marker_categories(db: &OdbDb, category: &str) -> Vec<String>;
         fn marker_cat_get_top_category(db: &OdbDb, category: &str) -> String;
         fn marker_cat_get_source(db: &OdbDb, category: &str) -> String;
         fn marker_cat_get_marker_count(db: &OdbDb, category: &str) -> i32;
@@ -566,15 +610,20 @@ mod ffi_gen {
         fn modinst_get_hierarchical_name(db: &OdbDb, path: &str) -> String;
         fn num_modinst_get_mod_i_terms(db: &OdbDb, path: &str) -> usize;
         fn nth_modinst_get_mod_i_terms(db: &OdbDb, path: &str, i: usize) -> String;
+        fn all_modinst_get_mod_i_terms(db: &OdbDb, path: &str) -> Vec<String>;
         fn modnet_get_parent(db: &OdbDb, name: &str) -> String;
         fn num_modnet_get_mod_i_terms(db: &OdbDb, name: &str) -> usize;
         fn nth_modnet_get_mod_i_terms(db: &OdbDb, name: &str, i: usize) -> String;
+        fn all_modnet_get_mod_i_terms(db: &OdbDb, name: &str) -> Vec<String>;
         fn num_modnet_get_mod_b_terms(db: &OdbDb, name: &str) -> usize;
         fn nth_modnet_get_mod_b_terms(db: &OdbDb, name: &str, i: usize) -> String;
+        fn all_modnet_get_mod_b_terms(db: &OdbDb, name: &str) -> Vec<String>;
         fn num_modnet_get_i_terms(db: &OdbDb, name: &str) -> usize;
         fn nth_modnet_get_i_terms(db: &OdbDb, name: &str, i: usize) -> String;
+        fn all_modnet_get_i_terms(db: &OdbDb, name: &str) -> Vec<String>;
         fn num_modnet_get_b_terms(db: &OdbDb, name: &str) -> usize;
         fn nth_modnet_get_b_terms(db: &OdbDb, name: &str, i: usize) -> String;
+        fn all_modnet_get_b_terms(db: &OdbDb, name: &str) -> Vec<String>;
         fn modnet_get_name(db: &OdbDb, name: &str) -> String;
         fn modnet_get_const_name(db: &OdbDb, name: &str) -> String;
         fn modnet_get_hierarchical_name(db: &OdbDb, name: &str) -> String;
@@ -583,8 +632,10 @@ mod ffi_gen {
         fn modnet_is_connected_to_output_port(db: &OdbDb, name: &str) -> bool;
         fn num_modnet_get_next_mod_nets_in_fanin(db: &OdbDb, name: &str) -> usize;
         fn nth_modnet_get_next_mod_nets_in_fanin(db: &OdbDb, name: &str, i: usize) -> String;
+        fn all_modnet_get_next_mod_nets_in_fanin(db: &OdbDb, name: &str) -> Vec<String>;
         fn num_modnet_get_next_mod_nets_in_fanout(db: &OdbDb, name: &str) -> usize;
         fn nth_modnet_get_next_mod_nets_in_fanout(db: &OdbDb, name: &str, i: usize) -> String;
+        fn all_modnet_get_next_mod_nets_in_fanout(db: &OdbDb, name: &str) -> Vec<String>;
         fn modnet_get_first_parent_mod_net(db: &OdbDb, name: &str) -> String;
         fn modbterm_get_name(db: &OdbDb, module: &str, idx: usize) -> String;
         fn modbterm_get_parent(db: &OdbDb, module: &str, idx: usize) -> String;
@@ -607,10 +658,13 @@ mod ffi_gen {
         fn pwr_domain_get_voltage(db: &OdbDb, name: &str) -> f32;
         fn num_pwr_domain_get_power_switches(db: &OdbDb, name: &str) -> usize;
         fn nth_pwr_domain_get_power_switches(db: &OdbDb, name: &str, i: usize) -> String;
+        fn all_pwr_domain_get_power_switches(db: &OdbDb, name: &str) -> Vec<String>;
         fn num_pwr_domain_get_isolations(db: &OdbDb, name: &str) -> usize;
         fn nth_pwr_domain_get_isolations(db: &OdbDb, name: &str, i: usize) -> String;
+        fn all_pwr_domain_get_isolations(db: &OdbDb, name: &str) -> Vec<String>;
         fn num_pwr_domain_get_level_shifters(db: &OdbDb, name: &str) -> usize;
         fn nth_pwr_domain_get_level_shifters(db: &OdbDb, name: &str, i: usize) -> String;
+        fn all_pwr_domain_get_level_shifters(db: &OdbDb, name: &str) -> Vec<String>;
         fn pwr_switch_get_name(db: &OdbDb, name: &str) -> String;
         fn pwr_switch_get_power_domain(db: &OdbDb, name: &str) -> String;
         fn pwr_switch_get_lib_cell(db: &OdbDb, name: &str) -> String;
@@ -623,6 +677,7 @@ mod ffi_gen {
         fn isolation_get_power_domain(db: &OdbDb, name: &str) -> String;
         fn num_isolation_get_isolation_cells(db: &OdbDb, name: &str) -> usize;
         fn nth_isolation_get_isolation_cells(db: &OdbDb, name: &str, i: usize) -> String;
+        fn all_isolation_get_isolation_cells(db: &OdbDb, name: &str) -> Vec<String>;
         fn level_shifter_get_name(db: &OdbDb, name: &str) -> String;
         fn level_shifter_get_domain(db: &OdbDb, name: &str) -> String;
         fn level_shifter_get_source(db: &OdbDb, name: &str) -> String;
@@ -647,10 +702,12 @@ mod ffi_gen {
         fn tech_get_db_units_per_micron(db: &OdbDb) -> i32;
         fn num_tech_get_layers(db: &OdbDb) -> usize;
         fn nth_tech_get_layers(db: &OdbDb, i: usize) -> String;
+        fn all_tech_get_layers(db: &OdbDb) -> Vec<String>;
         fn tech_first_frontside_routing_layer(db: &OdbDb) -> String;
         fn tech_first_backside_routing_layer(db: &OdbDb) -> String;
         fn num_tech_get_vias(db: &OdbDb) -> usize;
         fn nth_tech_get_vias(db: &OdbDb, i: usize) -> String;
+        fn all_tech_get_vias(db: &OdbDb) -> Vec<String>;
         fn tech_get_lef_units(db: &OdbDb) -> i32;
         fn tech_get_lef_version(db: &OdbDb) -> f64;
         fn tech_get_lef_version_str(db: &OdbDb) -> String;
@@ -665,18 +722,23 @@ mod ffi_gen {
         fn tech_get_via_count(db: &OdbDb) -> i32;
         fn num_tech_get_non_default_rules(db: &OdbDb) -> usize;
         fn nth_tech_get_non_default_rules(db: &OdbDb, i: usize) -> String;
+        fn all_tech_get_non_default_rules(db: &OdbDb) -> Vec<String>;
         fn num_tech_get_via_rules(db: &OdbDb) -> usize;
         fn nth_tech_get_via_rules(db: &OdbDb, i: usize) -> String;
+        fn all_tech_get_via_rules(db: &OdbDb) -> Vec<String>;
         fn num_tech_get_via_generate_rules(db: &OdbDb) -> usize;
         fn nth_tech_get_via_generate_rules(db: &OdbDb, i: usize) -> String;
+        fn all_tech_get_via_generate_rules(db: &OdbDb) -> Vec<String>;
         fn lib_get_name(db: &OdbDb, name: &str) -> String;
         fn lib_get_const_name(db: &OdbDb, name: &str) -> String;
         fn lib_get_db_units_per_micron(db: &OdbDb, name: &str) -> i32;
         fn lib_get_tech(db: &OdbDb, name: &str) -> String;
         fn num_lib_get_masters(db: &OdbDb, name: &str) -> usize;
         fn nth_lib_get_masters(db: &OdbDb, name: &str, i: usize) -> String;
+        fn all_lib_get_masters(db: &OdbDb, name: &str) -> Vec<String>;
         fn num_lib_get_sites(db: &OdbDb, name: &str) -> usize;
         fn nth_lib_get_sites(db: &OdbDb, name: &str, i: usize) -> String;
+        fn all_lib_get_sites(db: &OdbDb, name: &str) -> Vec<String>;
         fn lib_get_lef_units(db: &OdbDb, name: &str) -> i32;
         fn capnode_get_node(db: &OdbDb, idx: usize) -> u32;
         fn capnode_get_shape_id(db: &OdbDb, idx: usize) -> u32;
@@ -948,18 +1010,24 @@ mod ffi_gen {
         fn chip_is_tsv(db: &OdbDb, chip: &str) -> bool;
         fn num_chip_get_chip_regions(db: &OdbDb, chip: &str) -> usize;
         fn nth_chip_get_chip_regions(db: &OdbDb, chip: &str, i: usize) -> String;
+        fn all_chip_get_chip_regions(db: &OdbDb, chip: &str) -> Vec<String>;
         fn num_chip_get_marker_categories(db: &OdbDb, chip: &str) -> usize;
         fn nth_chip_get_marker_categories(db: &OdbDb, chip: &str, i: usize) -> String;
+        fn all_chip_get_marker_categories(db: &OdbDb, chip: &str) -> Vec<String>;
         fn num_chip_get_chip_paths(db: &OdbDb, chip: &str) -> usize;
         fn nth_chip_get_chip_paths(db: &OdbDb, chip: &str, i: usize) -> String;
+        fn all_chip_get_chip_paths(db: &OdbDb, chip: &str) -> Vec<String>;
         fn chip_get_chip_type(db: &OdbDb, chip: &str) -> String;
         fn chip_get_block(db: &OdbDb, chip: &str) -> String;
         fn num_chip_get_chip_insts(db: &OdbDb, chip: &str) -> usize;
         fn nth_chip_get_chip_insts(db: &OdbDb, chip: &str, i: usize) -> String;
+        fn all_chip_get_chip_insts(db: &OdbDb, chip: &str) -> Vec<String>;
         fn num_chip_get_chip_conns(db: &OdbDb, chip: &str) -> usize;
         fn nth_chip_get_chip_conns(db: &OdbDb, chip: &str, i: usize) -> String;
+        fn all_chip_get_chip_conns(db: &OdbDb, chip: &str) -> Vec<String>;
         fn num_chip_get_chip_nets(db: &OdbDb, chip: &str) -> usize;
         fn nth_chip_get_chip_nets(db: &OdbDb, chip: &str, i: usize) -> String;
+        fn all_chip_get_chip_nets(db: &OdbDb, chip: &str) -> Vec<String>;
         fn chip_get_tech(db: &OdbDb, chip: &str) -> String;
         fn chip_get_b_box_x_min(db: &OdbDb, chip: &str) -> i32;
         fn chip_get_b_box_y_min(db: &OdbDb, chip: &str) -> i32;
@@ -1004,8 +1072,10 @@ mod ffi_gen {
         fn chipconn_get_parent_chip(db: &OdbDb, chip: &str, conn: &str) -> String;
         fn num_chipconn_get_top_region_path(db: &OdbDb, chip: &str, conn: &str) -> usize;
         fn nth_chipconn_get_top_region_path(db: &OdbDb, chip: &str, conn: &str, i: usize) -> String;
+        fn all_chipconn_get_top_region_path(db: &OdbDb, chip: &str, conn: &str) -> Vec<String>;
         fn num_chipconn_get_bottom_region_path(db: &OdbDb, chip: &str, conn: &str) -> usize;
         fn nth_chipconn_get_bottom_region_path(db: &OdbDb, chip: &str, conn: &str, i: usize) -> String;
+        fn all_chipconn_get_bottom_region_path(db: &OdbDb, chip: &str, conn: &str) -> Vec<String>;
         fn chipnet_get_name(db: &OdbDb, chip: &str, net: &str) -> String;
         fn chipnet_get_chip(db: &OdbDb, chip: &str, net: &str) -> String;
         fn chipnet_get_total_capacitance(db: &OdbDb, chip: &str, net: &str) -> f32;
@@ -1016,6 +1086,7 @@ mod ffi_gen {
         fn num_unfoldedchip_get_regions(db: &OdbDb, path: &str) -> usize;
         fn num_unfoldedchip_get_chip_inst_path(db: &OdbDb, path: &str) -> usize;
         fn nth_unfoldedchip_get_chip_inst_path(db: &OdbDb, path: &str, i: usize) -> String;
+        fn all_unfoldedchip_get_chip_inst_path(db: &OdbDb, path: &str) -> Vec<String>;
         fn unfoldedregion_get_parent_chip(db: &OdbDb, path: &str, idx: usize) -> String;
         fn unfoldedregion_get_effective_side(db: &OdbDb, path: &str, idx: usize) -> String;
         fn unfoldedregion_is_top(db: &OdbDb, path: &str, idx: usize) -> bool;
@@ -1033,6 +1104,77 @@ mod ffi_gen {
 }
 
 pub use ffi_gen::{
+    all_block_get_b_terms,
+    all_block_get_children,
+    all_block_get_component_mask_shift,
+    all_block_get_groups,
+    all_block_get_i_terms,
+    all_block_get_insts,
+    all_block_get_isolations,
+    all_block_get_level_shifters,
+    all_block_get_logic_ports,
+    all_block_get_marker_categories,
+    all_block_get_mod_b_terms,
+    all_block_get_mod_i_terms,
+    all_block_get_mod_insts,
+    all_block_get_mod_nets,
+    all_block_get_modules,
+    all_block_get_nets,
+    all_block_get_non_default_rules,
+    all_block_get_power_domains,
+    all_block_get_power_switches,
+    all_block_get_regions,
+    all_block_get_rows,
+    all_block_get_vias,
+    all_chip_get_chip_conns,
+    all_chip_get_chip_insts,
+    all_chip_get_chip_nets,
+    all_chip_get_chip_paths,
+    all_chip_get_chip_regions,
+    all_chip_get_marker_categories,
+    all_chipconn_get_bottom_region_path,
+    all_chipconn_get_top_region_path,
+    all_group_get_ground_nets,
+    all_group_get_groups,
+    all_group_get_insts,
+    all_group_get_mod_insts,
+    all_group_get_power_nets,
+    all_inst_get_children,
+    all_inst_get_i_terms,
+    all_isolation_get_isolation_cells,
+    all_layer_get_tech_layer_cut_class_rules,
+    all_lib_get_masters,
+    all_lib_get_sites,
+    all_marker_cat_get_marker_categories,
+    all_marker_cat_get_markers,
+    all_master_get_m_terms,
+    all_modinst_get_mod_i_terms,
+    all_modnet_get_b_terms,
+    all_modnet_get_i_terms,
+    all_modnet_get_mod_b_terms,
+    all_modnet_get_mod_i_terms,
+    all_modnet_get_next_mod_nets_in_fanin,
+    all_modnet_get_next_mod_nets_in_fanout,
+    all_module_get_children,
+    all_module_get_insts,
+    all_module_get_leaf_insts,
+    all_module_get_mod_b_terms,
+    all_module_get_mod_insts,
+    all_module_get_mod_nets,
+    all_module_get_ports,
+    all_net_get_b_terms,
+    all_net_get_i_terms,
+    all_pwr_domain_get_isolations,
+    all_pwr_domain_get_level_shifters,
+    all_pwr_domain_get_power_switches,
+    all_region_get_groups,
+    all_region_get_region_insts,
+    all_tech_get_layers,
+    all_tech_get_non_default_rules,
+    all_tech_get_via_generate_rules,
+    all_tech_get_via_rules,
+    all_tech_get_vias,
+    all_unfoldedchip_get_chip_inst_path,
     block_get_chip,
     block_get_const_name,
     block_get_core_area_dx,

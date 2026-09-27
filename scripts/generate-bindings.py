@@ -590,7 +590,7 @@ class Emit:
                 return False
             nexpr = nameable[velem].format("e")
             num, nth = f"num_{fn}", f"nth_{fn}"
-            if num in seen or nth in seen:
+            if num in seen or nth in seen or f"all_{fn}" in seen:
                 return False
             self.h.append(f"std::size_t {num}(const OdbDb& db{c_params});")
             self.h.append(f"rust::String {nth}(const OdbDb& db{c_params}, std::size_t i);")
@@ -601,15 +601,28 @@ class Emit:
                 f"rust::String {nth}(const OdbDb& h{c_params}, std::size_t i) {{ auto* p = {resolve}; "
                 f"if (!p) return rust::String(); auto v = p->{name}(); if (i >= v.size()) return rust::String(); "
                 f"auto* e = v[i]; return rust::String({nexpr}); }}")
+            # ⛔ The whole list in ONE pass (`all_*`), which is what the safe API returns. Built
+            # from num/nth it was quadratic: each nth walks the container from its start (a
+            # std::vector getter even copies the vector per call). 239,544 instances cost grt 77
+            # minutes (O.4/O.11, 2026-09-27). num/nth stay for callers that want one element.
+            allf = f"all_{fn}"
+            self.h.append(f"rust::Vec<rust::String> {allf}(const OdbDb& db{c_params});")
+            self.cc.append(
+                f"rust::Vec<rust::String> {allf}(const OdbDb& h{c_params}) {{ rust::Vec<rust::String> out; "
+                f"auto* p = {resolve}; if (!p) return out; "
+                f"for (auto* e : p->{name}()) out.push_back(rust::String({nexpr})); return out; }}")
             self.bridge.append(f"        fn {num}(db: &OdbDb{r_params}) -> usize;")
             self.bridge.append(f"        fn {nth}(db: &OdbDb{r_params}, i: usize) -> String;")
+            self.bridge.append(f"        fn {allf}(db: &OdbDb{r_params}) -> Vec<String>;")
             self.reexport.append(num)
             self.reexport.append(nth)
+            self.reexport.append(allf)
             self.api.append(
                 f"    pub fn {fn}(&self{rust_args_sig}) -> Vec<String> {{ "
-                f"(0..sys::{num}(self.r(){rust_fwd})).map(|i| sys::{nth}(self.r(){rust_fwd}, i)).collect() }}")
+                f"sys::{allf}(self.r(){rust_fwd}) }}")
             seen.add(num)
             seen.add(nth)
+            seen.add(allf)
             seen.add(fn)
             self.per_class[cls] = self.per_class.get(cls, 0) + 1
             self.reg.append((cls, field, "list", keys_desc, arm))
@@ -730,7 +743,7 @@ class Emit:
                 return False
             nexpr = nameable[elem].format("e")
             num, nth = f"num_{fn}", f"nth_{fn}"
-            if num in seen or nth in seen:
+            if num in seen or nth in seen or f"all_{fn}" in seen:
                 return False
             self.h.append(f"std::size_t {num}(const OdbDb& db{c_params});")
             self.h.append(f"rust::String {nth}(const OdbDb& db{c_params}, std::size_t i);")
@@ -742,15 +755,28 @@ class Emit:
                 f"if (!p) return rust::String(); std::size_t k = 0; "
                 f"for (auto* e : p->{name}()) {{ if (k++ == i) return rust::String({nexpr}); }} "
                 f"return rust::String(); }}")
+            # ⛔ The whole list in ONE pass (`all_*`), which is what the safe API returns. Built
+            # from num/nth it was quadratic: each nth walks the container from its start (a
+            # std::vector getter even copies the vector per call). 239,544 instances cost grt 77
+            # minutes (O.4/O.11, 2026-09-27). num/nth stay for callers that want one element.
+            allf = f"all_{fn}"
+            self.h.append(f"rust::Vec<rust::String> {allf}(const OdbDb& db{c_params});")
+            self.cc.append(
+                f"rust::Vec<rust::String> {allf}(const OdbDb& h{c_params}) {{ rust::Vec<rust::String> out; "
+                f"auto* p = {resolve}; if (!p) return out; "
+                f"for (auto* e : p->{name}()) out.push_back(rust::String({nexpr})); return out; }}")
             self.bridge.append(f"        fn {num}(db: &OdbDb{r_params}) -> usize;")
             self.bridge.append(f"        fn {nth}(db: &OdbDb{r_params}, i: usize) -> String;")
+            self.bridge.append(f"        fn {allf}(db: &OdbDb{r_params}) -> Vec<String>;")
             self.reexport.append(num)
             self.reexport.append(nth)
+            self.reexport.append(allf)
             self.api.append(
                 f"    pub fn {fn}(&self{rust_args_sig}) -> Vec<String> {{ "
-                f"(0..sys::{num}(self.r(){rust_fwd})).map(|i| sys::{nth}(self.r(){rust_fwd}, i)).collect() }}")
+                f"sys::{allf}(self.r(){rust_fwd}) }}")
             seen.add(num)
             seen.add(nth)
+            seen.add(allf)
             seen.add(fn)
             self.per_class[cls] = self.per_class.get(cls, 0) + 1
             self.reg.append((cls, field, "list", keys_desc, arm))
