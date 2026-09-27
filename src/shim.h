@@ -637,6 +637,7 @@ rust::Vec<int32_t> die_area_polygon(const OdbDb& db);
 // OVERLAP-type layer defines the cell's true outline, while pin shapes take part in the per-layer
 // clearance check and carry a net.
 rust::Vec<int32_t> master_obstruction_boxes(const OdbDb& db, rust::Str master);
+rust::Vec<int32_t> master_obstruction_rules(const OdbDb& db, rust::Str master);
 rust::Vec<int32_t> master_pin_boxes(const OdbDb& db, rust::Str master);
 
 // Pin rectangles of ONE terminal of a master, 5 i32 each (layer_number, x_min, y_min, x_max,

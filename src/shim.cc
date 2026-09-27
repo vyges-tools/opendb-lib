@@ -1985,6 +1985,20 @@ rust::Vec<int32_t> master_obstruction_boxes(const OdbDb& h, rust::Str master) {
   for (odb::dbBox* b : m->getObstructions()) push_box(out, b->getTechLayer(), b->getBox());
   return out;
 }
+// Each master obstruction's DESIGNRULEWIDTH and SPACING, as (width, spacing) pairs in the order
+// master_obstruction_boxes returns the boxes; -1 where the LEF gave none. The detailed router
+// keeps an obstruction carrying either as a blockage of its own, with its own rule, instead of
+// merging it into the layer's shapes — so a caller that cannot model that must see the values.
+rust::Vec<int32_t> master_obstruction_rules(const OdbDb& h, rust::Str master) {
+  rust::Vec<int32_t> out;
+  odb::dbMaster* m = h.db->findMaster(s(master).c_str());
+  if (!m) return out;
+  for (odb::dbBox* b : m->getObstructions()) {
+    out.push_back(b->getDesignRuleWidth());
+    out.push_back(b->getMinSpacing());
+  }
+  return out;
+}
 // Every terminal of a master, as "name\tSIGTYPE" per entry.
 //
 // 🔑 The SIGNAL TYPE has to come across with the name. `dpl`'s power-rail alignment
