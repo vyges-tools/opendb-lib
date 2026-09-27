@@ -333,8 +333,13 @@ mod ffi_gen {
         fn num_layer_get_tech_layer_cut_class_rules(db: &OdbDb, layer: &str) -> usize;
         fn nth_layer_get_tech_layer_cut_class_rules(db: &OdbDb, layer: &str, i: usize) -> String;
         fn all_layer_get_tech_layer_cut_class_rules(db: &OdbDb, layer: &str) -> Vec<String>;
+        fn num_layer_get_tech_layer_spacing_eol_rules(db: &OdbDb, layer: &str) -> usize;
         fn num_layer_get_tech_layer_cut_spacing_rules(db: &OdbDb, layer: &str) -> usize;
+        fn num_layer_get_tech_layer_min_step_rules(db: &OdbDb, layer: &str) -> usize;
+        fn num_layer_get_tech_layer_corner_spacing_rules(db: &OdbDb, layer: &str) -> usize;
         fn num_layer_get_tech_layer_cut_enclosure_rules(db: &OdbDb, layer: &str) -> usize;
+        fn num_layer_get_tech_layer_eol_keep_out_rules(db: &OdbDb, layer: &str) -> usize;
+        fn num_layer_get_tech_layer_min_cut_rules(db: &OdbDb, layer: &str) -> usize;
         fn layer_is_rect_only(db: &OdbDb, layer: &str) -> bool;
         fn layer_is_right_way_on_grid_only(db: &OdbDb, layer: &str) -> bool;
         fn layer_is_right_way_on_grid_only_check_mask(db: &OdbDb, layer: &str) -> bool;
@@ -959,6 +964,139 @@ mod ffi_gen {
         fn cutspacingtablerule_is_opposite_enclosure_resize_spacing_valid(db: &OdbDb, layer: &str, idx: usize) -> bool;
         fn cutspacingtablerule_get_second_layer(db: &OdbDb, layer: &str, idx: usize) -> String;
         fn cutspacingtablerule_get_tech_layer(db: &OdbDb, layer: &str, idx: usize) -> String;
+        fn eolkeepoutrule_get_eol_width(db: &OdbDb, layer: &str, idx: usize) -> i32;
+        fn eolkeepoutrule_get_backward_ext(db: &OdbDb, layer: &str, idx: usize) -> i32;
+        fn eolkeepoutrule_get_forward_ext(db: &OdbDb, layer: &str, idx: usize) -> i32;
+        fn eolkeepoutrule_get_side_ext(db: &OdbDb, layer: &str, idx: usize) -> i32;
+        fn eolkeepoutrule_get_within_low(db: &OdbDb, layer: &str, idx: usize) -> i32;
+        fn eolkeepoutrule_get_within_high(db: &OdbDb, layer: &str, idx: usize) -> i32;
+        fn eolkeepoutrule_get_class_name(db: &OdbDb, layer: &str, idx: usize) -> String;
+        fn eolkeepoutrule_is_class_valid(db: &OdbDb, layer: &str, idx: usize) -> bool;
+        fn eolkeepoutrule_is_corner_only(db: &OdbDb, layer: &str, idx: usize) -> bool;
+        fn eolkeepoutrule_is_except_within(db: &OdbDb, layer: &str, idx: usize) -> bool;
+        fn spacingeolrule_get_eol_space(db: &OdbDb, layer: &str, idx: usize) -> i32;
+        fn spacingeolrule_get_eol_width(db: &OdbDb, layer: &str, idx: usize) -> i32;
+        fn spacingeolrule_get_wrong_dir_space(db: &OdbDb, layer: &str, idx: usize) -> i32;
+        fn spacingeolrule_get_opposite_width(db: &OdbDb, layer: &str, idx: usize) -> i32;
+        fn spacingeolrule_get_eol_within(db: &OdbDb, layer: &str, idx: usize) -> i32;
+        fn spacingeolrule_get_wrong_dir_within(db: &OdbDb, layer: &str, idx: usize) -> i32;
+        fn spacingeolrule_get_exact_width(db: &OdbDb, layer: &str, idx: usize) -> i32;
+        fn spacingeolrule_get_other_width(db: &OdbDb, layer: &str, idx: usize) -> i32;
+        fn spacingeolrule_get_fill_triangle(db: &OdbDb, layer: &str, idx: usize) -> i32;
+        fn spacingeolrule_get_cut_class(db: &OdbDb, layer: &str, idx: usize) -> i32;
+        fn spacingeolrule_get_with_cut_space(db: &OdbDb, layer: &str, idx: usize) -> i32;
+        fn spacingeolrule_get_enclosure_end_width(db: &OdbDb, layer: &str, idx: usize) -> i32;
+        fn spacingeolrule_get_enclosure_end_within(db: &OdbDb, layer: &str, idx: usize) -> i32;
+        fn spacingeolrule_get_end_prl_space(db: &OdbDb, layer: &str, idx: usize) -> i32;
+        fn spacingeolrule_get_end_prl(db: &OdbDb, layer: &str, idx: usize) -> i32;
+        fn spacingeolrule_get_end_to_end_space(db: &OdbDb, layer: &str, idx: usize) -> i32;
+        fn spacingeolrule_get_one_cut_space(db: &OdbDb, layer: &str, idx: usize) -> i32;
+        fn spacingeolrule_get_two_cut_space(db: &OdbDb, layer: &str, idx: usize) -> i32;
+        fn spacingeolrule_get_extension(db: &OdbDb, layer: &str, idx: usize) -> i32;
+        fn spacingeolrule_get_wrong_dir_extension(db: &OdbDb, layer: &str, idx: usize) -> i32;
+        fn spacingeolrule_get_other_end_width(db: &OdbDb, layer: &str, idx: usize) -> i32;
+        fn spacingeolrule_get_max_length(db: &OdbDb, layer: &str, idx: usize) -> i32;
+        fn spacingeolrule_get_min_length(db: &OdbDb, layer: &str, idx: usize) -> i32;
+        fn spacingeolrule_get_par_space(db: &OdbDb, layer: &str, idx: usize) -> i32;
+        fn spacingeolrule_get_par_within(db: &OdbDb, layer: &str, idx: usize) -> i32;
+        fn spacingeolrule_get_par_prl(db: &OdbDb, layer: &str, idx: usize) -> i32;
+        fn spacingeolrule_get_par_min_length(db: &OdbDb, layer: &str, idx: usize) -> i32;
+        fn spacingeolrule_get_enclose_dist(db: &OdbDb, layer: &str, idx: usize) -> i32;
+        fn spacingeolrule_get_cut_to_metal_space(db: &OdbDb, layer: &str, idx: usize) -> i32;
+        fn spacingeolrule_get_min_adj_length(db: &OdbDb, layer: &str, idx: usize) -> i32;
+        fn spacingeolrule_get_min_adj_length1(db: &OdbDb, layer: &str, idx: usize) -> i32;
+        fn spacingeolrule_get_min_adj_length2(db: &OdbDb, layer: &str, idx: usize) -> i32;
+        fn spacingeolrule_get_notch_length(db: &OdbDb, layer: &str, idx: usize) -> i32;
+        fn spacingeolrule_is_exact_width_valid(db: &OdbDb, layer: &str, idx: usize) -> bool;
+        fn spacingeolrule_is_wrong_dir_spacing_valid(db: &OdbDb, layer: &str, idx: usize) -> bool;
+        fn spacingeolrule_is_opposite_width_valid(db: &OdbDb, layer: &str, idx: usize) -> bool;
+        fn spacingeolrule_is_within_valid(db: &OdbDb, layer: &str, idx: usize) -> bool;
+        fn spacingeolrule_is_wrong_dir_within_valid(db: &OdbDb, layer: &str, idx: usize) -> bool;
+        fn spacingeolrule_is_same_mask_valid(db: &OdbDb, layer: &str, idx: usize) -> bool;
+        fn spacingeolrule_is_except_exact_width_valid(db: &OdbDb, layer: &str, idx: usize) -> bool;
+        fn spacingeolrule_is_fill_concave_corner_valid(db: &OdbDb, layer: &str, idx: usize) -> bool;
+        fn spacingeolrule_is_withcut_valid(db: &OdbDb, layer: &str, idx: usize) -> bool;
+        fn spacingeolrule_is_cut_class_valid(db: &OdbDb, layer: &str, idx: usize) -> bool;
+        fn spacingeolrule_is_with_cut_above_valid(db: &OdbDb, layer: &str, idx: usize) -> bool;
+        fn spacingeolrule_is_enclosure_end_valid(db: &OdbDb, layer: &str, idx: usize) -> bool;
+        fn spacingeolrule_is_enclosure_end_within_valid(db: &OdbDb, layer: &str, idx: usize) -> bool;
+        fn spacingeolrule_is_end_prl_spacing_valid(db: &OdbDb, layer: &str, idx: usize) -> bool;
+        fn spacingeolrule_is_prl_valid(db: &OdbDb, layer: &str, idx: usize) -> bool;
+        fn spacingeolrule_is_end_to_end_valid(db: &OdbDb, layer: &str, idx: usize) -> bool;
+        fn spacingeolrule_is_cut_spaces_valid(db: &OdbDb, layer: &str, idx: usize) -> bool;
+        fn spacingeolrule_is_extension_valid(db: &OdbDb, layer: &str, idx: usize) -> bool;
+        fn spacingeolrule_is_wrong_dir_extension_valid(db: &OdbDb, layer: &str, idx: usize) -> bool;
+        fn spacingeolrule_is_other_end_width_valid(db: &OdbDb, layer: &str, idx: usize) -> bool;
+        fn spacingeolrule_is_max_length_valid(db: &OdbDb, layer: &str, idx: usize) -> bool;
+        fn spacingeolrule_is_min_length_valid(db: &OdbDb, layer: &str, idx: usize) -> bool;
+        fn spacingeolrule_is_two_sides_valid(db: &OdbDb, layer: &str, idx: usize) -> bool;
+        fn spacingeolrule_is_equal_rect_width_valid(db: &OdbDb, layer: &str, idx: usize) -> bool;
+        fn spacingeolrule_is_parallel_edge_valid(db: &OdbDb, layer: &str, idx: usize) -> bool;
+        fn spacingeolrule_is_subtract_eol_width_valid(db: &OdbDb, layer: &str, idx: usize) -> bool;
+        fn spacingeolrule_is_par_prl_valid(db: &OdbDb, layer: &str, idx: usize) -> bool;
+        fn spacingeolrule_is_par_min_length_valid(db: &OdbDb, layer: &str, idx: usize) -> bool;
+        fn spacingeolrule_is_two_edges_valid(db: &OdbDb, layer: &str, idx: usize) -> bool;
+        fn spacingeolrule_is_same_metal_valid(db: &OdbDb, layer: &str, idx: usize) -> bool;
+        fn spacingeolrule_is_non_eol_corner_only_valid(db: &OdbDb, layer: &str, idx: usize) -> bool;
+        fn spacingeolrule_is_parallel_same_mask_valid(db: &OdbDb, layer: &str, idx: usize) -> bool;
+        fn spacingeolrule_is_enclose_cut_valid(db: &OdbDb, layer: &str, idx: usize) -> bool;
+        fn spacingeolrule_is_below_valid(db: &OdbDb, layer: &str, idx: usize) -> bool;
+        fn spacingeolrule_is_above_valid(db: &OdbDb, layer: &str, idx: usize) -> bool;
+        fn spacingeolrule_is_cut_spacing_valid(db: &OdbDb, layer: &str, idx: usize) -> bool;
+        fn spacingeolrule_is_all_cuts_valid(db: &OdbDb, layer: &str, idx: usize) -> bool;
+        fn spacingeolrule_is_to_concave_corner_valid(db: &OdbDb, layer: &str, idx: usize) -> bool;
+        fn spacingeolrule_is_min_adjacent_length_valid(db: &OdbDb, layer: &str, idx: usize) -> bool;
+        fn spacingeolrule_is_two_min_adj_length_valid(db: &OdbDb, layer: &str, idx: usize) -> bool;
+        fn spacingeolrule_is_to_notch_length_valid(db: &OdbDb, layer: &str, idx: usize) -> bool;
+        fn cornerspacingrule_get_within(db: &OdbDb, layer: &str, idx: usize) -> i32;
+        fn cornerspacingrule_get_eol_width(db: &OdbDb, layer: &str, idx: usize) -> i32;
+        fn cornerspacingrule_get_jog_length(db: &OdbDb, layer: &str, idx: usize) -> i32;
+        fn cornerspacingrule_get_edge_length(db: &OdbDb, layer: &str, idx: usize) -> i32;
+        fn cornerspacingrule_get_min_length(db: &OdbDb, layer: &str, idx: usize) -> i32;
+        fn cornerspacingrule_get_except_notch_length(db: &OdbDb, layer: &str, idx: usize) -> i32;
+        fn cornerspacingrule_is_same_mask(db: &OdbDb, layer: &str, idx: usize) -> bool;
+        fn cornerspacingrule_is_corner_only(db: &OdbDb, layer: &str, idx: usize) -> bool;
+        fn cornerspacingrule_is_except_eol(db: &OdbDb, layer: &str, idx: usize) -> bool;
+        fn cornerspacingrule_is_except_jog_length(db: &OdbDb, layer: &str, idx: usize) -> bool;
+        fn cornerspacingrule_is_edge_length_valid(db: &OdbDb, layer: &str, idx: usize) -> bool;
+        fn cornerspacingrule_is_include_shape(db: &OdbDb, layer: &str, idx: usize) -> bool;
+        fn cornerspacingrule_is_min_length_valid(db: &OdbDb, layer: &str, idx: usize) -> bool;
+        fn cornerspacingrule_is_except_notch(db: &OdbDb, layer: &str, idx: usize) -> bool;
+        fn cornerspacingrule_is_except_notch_length_valid(db: &OdbDb, layer: &str, idx: usize) -> bool;
+        fn cornerspacingrule_is_except_same_net(db: &OdbDb, layer: &str, idx: usize) -> bool;
+        fn cornerspacingrule_is_except_same_metal(db: &OdbDb, layer: &str, idx: usize) -> bool;
+        fn cornerspacingrule_is_corner_to_corner(db: &OdbDb, layer: &str, idx: usize) -> bool;
+        fn minsteprule_get_min_step_length(db: &OdbDb, layer: &str, idx: usize) -> i32;
+        fn minsteprule_get_max_edges(db: &OdbDb, layer: &str, idx: usize) -> u32;
+        fn minsteprule_get_min_adj_length1(db: &OdbDb, layer: &str, idx: usize) -> i32;
+        fn minsteprule_get_min_adj_length2(db: &OdbDb, layer: &str, idx: usize) -> i32;
+        fn minsteprule_get_eol_width(db: &OdbDb, layer: &str, idx: usize) -> i32;
+        fn minsteprule_get_min_between_length(db: &OdbDb, layer: &str, idx: usize) -> i32;
+        fn minsteprule_is_max_edges_valid(db: &OdbDb, layer: &str, idx: usize) -> bool;
+        fn minsteprule_is_min_adj_length1_valid(db: &OdbDb, layer: &str, idx: usize) -> bool;
+        fn minsteprule_is_no_between_eol(db: &OdbDb, layer: &str, idx: usize) -> bool;
+        fn minsteprule_is_min_adj_length2_valid(db: &OdbDb, layer: &str, idx: usize) -> bool;
+        fn minsteprule_is_convex_corner(db: &OdbDb, layer: &str, idx: usize) -> bool;
+        fn minsteprule_is_min_between_length_valid(db: &OdbDb, layer: &str, idx: usize) -> bool;
+        fn minsteprule_is_except_same_corners(db: &OdbDb, layer: &str, idx: usize) -> bool;
+        fn minsteprule_is_concave_corner(db: &OdbDb, layer: &str, idx: usize) -> bool;
+        fn minsteprule_is_except_rectangle(db: &OdbDb, layer: &str, idx: usize) -> bool;
+        fn minsteprule_is_no_adjacent_eol(db: &OdbDb, layer: &str, idx: usize) -> bool;
+        fn mincutrule_get_num_cuts(db: &OdbDb, layer: &str, idx: usize) -> i32;
+        fn mincutrule_get_width(db: &OdbDb, layer: &str, idx: usize) -> i32;
+        fn mincutrule_get_within_cut_dist(db: &OdbDb, layer: &str, idx: usize) -> i32;
+        fn mincutrule_get_length(db: &OdbDb, layer: &str, idx: usize) -> i32;
+        fn mincutrule_get_length_within_dist(db: &OdbDb, layer: &str, idx: usize) -> i32;
+        fn mincutrule_get_area_within_dist(db: &OdbDb, layer: &str, idx: usize) -> i32;
+        fn mincutrule_is_per_cut_class(db: &OdbDb, layer: &str, idx: usize) -> bool;
+        fn mincutrule_is_within_cut_dist_valid(db: &OdbDb, layer: &str, idx: usize) -> bool;
+        fn mincutrule_is_from_above(db: &OdbDb, layer: &str, idx: usize) -> bool;
+        fn mincutrule_is_from_below(db: &OdbDb, layer: &str, idx: usize) -> bool;
+        fn mincutrule_is_length_valid(db: &OdbDb, layer: &str, idx: usize) -> bool;
+        fn mincutrule_is_area_valid(db: &OdbDb, layer: &str, idx: usize) -> bool;
+        fn mincutrule_is_area_within_dist_valid(db: &OdbDb, layer: &str, idx: usize) -> bool;
+        fn mincutrule_is_same_metal_overlap(db: &OdbDb, layer: &str, idx: usize) -> bool;
+        fn mincutrule_is_fully_enclosed(db: &OdbDb, layer: &str, idx: usize) -> bool;
         fn layerantenna_is_valid(db: &OdbDb, layer: &str) -> bool;
         fn layerantenna_has_area_factor(db: &OdbDb, layer: &str) -> bool;
         fn layerantenna_has_side_area_factor(db: &OdbDb, layer: &str) -> bool;
@@ -1360,6 +1498,24 @@ pub use ffi_gen::{
     chipregion_get_side,
     chipregioninst_get_chip_inst,
     chipregioninst_get_chip_region,
+    cornerspacingrule_get_edge_length,
+    cornerspacingrule_get_eol_width,
+    cornerspacingrule_get_except_notch_length,
+    cornerspacingrule_get_jog_length,
+    cornerspacingrule_get_min_length,
+    cornerspacingrule_get_within,
+    cornerspacingrule_is_corner_only,
+    cornerspacingrule_is_corner_to_corner,
+    cornerspacingrule_is_edge_length_valid,
+    cornerspacingrule_is_except_eol,
+    cornerspacingrule_is_except_jog_length,
+    cornerspacingrule_is_except_notch,
+    cornerspacingrule_is_except_notch_length_valid,
+    cornerspacingrule_is_except_same_metal,
+    cornerspacingrule_is_except_same_net,
+    cornerspacingrule_is_include_shape,
+    cornerspacingrule_is_min_length_valid,
+    cornerspacingrule_is_same_mask,
     cutclassrule_get_length,
     cutclassrule_get_name,
     cutclassrule_get_num_cuts,
@@ -1498,6 +1654,16 @@ pub use ffi_gen::{
     cutspacingtablerule_is_same_via,
     cutspacingtablerule_is_side_extension_valid,
     cutspacingtablerule_is_vertical,
+    eolkeepoutrule_get_backward_ext,
+    eolkeepoutrule_get_class_name,
+    eolkeepoutrule_get_eol_width,
+    eolkeepoutrule_get_forward_ext,
+    eolkeepoutrule_get_side_ext,
+    eolkeepoutrule_get_within_high,
+    eolkeepoutrule_get_within_low,
+    eolkeepoutrule_is_class_valid,
+    eolkeepoutrule_is_corner_only,
+    eolkeepoutrule_is_except_within,
     fill_get_tech_layer,
     fill_mask_number,
     fill_needs_o_p_c,
@@ -1732,6 +1898,37 @@ pub use ffi_gen::{
     master_is_pad,
     master_is_sequential,
     master_is_special_power,
+    mincutrule_get_area_within_dist,
+    mincutrule_get_length,
+    mincutrule_get_length_within_dist,
+    mincutrule_get_num_cuts,
+    mincutrule_get_width,
+    mincutrule_get_within_cut_dist,
+    mincutrule_is_area_valid,
+    mincutrule_is_area_within_dist_valid,
+    mincutrule_is_from_above,
+    mincutrule_is_from_below,
+    mincutrule_is_fully_enclosed,
+    mincutrule_is_length_valid,
+    mincutrule_is_per_cut_class,
+    mincutrule_is_same_metal_overlap,
+    mincutrule_is_within_cut_dist_valid,
+    minsteprule_get_eol_width,
+    minsteprule_get_max_edges,
+    minsteprule_get_min_adj_length1,
+    minsteprule_get_min_adj_length2,
+    minsteprule_get_min_between_length,
+    minsteprule_get_min_step_length,
+    minsteprule_is_concave_corner,
+    minsteprule_is_convex_corner,
+    minsteprule_is_except_rectangle,
+    minsteprule_is_except_same_corners,
+    minsteprule_is_max_edges_valid,
+    minsteprule_is_min_adj_length1_valid,
+    minsteprule_is_min_adj_length2_valid,
+    minsteprule_is_min_between_length_valid,
+    minsteprule_is_no_adjacent_eol,
+    minsteprule_is_no_between_eol,
     modbterm_get_hierarchical_name,
     modbterm_get_io_type,
     modbterm_get_mod_inst,
@@ -1977,9 +2174,14 @@ pub use ffi_gen::{
     num_inst_get_children,
     num_inst_get_i_terms,
     num_isolation_get_isolation_cells,
+    num_layer_get_tech_layer_corner_spacing_rules,
     num_layer_get_tech_layer_cut_class_rules,
     num_layer_get_tech_layer_cut_enclosure_rules,
     num_layer_get_tech_layer_cut_spacing_rules,
+    num_layer_get_tech_layer_eol_keep_out_rules,
+    num_layer_get_tech_layer_min_cut_rules,
+    num_layer_get_tech_layer_min_step_rules,
+    num_layer_get_tech_layer_spacing_eol_rules,
     num_lib_get_masters,
     num_lib_get_sites,
     num_marker_cat_get_marker_categories,
@@ -2084,6 +2286,80 @@ pub use ffi_gen::{
     site_get_width,
     site_has_row_pattern,
     site_is_hybrid,
+    spacingeolrule_get_cut_class,
+    spacingeolrule_get_cut_to_metal_space,
+    spacingeolrule_get_enclose_dist,
+    spacingeolrule_get_enclosure_end_width,
+    spacingeolrule_get_enclosure_end_within,
+    spacingeolrule_get_end_prl,
+    spacingeolrule_get_end_prl_space,
+    spacingeolrule_get_end_to_end_space,
+    spacingeolrule_get_eol_space,
+    spacingeolrule_get_eol_width,
+    spacingeolrule_get_eol_within,
+    spacingeolrule_get_exact_width,
+    spacingeolrule_get_extension,
+    spacingeolrule_get_fill_triangle,
+    spacingeolrule_get_max_length,
+    spacingeolrule_get_min_adj_length,
+    spacingeolrule_get_min_adj_length1,
+    spacingeolrule_get_min_adj_length2,
+    spacingeolrule_get_min_length,
+    spacingeolrule_get_notch_length,
+    spacingeolrule_get_one_cut_space,
+    spacingeolrule_get_opposite_width,
+    spacingeolrule_get_other_end_width,
+    spacingeolrule_get_other_width,
+    spacingeolrule_get_par_min_length,
+    spacingeolrule_get_par_prl,
+    spacingeolrule_get_par_space,
+    spacingeolrule_get_par_within,
+    spacingeolrule_get_two_cut_space,
+    spacingeolrule_get_with_cut_space,
+    spacingeolrule_get_wrong_dir_extension,
+    spacingeolrule_get_wrong_dir_space,
+    spacingeolrule_get_wrong_dir_within,
+    spacingeolrule_is_above_valid,
+    spacingeolrule_is_all_cuts_valid,
+    spacingeolrule_is_below_valid,
+    spacingeolrule_is_cut_class_valid,
+    spacingeolrule_is_cut_spaces_valid,
+    spacingeolrule_is_cut_spacing_valid,
+    spacingeolrule_is_enclose_cut_valid,
+    spacingeolrule_is_enclosure_end_valid,
+    spacingeolrule_is_enclosure_end_within_valid,
+    spacingeolrule_is_end_prl_spacing_valid,
+    spacingeolrule_is_end_to_end_valid,
+    spacingeolrule_is_equal_rect_width_valid,
+    spacingeolrule_is_exact_width_valid,
+    spacingeolrule_is_except_exact_width_valid,
+    spacingeolrule_is_extension_valid,
+    spacingeolrule_is_fill_concave_corner_valid,
+    spacingeolrule_is_max_length_valid,
+    spacingeolrule_is_min_adjacent_length_valid,
+    spacingeolrule_is_min_length_valid,
+    spacingeolrule_is_non_eol_corner_only_valid,
+    spacingeolrule_is_opposite_width_valid,
+    spacingeolrule_is_other_end_width_valid,
+    spacingeolrule_is_par_min_length_valid,
+    spacingeolrule_is_par_prl_valid,
+    spacingeolrule_is_parallel_edge_valid,
+    spacingeolrule_is_parallel_same_mask_valid,
+    spacingeolrule_is_prl_valid,
+    spacingeolrule_is_same_mask_valid,
+    spacingeolrule_is_same_metal_valid,
+    spacingeolrule_is_subtract_eol_width_valid,
+    spacingeolrule_is_to_concave_corner_valid,
+    spacingeolrule_is_to_notch_length_valid,
+    spacingeolrule_is_two_edges_valid,
+    spacingeolrule_is_two_min_adj_length_valid,
+    spacingeolrule_is_two_sides_valid,
+    spacingeolrule_is_with_cut_above_valid,
+    spacingeolrule_is_withcut_valid,
+    spacingeolrule_is_within_valid,
+    spacingeolrule_is_wrong_dir_extension_valid,
+    spacingeolrule_is_wrong_dir_spacing_valid,
+    spacingeolrule_is_wrong_dir_within_valid,
     swire_get_block,
     swire_get_net,
     swire_get_shield,

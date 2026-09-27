@@ -160,6 +160,21 @@ inline odb::dbTechLayerCutSpacingRule* gen_cutspacingrule(const OdbDb& h, rust::
 inline odb::dbTechLayerCutSpacingTableDefRule* gen_cutspacingtablerule(const OdbDb& h, rust::Str layer, std::size_t i) {
   odb::dbTechLayer* l = gen_techlayer(h, layer); if (!l) return nullptr;
   std::size_t k = 0; for (odb::dbTechLayerCutSpacingTableDefRule* r : l->getTechLayerCutSpacingTableDefRules()) { if (k++ == i) return r; } return nullptr; }
+inline odb::dbTechLayerEolKeepOutRule* gen_eolkeepoutrule(const OdbDb& h, rust::Str layer, std::size_t i) {
+  odb::dbTechLayer* l = gen_techlayer(h, layer); if (!l) return nullptr;
+  std::size_t k = 0; for (odb::dbTechLayerEolKeepOutRule* r : l->getTechLayerEolKeepOutRules()) { if (k++ == i) return r; } return nullptr; }
+inline odb::dbTechLayerSpacingEolRule* gen_spacingeolrule(const OdbDb& h, rust::Str layer, std::size_t i) {
+  odb::dbTechLayer* l = gen_techlayer(h, layer); if (!l) return nullptr;
+  std::size_t k = 0; for (odb::dbTechLayerSpacingEolRule* r : l->getTechLayerSpacingEolRules()) { if (k++ == i) return r; } return nullptr; }
+inline odb::dbTechLayerCornerSpacingRule* gen_cornerspacingrule(const OdbDb& h, rust::Str layer, std::size_t i) {
+  odb::dbTechLayer* l = gen_techlayer(h, layer); if (!l) return nullptr;
+  std::size_t k = 0; for (odb::dbTechLayerCornerSpacingRule* r : l->getTechLayerCornerSpacingRules()) { if (k++ == i) return r; } return nullptr; }
+inline odb::dbTechLayerMinStepRule* gen_minsteprule(const OdbDb& h, rust::Str layer, std::size_t i) {
+  odb::dbTechLayer* l = gen_techlayer(h, layer); if (!l) return nullptr;
+  std::size_t k = 0; for (odb::dbTechLayerMinStepRule* r : l->getTechLayerMinStepRules()) { if (k++ == i) return r; } return nullptr; }
+inline odb::dbTechLayerMinCutRule* gen_mincutrule(const OdbDb& h, rust::Str layer, std::size_t i) {
+  odb::dbTechLayer* l = gen_techlayer(h, layer); if (!l) return nullptr;
+  std::size_t k = 0; for (odb::dbTechLayerMinCutRule* r : l->getTechLayerMinCutRules()) { if (k++ == i) return r; } return nullptr; }
 inline odb::dbTechLayerAntennaRule* gen_layerantenna(const OdbDb& h, rust::Str layer) {
   odb::dbTechLayer* l = gen_techlayer(h, layer); return l ? l->getDefaultAntennaRule() : nullptr; }
 inline odb::dbTechAntennaPinModel* gen_antennapinmodel(const OdbDb& h, rust::Str master, rust::Str term) {

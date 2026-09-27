@@ -104,6 +104,13 @@ TARGETS = {
     "dbTechLayerCutEnclosureRule":       {"key": "cutenclosurerule",    "args": ["layer", {"name": "idx", "type": "idx"}], "resolve": "gen_cutenclosurerule(h, layer, idx)"},
     "dbTechLayerCutSpacingRule":         {"key": "cutspacingrule",      "args": ["layer", {"name": "idx", "type": "idx"}], "resolve": "gen_cutspacingrule(h, layer, idx)"},
     "dbTechLayerCutSpacingTableDefRule": {"key": "cutspacingtablerule", "args": ["layer", {"name": "idx", "type": "idx"}], "resolve": "gen_cutspacingtablerule(h, layer, idx)"},
+    # LEF58 routing-layer rules, the same (layer, index) addressing. `drt`'s design-rule check
+    # reads them (end-of-line keep-out and spacing, corner spacing, minimum step and cut).
+    "dbTechLayerEolKeepOutRule":    {"key": "eolkeepoutrule",    "args": ["layer", {"name": "idx", "type": "idx"}], "resolve": "gen_eolkeepoutrule(h, layer, idx)"},
+    "dbTechLayerSpacingEolRule":    {"key": "spacingeolrule",    "args": ["layer", {"name": "idx", "type": "idx"}], "resolve": "gen_spacingeolrule(h, layer, idx)"},
+    "dbTechLayerCornerSpacingRule": {"key": "cornerspacingrule", "args": ["layer", {"name": "idx", "type": "idx"}], "resolve": "gen_cornerspacingrule(h, layer, idx)"},
+    "dbTechLayerMinStepRule":       {"key": "minsteprule",       "args": ["layer", {"name": "idx", "type": "idx"}], "resolve": "gen_minsteprule(h, layer, idx)"},
+    "dbTechLayerMinCutRule":        {"key": "mincutrule",        "args": ["layer", {"name": "idx", "type": "idx"}], "resolve": "gen_mincutrule(h, layer, idx)"},
     "dbTechLayerAntennaRule": {"key": "layerantenna",     "args": ["layer"], "resolve": "gen_layerantenna(h, layer)"},
     "dbTechAntennaPinModel":  {"key": "antennapinmodel",  "args": ["master", "term"], "resolve": "gen_antennapinmodel(h, master, term)"},
     # via cut geometry (value-struct via dbVia::getViaParams(), stashed thread-local) — see resolver.
@@ -1011,6 +1018,21 @@ def main() -> int:
         "static odb::dbTechLayerCutSpacingTableDefRule* gen_cutspacingtablerule(const OdbDb& h, rust::Str layer, std::size_t i) {\n"
         "  odb::dbTechLayer* l = gen_techlayer(h, layer); if (!l) return nullptr;\n"
         "  std::size_t k = 0; for (odb::dbTechLayerCutSpacingTableDefRule* r : l->getTechLayerCutSpacingTableDefRules()) { if (k++ == i) return r; } return nullptr; }\n"
+        "static odb::dbTechLayerEolKeepOutRule* gen_eolkeepoutrule(const OdbDb& h, rust::Str layer, std::size_t i) {\n"
+        "  odb::dbTechLayer* l = gen_techlayer(h, layer); if (!l) return nullptr;\n"
+        "  std::size_t k = 0; for (odb::dbTechLayerEolKeepOutRule* r : l->getTechLayerEolKeepOutRules()) { if (k++ == i) return r; } return nullptr; }\n"
+        "static odb::dbTechLayerSpacingEolRule* gen_spacingeolrule(const OdbDb& h, rust::Str layer, std::size_t i) {\n"
+        "  odb::dbTechLayer* l = gen_techlayer(h, layer); if (!l) return nullptr;\n"
+        "  std::size_t k = 0; for (odb::dbTechLayerSpacingEolRule* r : l->getTechLayerSpacingEolRules()) { if (k++ == i) return r; } return nullptr; }\n"
+        "static odb::dbTechLayerCornerSpacingRule* gen_cornerspacingrule(const OdbDb& h, rust::Str layer, std::size_t i) {\n"
+        "  odb::dbTechLayer* l = gen_techlayer(h, layer); if (!l) return nullptr;\n"
+        "  std::size_t k = 0; for (odb::dbTechLayerCornerSpacingRule* r : l->getTechLayerCornerSpacingRules()) { if (k++ == i) return r; } return nullptr; }\n"
+        "static odb::dbTechLayerMinStepRule* gen_minsteprule(const OdbDb& h, rust::Str layer, std::size_t i) {\n"
+        "  odb::dbTechLayer* l = gen_techlayer(h, layer); if (!l) return nullptr;\n"
+        "  std::size_t k = 0; for (odb::dbTechLayerMinStepRule* r : l->getTechLayerMinStepRules()) { if (k++ == i) return r; } return nullptr; }\n"
+        "static odb::dbTechLayerMinCutRule* gen_mincutrule(const OdbDb& h, rust::Str layer, std::size_t i) {\n"
+        "  odb::dbTechLayer* l = gen_techlayer(h, layer); if (!l) return nullptr;\n"
+        "  std::size_t k = 0; for (odb::dbTechLayerMinCutRule* r : l->getTechLayerMinCutRules()) { if (k++ == i) return r; } return nullptr; }\n"
         "static odb::dbTechLayerAntennaRule* gen_layerantenna(const OdbDb& h, rust::Str layer) {\n"
         "  odb::dbTechLayer* l = gen_techlayer(h, layer); return l ? l->getDefaultAntennaRule() : nullptr; }\n"
         "static odb::dbTechAntennaPinModel* gen_antennapinmodel(const OdbDb& h, rust::Str master, rust::Str term) {\n"
