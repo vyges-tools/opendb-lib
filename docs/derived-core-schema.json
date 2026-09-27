@@ -5,7 +5,7 @@
   "scope": "hand-written core only",
   "class_count": 45,
   "method_count": 1178,
-  "bridged_count": 831,
+  "bridged_count": 835,
   "classes": [
     {
       "name": "dbBPin",
@@ -1707,7 +1707,7 @@
           ],
           "const": false,
           "kind": "other",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "setCornerNameList",
@@ -4395,7 +4395,7 @@
           ],
           "const": false,
           "kind": "predicate",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "rename",
@@ -13336,7 +13336,7 @@
           ],
           "const": true,
           "kind": "other",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "getShape",
@@ -13542,7 +13542,7 @@
           ],
           "const": false,
           "kind": "other",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "getOpcode",

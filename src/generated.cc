@@ -112,6 +112,7 @@ int32_t block_get_ext_count_num_of_net(const OdbDb& h) { int v0 = 0; int v1 = 0;
 int32_t block_get_ext_count_num_of_r_seg(const OdbDb& h) { int v0 = 0; int v1 = 0; int v2 = 0; int v3 = 0; auto* p = gen_block(h); if (p) p->getExtCount(v0, v1, v2, v3); return v1; }
 int32_t block_get_ext_count_num_of_cap_node(const OdbDb& h) { int v0 = 0; int v1 = 0; int v2 = 0; int v3 = 0; auto* p = gen_block(h); if (p) p->getExtCount(v0, v1, v2, v3); return v2; }
 int32_t block_get_ext_count_num_of_c_c_seg(const OdbDb& h) { int v0 = 0; int v1 = 0; int v2 = 0; int v3 = 0; auto* p = gen_block(h); if (p) p->getExtCount(v0, v1, v2, v3); return v3; }
+int32_t block_get_ext_corner_index(const OdbDb& h, rust::Str corner_name) { auto* p = gen_block(h); return p ? p->getExtCornerIndex(std::string(corner_name).c_str()) : int32_t{}; }
 rust::String inst_get_name(const OdbDb& h, rust::Str inst) { auto* p = gen_inst(h, inst); return p ? rust::String(p->getName()) : rust::String(); }
 rust::String inst_get_const_name(const OdbDb& h, rust::Str inst) { auto* p = gen_inst(h, inst); if (!p) return rust::String(); const char* v = p->getConstName(); return rust::String(v ? v : ""); }
 int32_t inst_get_origin_x(const OdbDb& h, rust::Str inst) { auto* p = gen_inst(h, inst); return p ? p->getOrigin().getX() : 0; }
@@ -159,6 +160,7 @@ bool inst_is_core(const OdbDb& h, rust::Str inst) { auto* p = gen_inst(h, inst);
 bool inst_is_pad(const OdbDb& h, rust::Str inst) { auto* p = gen_inst(h, inst); return p ? p->isPad() : false; }
 bool inst_is_end_cap(const OdbDb& h, rust::Str inst) { auto* p = gen_inst(h, inst); return p ? p->isEndCap() : false; }
 uint32_t inst_get_pin_access_idx(const OdbDb& h, rust::Str inst) { auto* p = gen_inst(h, inst); return p ? p->getPinAccessIdx() : 0; }
+bool inst_is_named(const OdbDb& h, rust::Str inst, rust::Str name) { auto* p = gen_inst(h, inst); return p ? p->isNamed(std::string(name).c_str()) : bool{}; }
 rust::String net_get_name(const OdbDb& h, rust::Str net) { auto* p = gen_net(h, net); return p ? rust::String(p->getName()) : rust::String(); }
 rust::String net_get_const_name(const OdbDb& h, rust::Str net) { auto* p = gen_net(h, net); if (!p) return rust::String(); const char* v = p->getConstName(); return rust::String(v ? v : ""); }
 bool net_is_r_c_disconnected(const OdbDb& h, rust::Str net) { auto* p = gen_net(h, net); return p ? p->isRCDisconnected() : false; }
@@ -308,6 +310,7 @@ bool iterm_is_set_mark(const OdbDb& h, rust::Str inst, rust::Str pin) { auto* p 
 bool iterm_is_connected(const OdbDb& h, rust::Str inst, rust::Str pin) { auto* p = gen_iterm(h, inst, pin); return p ? p->isConnected() : false; }
 rust::String iterm_get_b_term(const OdbDb& h, rust::Str inst, rust::Str pin) { auto* p = gen_iterm(h, inst, pin); if (!p) return rust::String(); auto* t = p->getBTerm(); return t ? rust::String(t->getConstName()) : rust::String(); }
 uint32_t iterm_sta_vertex_id(const OdbDb& h, rust::Str inst, rust::Str pin) { auto* p = gen_iterm(h, inst, pin); return p ? p->staVertexId() : 0; }
+bool iterm_is_input_signal(const OdbDb& h, rust::Str inst, rust::Str pin, bool io) { auto* p = gen_iterm(h, inst, pin); return p ? p->isInputSignal(io) : bool{}; }
 rust::String mterm_get_name(const OdbDb& h, rust::Str master, rust::Str term) { auto* p = gen_mterm(h, master, term); return p ? rust::String(p->getName()) : rust::String(); }
 rust::String mterm_get_const_name(const OdbDb& h, rust::Str master, rust::Str term) { auto* p = gen_mterm(h, master, term); if (!p) return rust::String(); const char* v = p->getConstName(); return rust::String(v ? v : ""); }
 rust::String mterm_get_sig_type(const OdbDb& h, rust::Str master, rust::Str term) { auto* p = gen_mterm(h, master, term); return p ? rust::String(p->getSigType().getString()) : rust::String(); }
@@ -398,6 +401,7 @@ int32_t layer_get_max_wide_d_r_c_range_owidth(const OdbDb& h, rust::Str layer) {
 int32_t layer_get_max_wide_d_r_c_range_olength(const OdbDb& h, rust::Str layer) { int v0 = 0; int v1 = 0; auto* p = gen_techlayer(h, layer); if (p) p->getMaxWideDRCRange(v0, v1); return v1; }
 int32_t layer_get_min_wide_d_r_c_range_owidth(const OdbDb& h, rust::Str layer) { int v0 = 0; int v1 = 0; auto* p = gen_techlayer(h, layer); if (p) p->getMinWideDRCRange(v0, v1); return v0; }
 int32_t layer_get_min_wide_d_r_c_range_olength(const OdbDb& h, rust::Str layer) { int v0 = 0; int v1 = 0; auto* p = gen_techlayer(h, layer); if (p) p->getMinWideDRCRange(v0, v1); return v1; }
+int32_t layer_get_spacing_width_length(const OdbDb& h, rust::Str layer, int32_t width, int32_t length) { auto* p = gen_techlayer(h, layer); return p ? p->getSpacing(width, length) : int32_t{}; }
 rust::String row_get_name(const OdbDb& h, rust::Str row) { auto* p = gen_row(h, row); return p ? rust::String(p->getName()) : rust::String(); }
 rust::String row_get_const_name(const OdbDb& h, rust::Str row) { auto* p = gen_row(h, row); if (!p) return rust::String(); const char* v = p->getConstName(); return rust::String(v ? v : ""); }
 rust::String row_get_site(const OdbDb& h, rust::Str row) { auto* p = gen_row(h, row); if (!p) return rust::String(); auto* t = p->getSite(); return t ? rust::String(t->getConstName()) : rust::String(); }
@@ -487,11 +491,15 @@ int32_t gcell_get_num_grid_patterns_x(const OdbDb& h) { auto* p = gen_gcellgrid(
 int32_t gcell_get_num_grid_patterns_y(const OdbDb& h) { auto* p = gen_gcellgrid(h); return p ? p->getNumGridPatternsY() : 0; }
 rust::Vec<int32_t> gcell_get_grid_x(const OdbDb& h) { rust::Vec<int32_t> out; std::vector<int> v; auto* p = gen_gcellgrid(h); if (p) { p->getGridX(v); for (int x : v) out.push_back(x); } return out; }
 rust::Vec<int32_t> gcell_get_grid_y(const OdbDb& h) { rust::Vec<int32_t> out; std::vector<int> v; auto* p = gen_gcellgrid(h); if (p) { p->getGridY(v); for (int x : v) out.push_back(x); } return out; }
+uint32_t gcell_get_x_idx(const OdbDb& h, int32_t x) { auto* p = gen_gcellgrid(h); return p ? p->getXIdx(x) : uint32_t{}; }
+uint32_t gcell_get_y_idx(const OdbDb& h, int32_t y) { auto* p = gen_gcellgrid(h); return p ? p->getYIdx(y) : uint32_t{}; }
 rust::String wire_get_block(const OdbDb& h, rust::Str net) { auto* p = gen_wire(h, net); if (!p) return rust::String(); auto* t = p->getBlock(); return t ? rust::String(t->getConstName()) : rust::String(); }
 rust::String wire_get_net(const OdbDb& h, rust::Str net) { auto* p = gen_wire(h, net); if (!p) return rust::String(); auto* t = p->getNet(); return t ? rust::String(t->getConstName()) : rust::String(); }
 bool wire_is_global_wire(const OdbDb& h, rust::Str net) { auto* p = gen_wire(h, net); return p ? p->isGlobalWire() : false; }
 uint32_t wire_length(const OdbDb& h, rust::Str net) { auto* p = gen_wire(h, net); return p ? p->length() : 0; }
 uint32_t wire_count(const OdbDb& h, rust::Str net) { auto* p = gen_wire(h, net); return p ? p->count() : 0; }
+uint32_t wire_get_term_shape_junction_id(const OdbDb& h, rust::Str net, int32_t term_id) { auto* p = gen_wire(h, net); return p ? p->getTermShapeJunctionId(term_id) : uint32_t{}; }
+int32_t wire_get_data(const OdbDb& h, rust::Str net, int32_t n) { auto* p = gen_wire(h, net); return p ? p->getData(n) : int32_t{}; }
 bool fill_needs_o_p_c(const OdbDb& h, std::size_t idx) { auto* p = gen_fill(h, idx); return p ? p->needsOPC() : false; }
 uint32_t fill_mask_number(const OdbDb& h, std::size_t idx) { auto* p = gen_fill(h, idx); return p ? p->maskNumber() : 0; }
 rust::String fill_get_tech_layer(const OdbDb& h, std::size_t idx) { auto* p = gen_fill(h, idx); if (!p) return rust::String(); auto* t = p->getTechLayer(); return t ? rust::String(t->getConstName()) : rust::String(); }
@@ -971,6 +979,14 @@ bool cutspacingtablerule_is_non_opposite_enclosure_spacing_valid(const OdbDb& h,
 bool cutspacingtablerule_is_opposite_enclosure_resize_spacing_valid(const OdbDb& h, rust::Str layer, std::size_t idx) { auto* p = gen_cutspacingtablerule(h, layer, idx); return p ? p->isOppositeEnclosureResizeSpacingValid() : false; }
 rust::String cutspacingtablerule_get_second_layer(const OdbDb& h, rust::Str layer, std::size_t idx) { auto* p = gen_cutspacingtablerule(h, layer, idx); if (!p) return rust::String(); auto* t = p->getSecondLayer(); return t ? rust::String(t->getConstName()) : rust::String(); }
 rust::String cutspacingtablerule_get_tech_layer(const OdbDb& h, rust::Str layer, std::size_t idx) { auto* p = gen_cutspacingtablerule(h, layer, idx); if (!p) return rust::String(); auto* t = p->getTechLayer(); return t ? rust::String(t->getConstName()) : rust::String(); }
+bool cutspacingtablerule_is_center_to_center(const OdbDb& h, rust::Str layer, std::size_t idx, rust::Str cut_class1, rust::Str cut_class2) { auto* p = gen_cutspacingtablerule(h, layer, idx); return p ? p->isCenterToCenter(std::string(cut_class1), std::string(cut_class2)) : bool{}; }
+bool cutspacingtablerule_is_center_and_edge(const OdbDb& h, rust::Str layer, std::size_t idx, rust::Str cut_class1, rust::Str cut_class2) { auto* p = gen_cutspacingtablerule(h, layer, idx); return p ? p->isCenterAndEdge(std::string(cut_class1), std::string(cut_class2)) : bool{}; }
+bool cutspacingtablerule_is_prl_for_aligned_cut_classes(const OdbDb& h, rust::Str layer, std::size_t idx, rust::Str cut_class1, rust::Str cut_class2) { auto* p = gen_cutspacingtablerule(h, layer, idx); return p ? p->isPrlForAlignedCutClasses(std::string(cut_class1), std::string(cut_class2)) : bool{}; }
+int32_t cutspacingtablerule_get_prl_entry(const OdbDb& h, rust::Str layer, std::size_t idx, rust::Str cut_class1, rust::Str cut_class2) { auto* p = gen_cutspacingtablerule(h, layer, idx); return p ? p->getPrlEntry(std::string(cut_class1), std::string(cut_class2)) : int32_t{}; }
+int32_t cutspacingtablerule_get_max_spacing_cut_class_side(const OdbDb& h, rust::Str layer, std::size_t idx, rust::Str cut_class, bool side) { auto* p = gen_cutspacingtablerule(h, layer, idx); return p ? p->getMaxSpacing(std::string(cut_class), side) : int32_t{}; }
+int32_t cutspacingtablerule_get_exact_aligned_spacing(const OdbDb& h, rust::Str layer, std::size_t idx, rust::Str cut_class) { auto* p = gen_cutspacingtablerule(h, layer, idx); return p ? p->getExactAlignedSpacing(std::string(cut_class)) : int32_t{}; }
+int32_t cutspacingtablerule_get_max_spacing_cut_class1_cut_class2_strategy(const OdbDb& h, rust::Str layer, std::size_t idx, rust::Str cut_class1, rust::Str cut_class2, rust::Str strategy) { auto* p = gen_cutspacingtablerule(h, layer, idx); return p ? p->getMaxSpacing(std::string(cut_class1), std::string(cut_class2), cut_spacing_lookup_str_parse(strategy)) : int32_t{}; }
+int32_t cutspacingtablerule_get_spacing(const OdbDb& h, rust::Str layer, std::size_t idx, rust::Str class1, bool side1, rust::Str class2, bool side2, rust::Str strategy) { auto* p = gen_cutspacingtablerule(h, layer, idx); return p ? p->getSpacing(std::string(class1), side1, std::string(class2), side2, cut_spacing_lookup_str_parse(strategy)) : int32_t{}; }
 int32_t eolkeepoutrule_get_eol_width(const OdbDb& h, rust::Str layer, std::size_t idx) { auto* p = gen_eolkeepoutrule(h, layer, idx); return p ? p->getEolWidth() : 0; }
 int32_t eolkeepoutrule_get_backward_ext(const OdbDb& h, rust::Str layer, std::size_t idx) { auto* p = gen_eolkeepoutrule(h, layer, idx); return p ? p->getBackwardExt() : 0; }
 int32_t eolkeepoutrule_get_forward_ext(const OdbDb& h, rust::Str layer, std::size_t idx) { auto* p = gen_eolkeepoutrule(h, layer, idx); return p ? p->getForwardExt() : 0; }

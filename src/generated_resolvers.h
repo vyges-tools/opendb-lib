@@ -249,18 +249,40 @@ inline const char* chip_type_str(odb::dbChip::ChipType v) {
   if (v == odb::dbChip::ChipType::SUBSTRATE) return "SUBSTRATE";
   if (v == odb::dbChip::ChipType::HIER) return "HIER";
   return ""; }
+inline odb::dbChip::ChipType chip_type_str_parse(rust::Str s) {
+  std::string v(s);
+  if (v == "DIE") return odb::dbChip::ChipType::DIE;
+  if (v == "RDL") return odb::dbChip::ChipType::RDL;
+  if (v == "IP") return odb::dbChip::ChipType::IP;
+  if (v == "SUBSTRATE") return odb::dbChip::ChipType::SUBSTRATE;
+  if (v == "HIER") return odb::dbChip::ChipType::HIER;
+  return odb::dbChip::ChipType::DIE; }
 inline const char* chip_region_side_str(odb::dbChipRegion::Side v) {
   if (v == odb::dbChipRegion::Side::FRONT) return "FRONT";
   if (v == odb::dbChipRegion::Side::BACK) return "BACK";
   if (v == odb::dbChipRegion::Side::INTERNAL) return "INTERNAL";
   if (v == odb::dbChipRegion::Side::INTERNAL_EXT) return "INTERNAL_EXT";
   return ""; }
+inline odb::dbChipRegion::Side chip_region_side_str_parse(rust::Str s) {
+  std::string v(s);
+  if (v == "FRONT") return odb::dbChipRegion::Side::FRONT;
+  if (v == "BACK") return odb::dbChipRegion::Side::BACK;
+  if (v == "INTERNAL") return odb::dbChipRegion::Side::INTERNAL;
+  if (v == "INTERNAL_EXT") return odb::dbChipRegion::Side::INTERNAL_EXT;
+  return odb::dbChipRegion::Side::FRONT; }
 inline const char* cut_enclosure_type_str(odb::dbTechLayerCutEnclosureRule::ENC_TYPE v) {
   if (v == odb::dbTechLayerCutEnclosureRule::ENC_TYPE::DEFAULT) return "DEFAULT";
   if (v == odb::dbTechLayerCutEnclosureRule::ENC_TYPE::EOL) return "EOL";
   if (v == odb::dbTechLayerCutEnclosureRule::ENC_TYPE::ENDSIDE) return "ENDSIDE";
   if (v == odb::dbTechLayerCutEnclosureRule::ENC_TYPE::HORZ_AND_VERT) return "HORZ_AND_VERT";
   return ""; }
+inline odb::dbTechLayerCutEnclosureRule::ENC_TYPE cut_enclosure_type_str_parse(rust::Str s) {
+  std::string v(s);
+  if (v == "DEFAULT") return odb::dbTechLayerCutEnclosureRule::ENC_TYPE::DEFAULT;
+  if (v == "EOL") return odb::dbTechLayerCutEnclosureRule::ENC_TYPE::EOL;
+  if (v == "ENDSIDE") return odb::dbTechLayerCutEnclosureRule::ENC_TYPE::ENDSIDE;
+  if (v == "HORZ_AND_VERT") return odb::dbTechLayerCutEnclosureRule::ENC_TYPE::HORZ_AND_VERT;
+  return odb::dbTechLayerCutEnclosureRule::ENC_TYPE::DEFAULT; }
 inline const char* cut_spacing_type_str(odb::dbTechLayerCutSpacingRule::CutSpacingType v) {
   if (v == odb::dbTechLayerCutSpacingRule::CutSpacingType::NONE) return "NONE";
   if (v == odb::dbTechLayerCutSpacingRule::CutSpacingType::MAXXY) return "MAXXY";
@@ -272,19 +294,50 @@ inline const char* cut_spacing_type_str(odb::dbTechLayerCutSpacingRule::CutSpaci
   if (v == odb::dbTechLayerCutSpacingRule::CutSpacingType::SAMEMETALSHAREDEDGE) return "SAMEMETALSHAREDEDGE";
   if (v == odb::dbTechLayerCutSpacingRule::CutSpacingType::AREA) return "AREA";
   return ""; }
+inline odb::dbTechLayerCutSpacingRule::CutSpacingType cut_spacing_type_str_parse(rust::Str s) {
+  std::string v(s);
+  if (v == "NONE") return odb::dbTechLayerCutSpacingRule::CutSpacingType::NONE;
+  if (v == "MAXXY") return odb::dbTechLayerCutSpacingRule::CutSpacingType::MAXXY;
+  if (v == "SAMEMASK") return odb::dbTechLayerCutSpacingRule::CutSpacingType::SAMEMASK;
+  if (v == "LAYER") return odb::dbTechLayerCutSpacingRule::CutSpacingType::LAYER;
+  if (v == "ADJACENTCUTS") return odb::dbTechLayerCutSpacingRule::CutSpacingType::ADJACENTCUTS;
+  if (v == "PARALLELOVERLAP") return odb::dbTechLayerCutSpacingRule::CutSpacingType::PARALLELOVERLAP;
+  if (v == "PARALLELWITHIN") return odb::dbTechLayerCutSpacingRule::CutSpacingType::PARALLELWITHIN;
+  if (v == "SAMEMETALSHAREDEDGE") return odb::dbTechLayerCutSpacingRule::CutSpacingType::SAMEMETALSHAREDEDGE;
+  if (v == "AREA") return odb::dbTechLayerCutSpacingRule::CutSpacingType::AREA;
+  return odb::dbTechLayerCutSpacingRule::CutSpacingType::NONE; }
 inline const char* cut_spacing_lookup_str(odb::dbTechLayerCutSpacingTableDefRule::LOOKUP_STRATEGY v) {
   if (v == odb::dbTechLayerCutSpacingTableDefRule::LOOKUP_STRATEGY::FIRST) return "FIRST";
   if (v == odb::dbTechLayerCutSpacingTableDefRule::LOOKUP_STRATEGY::SECOND) return "SECOND";
   if (v == odb::dbTechLayerCutSpacingTableDefRule::LOOKUP_STRATEGY::MAX) return "MAX";
   if (v == odb::dbTechLayerCutSpacingTableDefRule::LOOKUP_STRATEGY::MIN) return "MIN";
   return ""; }
+inline odb::dbTechLayerCutSpacingTableDefRule::LOOKUP_STRATEGY cut_spacing_lookup_str_parse(rust::Str s) {
+  std::string v(s);
+  if (v == "FIRST") return odb::dbTechLayerCutSpacingTableDefRule::LOOKUP_STRATEGY::FIRST;
+  if (v == "SECOND") return odb::dbTechLayerCutSpacingTableDefRule::LOOKUP_STRATEGY::SECOND;
+  if (v == "MAX") return odb::dbTechLayerCutSpacingTableDefRule::LOOKUP_STRATEGY::MAX;
+  if (v == "MIN") return odb::dbTechLayerCutSpacingTableDefRule::LOOKUP_STRATEGY::MIN;
+  return odb::dbTechLayerCutSpacingTableDefRule::LOOKUP_STRATEGY::FIRST; }
 inline const char* corner_spacing_type_str(odb::dbTechLayerCornerSpacingRule::CornerType v) {
   if (v == odb::dbTechLayerCornerSpacingRule::CornerType::CONVEXCORNER) return "CONVEXCORNER";
   if (v == odb::dbTechLayerCornerSpacingRule::CornerType::CONCAVECORNER) return "CONCAVECORNER";
   return ""; }
+inline odb::dbTechLayerCornerSpacingRule::CornerType corner_spacing_type_str_parse(rust::Str s) {
+  std::string v(s);
+  if (v == "CONVEXCORNER") return odb::dbTechLayerCornerSpacingRule::CornerType::CONVEXCORNER;
+  if (v == "CONCAVECORNER") return odb::dbTechLayerCornerSpacingRule::CornerType::CONCAVECORNER;
+  return odb::dbTechLayerCornerSpacingRule::CornerType::CONVEXCORNER; }
 inline const char* unfolded_side_str(odb::dbUnfoldedChipRegionInst::EffectiveSide v) {
   if (v == odb::dbUnfoldedChipRegionInst::EffectiveSide::TOP) return "TOP";
   if (v == odb::dbUnfoldedChipRegionInst::EffectiveSide::BOTTOM) return "BOTTOM";
   if (v == odb::dbUnfoldedChipRegionInst::EffectiveSide::INTERNAL) return "INTERNAL";
   if (v == odb::dbUnfoldedChipRegionInst::EffectiveSide::INTERNAL_EXT) return "INTERNAL_EXT";
   return ""; }
+inline odb::dbUnfoldedChipRegionInst::EffectiveSide unfolded_side_str_parse(rust::Str s) {
+  std::string v(s);
+  if (v == "TOP") return odb::dbUnfoldedChipRegionInst::EffectiveSide::TOP;
+  if (v == "BOTTOM") return odb::dbUnfoldedChipRegionInst::EffectiveSide::BOTTOM;
+  if (v == "INTERNAL") return odb::dbUnfoldedChipRegionInst::EffectiveSide::INTERNAL;
+  if (v == "INTERNAL_EXT") return odb::dbUnfoldedChipRegionInst::EffectiveSide::INTERNAL_EXT;
+  return odb::dbUnfoldedChipRegionInst::EffectiveSide::TOP; }

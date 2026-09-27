@@ -524,6 +524,59 @@ class Emit:
         return ("rust::Str", "&str",
                 f'gen_req({fnm.group(1)}(h, {placeholder}), "{target}")')
 
+    def add_query(self, cls, spec, m, overloaded, reserved_fn, reserved_db, seen):
+        """A parameterised read `int|bool get*/is*/has*(args…)` whose args are all strings, bools,
+        ints or an enum ENUM_MAPPED knows (passed as its enumerator NAME) -> one call through. An
+        overloaded name takes its parameter names as a suffix (`get_max_spacing_cut_class_side`),
+        so which overload a binding reaches does not depend on declaration order."""
+        name, params = m["name"], m["params"]
+        if not params or not re.match(r"(get|is|has)[A-Z]", name):
+            return False
+        rets = {"int": ("int32_t", "i32"), "int32_t": ("int32_t", "i32"), "uint32_t": ("uint32_t", "u32"),
+                "uint": ("uint32_t", "u32"), "bool": ("bool", "bool")}
+        ret = " ".join(m["return"].replace("const", "").split())
+        if ret not in rets:
+            return False
+        cty_ret, rty_ret = rets[ret]
+        c_q, r_q, calls, pnames = [], [], [], []
+        for i, p in enumerate(params):
+            t = " ".join(p["type"].replace(" &", "&").replace(" *", "*").split())
+            raw = p.get("name")
+            pn = (raw.lower() if raw.isupper() else snake(raw)) if raw else f"a{i}"
+            if pn in RUST_KW:
+                pn += "_"
+            pnames.append(pn)
+            if t in ("std::string", "const std::string&", "const char*"):
+                # a const char* reads the temporary, which lives to the end of the call
+                conv = f"std::string({pn}).c_str()" if t == "const char*" else f"std::string({pn})"
+                c_q.append(f"rust::Str {pn}"); r_q.append(f"{pn}: &str"); calls.append(conv)
+            elif t in ("bool", "int", "int32_t"):
+                ct, rt = ("bool", "bool") if t == "bool" else ("int32_t", "i32")
+                c_q.append(f"{ct} {pn}"); r_q.append(f"{pn}: {rt}"); calls.append(pn)
+            elif (cls, t) in ENUM_MAPPED:
+                helper = ENUM_MAPPED[(cls, t)][1]
+                c_q.append(f"rust::Str {pn}"); r_q.append(f"{pn}: &str"); calls.append(f"{helper}_parse({pn})")
+            else:
+                return False
+        argspecs = normalize_args(spec["args"])
+        c_ids = "".join(f", {_cty(k)} {n}" for n, k in argspecs) + "".join(f", {x}" for x in c_q)
+        r_ids = "".join(f", {n}: {_rty(k)}" for n, k in argspecs) + "".join(f", {x}" for x in r_q)
+        fwd = "".join(f", {n}" for n, k in argspecs) + "".join(f", {pn}" for pn in pnames)
+        field = snake(name) + ("_" + "_".join(pnames) if overloaded else "")
+        fn = f"{spec['key']}_{field}"
+        if fn in seen or fn in reserved_fn or fn in reserved_db:
+            return False
+        self.h.append(f"{cty_ret} {fn}(const OdbDb& db{c_ids});")
+        self.cc.append(
+            f"{cty_ret} {fn}(const OdbDb& h{c_ids}) {{ auto* p = {spec['resolve']}; "
+            f"return p ? p->{name}({', '.join(calls)}) : {cty_ret}{{}}; }}")
+        self.bridge.append(f"        fn {fn}(db: &OdbDb{r_ids}) -> {rty_ret};")
+        self.api.append(f"    pub fn {fn}(&self{r_ids}) -> {rty_ret} {{ sys::{fn}(self.r(){fwd}) }}")
+        self.reexport.append(fn)
+        seen.add(fn)
+        self.per_class[cls] = self.per_class.get(cls, 0) + 1
+        return True
+
     def add_vector_outparam_getter(self, cls, spec, m, reserved_fn, reserved_db, seen):
         """A `void get*(std::vector<int>& v)` or `void get*(std::vector<std::pair<int, int>>& v)`
         table reader -> one `Vec<i32>`; a pair table comes FLATTENED (first, second, first, ...)
@@ -888,6 +941,12 @@ def main() -> int:
         for m in by_name[cls]["methods"]:
             if m["kind"] == "setter" and m["name"].startswith("get"):
                 e.add_outparam_getter(cls, spec, m, reserved_fn, reserved_db, seen)
+        # parameterised reads (`getSpacing(class1, side1, class2, side2, strategy)`): after every
+        # plain getter, so a zero-argument getter keeps its name.
+        names = [m["name"] for m in by_name[cls]["methods"]]
+        for m in by_name[cls]["methods"]:
+            if m["kind"] != "setter" and m["params"]:
+                e.add_query(cls, spec, m, names.count(m["name"]) > 1, reserved_fn, reserved_db, seen)
         seen_w: set[str] = set()
         if not spec.get("read_only"):  # value-struct targets expose getters only (see dbViaParams)
             for m in by_name[cls]["methods"]:
@@ -1155,6 +1214,11 @@ def main() -> int:
             f"static const char* {helper}({cxx_t} v) {{\n"
             + "".join(f'  if (v == {cxx_t}::{e}) return "{e}";\n' for e in vals)
             + '  return ""; }\n'
+            # …and back, for a parameterised read that takes the enum: an unknown name is the
+            # FIRST enumerator (the caller passes the vocabulary's own names).
+            + f"static {cxx_t} {helper}_parse(rust::Str s) {{\n  std::string v(s);\n"
+            + "".join(f'  if (v == "{e}") return {cxx_t}::{e};\n' for e in vals)
+            + f"  return {cxx_t}::{vals[0]}; }}\n"
             for (cxx_t, helper, vals) in ENUM_MAPPED.values())
         + "}  // namespace\n")
 

@@ -5,7 +5,7 @@
   "scope": "all",
   "class_count": 122,
   "method_count": 2715,
-  "bridged_count": 1967,
+  "bridged_count": 1974,
   "classes": [
     {
       "name": "dbAccessPoint",
@@ -2015,7 +2015,7 @@
           ],
           "const": false,
           "kind": "other",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "setCornerNameList",
@@ -8194,7 +8194,7 @@
           ],
           "const": false,
           "kind": "predicate",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "rename",
@@ -23417,7 +23417,7 @@
           ],
           "const": false,
           "kind": "predicate",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "getPrlEntry",
@@ -23434,7 +23434,7 @@
           ],
           "const": false,
           "kind": "other",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "setSpacingTable",
@@ -23506,7 +23506,7 @@
           ],
           "const": true,
           "kind": "other",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "getMaxSpacing",
@@ -30347,7 +30347,7 @@
           ],
           "const": true,
           "kind": "other",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "getShape",
@@ -30553,7 +30553,7 @@
           ],
           "const": false,
           "kind": "other",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "getOpcode",

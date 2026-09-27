@@ -115,6 +115,7 @@ mod ffi_gen {
         fn block_get_ext_count_num_of_r_seg(db: &OdbDb) -> i32;
         fn block_get_ext_count_num_of_cap_node(db: &OdbDb) -> i32;
         fn block_get_ext_count_num_of_c_c_seg(db: &OdbDb) -> i32;
+        fn block_get_ext_corner_index(db: &OdbDb, corner_name: &str) -> i32;
         fn inst_get_name(db: &OdbDb, inst: &str) -> String;
         fn inst_get_const_name(db: &OdbDb, inst: &str) -> String;
         fn inst_get_origin_x(db: &OdbDb, inst: &str) -> i32;
@@ -162,6 +163,7 @@ mod ffi_gen {
         fn inst_is_pad(db: &OdbDb, inst: &str) -> bool;
         fn inst_is_end_cap(db: &OdbDb, inst: &str) -> bool;
         fn inst_get_pin_access_idx(db: &OdbDb, inst: &str) -> u32;
+        fn inst_is_named(db: &OdbDb, inst: &str, name: &str) -> bool;
         fn net_get_name(db: &OdbDb, net: &str) -> String;
         fn net_get_const_name(db: &OdbDb, net: &str) -> String;
         fn net_is_r_c_disconnected(db: &OdbDb, net: &str) -> bool;
@@ -311,6 +313,7 @@ mod ffi_gen {
         fn iterm_is_connected(db: &OdbDb, inst: &str, pin: &str) -> bool;
         fn iterm_get_b_term(db: &OdbDb, inst: &str, pin: &str) -> String;
         fn iterm_sta_vertex_id(db: &OdbDb, inst: &str, pin: &str) -> u32;
+        fn iterm_is_input_signal(db: &OdbDb, inst: &str, pin: &str, io: bool) -> bool;
         fn mterm_get_name(db: &OdbDb, master: &str, term: &str) -> String;
         fn mterm_get_const_name(db: &OdbDb, master: &str, term: &str) -> String;
         fn mterm_get_sig_type(db: &OdbDb, master: &str, term: &str) -> String;
@@ -401,6 +404,7 @@ mod ffi_gen {
         fn layer_get_max_wide_d_r_c_range_olength(db: &OdbDb, layer: &str) -> i32;
         fn layer_get_min_wide_d_r_c_range_owidth(db: &OdbDb, layer: &str) -> i32;
         fn layer_get_min_wide_d_r_c_range_olength(db: &OdbDb, layer: &str) -> i32;
+        fn layer_get_spacing_width_length(db: &OdbDb, layer: &str, width: i32, length: i32) -> i32;
         fn row_get_name(db: &OdbDb, row: &str) -> String;
         fn row_get_const_name(db: &OdbDb, row: &str) -> String;
         fn row_get_site(db: &OdbDb, row: &str) -> String;
@@ -490,11 +494,15 @@ mod ffi_gen {
         fn gcell_get_num_grid_patterns_y(db: &OdbDb) -> i32;
         fn gcell_get_grid_x(db: &OdbDb) -> Vec<i32>;
         fn gcell_get_grid_y(db: &OdbDb) -> Vec<i32>;
+        fn gcell_get_x_idx(db: &OdbDb, x: i32) -> u32;
+        fn gcell_get_y_idx(db: &OdbDb, y: i32) -> u32;
         fn wire_get_block(db: &OdbDb, net: &str) -> String;
         fn wire_get_net(db: &OdbDb, net: &str) -> String;
         fn wire_is_global_wire(db: &OdbDb, net: &str) -> bool;
         fn wire_length(db: &OdbDb, net: &str) -> u32;
         fn wire_count(db: &OdbDb, net: &str) -> u32;
+        fn wire_get_term_shape_junction_id(db: &OdbDb, net: &str, term_id: i32) -> u32;
+        fn wire_get_data(db: &OdbDb, net: &str, n: i32) -> i32;
         fn fill_needs_o_p_c(db: &OdbDb, idx: usize) -> bool;
         fn fill_mask_number(db: &OdbDb, idx: usize) -> u32;
         fn fill_get_tech_layer(db: &OdbDb, idx: usize) -> String;
@@ -974,6 +982,14 @@ mod ffi_gen {
         fn cutspacingtablerule_is_opposite_enclosure_resize_spacing_valid(db: &OdbDb, layer: &str, idx: usize) -> bool;
         fn cutspacingtablerule_get_second_layer(db: &OdbDb, layer: &str, idx: usize) -> String;
         fn cutspacingtablerule_get_tech_layer(db: &OdbDb, layer: &str, idx: usize) -> String;
+        fn cutspacingtablerule_is_center_to_center(db: &OdbDb, layer: &str, idx: usize, cut_class1: &str, cut_class2: &str) -> bool;
+        fn cutspacingtablerule_is_center_and_edge(db: &OdbDb, layer: &str, idx: usize, cut_class1: &str, cut_class2: &str) -> bool;
+        fn cutspacingtablerule_is_prl_for_aligned_cut_classes(db: &OdbDb, layer: &str, idx: usize, cut_class1: &str, cut_class2: &str) -> bool;
+        fn cutspacingtablerule_get_prl_entry(db: &OdbDb, layer: &str, idx: usize, cut_class1: &str, cut_class2: &str) -> i32;
+        fn cutspacingtablerule_get_max_spacing_cut_class_side(db: &OdbDb, layer: &str, idx: usize, cut_class: &str, side: bool) -> i32;
+        fn cutspacingtablerule_get_exact_aligned_spacing(db: &OdbDb, layer: &str, idx: usize, cut_class: &str) -> i32;
+        fn cutspacingtablerule_get_max_spacing_cut_class1_cut_class2_strategy(db: &OdbDb, layer: &str, idx: usize, cut_class1: &str, cut_class2: &str, strategy: &str) -> i32;
+        fn cutspacingtablerule_get_spacing(db: &OdbDb, layer: &str, idx: usize, class1: &str, side1: bool, class2: &str, side2: bool, strategy: &str) -> i32;
         fn eolkeepoutrule_get_eol_width(db: &OdbDb, layer: &str, idx: usize) -> i32;
         fn eolkeepoutrule_get_backward_ext(db: &OdbDb, layer: &str, idx: usize) -> i32;
         fn eolkeepoutrule_get_forward_ext(db: &OdbDb, layer: &str, idx: usize) -> i32;
@@ -1363,6 +1379,7 @@ pub use ffi_gen::{
     block_get_die_area_x_min,
     block_get_die_area_y_max,
     block_get_die_area_y_min,
+    block_get_ext_corner_index,
     block_get_ext_count_num_of_c_c_seg,
     block_get_ext_count_num_of_cap_node,
     block_get_ext_count_num_of_net,
@@ -1661,11 +1678,18 @@ pub use ffi_gen::{
     cutspacingrule_is_two_cuts_valid,
     cutspacingrule_is_wrong_direction,
     cutspacingtablerule_get_default,
+    cutspacingtablerule_get_exact_aligned_spacing,
     cutspacingtablerule_get_extension,
+    cutspacingtablerule_get_max_spacing_cut_class1_cut_class2_strategy,
+    cutspacingtablerule_get_max_spacing_cut_class_side,
     cutspacingtablerule_get_prl,
+    cutspacingtablerule_get_prl_entry,
     cutspacingtablerule_get_second_layer,
+    cutspacingtablerule_get_spacing,
     cutspacingtablerule_get_tech_layer,
+    cutspacingtablerule_is_center_and_edge,
     cutspacingtablerule_is_center_and_edge_valid,
+    cutspacingtablerule_is_center_to_center,
     cutspacingtablerule_is_center_to_center_valid,
     cutspacingtablerule_is_default_valid,
     cutspacingtablerule_is_end_extension_valid,
@@ -1679,6 +1703,7 @@ pub use ffi_gen::{
     cutspacingtablerule_is_non_zero_enclosure,
     cutspacingtablerule_is_opposite_enclosure_resize_spacing_valid,
     cutspacingtablerule_is_prl_for_aligned_cut,
+    cutspacingtablerule_is_prl_for_aligned_cut_classes,
     cutspacingtablerule_is_prl_horizontal,
     cutspacingtablerule_is_prl_valid,
     cutspacingtablerule_is_prl_vertical,
@@ -1706,6 +1731,8 @@ pub use ffi_gen::{
     gcell_get_grid_y,
     gcell_get_num_grid_patterns_x,
     gcell_get_num_grid_patterns_y,
+    gcell_get_x_idx,
+    gcell_get_y_idx,
     group_get_name,
     group_get_parent_group,
     group_get_region,
@@ -1759,6 +1786,7 @@ pub use ffi_gen::{
     inst_is_end_cap,
     inst_is_fixed,
     inst_is_hierarchical,
+    inst_is_named,
     inst_is_pad,
     inst_is_physical_only,
     inst_is_placed,
@@ -1786,6 +1814,7 @@ pub use ffi_gen::{
     iterm_get_sig_type,
     iterm_is_clocked,
     iterm_is_connected,
+    iterm_is_input_signal,
     iterm_is_set_mark,
     iterm_is_special,
     iterm_is_spef,
@@ -1823,6 +1852,7 @@ pub use ffi_gen::{
     layer_get_resistance,
     layer_get_routing_level,
     layer_get_spacing,
+    layer_get_spacing_width_length,
     layer_get_tech,
     layer_get_two_widths_spacing_table_num_widths,
     layer_get_upper_layer,
@@ -2525,7 +2555,9 @@ pub use ffi_gen::{
     widthtablerule_is_wrong_direction,
     wire_count,
     wire_get_block,
+    wire_get_data,
     wire_get_net,
+    wire_get_term_shape_junction_id,
     wire_is_global_wire,
     wire_length,
     wrongdirspacingrule_get_length,
