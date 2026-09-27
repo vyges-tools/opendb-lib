@@ -168,16 +168,22 @@ def logical_lines(body: str):
 
     Joining is by paren DEPTH, not by a heuristic: accumulate while unbalanced. A single-line
     declaration is yielded unchanged, so nothing that parsed before parses differently now.
+
+    ⛔ Balanced is not finished: clang-format also breaks BEFORE a trailing `const;` and between
+    a long return type and the name (`dbSet<dbTechLayerTwoWiresForbiddenSpcRule>` / `getTech…()
+    const;`), and both leave the parens balanced at the break. So a balanced line that does not
+    END a declaration (`;`, `{` or `}`) keeps accumulating — blank lines, comments, access labels
+    and preprocessor lines are never a declaration's first half.
     """
     buf, depth = "", 0
     for line in body.splitlines():
         stripped = line.strip()
-        if not buf and stripped.startswith("//"):
+        if not buf and (stripped.startswith(("//", "#")) or not stripped or stripped.endswith(":")):
             yield line
             continue
         buf = line if not buf else buf + " " + stripped
         depth += line.count("(") - line.count(")")
-        if depth <= 0:
+        if depth <= 0 and stripped.endswith((";", "{", "}")):
             yield buf
             buf, depth = "", 0
     if buf:

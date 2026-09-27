@@ -111,6 +111,11 @@ TARGETS = {
     "dbTechLayerCornerSpacingRule": {"key": "cornerspacingrule", "args": ["layer", {"name": "idx", "type": "idx"}], "resolve": "gen_cornerspacingrule(h, layer, idx)"},
     "dbTechLayerMinStepRule":       {"key": "minsteprule",       "args": ["layer", {"name": "idx", "type": "idx"}], "resolve": "gen_minsteprule(h, layer, idx)"},
     "dbTechLayerMinCutRule":        {"key": "mincutrule",        "args": ["layer", {"name": "idx", "type": "idx"}], "resolve": "gen_mincutrule(h, layer, idx)"},
+    # … and the rules drt's census counts to REFUSE (translated by the reference's io, not modelled).
+    "dbTechLayerMaxSpacingRule":          {"key": "maxspacingrule",       "args": ["layer", {"name": "idx", "type": "idx"}], "resolve": "gen_maxspacingrule(h, layer, idx)"},
+    "dbTechLayerTwoWiresForbiddenSpcRule": {"key": "twowiresforbiddenrule", "args": ["layer", {"name": "idx", "type": "idx"}], "resolve": "gen_twowiresforbiddenrule(h, layer, idx)"},
+    "dbTechLayerWidthTableRule":          {"key": "widthtablerule",       "args": ["layer", {"name": "idx", "type": "idx"}], "resolve": "gen_widthtablerule(h, layer, idx)"},
+    "dbTechLayerWrongDirSpacingRule":     {"key": "wrongdirspacingrule",  "args": ["layer", {"name": "idx", "type": "idx"}], "resolve": "gen_wrongdirspacingrule(h, layer, idx)"},
     "dbTechLayerAntennaRule": {"key": "layerantenna",     "args": ["layer"], "resolve": "gen_layerantenna(h, layer)"},
     "dbTechAntennaPinModel":  {"key": "antennapinmodel",  "args": ["master", "term"], "resolve": "gen_antennapinmodel(h, master, term)"},
     # via cut geometry (value-struct via dbVia::getViaParams(), stashed thread-local) — see resolver.
@@ -230,6 +235,10 @@ ENUM_MAPPED = {
     ("dbTechLayerCutSpacingTableDefRule", "LOOKUP_STRATEGY"):
         ("odb::dbTechLayerCutSpacingTableDefRule::LOOKUP_STRATEGY", "cut_spacing_lookup_str",
          ["FIRST", "SECOND", "MAX", "MIN"]),
+    # drt's corner spacing check only fires on the rule's own corner type.
+    ("dbTechLayerCornerSpacingRule", "CornerType"):
+        ("odb::dbTechLayerCornerSpacingRule::CornerType", "corner_spacing_type_str",
+         ["CONVEXCORNER", "CONCAVECORNER"]),
     ("dbUnfoldedChipRegionInst", "EffectiveSide"):
         ("odb::dbUnfoldedChipRegionInst::EffectiveSide", "unfolded_side_str",
          ["TOP", "BOTTOM", "INTERNAL", "INTERNAL_EXT"]),
@@ -515,6 +524,41 @@ class Emit:
         return ("rust::Str", "&str",
                 f'gen_req({fnm.group(1)}(h, {placeholder}), "{target}")')
 
+    def add_vector_outparam_getter(self, cls, spec, m, reserved_fn, reserved_db, seen):
+        """A `void get*(std::vector<int>& v)` or `void get*(std::vector<std::pair<int, int>>& v)`
+        table reader -> one `Vec<i32>`; a pair table comes FLATTENED (first, second, first, ...)
+        in odb's order."""
+        name, p = m["name"], m["params"][0]["type"].strip()
+        if re.fullmatch(r"std::vector<\s*int\s*>\s*&", p):
+            fill = "for (int x : v) out.push_back(x);"
+            decl = "std::vector<int> v;"
+        elif re.fullmatch(r"std::vector<\s*std::pair<\s*int\s*,\s*int\s*>\s*>\s*&", p):
+            fill = "for (auto& [a, b] : v) { out.push_back(a); out.push_back(b); }"
+            decl = "std::vector<std::pair<int, int>> v;"
+        else:
+            return False
+        argspecs = normalize_args(spec["args"])
+        c_ids = "".join(f", {_cty(k)} {n}" for n, k in argspecs)
+        r_ids = "".join(f", {n}: {_rty(k)}" for n, k in argspecs)
+        fwd = "".join(f", {n}" for n, k in argspecs)
+        key_call, keys_desc = key_exprs(argspecs)
+        field = snake(name)
+        fn = f"{spec['key']}_{field}"
+        if fn in seen or fn in reserved_fn or fn in reserved_db:
+            return False
+        self.h.append(f"rust::Vec<int32_t> {fn}(const OdbDb& db{c_ids});")
+        self.cc.append(
+            f"rust::Vec<int32_t> {fn}(const OdbDb& h{c_ids}) {{ rust::Vec<int32_t> out; {decl} "
+            f"auto* p = {spec['resolve']}; if (p) {{ p->{name}(v); {fill} }} return out; }}")
+        self.bridge.append(f"        fn {fn}(db: &OdbDb{r_ids}) -> Vec<i32>;")
+        self.api.append(f"    pub fn {fn}(&self{r_ids}) -> Vec<i32> {{ sys::{fn}(self.r(){fwd}) }}")
+        self.reexport.append(fn)
+        seen.add(fn)
+        arm = f'        ("{cls}", "{field}") => Ok(serde_json::json!(db.{fn}({key_call}))),'
+        self.reg.append((cls, field, "list", keys_desc, arm))
+        self.per_class[cls] = self.per_class.get(cls, 0) + 1
+        return True
+
     def add_outparam_getter(self, cls, spec, m, reserved_fn, reserved_db, seen):
         """A `void get*(int& a, int& b, ...)` reader (all params are scalar out-refs) -> one scalar
         sub-field per out-param. Classifies as a 'setter' (void return) so it's otherwise skipped."""
@@ -522,6 +566,8 @@ class Emit:
         params = m["params"]
         if not name.startswith("get") or not params:
             return False
+        if len(params) == 1 and self.add_vector_outparam_getter(cls, spec, m, reserved_fn, reserved_db, seen):
+            return True
         outs = []
         for i, p in enumerate(params):
             om = re.match(r"^(int|int32_t|uint|uint32_t|unsigned|bool|double|float)\s*&$", p["type"].strip())
@@ -1033,6 +1079,18 @@ def main() -> int:
         "static odb::dbTechLayerMinCutRule* gen_mincutrule(const OdbDb& h, rust::Str layer, std::size_t i) {\n"
         "  odb::dbTechLayer* l = gen_techlayer(h, layer); if (!l) return nullptr;\n"
         "  std::size_t k = 0; for (odb::dbTechLayerMinCutRule* r : l->getTechLayerMinCutRules()) { if (k++ == i) return r; } return nullptr; }\n"
+        "static odb::dbTechLayerMaxSpacingRule* gen_maxspacingrule(const OdbDb& h, rust::Str layer, std::size_t i) {\n"
+        "  odb::dbTechLayer* l = gen_techlayer(h, layer); if (!l) return nullptr;\n"
+        "  std::size_t k = 0; for (odb::dbTechLayerMaxSpacingRule* r : l->getTechLayerMaxSpacingRules()) { if (k++ == i) return r; } return nullptr; }\n"
+        "static odb::dbTechLayerTwoWiresForbiddenSpcRule* gen_twowiresforbiddenrule(const OdbDb& h, rust::Str layer, std::size_t i) {\n"
+        "  odb::dbTechLayer* l = gen_techlayer(h, layer); if (!l) return nullptr;\n"
+        "  std::size_t k = 0; for (odb::dbTechLayerTwoWiresForbiddenSpcRule* r : l->getTechLayerTwoWiresForbiddenSpcRules()) { if (k++ == i) return r; } return nullptr; }\n"
+        "static odb::dbTechLayerWidthTableRule* gen_widthtablerule(const OdbDb& h, rust::Str layer, std::size_t i) {\n"
+        "  odb::dbTechLayer* l = gen_techlayer(h, layer); if (!l) return nullptr;\n"
+        "  std::size_t k = 0; for (odb::dbTechLayerWidthTableRule* r : l->getTechLayerWidthTableRules()) { if (k++ == i) return r; } return nullptr; }\n"
+        "static odb::dbTechLayerWrongDirSpacingRule* gen_wrongdirspacingrule(const OdbDb& h, rust::Str layer, std::size_t i) {\n"
+        "  odb::dbTechLayer* l = gen_techlayer(h, layer); if (!l) return nullptr;\n"
+        "  std::size_t k = 0; for (odb::dbTechLayerWrongDirSpacingRule* r : l->getTechLayerWrongDirSpacingRules()) { if (k++ == i) return r; } return nullptr; }\n"
         "static odb::dbTechLayerAntennaRule* gen_layerantenna(const OdbDb& h, rust::Str layer) {\n"
         "  odb::dbTechLayer* l = gen_techlayer(h, layer); return l ? l->getDefaultAntennaRule() : nullptr; }\n"
         "static odb::dbTechAntennaPinModel* gen_antennapinmodel(const OdbDb& h, rust::Str master, rust::Str term) {\n"

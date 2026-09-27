@@ -353,7 +353,6 @@ mod ffi_gen_write {
         fn cutspacingrule_set_prl_valid(db: &OdbDb, layer: &str, idx: usize, prl_valid: bool) -> Result<()>;
         fn cutspacingrule_set_below(db: &OdbDb, layer: &str, idx: usize, below: bool) -> Result<()>;
         fn cutspacingrule_set_par_within_enclosure_valid(db: &OdbDb, layer: &str, idx: usize, par_within_enclosure_valid: bool) -> Result<()>;
-        fn cutspacingtablerule_set_default(db: &OdbDb, layer: &str, idx: usize, spacing: i32) -> Result<()>;
         fn cutspacingtablerule_set_second_layer(db: &OdbDb, layer: &str, idx: usize, second_layer: &str) -> Result<()>;
         fn cutspacingtablerule_set_prl(db: &OdbDb, layer: &str, idx: usize, prl: i32) -> Result<()>;
         fn cutspacingtablerule_set_extension(db: &OdbDb, layer: &str, idx: usize, extension: i32) -> Result<()>;
@@ -515,6 +514,23 @@ mod ffi_gen_write {
         fn mincutrule_set_same_metal_overlap(db: &OdbDb, layer: &str, idx: usize, same_metal_overlap: bool) -> Result<()>;
         fn mincutrule_set_fully_enclosed(db: &OdbDb, layer: &str, idx: usize, fully_enclosed: bool) -> Result<()>;
         fn mincutrule_set_cuts_per_cut_class(db: &OdbDb, layer: &str, idx: usize, cut_class: &str, num_cuts: i32) -> Result<()>;
+        fn maxspacingrule_set_cut_class(db: &OdbDb, layer: &str, idx: usize, cut_class: &str) -> Result<()>;
+        fn maxspacingrule_set_max_spacing(db: &OdbDb, layer: &str, idx: usize, max_spacing: i32) -> Result<()>;
+        fn twowiresforbiddenrule_set_min_spacing(db: &OdbDb, layer: &str, idx: usize, min_spacing: i32) -> Result<()>;
+        fn twowiresforbiddenrule_set_max_spacing(db: &OdbDb, layer: &str, idx: usize, max_spacing: i32) -> Result<()>;
+        fn twowiresforbiddenrule_set_min_span_length(db: &OdbDb, layer: &str, idx: usize, min_span_length: i32) -> Result<()>;
+        fn twowiresforbiddenrule_set_max_span_length(db: &OdbDb, layer: &str, idx: usize, max_span_length: i32) -> Result<()>;
+        fn twowiresforbiddenrule_set_prl(db: &OdbDb, layer: &str, idx: usize, prl: i32) -> Result<()>;
+        fn twowiresforbiddenrule_set_min_exact_span_length(db: &OdbDb, layer: &str, idx: usize, min_exact_span_length: bool) -> Result<()>;
+        fn twowiresforbiddenrule_set_max_exact_span_length(db: &OdbDb, layer: &str, idx: usize, max_exact_span_length: bool) -> Result<()>;
+        fn widthtablerule_set_wrong_direction(db: &OdbDb, layer: &str, idx: usize, wrong_direction: bool) -> Result<()>;
+        fn widthtablerule_set_orthogonal(db: &OdbDb, layer: &str, idx: usize, orthogonal: bool) -> Result<()>;
+        fn wrongdirspacingrule_set_wrongdir_space(db: &OdbDb, layer: &str, idx: usize, wrongdir_space: i32) -> Result<()>;
+        fn wrongdirspacingrule_set_noneol_width(db: &OdbDb, layer: &str, idx: usize, noneol_width: i32) -> Result<()>;
+        fn wrongdirspacingrule_set_length(db: &OdbDb, layer: &str, idx: usize, length: i32) -> Result<()>;
+        fn wrongdirspacingrule_set_prl_length(db: &OdbDb, layer: &str, idx: usize, prl_length: i32) -> Result<()>;
+        fn wrongdirspacingrule_set_noneol_valid(db: &OdbDb, layer: &str, idx: usize, noneol_valid: bool) -> Result<()>;
+        fn wrongdirspacingrule_set_length_valid(db: &OdbDb, layer: &str, idx: usize, length_valid: bool) -> Result<()>;
         fn layerantenna_set_gate_plus_diff_factor(db: &OdbDb, layer: &str, factor: f64) -> Result<()>;
         fn layerantenna_set_area_minus_diff_factor(db: &OdbDb, layer: &str, factor: f64) -> Result<()>;
         fn layerantenna_set_area_factor(db: &OdbDb, layer: &str, factor: f64, diffuse: bool) -> Result<()>;
@@ -737,7 +753,6 @@ pub use ffi_gen_write::{
     cutspacingrule_set_wrong_direction,
     cutspacingtablerule_set_center_and_edge_valid,
     cutspacingtablerule_set_center_to_center_valid,
-    cutspacingtablerule_set_default,
     cutspacingtablerule_set_default_valid,
     cutspacingtablerule_set_end_extension_valid,
     cutspacingtablerule_set_exact_aligned_spacing_valid,
@@ -895,6 +910,8 @@ pub use ffi_gen_write::{
     master_set_symmetry_x,
     master_set_symmetry_y,
     master_set_width,
+    maxspacingrule_set_cut_class,
+    maxspacingrule_set_max_spacing,
     mincutrule_set_area,
     mincutrule_set_area_valid,
     mincutrule_set_area_within_dist,
@@ -1088,6 +1105,21 @@ pub use ffi_gen_write::{
     techvialayerrule_set_resistance,
     techvialayerrule_set_spacing,
     techvialayerrule_set_width,
+    twowiresforbiddenrule_set_max_exact_span_length,
+    twowiresforbiddenrule_set_max_spacing,
+    twowiresforbiddenrule_set_max_span_length,
+    twowiresforbiddenrule_set_min_exact_span_length,
+    twowiresforbiddenrule_set_min_spacing,
+    twowiresforbiddenrule_set_min_span_length,
+    twowiresforbiddenrule_set_prl,
     via_set_pattern,
+    widthtablerule_set_orthogonal,
+    widthtablerule_set_wrong_direction,
     wire_set_property,
+    wrongdirspacingrule_set_length,
+    wrongdirspacingrule_set_length_valid,
+    wrongdirspacingrule_set_noneol_valid,
+    wrongdirspacingrule_set_noneol_width,
+    wrongdirspacingrule_set_prl_length,
+    wrongdirspacingrule_set_wrongdir_space,
 };

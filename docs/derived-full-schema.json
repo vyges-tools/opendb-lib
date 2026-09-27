@@ -4,8 +4,8 @@
   "note": "Method-based schema derived from the hand-written core classes; parallels OpenROAD's field-based codeGenerator schema for the classes it does not cover.",
   "scope": "all",
   "class_count": 122,
-  "method_count": 2711,
-  "bridged_count": 1938,
+  "method_count": 2715,
+  "bridged_count": 1967,
   "classes": [
     {
       "name": "dbAccessPoint",
@@ -140,13 +140,17 @@
           "bridged": true
         },
         {
-          "name": "getLayer",
-          "return": "dbTechLayer*",
-          "params": [],
+          "name": "hasAccess",
+          "return": "bool",
+          "params": [
+            {
+              "type": "dbDirection",
+              "name": "dir"
+            }
+          ],
           "const": true,
-          "kind": "relation",
-          "bridged": true,
-          "target": "dbTechLayer"
+          "kind": "predicate",
+          "bridged": false
         },
         {
           "name": "getMPin",
@@ -17440,7 +17444,7 @@
           ],
           "const": true,
           "kind": "setter",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "getTechLayerCutClassRules",
@@ -17502,6 +17506,33 @@
           "element": "dbTechLayerCornerSpacingRule"
         },
         {
+          "name": "getTechLayerSpacingTablePrlRules",
+          "return": "dbSet<dbTechLayerSpacingTablePrlRule>",
+          "params": [],
+          "const": true,
+          "kind": "iterator",
+          "bridged": true,
+          "element": "dbTechLayerSpacingTablePrlRule"
+        },
+        {
+          "name": "getTechLayerCutSpacingTableOrthRules",
+          "return": "dbSet<dbTechLayerCutSpacingTableOrthRule>",
+          "params": [],
+          "const": true,
+          "kind": "iterator",
+          "bridged": true,
+          "element": "dbTechLayerCutSpacingTableOrthRule"
+        },
+        {
+          "name": "getTechLayerCutSpacingTableDefRules",
+          "return": "dbSet<dbTechLayerCutSpacingTableDefRule>",
+          "params": [],
+          "const": true,
+          "kind": "iterator",
+          "bridged": true,
+          "element": "dbTechLayerCutSpacingTableDefRule"
+        },
+        {
           "name": "getTechLayerCutEnclosureRules",
           "return": "dbSet<dbTechLayerCutEnclosureRule>",
           "params": [],
@@ -17543,7 +17574,7 @@
           "params": [],
           "const": true,
           "kind": "iterator",
-          "bridged": false,
+          "bridged": true,
           "element": "dbTechLayerMaxSpacingRule"
         },
         {
@@ -17574,6 +17605,15 @@
           "element": "dbTechLayerAreaRule"
         },
         {
+          "name": "getTechLayerForbiddenSpacingRules",
+          "return": "dbSet<dbTechLayerForbiddenSpacingRule>",
+          "params": [],
+          "const": true,
+          "kind": "iterator",
+          "bridged": true,
+          "element": "dbTechLayerForbiddenSpacingRule"
+        },
+        {
           "name": "getTechLayerKeepOutZoneRules",
           "return": "dbSet<dbTechLayerKeepOutZoneRule>",
           "params": [],
@@ -17581,6 +17621,24 @@
           "kind": "iterator",
           "bridged": true,
           "element": "dbTechLayerKeepOutZoneRule"
+        },
+        {
+          "name": "getTechLayerWrongDirSpacingRules",
+          "return": "dbSet<dbTechLayerWrongDirSpacingRule>",
+          "params": [],
+          "const": true,
+          "kind": "iterator",
+          "bridged": true,
+          "element": "dbTechLayerWrongDirSpacingRule"
+        },
+        {
+          "name": "getTechLayerTwoWiresForbiddenSpcRules",
+          "return": "dbSet<dbTechLayerTwoWiresForbiddenSpcRule>",
+          "params": [],
+          "const": true,
+          "kind": "iterator",
+          "bridged": true,
+          "element": "dbTechLayerTwoWiresForbiddenSpcRule"
         },
         {
           "name": "getTechLayerVoltageSpacings",
@@ -20251,7 +20309,7 @@
           ],
           "const": false,
           "kind": "setter",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "getWidthTable",
@@ -20393,19 +20451,6 @@
       "name": "dbTechLayerCutEnclosureRule",
       "parent": "dbObject",
       "methods": [
-        {
-          "name": "setCutClass",
-          "return": "void",
-          "params": [
-            {
-              "type": "dbTechLayerCutClassRule*",
-              "name": "cut_class"
-            }
-          ],
-          "const": false,
-          "kind": "setter",
-          "bridged": true
-        },
         {
           "name": "getCutClass",
           "return": "dbTechLayerCutClassRule*",
@@ -22604,19 +22649,6 @@
       "parent": "dbObject",
       "methods": [
         {
-          "name": "setDefault",
-          "return": "void",
-          "params": [
-            {
-              "type": "int",
-              "name": "spacing"
-            }
-          ],
-          "const": false,
-          "kind": "setter",
-          "bridged": true
-        },
-        {
           "name": "getDefault",
           "return": "int",
           "params": [],
@@ -23444,7 +23476,7 @@
           ],
           "const": false,
           "kind": "setter",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "getMaxSpacing",
@@ -23553,7 +23585,7 @@
           ],
           "const": true,
           "kind": "setter",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "setSpacingTable",
@@ -24369,7 +24401,7 @@
           ],
           "const": false,
           "kind": "setter",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "getMaxSpacing",
@@ -24385,7 +24417,7 @@
           "params": [],
           "const": true,
           "kind": "predicate",
-          "bridged": false
+          "bridged": true
         }
       ],
       "hand_written": false
@@ -27620,7 +27652,7 @@
           ],
           "const": false,
           "kind": "setter",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "getMaxSpacing",
@@ -27641,7 +27673,7 @@
           ],
           "const": false,
           "kind": "setter",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "getMinSpanLength",
@@ -27649,7 +27681,7 @@
           "params": [],
           "const": true,
           "kind": "getter",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "setMaxSpanLength",
@@ -27662,7 +27694,7 @@
           ],
           "const": false,
           "kind": "setter",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "getMaxSpanLength",
@@ -27670,7 +27702,7 @@
           "params": [],
           "const": true,
           "kind": "getter",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "setPrl",
@@ -27704,7 +27736,7 @@
           ],
           "const": false,
           "kind": "setter",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "isMinExactSpanLength",
@@ -27712,7 +27744,7 @@
           "params": [],
           "const": true,
           "kind": "predicate",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "setMaxExactSpanLength",
@@ -27725,7 +27757,7 @@
           ],
           "const": false,
           "kind": "setter",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "isMaxExactSpanLength",
@@ -27733,7 +27765,7 @@
           "params": [],
           "const": true,
           "kind": "predicate",
-          "bridged": false
+          "bridged": true
         }
       ],
       "hand_written": false
@@ -27848,7 +27880,7 @@
           ],
           "const": false,
           "kind": "setter",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "isOrthogonal",
@@ -27856,7 +27888,7 @@
           "params": [],
           "const": true,
           "kind": "predicate",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "addWidth",
@@ -27897,7 +27929,7 @@
           ],
           "const": false,
           "kind": "setter",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "getWrongdirSpace",
@@ -27905,7 +27937,7 @@
           "params": [],
           "const": true,
           "kind": "getter",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "setNoneolWidth",
@@ -27918,7 +27950,7 @@
           ],
           "const": false,
           "kind": "setter",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "getNoneolWidth",
@@ -27926,7 +27958,7 @@
           "params": [],
           "const": true,
           "kind": "getter",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "setLength",
@@ -27960,7 +27992,7 @@
           ],
           "const": false,
           "kind": "setter",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "getPrlLength",
@@ -27968,7 +28000,7 @@
           "params": [],
           "const": true,
           "kind": "getter",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "setNoneolValid",
@@ -27981,7 +28013,7 @@
           ],
           "const": false,
           "kind": "setter",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "isNoneolValid",
@@ -27989,7 +28021,7 @@
           "params": [],
           "const": true,
           "kind": "predicate",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "setLengthValid",

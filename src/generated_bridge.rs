@@ -337,9 +337,14 @@ mod ffi_gen {
         fn num_layer_get_tech_layer_cut_spacing_rules(db: &OdbDb, layer: &str) -> usize;
         fn num_layer_get_tech_layer_min_step_rules(db: &OdbDb, layer: &str) -> usize;
         fn num_layer_get_tech_layer_corner_spacing_rules(db: &OdbDb, layer: &str) -> usize;
+        fn num_layer_get_tech_layer_cut_spacing_table_def_rules(db: &OdbDb, layer: &str) -> usize;
         fn num_layer_get_tech_layer_cut_enclosure_rules(db: &OdbDb, layer: &str) -> usize;
         fn num_layer_get_tech_layer_eol_keep_out_rules(db: &OdbDb, layer: &str) -> usize;
+        fn num_layer_get_tech_layer_max_spacing_rules(db: &OdbDb, layer: &str) -> usize;
+        fn num_layer_get_tech_layer_width_table_rules(db: &OdbDb, layer: &str) -> usize;
         fn num_layer_get_tech_layer_min_cut_rules(db: &OdbDb, layer: &str) -> usize;
+        fn num_layer_get_tech_layer_wrong_dir_spacing_rules(db: &OdbDb, layer: &str) -> usize;
+        fn num_layer_get_tech_layer_two_wires_forbidden_spc_rules(db: &OdbDb, layer: &str) -> usize;
         fn layer_is_rect_only(db: &OdbDb, layer: &str) -> bool;
         fn layer_is_right_way_on_grid_only(db: &OdbDb, layer: &str) -> bool;
         fn layer_is_right_way_on_grid_only_check_mask(db: &OdbDb, layer: &str) -> bool;
@@ -391,6 +396,7 @@ mod ffi_gen {
         fn layer_get_upper_layer(db: &OdbDb, layer: &str) -> String;
         fn layer_get_tech(db: &OdbDb, layer: &str) -> String;
         fn layer_has_orth_spacing_table(db: &OdbDb, layer: &str) -> bool;
+        fn layer_get_orth_spacing_table(db: &OdbDb, layer: &str) -> Vec<i32>;
         fn layer_get_max_wide_d_r_c_range_owidth(db: &OdbDb, layer: &str) -> i32;
         fn layer_get_max_wide_d_r_c_range_olength(db: &OdbDb, layer: &str) -> i32;
         fn layer_get_min_wide_d_r_c_range_owidth(db: &OdbDb, layer: &str) -> i32;
@@ -482,6 +488,8 @@ mod ffi_gen {
         fn gcell_get_block(db: &OdbDb) -> String;
         fn gcell_get_num_grid_patterns_x(db: &OdbDb) -> i32;
         fn gcell_get_num_grid_patterns_y(db: &OdbDb) -> i32;
+        fn gcell_get_grid_x(db: &OdbDb) -> Vec<i32>;
+        fn gcell_get_grid_y(db: &OdbDb) -> Vec<i32>;
         fn wire_get_block(db: &OdbDb, net: &str) -> String;
         fn wire_get_net(db: &OdbDb, net: &str) -> String;
         fn wire_is_global_wire(db: &OdbDb, net: &str) -> bool;
@@ -579,6 +587,8 @@ mod ffi_gen {
         fn trackgrid_get_block(db: &OdbDb, idx: usize) -> String;
         fn trackgrid_get_num_grid_patterns_x(db: &OdbDb, idx: usize) -> i32;
         fn trackgrid_get_num_grid_patterns_y(db: &OdbDb, idx: usize) -> i32;
+        fn trackgrid_get_grid_x(db: &OdbDb, idx: usize) -> Vec<i32>;
+        fn trackgrid_get_grid_y(db: &OdbDb, idx: usize) -> Vec<i32>;
         fn trackgrid_get_average_track_spacing_track_step(db: &OdbDb, idx: usize) -> i32;
         fn trackgrid_get_average_track_spacing_track_init(db: &OdbDb, idx: usize) -> i32;
         fn trackgrid_get_average_track_spacing_num_tracks(db: &OdbDb, idx: usize) -> i32;
@@ -1066,6 +1076,9 @@ mod ffi_gen {
         fn cornerspacingrule_is_except_same_net(db: &OdbDb, layer: &str, idx: usize) -> bool;
         fn cornerspacingrule_is_except_same_metal(db: &OdbDb, layer: &str, idx: usize) -> bool;
         fn cornerspacingrule_is_corner_to_corner(db: &OdbDb, layer: &str, idx: usize) -> bool;
+        fn cornerspacingrule_get_type(db: &OdbDb, layer: &str, idx: usize) -> String;
+        fn cornerspacingrule_get_spacing_table(db: &OdbDb, layer: &str, idx: usize) -> Vec<i32>;
+        fn cornerspacingrule_get_width_table(db: &OdbDb, layer: &str, idx: usize) -> Vec<i32>;
         fn minsteprule_get_min_step_length(db: &OdbDb, layer: &str, idx: usize) -> i32;
         fn minsteprule_get_max_edges(db: &OdbDb, layer: &str, idx: usize) -> u32;
         fn minsteprule_get_min_adj_length1(db: &OdbDb, layer: &str, idx: usize) -> i32;
@@ -1097,6 +1110,24 @@ mod ffi_gen {
         fn mincutrule_is_area_within_dist_valid(db: &OdbDb, layer: &str, idx: usize) -> bool;
         fn mincutrule_is_same_metal_overlap(db: &OdbDb, layer: &str, idx: usize) -> bool;
         fn mincutrule_is_fully_enclosed(db: &OdbDb, layer: &str, idx: usize) -> bool;
+        fn maxspacingrule_get_cut_class(db: &OdbDb, layer: &str, idx: usize) -> String;
+        fn maxspacingrule_get_max_spacing(db: &OdbDb, layer: &str, idx: usize) -> i32;
+        fn maxspacingrule_has_cut_class(db: &OdbDb, layer: &str, idx: usize) -> bool;
+        fn twowiresforbiddenrule_get_min_spacing(db: &OdbDb, layer: &str, idx: usize) -> i32;
+        fn twowiresforbiddenrule_get_max_spacing(db: &OdbDb, layer: &str, idx: usize) -> i32;
+        fn twowiresforbiddenrule_get_min_span_length(db: &OdbDb, layer: &str, idx: usize) -> i32;
+        fn twowiresforbiddenrule_get_max_span_length(db: &OdbDb, layer: &str, idx: usize) -> i32;
+        fn twowiresforbiddenrule_get_prl(db: &OdbDb, layer: &str, idx: usize) -> i32;
+        fn twowiresforbiddenrule_is_min_exact_span_length(db: &OdbDb, layer: &str, idx: usize) -> bool;
+        fn twowiresforbiddenrule_is_max_exact_span_length(db: &OdbDb, layer: &str, idx: usize) -> bool;
+        fn widthtablerule_is_wrong_direction(db: &OdbDb, layer: &str, idx: usize) -> bool;
+        fn widthtablerule_is_orthogonal(db: &OdbDb, layer: &str, idx: usize) -> bool;
+        fn wrongdirspacingrule_get_wrongdir_space(db: &OdbDb, layer: &str, idx: usize) -> i32;
+        fn wrongdirspacingrule_get_noneol_width(db: &OdbDb, layer: &str, idx: usize) -> i32;
+        fn wrongdirspacingrule_get_length(db: &OdbDb, layer: &str, idx: usize) -> i32;
+        fn wrongdirspacingrule_get_prl_length(db: &OdbDb, layer: &str, idx: usize) -> i32;
+        fn wrongdirspacingrule_is_noneol_valid(db: &OdbDb, layer: &str, idx: usize) -> bool;
+        fn wrongdirspacingrule_is_length_valid(db: &OdbDb, layer: &str, idx: usize) -> bool;
         fn layerantenna_is_valid(db: &OdbDb, layer: &str) -> bool;
         fn layerantenna_has_area_factor(db: &OdbDb, layer: &str) -> bool;
         fn layerantenna_has_side_area_factor(db: &OdbDb, layer: &str) -> bool;
@@ -1503,6 +1534,9 @@ pub use ffi_gen::{
     cornerspacingrule_get_except_notch_length,
     cornerspacingrule_get_jog_length,
     cornerspacingrule_get_min_length,
+    cornerspacingrule_get_spacing_table,
+    cornerspacingrule_get_type,
+    cornerspacingrule_get_width_table,
     cornerspacingrule_get_within,
     cornerspacingrule_is_corner_only,
     cornerspacingrule_is_corner_to_corner,
@@ -1668,6 +1702,8 @@ pub use ffi_gen::{
     fill_mask_number,
     fill_needs_o_p_c,
     gcell_get_block,
+    gcell_get_grid_x,
+    gcell_get_grid_y,
     gcell_get_num_grid_patterns_x,
     gcell_get_num_grid_patterns_y,
     group_get_name,
@@ -1777,6 +1813,7 @@ pub use ffi_gen::{
     layer_get_offset,
     layer_get_offset_x,
     layer_get_offset_y,
+    layer_get_orth_spacing_table,
     layer_get_pitch,
     layer_get_pitch_x,
     layer_get_pitch_y,
@@ -1898,6 +1935,9 @@ pub use ffi_gen::{
     master_is_pad,
     master_is_sequential,
     master_is_special_power,
+    maxspacingrule_get_cut_class,
+    maxspacingrule_get_max_spacing,
+    maxspacingrule_has_cut_class,
     mincutrule_get_area_within_dist,
     mincutrule_get_length,
     mincutrule_get_length_within_dist,
@@ -2178,10 +2218,15 @@ pub use ffi_gen::{
     num_layer_get_tech_layer_cut_class_rules,
     num_layer_get_tech_layer_cut_enclosure_rules,
     num_layer_get_tech_layer_cut_spacing_rules,
+    num_layer_get_tech_layer_cut_spacing_table_def_rules,
     num_layer_get_tech_layer_eol_keep_out_rules,
+    num_layer_get_tech_layer_max_spacing_rules,
     num_layer_get_tech_layer_min_cut_rules,
     num_layer_get_tech_layer_min_step_rules,
     num_layer_get_tech_layer_spacing_eol_rules,
+    num_layer_get_tech_layer_two_wires_forbidden_spc_rules,
+    num_layer_get_tech_layer_width_table_rules,
+    num_layer_get_tech_layer_wrong_dir_spacing_rules,
     num_lib_get_masters,
     num_lib_get_sites,
     num_marker_cat_get_marker_categories,
@@ -2419,9 +2464,18 @@ pub use ffi_gen::{
     trackgrid_get_average_track_spacing_track_init,
     trackgrid_get_average_track_spacing_track_step,
     trackgrid_get_block,
+    trackgrid_get_grid_x,
+    trackgrid_get_grid_y,
     trackgrid_get_num_grid_patterns_x,
     trackgrid_get_num_grid_patterns_y,
     trackgrid_get_tech_layer,
+    twowiresforbiddenrule_get_max_spacing,
+    twowiresforbiddenrule_get_max_span_length,
+    twowiresforbiddenrule_get_min_spacing,
+    twowiresforbiddenrule_get_min_span_length,
+    twowiresforbiddenrule_get_prl,
+    twowiresforbiddenrule_is_max_exact_span_length,
+    twowiresforbiddenrule_is_min_exact_span_length,
     unfoldedbump_get_global_position_x,
     unfoldedbump_get_global_position_y,
     unfoldedbump_get_global_position_z,
@@ -2467,9 +2521,17 @@ pub use ffi_gen::{
     via_params_get_y_origin,
     via_params_get_y_top_enclosure,
     via_params_get_y_top_offset,
+    widthtablerule_is_orthogonal,
+    widthtablerule_is_wrong_direction,
     wire_count,
     wire_get_block,
     wire_get_net,
     wire_is_global_wire,
     wire_length,
+    wrongdirspacingrule_get_length,
+    wrongdirspacingrule_get_noneol_width,
+    wrongdirspacingrule_get_prl_length,
+    wrongdirspacingrule_get_wrongdir_space,
+    wrongdirspacingrule_is_length_valid,
+    wrongdirspacingrule_is_noneol_valid,
 };

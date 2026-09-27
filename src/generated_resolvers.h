@@ -175,6 +175,18 @@ inline odb::dbTechLayerMinStepRule* gen_minsteprule(const OdbDb& h, rust::Str la
 inline odb::dbTechLayerMinCutRule* gen_mincutrule(const OdbDb& h, rust::Str layer, std::size_t i) {
   odb::dbTechLayer* l = gen_techlayer(h, layer); if (!l) return nullptr;
   std::size_t k = 0; for (odb::dbTechLayerMinCutRule* r : l->getTechLayerMinCutRules()) { if (k++ == i) return r; } return nullptr; }
+inline odb::dbTechLayerMaxSpacingRule* gen_maxspacingrule(const OdbDb& h, rust::Str layer, std::size_t i) {
+  odb::dbTechLayer* l = gen_techlayer(h, layer); if (!l) return nullptr;
+  std::size_t k = 0; for (odb::dbTechLayerMaxSpacingRule* r : l->getTechLayerMaxSpacingRules()) { if (k++ == i) return r; } return nullptr; }
+inline odb::dbTechLayerTwoWiresForbiddenSpcRule* gen_twowiresforbiddenrule(const OdbDb& h, rust::Str layer, std::size_t i) {
+  odb::dbTechLayer* l = gen_techlayer(h, layer); if (!l) return nullptr;
+  std::size_t k = 0; for (odb::dbTechLayerTwoWiresForbiddenSpcRule* r : l->getTechLayerTwoWiresForbiddenSpcRules()) { if (k++ == i) return r; } return nullptr; }
+inline odb::dbTechLayerWidthTableRule* gen_widthtablerule(const OdbDb& h, rust::Str layer, std::size_t i) {
+  odb::dbTechLayer* l = gen_techlayer(h, layer); if (!l) return nullptr;
+  std::size_t k = 0; for (odb::dbTechLayerWidthTableRule* r : l->getTechLayerWidthTableRules()) { if (k++ == i) return r; } return nullptr; }
+inline odb::dbTechLayerWrongDirSpacingRule* gen_wrongdirspacingrule(const OdbDb& h, rust::Str layer, std::size_t i) {
+  odb::dbTechLayer* l = gen_techlayer(h, layer); if (!l) return nullptr;
+  std::size_t k = 0; for (odb::dbTechLayerWrongDirSpacingRule* r : l->getTechLayerWrongDirSpacingRules()) { if (k++ == i) return r; } return nullptr; }
 inline odb::dbTechLayerAntennaRule* gen_layerantenna(const OdbDb& h, rust::Str layer) {
   odb::dbTechLayer* l = gen_techlayer(h, layer); return l ? l->getDefaultAntennaRule() : nullptr; }
 inline odb::dbTechAntennaPinModel* gen_antennapinmodel(const OdbDb& h, rust::Str master, rust::Str term) {
@@ -265,6 +277,10 @@ inline const char* cut_spacing_lookup_str(odb::dbTechLayerCutSpacingTableDefRule
   if (v == odb::dbTechLayerCutSpacingTableDefRule::LOOKUP_STRATEGY::SECOND) return "SECOND";
   if (v == odb::dbTechLayerCutSpacingTableDefRule::LOOKUP_STRATEGY::MAX) return "MAX";
   if (v == odb::dbTechLayerCutSpacingTableDefRule::LOOKUP_STRATEGY::MIN) return "MIN";
+  return ""; }
+inline const char* corner_spacing_type_str(odb::dbTechLayerCornerSpacingRule::CornerType v) {
+  if (v == odb::dbTechLayerCornerSpacingRule::CornerType::CONVEXCORNER) return "CONVEXCORNER";
+  if (v == odb::dbTechLayerCornerSpacingRule::CornerType::CONCAVECORNER) return "CONCAVECORNER";
   return ""; }
 inline const char* unfolded_side_str(odb::dbUnfoldedChipRegionInst::EffectiveSide v) {
   if (v == odb::dbUnfoldedChipRegionInst::EffectiveSide::TOP) return "TOP";
