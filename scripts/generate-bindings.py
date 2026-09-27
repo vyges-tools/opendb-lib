@@ -612,6 +612,53 @@ class Emit:
         self.per_class[cls] = self.per_class.get(cls, 0) + 1
         return True
 
+    def add_table_and_maps_getter(self, cls, spec, m, reserved_fn, reserved_db, seen):
+        """`void get*(std::vector<std::vector<std::pair<int, int>>>& t, std::map<std::string,
+        uint32_t>& a, std::map<std::string, uint32_t>& b)` (a cut spacing table with its row and
+        column maps) -> one reader per out-param, each calling the getter once:
+        `<fn>_<t>` a `Vec<i32>`: the row count, then per row its length and its pairs FLATTENED
+        (first, second, ...), in odb's order; `<fn>_<a>_names` / `<fn>_<a>_indexes` each map's
+        keys and values in the map's (sorted) order."""
+        name, params = m["name"], m["params"]
+        types = [q["type"].strip() for q in params]
+        if not (re.fullmatch(r"std::vector<\s*std::vector<\s*std::pair<\s*int\s*,\s*int\s*>\s*>\s*>\s*&", types[0])
+                and all(re.fullmatch(r"std::map<\s*std::string\s*,\s*(uint32_t|uint)\s*>\s*&", t) for t in types[1:])):
+            return False
+        pnames = [snake(q.get("name") or f"a{i}") for i, q in enumerate(params)]
+        argspecs = normalize_args(spec["args"])
+        c_ids = "".join(f", {_cty(k)} {n}" for n, k in argspecs)
+        r_ids = "".join(f", {n}: {_rty(k)}" for n, k in argspecs)
+        fwd = "".join(f", {n}" for n, k in argspecs)
+        key_call, keys_desc = key_exprs(argspecs)
+        field = snake(name)
+        base = f"{spec['key']}_{field}"
+        call = (f"std::vector<std::vector<std::pair<int, int>>> v0; std::map<std::string, uint32_t> v1, v2; "
+                f"auto* p = {spec['resolve']}; if (p) p->{name}(v0, v1, v2);")
+        subs = [(f"{base}_{pnames[0]}", "rust::Vec<int32_t>", "Vec<i32>", "list",
+                 "out.push_back((int32_t) v0.size()); for (auto& row : v0) { out.push_back((int32_t) row.size()); "
+                 "for (auto& [a, b] : row) { out.push_back(a); out.push_back(b); } }")]
+        for i in (1, 2):
+            subs.append((f"{base}_{pnames[i]}_names", "rust::Vec<rust::String>", "Vec<String>", "list",
+                         f"for (auto& [k, v] : v{i}) out.push_back(rust::String(k));"))
+            subs.append((f"{base}_{pnames[i]}_indexes", "rust::Vec<uint32_t>", "Vec<u32>", "list",
+                         f"for (auto& [k, v] : v{i}) out.push_back(v);"))
+        emitted = 0
+        for sub, cty, rty, kind, fill in subs:
+            if sub in seen or sub in reserved_fn or sub in reserved_db:
+                continue
+            self.h.append(f"{cty} {sub}(const OdbDb& db{c_ids});")
+            self.cc.append(f"{cty} {sub}(const OdbDb& h{c_ids}) {{ {cty} out; {call} {fill} return out; }}")
+            self.bridge.append(f"        fn {sub}(db: &OdbDb{r_ids}) -> {rty};")
+            self.api.append(f"    pub fn {sub}(&self{r_ids}) -> {rty} {{ sys::{sub}(self.r(){fwd}) }}")
+            self.reexport.append(sub)
+            seen.add(sub)
+            sfield = sub[len(spec["key"]) + 1:]
+            self.reg.append((cls, sfield, kind, keys_desc, f'        ("{cls}", "{sfield}") => Ok(serde_json::json!(db.{sub}({key_call}))),'))
+            emitted += 1
+        if emitted:
+            self.per_class[cls] = self.per_class.get(cls, 0) + 1
+        return emitted > 0
+
     def add_outparam_getter(self, cls, spec, m, reserved_fn, reserved_db, seen):
         """A `void get*(int& a, int& b, ...)` reader (all params are scalar out-refs) -> one scalar
         sub-field per out-param. Classifies as a 'setter' (void return) so it's otherwise skipped."""
@@ -620,6 +667,8 @@ class Emit:
         if not name.startswith("get") or not params:
             return False
         if len(params) == 1 and self.add_vector_outparam_getter(cls, spec, m, reserved_fn, reserved_db, seen):
+            return True
+        if len(params) == 3 and self.add_table_and_maps_getter(cls, spec, m, reserved_fn, reserved_db, seen):
             return True
         outs = []
         for i, p in enumerate(params):

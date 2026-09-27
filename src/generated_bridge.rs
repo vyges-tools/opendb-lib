@@ -982,6 +982,11 @@ mod ffi_gen {
         fn cutspacingtablerule_is_opposite_enclosure_resize_spacing_valid(db: &OdbDb, layer: &str, idx: usize) -> bool;
         fn cutspacingtablerule_get_second_layer(db: &OdbDb, layer: &str, idx: usize) -> String;
         fn cutspacingtablerule_get_tech_layer(db: &OdbDb, layer: &str, idx: usize) -> String;
+        fn cutspacingtablerule_get_spacing_table_table(db: &OdbDb, layer: &str, idx: usize) -> Vec<i32>;
+        fn cutspacingtablerule_get_spacing_table_row_map_names(db: &OdbDb, layer: &str, idx: usize) -> Vec<String>;
+        fn cutspacingtablerule_get_spacing_table_row_map_indexes(db: &OdbDb, layer: &str, idx: usize) -> Vec<u32>;
+        fn cutspacingtablerule_get_spacing_table_col_map_names(db: &OdbDb, layer: &str, idx: usize) -> Vec<String>;
+        fn cutspacingtablerule_get_spacing_table_col_map_indexes(db: &OdbDb, layer: &str, idx: usize) -> Vec<u32>;
         fn cutspacingtablerule_is_center_to_center(db: &OdbDb, layer: &str, idx: usize, cut_class1: &str, cut_class2: &str) -> bool;
         fn cutspacingtablerule_is_center_and_edge(db: &OdbDb, layer: &str, idx: usize, cut_class1: &str, cut_class2: &str) -> bool;
         fn cutspacingtablerule_is_prl_for_aligned_cut_classes(db: &OdbDb, layer: &str, idx: usize, cut_class1: &str, cut_class2: &str) -> bool;
@@ -1686,6 +1691,11 @@ pub use ffi_gen::{
     cutspacingtablerule_get_prl_entry,
     cutspacingtablerule_get_second_layer,
     cutspacingtablerule_get_spacing,
+    cutspacingtablerule_get_spacing_table_col_map_indexes,
+    cutspacingtablerule_get_spacing_table_col_map_names,
+    cutspacingtablerule_get_spacing_table_row_map_indexes,
+    cutspacingtablerule_get_spacing_table_row_map_names,
+    cutspacingtablerule_get_spacing_table_table,
     cutspacingtablerule_get_tech_layer,
     cutspacingtablerule_is_center_and_edge,
     cutspacingtablerule_is_center_and_edge_valid,

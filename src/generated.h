@@ -977,6 +977,11 @@ bool cutspacingtablerule_is_non_opposite_enclosure_spacing_valid(const OdbDb& db
 bool cutspacingtablerule_is_opposite_enclosure_resize_spacing_valid(const OdbDb& db, rust::Str layer, std::size_t idx);
 rust::String cutspacingtablerule_get_second_layer(const OdbDb& db, rust::Str layer, std::size_t idx);
 rust::String cutspacingtablerule_get_tech_layer(const OdbDb& db, rust::Str layer, std::size_t idx);
+rust::Vec<int32_t> cutspacingtablerule_get_spacing_table_table(const OdbDb& db, rust::Str layer, std::size_t idx);
+rust::Vec<rust::String> cutspacingtablerule_get_spacing_table_row_map_names(const OdbDb& db, rust::Str layer, std::size_t idx);
+rust::Vec<uint32_t> cutspacingtablerule_get_spacing_table_row_map_indexes(const OdbDb& db, rust::Str layer, std::size_t idx);
+rust::Vec<rust::String> cutspacingtablerule_get_spacing_table_col_map_names(const OdbDb& db, rust::Str layer, std::size_t idx);
+rust::Vec<uint32_t> cutspacingtablerule_get_spacing_table_col_map_indexes(const OdbDb& db, rust::Str layer, std::size_t idx);
 bool cutspacingtablerule_is_center_to_center(const OdbDb& db, rust::Str layer, std::size_t idx, rust::Str cut_class1, rust::Str cut_class2);
 bool cutspacingtablerule_is_center_and_edge(const OdbDb& db, rust::Str layer, std::size_t idx, rust::Str cut_class1, rust::Str cut_class2);
 bool cutspacingtablerule_is_prl_for_aligned_cut_classes(const OdbDb& db, rust::Str layer, std::size_t idx, rust::Str cut_class1, rust::Str cut_class2);
