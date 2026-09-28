@@ -5,7 +5,7 @@
   "scope": "all",
   "class_count": 122,
   "method_count": 2715,
-  "bridged_count": 1974,
+  "bridged_count": 1984,
   "classes": [
     {
       "name": "dbAccessPoint",
@@ -18657,7 +18657,7 @@
           "params": [],
           "const": true,
           "kind": "getter",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "setMinStepType",
@@ -18670,7 +18670,7 @@
           ],
           "const": false,
           "kind": "setter",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "hasMinStepMaxLength",
@@ -28066,7 +28066,7 @@
           ],
           "const": true,
           "kind": "other",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "setMinimumCuts",
@@ -28091,7 +28091,7 @@
           ],
           "const": false,
           "kind": "setter",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "getCutDistance",
@@ -28104,7 +28104,7 @@
           ],
           "const": true,
           "kind": "other",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "setCutDistance",
@@ -28117,7 +28117,7 @@
           ],
           "const": false,
           "kind": "setter",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "getLengthForCuts",
@@ -28134,7 +28134,7 @@
           ],
           "const": true,
           "kind": "other",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "setLengthForCuts",
@@ -28151,7 +28151,7 @@
           ],
           "const": false,
           "kind": "setter",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "isAboveOnly",
@@ -28159,7 +28159,7 @@
           "params": [],
           "const": true,
           "kind": "predicate",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "isBelowOnly",
@@ -28167,7 +28167,7 @@
           "params": [],
           "const": true,
           "kind": "predicate",
-          "bridged": false
+          "bridged": true
         }
       ],
       "hand_written": true
