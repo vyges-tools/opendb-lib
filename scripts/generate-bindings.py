@@ -111,6 +111,8 @@ TARGETS = {
     "dbTechLayerCornerSpacingRule": {"key": "cornerspacingrule", "args": ["layer", {"name": "idx", "type": "idx"}], "resolve": "gen_cornerspacingrule(h, layer, idx)"},
     "dbTechLayerMinStepRule":       {"key": "minsteprule",       "args": ["layer", {"name": "idx", "type": "idx"}], "resolve": "gen_minsteprule(h, layer, idx)"},
     "dbTechLayerMinCutRule":        {"key": "mincutrule",        "args": ["layer", {"name": "idx", "type": "idx"}], "resolve": "gen_mincutrule(h, layer, idx)"},
+    # The v5.4 MINIMUMCUT rules (`getMinCutRules`): drt's router reads them (via-to-via, the maze).
+    "dbTechMinCutRule":             {"key": "v54mincutrule",     "args": ["layer", {"name": "idx", "type": "idx"}], "resolve": "gen_v54mincutrule(h, layer, idx)"},
     # … and the rules drt's census counts to REFUSE (translated by the reference's io, not modelled).
     "dbTechLayerMaxSpacingRule":          {"key": "maxspacingrule",       "args": ["layer", {"name": "idx", "type": "idx"}], "resolve": "gen_maxspacingrule(h, layer, idx)"},
     "dbTechLayerTwoWiresForbiddenSpcRule": {"key": "twowiresforbiddenrule", "args": ["layer", {"name": "idx", "type": "idx"}], "resolve": "gen_twowiresforbiddenrule(h, layer, idx)"},
@@ -202,7 +204,9 @@ SCALAR = {
 # std::string return, and a const char* argument reaches a `const std::string&` parameter through
 # one user-defined conversion, which direct-initialisation permits.
 ENUMS = {"dbSigType", "dbIoType", "dbPlacementStatus", "dbOrientType", "dbSourceType", "dbWireType",
-         "dbOrientType3D"}
+         "dbOrientType3D",
+         # drt's min step rule reads its type ("INSIDECORNER", "OUTSIDECORNER", "STEP").
+         "dbTechLayerMinStepType"}
 
 # Enum types that expose NO getString() -- odb leaves the mapping to the caller. Upstream
 # hand-writes it in three separate places (3dblox/dbvWriter.cpp, the 3dblox parser, and its own
@@ -690,6 +694,19 @@ class Emit:
         decls = "; ".join(f"{ct} v{i} = 0" for i, (_, ct, _, _) in enumerate(outs))
         callargs = ", ".join(f"v{i}" for i in range(len(outs)))
         emitted = 0
+        if norm(m.get("return", "")) == "bool":
+            sub = f"{base}_valid"
+            if sub not in seen and sub not in reserved_fn and sub not in reserved_db:
+                self.h.append(f"bool {sub}(const OdbDb& db{c_ids});")
+                self.cc.append(
+                    f"bool {sub}(const OdbDb& h{c_ids}) {{ {decls}; auto* p = {spec['resolve']}; "
+                    f"return p ? p->{name}({callargs}) : false; }}")
+                self.bridge.append(f"        fn {sub}(db: &OdbDb{r_ids}) -> bool;")
+                self.api.append(f"    pub fn {sub}(&self{r_ids}) -> bool {{ sys::{sub}(self.r(){fwd}) }}")
+                self.reexport.append(sub)
+                seen.add(sub)
+                self.reg.append((cls, f"{field}_valid", "bool", keys_desc, f'        ("{cls}", "{field}_valid") => Ok(serde_json::json!(db.{sub}({key_call}))),'))
+                emitted += 1
         for i, (pn, ct, cty, rty) in enumerate(outs):
             sub = f"{base}_{pn}"
             if sub in seen or sub in reserved_fn or sub in reserved_db:
@@ -990,6 +1007,9 @@ def main() -> int:
         for m in by_name[cls]["methods"]:
             if m["kind"] == "setter" and m["name"].startswith("get"):
                 e.add_outparam_getter(cls, spec, m, reserved_fn, reserved_db, seen)
+            # `bool get*(int& a, ...)`: the returned flag says whether the out values are set.
+            elif m["name"].startswith("get") and m["params"] and norm(m.get("return", "")) == "bool":
+                e.add_outparam_getter(cls, spec, m, reserved_fn, reserved_db, seen)
         # parameterised reads (`getSpacing(class1, side1, class2, side2, strategy)`): after every
         # plain getter, so a zero-argument getter keeps its name.
         names = [m["name"] for m in by_name[cls]["methods"]]
@@ -1187,6 +1207,9 @@ def main() -> int:
         "static odb::dbTechLayerMinCutRule* gen_mincutrule(const OdbDb& h, rust::Str layer, std::size_t i) {\n"
         "  odb::dbTechLayer* l = gen_techlayer(h, layer); if (!l) return nullptr;\n"
         "  std::size_t k = 0; for (odb::dbTechLayerMinCutRule* r : l->getTechLayerMinCutRules()) { if (k++ == i) return r; } return nullptr; }\n"
+        "static odb::dbTechMinCutRule* gen_v54mincutrule(const OdbDb& h, rust::Str layer, std::size_t i) {\n"
+        "  odb::dbTechLayer* l = gen_techlayer(h, layer); if (!l) return nullptr;\n"
+        "  std::size_t k = 0; for (odb::dbTechMinCutRule* r : l->getMinCutRules()) { if (k++ == i) return r; } return nullptr; }\n"
         "static odb::dbTechLayerMaxSpacingRule* gen_maxspacingrule(const OdbDb& h, rust::Str layer, std::size_t i) {\n"
         "  odb::dbTechLayer* l = gen_techlayer(h, layer); if (!l) return nullptr;\n"
         "  std::size_t k = 0; for (odb::dbTechLayerMaxSpacingRule* r : l->getTechLayerMaxSpacingRules()) { if (k++ == i) return r; } return nullptr; }\n"

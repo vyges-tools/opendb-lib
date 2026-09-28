@@ -125,6 +125,7 @@ void layer_set_area(const OdbDb& db, rust::Str layer, int64_t area);
 void layer_set_max_width(const OdbDb& db, rust::Str layer, uint32_t max_width);
 void layer_set_min_width(const OdbDb& db, rust::Str layer, uint32_t max_width);
 void layer_set_min_step(const OdbDb& db, rust::Str layer, uint32_t min_step);
+void layer_set_min_step_type(const OdbDb& db, rust::Str layer, rust::Str a0);
 void layer_set_min_step_max_length(const OdbDb& db, rust::Str layer, uint32_t length);
 void layer_set_min_step_max_edges(const OdbDb& db, rust::Str layer, uint32_t edges);
 void layer_set_protrusion(const OdbDb& db, rust::Str layer, uint32_t pt_width, uint32_t pt_length, uint32_t pt_from_width);
@@ -509,6 +510,9 @@ void mincutrule_set_area_within_dist_valid(const OdbDb& db, rust::Str layer, std
 void mincutrule_set_same_metal_overlap(const OdbDb& db, rust::Str layer, std::size_t idx, bool same_metal_overlap);
 void mincutrule_set_fully_enclosed(const OdbDb& db, rust::Str layer, std::size_t idx, bool fully_enclosed);
 void mincutrule_set_cuts_per_cut_class(const OdbDb& db, rust::Str layer, std::size_t idx, rust::Str cut_class, int32_t num_cuts);
+void v54mincutrule_set_minimum_cuts(const OdbDb& db, rust::Str layer, std::size_t idx, uint32_t numcuts, uint32_t width, bool above_only, bool below_only);
+void v54mincutrule_set_cut_distance(const OdbDb& db, rust::Str layer, std::size_t idx, uint32_t cut_distance);
+void v54mincutrule_set_length_for_cuts(const OdbDb& db, rust::Str layer, std::size_t idx, uint32_t length, uint32_t distance);
 void maxspacingrule_set_cut_class(const OdbDb& db, rust::Str layer, std::size_t idx, rust::Str cut_class);
 void maxspacingrule_set_max_spacing(const OdbDb& db, rust::Str layer, std::size_t idx, int32_t max_spacing);
 void twowiresforbiddenrule_set_min_spacing(const OdbDb& db, rust::Str layer, std::size_t idx, int32_t min_spacing);

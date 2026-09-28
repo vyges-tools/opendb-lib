@@ -130,6 +130,7 @@ mod ffi_gen_write {
         fn layer_set_max_width(db: &OdbDb, layer: &str, max_width: u32) -> Result<()>;
         fn layer_set_min_width(db: &OdbDb, layer: &str, max_width: u32) -> Result<()>;
         fn layer_set_min_step(db: &OdbDb, layer: &str, min_step: u32) -> Result<()>;
+        fn layer_set_min_step_type(db: &OdbDb, layer: &str, a0: &str) -> Result<()>;
         fn layer_set_min_step_max_length(db: &OdbDb, layer: &str, length: u32) -> Result<()>;
         fn layer_set_min_step_max_edges(db: &OdbDb, layer: &str, edges: u32) -> Result<()>;
         fn layer_set_protrusion(db: &OdbDb, layer: &str, pt_width: u32, pt_length: u32, pt_from_width: u32) -> Result<()>;
@@ -514,6 +515,9 @@ mod ffi_gen_write {
         fn mincutrule_set_same_metal_overlap(db: &OdbDb, layer: &str, idx: usize, same_metal_overlap: bool) -> Result<()>;
         fn mincutrule_set_fully_enclosed(db: &OdbDb, layer: &str, idx: usize, fully_enclosed: bool) -> Result<()>;
         fn mincutrule_set_cuts_per_cut_class(db: &OdbDb, layer: &str, idx: usize, cut_class: &str, num_cuts: i32) -> Result<()>;
+        fn v54mincutrule_set_minimum_cuts(db: &OdbDb, layer: &str, idx: usize, numcuts: u32, width: u32, above_only: bool, below_only: bool) -> Result<()>;
+        fn v54mincutrule_set_cut_distance(db: &OdbDb, layer: &str, idx: usize, cut_distance: u32) -> Result<()>;
+        fn v54mincutrule_set_length_for_cuts(db: &OdbDb, layer: &str, idx: usize, length: u32, distance: u32) -> Result<()>;
         fn maxspacingrule_set_cut_class(db: &OdbDb, layer: &str, idx: usize, cut_class: &str) -> Result<()>;
         fn maxspacingrule_set_max_spacing(db: &OdbDb, layer: &str, idx: usize, max_spacing: i32) -> Result<()>;
         fn twowiresforbiddenrule_set_min_spacing(db: &OdbDb, layer: &str, idx: usize, min_spacing: i32) -> Result<()>;
@@ -836,6 +840,7 @@ pub use ffi_gen_write::{
     layer_set_min_step,
     layer_set_min_step_max_edges,
     layer_set_min_step_max_length,
+    layer_set_min_step_type,
     layer_set_min_width,
     layer_set_num_masks,
     layer_set_offset,
@@ -1112,6 +1117,9 @@ pub use ffi_gen_write::{
     twowiresforbiddenrule_set_min_spacing,
     twowiresforbiddenrule_set_min_span_length,
     twowiresforbiddenrule_set_prl,
+    v54mincutrule_set_cut_distance,
+    v54mincutrule_set_length_for_cuts,
+    v54mincutrule_set_minimum_cuts,
     via_set_pattern,
     widthtablerule_set_orthogonal,
     widthtablerule_set_wrong_direction,

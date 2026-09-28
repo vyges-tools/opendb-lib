@@ -259,6 +259,9 @@ uint32_t bterm_sta_vertex_id(const OdbDb& h, rust::Str bterm) { auto* p = gen_bt
 rust::String bterm_get_mirrored_b_term(const OdbDb& h, rust::Str bterm) { auto* p = gen_bterm(h, bterm); if (!p) return rust::String(); auto* t = p->getMirroredBTerm(); return t ? rust::String(t->getConstName()) : rust::String(); }
 bool bterm_has_mirrored_b_term(const OdbDb& h, rust::Str bterm) { auto* p = gen_bterm(h, bterm); return p ? p->hasMirroredBTerm() : false; }
 bool bterm_is_mirrored(const OdbDb& h, rust::Str bterm) { auto* p = gen_bterm(h, bterm); return p ? p->isMirrored() : false; }
+bool bterm_get_first_pin_location_valid(const OdbDb& h, rust::Str bterm) { int v0 = 0; int v1 = 0; auto* p = gen_bterm(h, bterm); return p ? p->getFirstPinLocation(v0, v1) : false; }
+int32_t bterm_get_first_pin_location_x(const OdbDb& h, rust::Str bterm) { int v0 = 0; int v1 = 0; auto* p = gen_bterm(h, bterm); if (p) p->getFirstPinLocation(v0, v1); return v0; }
+int32_t bterm_get_first_pin_location_y(const OdbDb& h, rust::Str bterm) { int v0 = 0; int v1 = 0; auto* p = gen_bterm(h, bterm); if (p) p->getFirstPinLocation(v0, v1); return v1; }
 rust::String master_get_name(const OdbDb& h, rust::Str master) { auto* p = gen_master(h, master); return p ? rust::String(p->getName()) : rust::String(); }
 rust::String master_get_const_name(const OdbDb& h, rust::Str master) { auto* p = gen_master(h, master); if (!p) return rust::String(); const char* v = p->getConstName(); return rust::String(v ? v : ""); }
 int32_t master_get_origin_x(const OdbDb& h, rust::Str master) { auto* p = gen_master(h, master); return p ? p->getOrigin().getX() : 0; }
@@ -363,6 +366,7 @@ bool layer_has_two_widths_spacing_rules(const OdbDb& h, rust::Str layer) { auto*
 uint32_t layer_get_two_widths_spacing_table_num_widths(const OdbDb& h, rust::Str layer) { auto* p = gen_techlayer(h, layer); return p ? p->getTwoWidthsSpacingTableNumWidths() : 0; }
 bool layer_has_default_antenna_rule(const OdbDb& h, rust::Str layer) { auto* p = gen_techlayer(h, layer); return p ? p->hasDefaultAntennaRule() : false; }
 bool layer_has_oxide2_antenna_rule(const OdbDb& h, rust::Str layer) { auto* p = gen_techlayer(h, layer); return p ? p->hasOxide2AntennaRule() : false; }
+std::size_t num_layer_get_min_cut_rules(const OdbDb& h, rust::Str layer) { auto* p = gen_techlayer(h, layer); return p ? p->getMinCutRules().size() : 0; }
 int32_t layer_get_pitch(const OdbDb& h, rust::Str layer) { auto* p = gen_techlayer(h, layer); return p ? p->getPitch() : 0; }
 int32_t layer_get_pitch_x(const OdbDb& h, rust::Str layer) { auto* p = gen_techlayer(h, layer); return p ? p->getPitchX() : 0; }
 int32_t layer_get_pitch_y(const OdbDb& h, rust::Str layer) { auto* p = gen_techlayer(h, layer); return p ? p->getPitchY() : 0; }
@@ -378,6 +382,7 @@ uint32_t layer_get_max_width(const OdbDb& h, rust::Str layer) { auto* p = gen_te
 uint32_t layer_get_min_width(const OdbDb& h, rust::Str layer) { auto* p = gen_techlayer(h, layer); return p ? p->getMinWidth() : 0; }
 bool layer_has_min_step(const OdbDb& h, rust::Str layer) { auto* p = gen_techlayer(h, layer); return p ? p->hasMinStep() : false; }
 uint32_t layer_get_min_step(const OdbDb& h, rust::Str layer) { auto* p = gen_techlayer(h, layer); return p ? p->getMinStep() : 0; }
+rust::String layer_get_min_step_type(const OdbDb& h, rust::Str layer) { auto* p = gen_techlayer(h, layer); return p ? rust::String(p->getMinStepType().getString()) : rust::String(); }
 bool layer_has_min_step_max_length(const OdbDb& h, rust::Str layer) { auto* p = gen_techlayer(h, layer); return p ? p->hasMinStepMaxLength() : false; }
 uint32_t layer_get_min_step_max_length(const OdbDb& h, rust::Str layer) { auto* p = gen_techlayer(h, layer); return p ? p->getMinStepMaxLength() : 0; }
 bool layer_has_min_step_max_edges(const OdbDb& h, rust::Str layer) { auto* p = gen_techlayer(h, layer); return p ? p->hasMinStepMaxEdges() : false; }
@@ -401,6 +406,8 @@ int32_t layer_get_max_wide_d_r_c_range_owidth(const OdbDb& h, rust::Str layer) {
 int32_t layer_get_max_wide_d_r_c_range_olength(const OdbDb& h, rust::Str layer) { int v0 = 0; int v1 = 0; auto* p = gen_techlayer(h, layer); if (p) p->getMaxWideDRCRange(v0, v1); return v1; }
 int32_t layer_get_min_wide_d_r_c_range_owidth(const OdbDb& h, rust::Str layer) { int v0 = 0; int v1 = 0; auto* p = gen_techlayer(h, layer); if (p) p->getMinWideDRCRange(v0, v1); return v0; }
 int32_t layer_get_min_wide_d_r_c_range_olength(const OdbDb& h, rust::Str layer) { int v0 = 0; int v1 = 0; auto* p = gen_techlayer(h, layer); if (p) p->getMinWideDRCRange(v0, v1); return v1; }
+bool layer_get_thickness_valid(const OdbDb& h, rust::Str layer) { uint32_t v0 = 0; auto* p = gen_techlayer(h, layer); return p ? p->getThickness(v0) : false; }
+uint32_t layer_get_thickness_inthk(const OdbDb& h, rust::Str layer) { uint32_t v0 = 0; auto* p = gen_techlayer(h, layer); if (p) p->getThickness(v0); return v0; }
 int32_t layer_get_spacing_width_length(const OdbDb& h, rust::Str layer, int32_t width, int32_t length) { auto* p = gen_techlayer(h, layer); return p ? p->getSpacing(width, length) : int32_t{}; }
 rust::String row_get_name(const OdbDb& h, rust::Str row) { auto* p = gen_row(h, row); return p ? rust::String(p->getName()) : rust::String(); }
 rust::String row_get_const_name(const OdbDb& h, rust::Str row) { auto* p = gen_row(h, row); if (!p) return rust::String(); const char* v = p->getConstName(); return rust::String(v ? v : ""); }
@@ -1128,6 +1135,16 @@ bool mincutrule_is_area_valid(const OdbDb& h, rust::Str layer, std::size_t idx) 
 bool mincutrule_is_area_within_dist_valid(const OdbDb& h, rust::Str layer, std::size_t idx) { auto* p = gen_mincutrule(h, layer, idx); return p ? p->isAreaWithinDistValid() : false; }
 bool mincutrule_is_same_metal_overlap(const OdbDb& h, rust::Str layer, std::size_t idx) { auto* p = gen_mincutrule(h, layer, idx); return p ? p->isSameMetalOverlap() : false; }
 bool mincutrule_is_fully_enclosed(const OdbDb& h, rust::Str layer, std::size_t idx) { auto* p = gen_mincutrule(h, layer, idx); return p ? p->isFullyEnclosed() : false; }
+bool v54mincutrule_is_above_only(const OdbDb& h, rust::Str layer, std::size_t idx) { auto* p = gen_v54mincutrule(h, layer, idx); return p ? p->isAboveOnly() : false; }
+bool v54mincutrule_is_below_only(const OdbDb& h, rust::Str layer, std::size_t idx) { auto* p = gen_v54mincutrule(h, layer, idx); return p ? p->isBelowOnly() : false; }
+bool v54mincutrule_get_minimum_cuts_valid(const OdbDb& h, rust::Str layer, std::size_t idx) { uint32_t v0 = 0; uint32_t v1 = 0; auto* p = gen_v54mincutrule(h, layer, idx); return p ? p->getMinimumCuts(v0, v1) : false; }
+uint32_t v54mincutrule_get_minimum_cuts_numcuts(const OdbDb& h, rust::Str layer, std::size_t idx) { uint32_t v0 = 0; uint32_t v1 = 0; auto* p = gen_v54mincutrule(h, layer, idx); if (p) p->getMinimumCuts(v0, v1); return v0; }
+uint32_t v54mincutrule_get_minimum_cuts_width(const OdbDb& h, rust::Str layer, std::size_t idx) { uint32_t v0 = 0; uint32_t v1 = 0; auto* p = gen_v54mincutrule(h, layer, idx); if (p) p->getMinimumCuts(v0, v1); return v1; }
+bool v54mincutrule_get_cut_distance_valid(const OdbDb& h, rust::Str layer, std::size_t idx) { uint32_t v0 = 0; auto* p = gen_v54mincutrule(h, layer, idx); return p ? p->getCutDistance(v0) : false; }
+uint32_t v54mincutrule_get_cut_distance_cut_distance(const OdbDb& h, rust::Str layer, std::size_t idx) { uint32_t v0 = 0; auto* p = gen_v54mincutrule(h, layer, idx); if (p) p->getCutDistance(v0); return v0; }
+bool v54mincutrule_get_length_for_cuts_valid(const OdbDb& h, rust::Str layer, std::size_t idx) { uint32_t v0 = 0; uint32_t v1 = 0; auto* p = gen_v54mincutrule(h, layer, idx); return p ? p->getLengthForCuts(v0, v1) : false; }
+uint32_t v54mincutrule_get_length_for_cuts_length(const OdbDb& h, rust::Str layer, std::size_t idx) { uint32_t v0 = 0; uint32_t v1 = 0; auto* p = gen_v54mincutrule(h, layer, idx); if (p) p->getLengthForCuts(v0, v1); return v0; }
+uint32_t v54mincutrule_get_length_for_cuts_distance(const OdbDb& h, rust::Str layer, std::size_t idx) { uint32_t v0 = 0; uint32_t v1 = 0; auto* p = gen_v54mincutrule(h, layer, idx); if (p) p->getLengthForCuts(v0, v1); return v1; }
 rust::String maxspacingrule_get_cut_class(const OdbDb& h, rust::Str layer, std::size_t idx) { auto* p = gen_maxspacingrule(h, layer, idx); return p ? rust::String(p->getCutClass()) : rust::String(); }
 int32_t maxspacingrule_get_max_spacing(const OdbDb& h, rust::Str layer, std::size_t idx) { auto* p = gen_maxspacingrule(h, layer, idx); return p ? p->getMaxSpacing() : 0; }
 bool maxspacingrule_has_cut_class(const OdbDb& h, rust::Str layer, std::size_t idx) { auto* p = gen_maxspacingrule(h, layer, idx); return p ? p->hasCutClass() : false; }

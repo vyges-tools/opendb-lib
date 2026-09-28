@@ -175,6 +175,9 @@ inline odb::dbTechLayerMinStepRule* gen_minsteprule(const OdbDb& h, rust::Str la
 inline odb::dbTechLayerMinCutRule* gen_mincutrule(const OdbDb& h, rust::Str layer, std::size_t i) {
   odb::dbTechLayer* l = gen_techlayer(h, layer); if (!l) return nullptr;
   std::size_t k = 0; for (odb::dbTechLayerMinCutRule* r : l->getTechLayerMinCutRules()) { if (k++ == i) return r; } return nullptr; }
+inline odb::dbTechMinCutRule* gen_v54mincutrule(const OdbDb& h, rust::Str layer, std::size_t i) {
+  odb::dbTechLayer* l = gen_techlayer(h, layer); if (!l) return nullptr;
+  std::size_t k = 0; for (odb::dbTechMinCutRule* r : l->getMinCutRules()) { if (k++ == i) return r; } return nullptr; }
 inline odb::dbTechLayerMaxSpacingRule* gen_maxspacingrule(const OdbDb& h, rust::Str layer, std::size_t i) {
   odb::dbTechLayer* l = gen_techlayer(h, layer); if (!l) return nullptr;
   std::size_t k = 0; for (odb::dbTechLayerMaxSpacingRule* r : l->getTechLayerMaxSpacingRules()) { if (k++ == i) return r; } return nullptr; }

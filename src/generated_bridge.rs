@@ -262,6 +262,9 @@ mod ffi_gen {
         fn bterm_get_mirrored_b_term(db: &OdbDb, bterm: &str) -> String;
         fn bterm_has_mirrored_b_term(db: &OdbDb, bterm: &str) -> bool;
         fn bterm_is_mirrored(db: &OdbDb, bterm: &str) -> bool;
+        fn bterm_get_first_pin_location_valid(db: &OdbDb, bterm: &str) -> bool;
+        fn bterm_get_first_pin_location_x(db: &OdbDb, bterm: &str) -> i32;
+        fn bterm_get_first_pin_location_y(db: &OdbDb, bterm: &str) -> i32;
         fn master_get_name(db: &OdbDb, master: &str) -> String;
         fn master_get_const_name(db: &OdbDb, master: &str) -> String;
         fn master_get_origin_x(db: &OdbDb, master: &str) -> i32;
@@ -366,6 +369,7 @@ mod ffi_gen {
         fn layer_get_two_widths_spacing_table_num_widths(db: &OdbDb, layer: &str) -> u32;
         fn layer_has_default_antenna_rule(db: &OdbDb, layer: &str) -> bool;
         fn layer_has_oxide2_antenna_rule(db: &OdbDb, layer: &str) -> bool;
+        fn num_layer_get_min_cut_rules(db: &OdbDb, layer: &str) -> usize;
         fn layer_get_pitch(db: &OdbDb, layer: &str) -> i32;
         fn layer_get_pitch_x(db: &OdbDb, layer: &str) -> i32;
         fn layer_get_pitch_y(db: &OdbDb, layer: &str) -> i32;
@@ -381,6 +385,7 @@ mod ffi_gen {
         fn layer_get_min_width(db: &OdbDb, layer: &str) -> u32;
         fn layer_has_min_step(db: &OdbDb, layer: &str) -> bool;
         fn layer_get_min_step(db: &OdbDb, layer: &str) -> u32;
+        fn layer_get_min_step_type(db: &OdbDb, layer: &str) -> String;
         fn layer_has_min_step_max_length(db: &OdbDb, layer: &str) -> bool;
         fn layer_get_min_step_max_length(db: &OdbDb, layer: &str) -> u32;
         fn layer_has_min_step_max_edges(db: &OdbDb, layer: &str) -> bool;
@@ -404,6 +409,8 @@ mod ffi_gen {
         fn layer_get_max_wide_d_r_c_range_olength(db: &OdbDb, layer: &str) -> i32;
         fn layer_get_min_wide_d_r_c_range_owidth(db: &OdbDb, layer: &str) -> i32;
         fn layer_get_min_wide_d_r_c_range_olength(db: &OdbDb, layer: &str) -> i32;
+        fn layer_get_thickness_valid(db: &OdbDb, layer: &str) -> bool;
+        fn layer_get_thickness_inthk(db: &OdbDb, layer: &str) -> u32;
         fn layer_get_spacing_width_length(db: &OdbDb, layer: &str, width: i32, length: i32) -> i32;
         fn row_get_name(db: &OdbDb, row: &str) -> String;
         fn row_get_const_name(db: &OdbDb, row: &str) -> String;
@@ -1131,6 +1138,16 @@ mod ffi_gen {
         fn mincutrule_is_area_within_dist_valid(db: &OdbDb, layer: &str, idx: usize) -> bool;
         fn mincutrule_is_same_metal_overlap(db: &OdbDb, layer: &str, idx: usize) -> bool;
         fn mincutrule_is_fully_enclosed(db: &OdbDb, layer: &str, idx: usize) -> bool;
+        fn v54mincutrule_is_above_only(db: &OdbDb, layer: &str, idx: usize) -> bool;
+        fn v54mincutrule_is_below_only(db: &OdbDb, layer: &str, idx: usize) -> bool;
+        fn v54mincutrule_get_minimum_cuts_valid(db: &OdbDb, layer: &str, idx: usize) -> bool;
+        fn v54mincutrule_get_minimum_cuts_numcuts(db: &OdbDb, layer: &str, idx: usize) -> u32;
+        fn v54mincutrule_get_minimum_cuts_width(db: &OdbDb, layer: &str, idx: usize) -> u32;
+        fn v54mincutrule_get_cut_distance_valid(db: &OdbDb, layer: &str, idx: usize) -> bool;
+        fn v54mincutrule_get_cut_distance_cut_distance(db: &OdbDb, layer: &str, idx: usize) -> u32;
+        fn v54mincutrule_get_length_for_cuts_valid(db: &OdbDb, layer: &str, idx: usize) -> bool;
+        fn v54mincutrule_get_length_for_cuts_length(db: &OdbDb, layer: &str, idx: usize) -> u32;
+        fn v54mincutrule_get_length_for_cuts_distance(db: &OdbDb, layer: &str, idx: usize) -> u32;
         fn maxspacingrule_get_cut_class(db: &OdbDb, layer: &str, idx: usize) -> String;
         fn maxspacingrule_get_max_spacing(db: &OdbDb, layer: &str, idx: usize) -> i32;
         fn maxspacingrule_has_cut_class(db: &OdbDb, layer: &str, idx: usize) -> bool;
@@ -1449,6 +1466,9 @@ pub use ffi_gen::{
     bterm_get_block,
     bterm_get_const_name,
     bterm_get_ext_id,
+    bterm_get_first_pin_location_valid,
+    bterm_get_first_pin_location_x,
+    bterm_get_first_pin_location_y,
     bterm_get_first_pin_placement_status,
     bterm_get_ground_pin,
     bterm_get_i_term,
@@ -1843,6 +1863,7 @@ pub use ffi_gen::{
     layer_get_min_step,
     layer_get_min_step_max_edges,
     layer_get_min_step_max_length,
+    layer_get_min_step_type,
     layer_get_min_wide_d_r_c_range_olength,
     layer_get_min_wide_d_r_c_range_owidth,
     layer_get_min_width,
@@ -1864,6 +1885,8 @@ pub use ffi_gen::{
     layer_get_spacing,
     layer_get_spacing_width_length,
     layer_get_tech,
+    layer_get_thickness_inthk,
+    layer_get_thickness_valid,
     layer_get_two_widths_spacing_table_num_widths,
     layer_get_upper_layer,
     layer_get_width,
@@ -2254,6 +2277,7 @@ pub use ffi_gen::{
     num_inst_get_children,
     num_inst_get_i_terms,
     num_isolation_get_isolation_cells,
+    num_layer_get_min_cut_rules,
     num_layer_get_tech_layer_corner_spacing_rules,
     num_layer_get_tech_layer_cut_class_rules,
     num_layer_get_tech_layer_cut_enclosure_rules,
@@ -2529,6 +2553,16 @@ pub use ffi_gen::{
     unfoldedregion_is_internal,
     unfoldedregion_is_internal_ext,
     unfoldedregion_is_top,
+    v54mincutrule_get_cut_distance_cut_distance,
+    v54mincutrule_get_cut_distance_valid,
+    v54mincutrule_get_length_for_cuts_distance,
+    v54mincutrule_get_length_for_cuts_length,
+    v54mincutrule_get_length_for_cuts_valid,
+    v54mincutrule_get_minimum_cuts_numcuts,
+    v54mincutrule_get_minimum_cuts_valid,
+    v54mincutrule_get_minimum_cuts_width,
+    v54mincutrule_is_above_only,
+    v54mincutrule_is_below_only,
     via_get_block,
     via_get_block_via,
     via_get_bottom_layer,
