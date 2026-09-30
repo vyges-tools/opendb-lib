@@ -31,7 +31,20 @@ routed `.odb`, walks the model, and writes it back — linking none of the engin
   license), extract it, and set `VYGES_ODB_PREBUILT_DIR=<dir>`. `build.rs` links the archive
   directly — no cmake, no OpenROAD fetch, no `libodb` compile. This is the path for consumers
   (e.g. `vyges-cli`) and CI.
-- **From source (default):** `scripts/fetch-odb-src.sh` + CMake, below.
+- **From source (default):** `scripts/fetch-odb-src.sh` + CMake, below. Under `cargo build`,
+  `build.rs` compiles against `vendor/OpenROAD` when it is present, and otherwise fetches the
+  pinned sparse subtree into `OUT_DIR` itself (re-fetching a cached subtree that is not at the
+  pin).
+
+### The vendor tree must be at the pin
+
+If `vendor/OpenROAD` is its own git checkout, `build.rs` refuses to build unless its `HEAD` is
+the commit in `openroad-pin.yaml`, and prints the `git fetch` / `git checkout` that moves it.
+The commit is read only when `vendor/OpenROAD` is the top level of its own checkout: a copy
+without its `.git` (an rsync, say) would otherwise report the enclosing opendb-lib checkout's
+`HEAD`. Such a copy has no commit to compare, so it is used unchecked — keep it at the pin, or
+delete it and let the build fetch the pin. `tests/vendor_tree_sha.rs` covers the three cases
+(checkout root, tree with no `.git` of its own, nested checkout).
 
 ## Build locally
 
