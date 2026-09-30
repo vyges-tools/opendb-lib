@@ -11,6 +11,10 @@
 // libodb is unix-only; on non-unix targets the crate is an empty stub (see lib.rs).
 use std::path::{Path, PathBuf};
 
+#[path = "build_support/tree_sha.rs"]
+mod tree_sha;
+use tree_sha::tree_sha;
+
 fn main() {
     // ⚠️ **Emitted before the non-unix early return**, because `OPENROAD_PIN` is a plain constant
     // and `env!` would fail to compile wherever this is skipped — including the Windows stub build
@@ -166,16 +170,6 @@ fn ordered_archives(mut a: Vec<PathBuf>) -> Vec<PathBuf> {
 
 /// Local `vendor/OpenROAD` if present (dev); otherwise auto-fetch the pinned sparse subtree
 /// into `OUT_DIR/OpenROAD` (self-contained dist build-from-source).
-/// The checked-out SHA of an OpenROAD tree, or None if it is not a git checkout.
-fn tree_sha(dir: &Path) -> Option<String> {
-    let out = std::process::Command::new("git")
-        .args(["-C", dir.to_str()?, "rev-parse", "HEAD"])
-        .output()
-        .ok()?;
-    out.status
-        .success()
-        .then(|| String::from_utf8_lossy(&out.stdout).trim().to_string())
-}
 
 fn source_tree() -> PathBuf {
     let sha = pinned_sha();
