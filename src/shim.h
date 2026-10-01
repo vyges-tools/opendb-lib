@@ -796,6 +796,12 @@ rust::String insert_buffer_before_loads(const OdbDb& db, rust::Str net,
                                         rust::Str net_base, rust::Str uniquify,
                                         bool loads_on_diff_nets);
 
+// `Network::visitConnectedPins(pin)` from an instance pin, as dbNetwork answers it: the pin's
+// module net (when it has one) walked through the hierarchy — iterms, bterms, moditerms, then down
+// and up — else its flat net's iterms then bterms. Each pin tagged "I:inst/pin", "B:port" or
+// "M:modinst/pin" (a hierarchical pin), in visit order.
+rust::Vec<rust::String> visit_connected_pins(const OdbDb& db, rust::Str inst, rust::Str pin);
+
 // Add a pin shape to a block terminal, returning the new pin's index.
 // Creating the pin and its box has to be one call: a dbBPin has no name, so there is no way to
 // address the pin between the two steps. The index this returns is what the generated

@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 #include "shim.h"
 
+#include <unordered_set>
 #include "odb/util.h"  // odb::cutRows / odb::hasOneSiteMaster (tap delegates row cutting)
 #include "odb/lefin.h"
 
@@ -1091,6 +1092,52 @@ rust::String insert_buffer_before_loads(const OdbDb& h, rust::Str net,
                                             loads_on_diff_nets);
   if (!inst) throw std::runtime_error("vyges-opendb: Failed to insert buffer before loads for net " + n->getName());
   return rust::String(inst->getName());
+}
+
+// dbNetwork::visitConnectedPins(Net*, visitor, visited_nets) on a module net: its iterms, bterms
+// and moditerms, then down each moditerm into the child module's net, then up each modbterm into
+// the parent instance's moditerm net.
+static void visit_mod_net(odb::dbModNet* mod_net, std::unordered_set<odb::dbModNet*>& visited,
+                          rust::Vec<rust::String>& out) {
+  if (!mod_net || !visited.insert(mod_net).second) return;
+  for (odb::dbITerm* it : mod_net->getITerms())
+    out.push_back(rust::String("I:" + it->getInst()->getName() + "/" + it->getMTerm()->getName()));
+  for (odb::dbBTerm* bt : mod_net->getBTerms()) out.push_back(rust::String("B:" + bt->getName()));
+  for (odb::dbModITerm* mit : mod_net->getModITerms())
+    out.push_back(rust::String("M:" + std::string(mit->getParent()->getName()) + "/" + mit->getName()));
+  for (odb::dbModITerm* mit : mod_net->getModITerms()) {
+    odb::dbModule* module = mit->getParent()->getMaster();
+    odb::dbModBTerm* below = module ? module->findModBTerm(mit->getName()) : nullptr;
+    if (below) visit_mod_net(below->getModNet(), visited, out);
+  }
+  for (odb::dbModBTerm* mbt : mod_net->getModBTerms()) {
+    odb::dbModule* module = mbt->getParent();
+    if (!module) continue;
+    odb::dbModInst* mod_inst = module->getModInst();
+    if (!mod_inst) continue;
+    odb::dbModITerm* above = mod_inst->findModITerm(mbt->getName());
+    if (above) {
+      out.push_back(rust::String("M:" + std::string(mod_inst->getName()) + "/" + above->getName()));
+      visit_mod_net(above->getModNet(), visited, out);
+    }
+  }
+}
+
+rust::Vec<rust::String> visit_connected_pins(const OdbDb& h, rust::Str inst, rust::Str pin) {
+  odb::dbITerm* it = require_inst(h, inst)->findITerm(s(pin).c_str());
+  if (!it) throw std::runtime_error("vyges-opendb: pin not found: " + s(inst) + "/" + s(pin));
+  rust::Vec<rust::String> out;
+  if (odb::dbModNet* mnet = it->getModNet()) {
+    std::unordered_set<odb::dbModNet*> visited;
+    visit_mod_net(mnet, visited, out);
+  } else if (dbNet* dnet = it->getNet()) {
+    for (odb::dbITerm* i : dnet->getITerms())
+      out.push_back(rust::String("I:" + i->getInst()->getName() + "/" + i->getMTerm()->getName()));
+    for (odb::dbBTerm* bt : dnet->getBTerms()) out.push_back(rust::String("B:" + bt->getName()));
+  } else {
+    out.push_back(rust::String("I:" + s(inst) + "/" + s(pin)));
+  }
+  return out;
 }
 
 bool swap_master(const OdbDb& h, rust::Str inst, rust::Str master) {

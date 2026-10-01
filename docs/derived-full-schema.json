@@ -5,7 +5,7 @@
   "scope": "all",
   "class_count": 122,
   "method_count": 2715,
-  "bridged_count": 1986,
+  "bridged_count": 1990,
   "classes": [
     {
       "name": "dbAccessPoint",
@@ -1421,7 +1421,7 @@
           ],
           "const": false,
           "kind": "relation",
-          "bridged": false,
+          "bridged": true,
           "target": "dbModITerm"
         },
         {
@@ -1435,7 +1435,7 @@
           ],
           "const": false,
           "kind": "relation",
-          "bridged": false,
+          "bridged": true,
           "target": "dbModBTerm"
         },
         {
@@ -11865,7 +11865,7 @@
           ],
           "const": false,
           "kind": "relation",
-          "bridged": false,
+          "bridged": true,
           "target": "dbModITerm"
         },
         {
@@ -12420,7 +12420,7 @@
           ],
           "const": true,
           "kind": "relation",
-          "bridged": false,
+          "bridged": true,
           "target": "dbModBTerm"
         },
         {
