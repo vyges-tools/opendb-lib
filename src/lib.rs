@@ -298,6 +298,9 @@ mod ffi {
                          x1: i32, y1: i32, x2: i32, y2: i32) -> Result<()>;
         fn swire_clear_routed(db: &OdbDb, net: &str) -> Result<usize>;
         fn bterm_create(db: &OdbDb, net: &str, name: &str) -> Result<()>;
+        /// `dbNet::insertBufferBeforeLoads` (odb's own) — see shim.h. Returns the new instance.
+        #[allow(clippy::too_many_arguments)]
+        fn insert_buffer_before_loads(db: &OdbDb, net: &str, iterm_insts: &[String], iterm_pins: &[String], bterms: &[String], master: &str, has_loc: bool, x: i32, y: i32, buf_base: &str, net_base: &str, uniquify: &str, loads_on_diff_nets: bool) -> Result<String>;
         fn bterm_create_pin(db: &OdbDb, bterm: &str, layer: &str,
                             x1: i32, y1: i32, x2: i32, y2: i32) -> Result<usize>;
         fn bterm_destroy(db: &OdbDb, bterm: &str) -> Result<()>;
@@ -562,7 +565,7 @@ pub use ffi::{
     connect, create_inst, create_net, disconnect, find_master, first_master_name, input_pin,
     inst_master, inst_x, inst_y, log_capture_begin, log_capture_end, net_of, nth_bterm_name, nth_inst_name, nth_iterm_name, num_bterms,
     num_insts, num_iterms, num_nets, num_obstructions, open_db, output_pin, place_bterm,
-    swap_master,
+    swap_master, insert_buffer_before_loads,
     net_is_special, net_sigtype, nth_net_bterm, nth_net_iterm, nth_net_name, num_net_bterms,
     add_track_pattern_x, add_track_pattern_y,
     block_set_bus_delimiters, block_set_def_units, bterm_set_io_type, read_lef,

@@ -1034,6 +1034,65 @@ void eco_end(const OdbDb& h) { odb::dbDatabase::endEco(require_block(h)); }
 void eco_commit(const OdbDb& h) { odb::dbDatabase::commitEco(require_block(h)); }
 void eco_undo(const OdbDb& h) { odb::dbDatabase::undoEco(require_block(h)); }
 bool eco_empty(const OdbDb& h) { return odb::dbDatabase::ecoEmpty(require_block(h)); }
+rust::String insert_buffer_before_loads(const OdbDb& h, rust::Str net,
+                                        rust::Slice<const rust::String> iterm_insts,
+                                        rust::Slice<const rust::String> iterm_pins,
+                                        rust::Slice<const rust::String> bterms, rust::Str master,
+                                        bool has_loc, int32_t x, int32_t y, rust::Str buf_base,
+                                        rust::Str net_base, rust::Str uniquify,
+                                        bool loads_on_diff_nets) {
+  dbBlock* b = require_block(h);
+  dbMaster* m = h.db->findMaster(s(master).c_str());
+  if (!m) throw std::runtime_error("vyges-opendb: master not found: " + s(master));
+  if (iterm_insts.size() != iterm_pins.size())
+    throw std::runtime_error("vyges-opendb: insert_buffer_before_loads: instance and pin lists differ in length");
+  odb::PtrSet<odb::dbObject> loads;
+  for (std::size_t k = 0; k < iterm_insts.size(); ++k) {
+    const std::string inst_name(iterm_insts[k]);
+    const std::string pin_name(iterm_pins[k]);
+    dbInst* i = b->findInst(inst_name.c_str());
+    if (!i) throw std::runtime_error("vyges-opendb: instance not found: " + inst_name);
+    odb::dbITerm* it = i->findITerm(pin_name.c_str());
+    if (!it) throw std::runtime_error("vyges-opendb: pin not found: " + inst_name + "/" + pin_name);
+    loads.insert(it);
+  }
+  for (const rust::String& bt : bterms) {
+    const std::string name(bt);
+    odb::dbBTerm* t = b->findBTerm(name.c_str());
+    if (!t) throw std::runtime_error("vyges-opendb: port not found: " + name);
+    loads.insert(t);
+  }
+  if (loads.empty()) throw std::runtime_error("vyges-opendb: insert_buffer_before_loads: no loads");
+  dbNet* n = nullptr;
+  if (!s(net).empty()) {
+    n = b->findNet(s(net).c_str());
+    if (!n) throw std::runtime_error("vyges-opendb: net not found: " + s(net));
+  } else {
+    // Resizer::insertBufferBeforeLoads with no net: the first load's, in the set's order.
+    odb::dbObject* first = *loads.begin();
+    n = first->getObjectType() == odb::dbITermObj ? static_cast<odb::dbITerm*>(first)->getNet()
+                                                   : static_cast<odb::dbBTerm*>(first)->getNet();
+    if (!n) throw std::runtime_error("vyges-opendb: Cannot infer net from loads.");
+  }
+  const std::string buf_base_s = s(buf_base);
+  const std::string net_base_s = s(net_base);
+  const std::string uniquify_s = s(uniquify);
+  odb::dbNameUniquifyType::Value uv;
+  if (uniquify_s == "ALWAYS") uv = odb::dbNameUniquifyType::ALWAYS;
+  else if (uniquify_s == "ALWAYS_WITH_UNDERSCORE") uv = odb::dbNameUniquifyType::ALWAYS_WITH_UNDERSCORE;
+  else if (uniquify_s == "IF_NEEDED") uv = odb::dbNameUniquifyType::IF_NEEDED;
+  else if (uniquify_s == "IF_NEEDED_WITH_UNDERSCORE") uv = odb::dbNameUniquifyType::IF_NEEDED_WITH_UNDERSCORE;
+  else throw std::runtime_error("vyges-opendb: unknown uniquify mode: " + uniquify_s);
+  const odb::dbNameUniquifyType u(uv);
+  const odb::Point loc(x, y);
+  dbInst* inst = n->insertBufferBeforeLoads(loads, m, has_loc ? &loc : nullptr,
+                                            buf_base_s.c_str(),
+                                            net_base_s.empty() ? nullptr : net_base_s.c_str(), u,
+                                            loads_on_diff_nets);
+  if (!inst) throw std::runtime_error("vyges-opendb: Failed to insert buffer before loads for net " + n->getName());
+  return rust::String(inst->getName());
+}
+
 bool swap_master(const OdbDb& h, rust::Str inst, rust::Str master) {
   dbInst* i = require_inst(h, inst);
   std::string want = s(master);

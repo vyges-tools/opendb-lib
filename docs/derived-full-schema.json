@@ -5,7 +5,7 @@
   "scope": "all",
   "class_count": 122,
   "method_count": 2715,
-  "bridged_count": 1984,
+  "bridged_count": 1986,
   "classes": [
     {
       "name": "dbAccessPoint",
@@ -14315,7 +14315,7 @@
           ],
           "const": false,
           "kind": "relation",
-          "bridged": false,
+          "bridged": true,
           "target": "dbInst"
         },
         {
@@ -14353,7 +14353,7 @@
           ],
           "const": false,
           "kind": "relation",
-          "bridged": false,
+          "bridged": true,
           "target": "dbInst"
         },
         {

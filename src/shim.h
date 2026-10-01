@@ -782,6 +782,19 @@ uint32_t inst_get_id(const OdbDb& db, rust::Str inst);
 
 // Create a block terminal on a net. Named separately from the net because they usually differ.
 void bterm_create(const OdbDb& db, rust::Str net, rust::Str name);
+// `dbNet::insertBufferBeforeLoads`, odb's own: a buffer of `master` placed before the given loads
+// (instance pins `iterm_insts[k]/iterm_pins[k]` and ports `bterms`), named by odb's uniquifier from
+// `buf_base` / `net_base` (empty: odb's default "net"), at (x, y) when `has_loc`. `net` empty:
+// the net of the FIRST load in odb's set order (Resizer::insertBufferBeforeLoads(nullptr, …)).
+// `uniquify`: ALWAYS, ALWAYS_WITH_UNDERSCORE, IF_NEEDED, IF_NEEDED_WITH_UNDERSCORE. Returns the
+// new instance's name.
+rust::String insert_buffer_before_loads(const OdbDb& db, rust::Str net,
+                                        rust::Slice<const rust::String> iterm_insts,
+                                        rust::Slice<const rust::String> iterm_pins,
+                                        rust::Slice<const rust::String> bterms, rust::Str master,
+                                        bool has_loc, int32_t x, int32_t y, rust::Str buf_base,
+                                        rust::Str net_base, rust::Str uniquify,
+                                        bool loads_on_diff_nets);
 
 // Add a pin shape to a block terminal, returning the new pin's index.
 // Creating the pin and its box has to be one call: a dbBPin has no name, so there is no way to
