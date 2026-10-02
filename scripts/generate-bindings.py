@@ -486,7 +486,7 @@ class Emit:
             if rt == "&str":
                 return f"val(values, {j})?"
             return (f'val(values, {j})?.parse().map_err(|_| '
-                    f'crate::Error::Odb(format!("value #{j} must be a {rt}")))?')
+                    f'crate::Error::Odb("value #{j} must be a {rt}".to_string()))?')
 
         field = snake(name)
         key_call, keys_desc = key_exprs(argspecs)
