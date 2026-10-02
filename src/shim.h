@@ -796,6 +796,20 @@ rust::String insert_buffer_before_loads(const OdbDb& db, rust::Str net,
                                         rust::Str net_base, rust::Str uniquify,
                                         bool loads_on_diff_nets);
 
+// `dbNet::insertBufferAfterDriver` / `dbNet::insertBufferBeforeLoad`, odb's own: a buffer of
+// `master` on the net of one terminal — the instance pin `inst`/`pin`, or (inst empty) the port
+// `pin` — after it as the net's driver, or before it as one load. Named as for
+// insert_buffer_before_loads (`net_base` empty: odb's default "net"); at (x, y) when `has_loc`,
+// else where odb puts it (at the terminal). Returns the new instance's name.
+rust::String insert_buffer_after_driver(const OdbDb& db, rust::Str inst, rust::Str pin,
+                                        rust::Str master, bool has_loc, int32_t x, int32_t y,
+                                        rust::Str buf_base, rust::Str net_base,
+                                        rust::Str uniquify);
+rust::String insert_buffer_before_load(const OdbDb& db, rust::Str inst, rust::Str pin,
+                                       rust::Str master, bool has_loc, int32_t x, int32_t y,
+                                       rust::Str buf_base, rust::Str net_base,
+                                       rust::Str uniquify);
+
 // `Network::visitConnectedPins(pin)` from an instance pin, as dbNetwork answers it: the pin's
 // module net (when it has one) walked through the hierarchy — iterms, bterms, moditerms, then down
 // and up — else its flat net's iterms then bterms. Each pin tagged "I:inst/pin", "B:port" or

@@ -301,6 +301,12 @@ mod ffi {
         /// `dbNet::insertBufferBeforeLoads` (odb's own) — see shim.h. Returns the new instance.
         #[allow(clippy::too_many_arguments)]
         fn insert_buffer_before_loads(db: &OdbDb, net: &str, iterm_insts: &[String], iterm_pins: &[String], bterms: &[String], master: &str, has_loc: bool, x: i32, y: i32, buf_base: &str, net_base: &str, uniquify: &str, loads_on_diff_nets: bool) -> Result<String>;
+        /// `dbNet::insertBufferAfterDriver` (odb's own) — see shim.h. Returns the new instance.
+        #[allow(clippy::too_many_arguments)]
+        fn insert_buffer_after_driver(db: &OdbDb, inst: &str, pin: &str, master: &str, has_loc: bool, x: i32, y: i32, buf_base: &str, net_base: &str, uniquify: &str) -> Result<String>;
+        /// `dbNet::insertBufferBeforeLoad` (odb's own) — see shim.h. Returns the new instance.
+        #[allow(clippy::too_many_arguments)]
+        fn insert_buffer_before_load(db: &OdbDb, inst: &str, pin: &str, master: &str, has_loc: bool, x: i32, y: i32, buf_base: &str, net_base: &str, uniquify: &str) -> Result<String>;
         /// `Network::visitConnectedPins(pin)` through the hierarchy — see shim.h.
         fn visit_connected_pins(db: &OdbDb, inst: &str, pin: &str) -> Result<Vec<String>>;
         fn bterm_create_pin(db: &OdbDb, bterm: &str, layer: &str,
@@ -567,7 +573,8 @@ pub use ffi::{
     connect, create_inst, create_net, disconnect, find_master, first_master_name, input_pin,
     inst_master, inst_x, inst_y, log_capture_begin, log_capture_end, net_of, nth_bterm_name, nth_inst_name, nth_iterm_name, num_bterms,
     num_insts, num_iterms, num_nets, num_obstructions, open_db, output_pin, place_bterm,
-    swap_master, insert_buffer_before_loads, visit_connected_pins,
+    swap_master, insert_buffer_before_loads, insert_buffer_after_driver, insert_buffer_before_load,
+    visit_connected_pins,
     net_is_special, net_sigtype, nth_net_bterm, nth_net_iterm, nth_net_name, num_net_bterms,
     add_track_pattern_x, add_track_pattern_y,
     block_set_bus_delimiters, block_set_def_units, bterm_set_io_type, read_lef,
