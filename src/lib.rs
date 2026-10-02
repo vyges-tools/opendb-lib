@@ -191,6 +191,8 @@ mod ffi {
         fn destroy_inst(db: &OdbDb, inst: &str) -> Result<()>;
         // density fill (vyges-fin) -- see shim.h
         fn inst_shapes(db: &OdbDb) -> Result<Vec<i64>>;
+        /// The obstructions a pin placement clears — see shim.h.
+        fn pin_obstruction_boxes(db: &OdbDb) -> Result<Vec<i64>>;
         fn obstruction_boxes(db: &OdbDb) -> Result<Vec<i64>>;
         fn fill_obstruction_boxes(db: &OdbDb) -> Result<Vec<i64>>;
         fn blockage_boxes(db: &OdbDb) -> Result<Vec<i32>>;
@@ -584,7 +586,7 @@ pub use ffi::{
     site_row_pattern_len, site_row_pattern_orient, site_row_pattern_site,
     block_cut_rows, block_cut_rows_at_blockages, group_get_type, has_one_site_master, nth_row_name, site_get_class, create_physical_inst, inst_bbox, master_placement_boundary, master_edge_type_names, master_edge_type_params, tech_cell_edge_spacing_types, tech_cell_edge_spacing_params, ndr_create, ndr_layer_rule_set, ndr_layer_rule_layers, ndr_layer_rule_params, ndr_add_use_via, ndr_use_vias, ndr_use_via_rules, ndr_layer_rule_wire_exts, block_access_point_count, iterm_pref_access_points, iterm_access_point_count, bpin_access_points, net_guides, net_wire_decode, layer_lef58_type, layer_rule_census, mpin_add_access_point, iterm_set_access_point, bpin_add_access_point, net_write_wire, block_create_via, block_set_gcell_grid, block_reset_gcell_grid, layer_min_enclosed_areas, num_masters, nth_master_name, master_get_type,
     nth_row_bbox, nth_row_site, nth_row_orient, nth_row_direction, destroy_inst,
-    inst_shapes, obstruction_boxes, fill_obstruction_boxes, blockage_boxes, swire_boxes, special_wire_boxes, wire_shape_type_name, blockage_create, num_blockages, blockage_destroy,
+    inst_shapes, pin_obstruction_boxes, obstruction_boxes, fill_obstruction_boxes, blockage_boxes, swire_boxes, special_wire_boxes, wire_shape_type_name, blockage_create, num_blockages, blockage_destroy,
     fill_create, num_fills, clear_fills,
     num_layers, nth_layer_name, layer_direction, track_grid_x, track_grid_y,
     track_patterns_x, track_patterns_y, bterm_constraint_region,

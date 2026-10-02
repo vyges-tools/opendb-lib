@@ -1789,6 +1789,28 @@ rust::Vec<int64_t> inst_shapes(const OdbDb& h) {
   }
   return out;
 }
+// The obstructions a pin placement keeps clear of (`IOPlacer::getBlockedRegionsFromDbObstructions`):
+// every one with a layer, except a system-reserved one (the outside of a polygon die) and a fill or
+// slot obstruction (routing metal may still run over those). Flat (layer number, x0, y0, x1, y1).
+rust::Vec<int64_t> pin_obstruction_boxes(const OdbDb& h) {
+  rust::Vec<int64_t> out;
+  dbBlock* b = block_of(h);
+  if (!b) return out;
+  for (odb::dbObstruction* o : b->getObstructions()) {
+    if (o->isSystemReserved() || o->isFillObstruction() || o->isSlotObstruction()) continue;
+    odb::dbBox* box = o->getBBox();
+    if (!box) continue;
+    odb::dbTechLayer* layer = box->getTechLayer();
+    if (!layer) continue;
+    out.push_back(layer->getNumber());
+    out.push_back(box->xMin());
+    out.push_back(box->yMin());
+    out.push_back(box->xMax());
+    out.push_back(box->yMax());
+  }
+  return out;
+}
+
 rust::Vec<int64_t> obstruction_boxes(const OdbDb& h) {
   rust::Vec<int64_t> out;
   dbBlock* b = block_of(h);

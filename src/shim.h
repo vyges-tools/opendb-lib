@@ -482,6 +482,8 @@ rust::Vec<int64_t> inst_shapes(const OdbDb& db);
 
 // Routing/PDN obstruction rectangles, 5 i64 each (layer_number, x_min, y_min, x_max, y_max).
 // `num_obstructions` counts them; this is the geometry.
+// Obstructions a pin placement clears (not system-reserved, not fill, not slot) — see shim.cc.
+rust::Vec<int64_t> pin_obstruction_boxes(const OdbDb& db);
 rust::Vec<int64_t> obstruction_boxes(const OdbDb& db);
 /// Only `+ FILLS` obstructions — see the note in shim.cc.
 rust::Vec<int64_t> fill_obstruction_boxes(const OdbDb& db);
