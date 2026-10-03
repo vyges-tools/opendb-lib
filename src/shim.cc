@@ -4010,14 +4010,22 @@ class EditLog : public odb::dbBlockCallBackObj {
     }
     return out;
   }
-  void inDbInstCreate(dbInst* i) override { events.push_back("inst_create|" + i->getName()); }
+  // An instance's terminals with their nets and each net's terminals: `T=net=pins;…`.
+  static std::string inst_pins(dbInst* i) {
+    std::string out;
+    for (dbITerm* t : i->getITerms()) {
+      out += (out.empty() ? "" : ";") + t->getMTerm()->getName() + "=" + net(t->getNet()) + "=" + pins(t->getNet());
+    }
+    return out;
+  }
+  void inDbInstCreate(dbInst* i) override { events.push_back("inst_create|" + i->getName() + "|" + i->getMaster()->getName()); }
   void inDbInstDestroy(dbInst* i) override { events.push_back("inst_destroy|" + i->getName()); }
   void inDbInstSwapMasterBefore(dbInst* i, odb::dbMaster* m) override {
-    events.push_back("swap_before|" + i->getName() + "|" + i->getMaster()->getName() + "|" + m->getName());
+    events.push_back("swap_before|" + i->getName() + "|" + i->getMaster()->getName() + "|" + m->getName() + "|" + inst_pins(i));
   }
-  void inDbInstSwapMasterAfter(dbInst* i) override { events.push_back("swap_after|" + i->getName()); }
+  void inDbInstSwapMasterAfter(dbInst* i) override { events.push_back("swap_after|" + i->getName() + "|" + inst_pins(i)); }
   void inDbNetCreate(dbNet* n) override { events.push_back("net_create|" + n->getName()); }
-  void inDbNetDestroy(dbNet* n) override { events.push_back("net_destroy|" + n->getName()); }
+  void inDbNetDestroy(dbNet* n) override { events.push_back("net_destroy|" + n->getName() + "|" + pins(n)); }
   void inDbNetPostMerge(dbNet* n, dbNet* removed) override { events.push_back("net_merge|" + net(n) + "|" + net(removed)); }
   void inDbITermPostConnect(dbITerm* t) override { events.push_back("iterm_connect|" + iterm(t) + "|" + net(t->getNet()) + "|" + pins(t->getNet())); }
   void inDbITermPreDisconnect(dbITerm* t) override { events.push_back("iterm_disconnect|" + iterm(t) + "|" + net(t->getNet()) + "|" + pins(t->getNet())); }

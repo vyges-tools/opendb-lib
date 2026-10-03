@@ -28,11 +28,12 @@ struct OdbDb {
 // ---- edit log ----------------------------------------------------------------
 // Start recording the block's edit callbacks — the ones the reference's timer and parasitics
 // estimator act on — one line each, in the order odb raises them:
-//   inst_create|I  inst_destroy|I  swap_before|I|from|to  swap_after|I
-//   net_create|N  net_destroy|N  net_merge|N|removed
+//   inst_create|I|master  inst_destroy|I  swap_before|I|from|to|terms  swap_after|I|terms
+//   net_create|N  net_destroy|N|pins  net_merge|N|removed
 //   iterm_connect|I/P|N|pins  iterm_disconnect|I/P|N|pins  iterm_destroy|I/P|N
 //   bterm_create|B  bterm_destroy|B  bterm_connect|B|N|pins  bterm_disconnect|B|N|pins
-// where `pins` is the net's terminals at that moment (`I/P`, then ports), comma-separated.
+// where `pins` is the net's terminals at that moment (`I/P`, then ports), comma-separated, and
+// `terms` the instance's terminals `T=net=pins` separated by `;`.
 // Restarting clears the log. Throws without a block.
 void edit_log_start(const OdbDb& db);
 // The events since the last take (or start); the log keeps recording.
