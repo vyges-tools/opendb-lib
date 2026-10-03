@@ -311,6 +311,15 @@ mod ffi {
         fn insert_buffer_before_load(db: &OdbDb, inst: &str, pin: &str, master: &str, has_loc: bool, x: i32, y: i32, buf_base: &str, net_base: &str, uniquify: &str) -> Result<String>;
         /// `Network::visitConnectedPins(pin)` through the hierarchy — see shim.h.
         fn visit_connected_pins(db: &OdbDb, inst: &str, pin: &str) -> Result<Vec<String>>;
+        /// The database half of a buffer removal (net merge, instance destroy) — see shim.h.
+        fn remove_buffer(db: &OdbDb, inst: &str, in_pin: &str, out_pin: &str) -> Result<String>;
+        /// `dbNet::canMergeNet` (odb's own) — see shim.h.
+        fn net_can_merge(db: &OdbDb, survivor: &str, removed: &str) -> Result<bool>;
+        /// odb's own name uniquifiers at the top scope — see shim.h.
+        fn make_new_inst_name(db: &OdbDb, base: &str, uniquify: &str) -> Result<String>;
+        fn make_new_net_name(db: &OdbDb, base: &str, uniquify: &str) -> Result<String>;
+        /// The database half of a pin swap — see shim.h.
+        fn swap_pins(db: &OdbDb, inst: &str, pin1: &str, pin2: &str) -> Result<bool>;
         fn bterm_create_pin(db: &OdbDb, bterm: &str, layer: &str,
                             x1: i32, y1: i32, x2: i32, y2: i32) -> Result<usize>;
         fn bterm_destroy(db: &OdbDb, bterm: &str) -> Result<()>;
@@ -576,7 +585,7 @@ pub use ffi::{
     inst_master, inst_x, inst_y, log_capture_begin, log_capture_end, net_of, nth_bterm_name, nth_inst_name, nth_iterm_name, num_bterms,
     num_insts, num_iterms, num_nets, num_obstructions, open_db, output_pin, place_bterm,
     swap_master, insert_buffer_before_loads, insert_buffer_after_driver, insert_buffer_before_load,
-    visit_connected_pins,
+    visit_connected_pins, remove_buffer, net_can_merge, swap_pins, make_new_inst_name, make_new_net_name,
     net_is_special, net_sigtype, nth_net_bterm, nth_net_iterm, nth_net_name, num_net_bterms,
     add_track_pattern_x, add_track_pattern_y,
     block_set_bus_delimiters, block_set_def_units, bterm_set_io_type, read_lef,

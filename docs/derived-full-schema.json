@@ -5,7 +5,7 @@
   "scope": "all",
   "class_count": 122,
   "method_count": 2715,
-  "bridged_count": 1992,
+  "bridged_count": 2005,
   "classes": [
     {
       "name": "dbAccessPoint",
@@ -466,7 +466,7 @@
           ],
           "const": false,
           "kind": "setter",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "getBBox",
@@ -2581,7 +2581,7 @@
           ],
           "const": false,
           "kind": "other",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "makeNewInstName",
@@ -2602,7 +2602,7 @@
           ],
           "const": false,
           "kind": "other",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "getBaseName",
@@ -2615,7 +2615,7 @@
           ],
           "const": true,
           "kind": "other",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "getRegions",
@@ -8207,7 +8207,7 @@
           ],
           "const": false,
           "kind": "setter",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "getOrigin",
@@ -10611,7 +10611,7 @@
           ],
           "const": false,
           "kind": "setter",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "getMarkerCount",
@@ -12069,7 +12069,7 @@
           ],
           "const": false,
           "kind": "setter",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "disconnectAllTerms",
@@ -12123,7 +12123,7 @@
           ],
           "const": false,
           "kind": "setter",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "connectTermsOf",
@@ -12136,7 +12136,7 @@
           ],
           "const": false,
           "kind": "setter",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "isConnected",
@@ -12557,7 +12557,7 @@
           ],
           "const": false,
           "kind": "setter",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "swapNetNames",
@@ -13997,7 +13997,7 @@
           ],
           "const": false,
           "kind": "other",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "mergeNet",
@@ -14010,7 +14010,7 @@
           ],
           "const": false,
           "kind": "setter",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "findMainParentModInst",
@@ -14117,7 +14117,7 @@
           ],
           "const": true,
           "kind": "predicate",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "findRelatedModNets",

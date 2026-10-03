@@ -1149,6 +1149,116 @@ rust::String insert_buffer_before_loads(const OdbDb& h, rust::Str net,
   return rust::String(inst->getName());
 }
 
+static dbITerm* require_iterm(dbBlock* b, const std::string& inst, const std::string& pin) {
+  dbInst* i = b->findInst(inst.c_str());
+  if (!i) throw std::runtime_error("vyges-opendb: instance not found: " + inst);
+  dbITerm* it = i->findITerm(pin.c_str());
+  if (!it) throw std::runtime_error("vyges-opendb: pin not found: " + inst + "/" + pin);
+  return it;
+}
+
+rust::String remove_buffer(const OdbDb& h, rust::Str inst, rust::Str in_pin, rust::Str out_pin) {
+  dbBlock* b = require_block(h);
+  const std::string inst_name = s(inst);
+  dbITerm* in_term = require_iterm(b, inst_name, s(in_pin));
+  dbITerm* out_term = require_iterm(b, inst_name, s(out_pin));
+  dbNet* in_net = in_term->getNet();
+  dbNet* out_net = out_term->getNet();
+  if (!in_net) throw std::runtime_error("vyges-opendb: remove_buffer: the input of " + inst_name + " is undriven");
+  if (!out_net) {
+    dbInst::destroy(b->findInst(inst_name.c_str()));
+    return rust::String("");
+  }
+  odb::dbModNet* in_mod = in_term->getModNet();
+  odb::dbModNet* out_mod = out_term->getModNet();
+  // A feedthrough: both module nets in one module, one reaching an input port, the other an output.
+  const bool feedthrough = in_mod && out_mod && in_mod->getParent() == out_mod->getParent()
+                           && in_mod->isConnectedToInputPort() && out_mod->isConnectedToOutputPort();
+  dbNet* keep = in_net;
+  dbNet* gone = out_net;
+  odb::dbModNet* keep_mod = in_mod;
+  odb::dbModNet* gone_mod = out_mod;
+  if (!feedthrough && in_net->getBTerms().empty() && !out_net->getBTerms().empty()) {
+    std::swap(keep, gone);
+    std::swap(keep_mod, gone_mod);
+  }
+  std::string new_name;
+  bool rename_net = false;
+  std::string new_mod_name;
+  bool rename_mod = false;
+  if (keep->isDeeperThan(gone)) {
+    // A survivor module net on an input port keeps its port's name; the flat net then takes the
+    // shallower name only if that name is not the removed module net's own.
+    if (!(keep_mod && keep_mod->isConnectedToInputPort())) {
+      new_name = gone->getName();
+      rename_net = true;
+      if (gone_mod) {
+        new_mod_name = gone_mod->getName();
+        rename_mod = true;
+      }
+    } else if (!gone_mod || gone_mod->getHierarchicalName() != gone->getName()) {
+      new_name = gone->getName();
+      rename_net = true;
+    }
+  }
+  in_term->disconnect();
+  out_term->disconnect();
+  if (keep_mod && gone_mod) {
+    keep_mod->mergeModNet(gone_mod);
+  } else if (keep_mod) {
+    keep_mod->connectTermsOf(gone);
+  } else if (gone_mod) {
+    keep_mod = gone_mod;
+    keep_mod->connectTermsOf(keep);
+    new_mod_name = b->getBaseName(keep->getName().c_str());
+    rename_mod = true;
+  }
+  keep->mergeNet(gone);
+  dbInst::destroy(b->findInst(inst_name.c_str()));
+  if (rename_net) keep->rename(new_name.c_str());
+  if (keep_mod && rename_mod) keep_mod->rename(new_mod_name.c_str());
+  return rust::String(keep->getName());
+}
+
+bool swap_pins(const OdbDb& h, rust::Str inst, rust::Str pin1, rust::Str pin2) {
+  dbBlock* b = require_block(h);
+  const std::string inst_name = s(inst);
+  dbITerm* t1 = require_iterm(b, inst_name, s(pin1));
+  dbITerm* t2 = require_iterm(b, inst_name, s(pin2));
+  dbNet* net1 = t1->getNet();
+  dbNet* net2 = t2->getNet();
+  if (!net1 || !net2) return false;
+  odb::dbModNet* mod1 = t1->getModNet();
+  odb::dbModNet* mod2 = t2->getModNet();
+  t1->disconnect();
+  t1->connect(net2);
+  if (mod2) t1->connect(mod2);
+  t2->disconnect();
+  t2->connect(net1);
+  if (mod1) t2->connect(mod1);
+  return true;
+}
+
+rust::String make_new_inst_name(const OdbDb& h, rust::Str base, rust::Str uniquify) {
+  dbBlock* b = require_block(h);
+  const std::string base_s = s(base);
+  return rust::String(b->makeNewInstName(nullptr, base_s.c_str(), uniquify_type(uniquify)));
+}
+
+rust::String make_new_net_name(const OdbDb& h, rust::Str base, rust::Str uniquify) {
+  dbBlock* b = require_block(h);
+  const std::string base_s = s(base);
+  return rust::String(b->makeNewNetName(nullptr, base_s.c_str(), uniquify_type(uniquify)));
+}
+
+bool net_can_merge(const OdbDb& h, rust::Str survivor, rust::Str removed) {
+  dbBlock* b = require_block(h);
+  dbNet* keep = b->findNet(s(survivor).c_str());
+  dbNet* gone = b->findNet(s(removed).c_str());
+  if (!keep || !gone) throw std::runtime_error("vyges-opendb: net_can_merge: net not found");
+  return keep->canMergeNet(gone);
+}
+
 // dbNetwork::visitConnectedPins(Net*, visitor, visited_nets) on a module net: its iterms, bterms
 // and moditerms, then down each moditerm into the child module's net, then up each modbterm into
 // the parent instance's moditerm net.

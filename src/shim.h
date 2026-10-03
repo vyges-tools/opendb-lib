@@ -818,6 +818,31 @@ rust::String insert_buffer_before_load(const OdbDb& db, rust::Str inst, rust::St
 // "M:modinst/pin" (a hierarchical pin), in visit order.
 rust::Vec<rust::String> visit_connected_pins(const OdbDb& db, rust::Str inst, rust::Str pin);
 
+// The database half of a buffer removal (the resizer's `removeBuffer` after its checks): buffer
+// `inst`'s input pin `in_pin` and output pin `out_pin` are disconnected, one of the two nets
+// survives and takes the other's terminals (`dbNet::mergeNet`, odb's own, so the terminals keep
+// odb's reconnection order), the instance is destroyed, and the survivor is renamed to the
+// shallower net's name when it sits deeper in the hierarchy. The INPUT net survives unless the
+// removal makes no feedthrough, the input net has no port and the output net has one. Module
+// nets are merged alongside. With no net on the output pin, only the instance goes. Returns the
+// survivor's name after the rename (empty when only the instance was destroyed).
+rust::String remove_buffer(const OdbDb& db, rust::Str inst, rust::Str in_pin, rust::Str out_pin);
+
+// odb's own name uniquifiers at the top scope (`dbBlock::makeNewInstName(nullptr, …)` /
+// `makeNewNetName(nullptr, …)`): the block's instance / net counter advances as odb advances it, so
+// names follow every earlier insertion. `uniquify` as for insert_buffer_before_loads.
+rust::String make_new_inst_name(const OdbDb& db, rust::Str base, rust::Str uniquify);
+rust::String make_new_net_name(const OdbDb& db, rust::Str base, rust::Str uniquify);
+
+// `dbNet::canMergeNet`, odb's own: neither net is dont_touch, and no instance on `removed` is.
+bool net_can_merge(const OdbDb& db, rust::Str survivor, rust::Str removed);
+
+// The database half of the resizer's pin swap (`Resizer::swapPins`): instance `inst`'s pins
+// `pin1` and `pin2` trade nets — pin1 disconnected and connected to pin2's flat net then module
+// net, then pin2 to pin1's — in that order, which decides each net's terminal order. Returns false
+// (nothing done) when either pin has no flat net.
+bool swap_pins(const OdbDb& db, rust::Str inst, rust::Str pin1, rust::Str pin2);
+
 // Add a pin shape to a block terminal, returning the new pin's index.
 // Creating the pin and its box has to be one call: a dbBPin has no name, so there is no way to
 // address the pin between the two steps. The index this returns is what the generated
