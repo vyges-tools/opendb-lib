@@ -11,6 +11,7 @@
 #include "odb/dbWireCodec.h"  // dbWireEncoder (writing a net's routing)
 #include "odb/defin.h"   // LEF/DEF I/O (libodb v1)
 #include "odb/defout.h"
+#include "odb/dbBlockCallBackObj.h"
 #include "spdlog/sinks/callback_sink.h"   // forward libodb's utl::Logger -> Rust -> vyges-events
 #include "vyges-opendb-lib/src/lib.rs.h"  // odb_forward_log (extern "Rust")
 
@@ -3984,5 +3985,65 @@ rust::Vec<rust::String> layer_rule_census(const OdbDb& h, rust::Str layer) {
     if (m->getCutLayer() == l) wvm++;
   }
   put("metal_width_via_map", wvm);
+  return out;
+}
+
+// ---- edit log ----------------------------------------------------------------
+namespace {
+class EditLog : public odb::dbBlockCallBackObj {
+ public:
+  std::vector<std::string> events;
+  static std::string iterm(dbITerm* t) { return t->getInst()->getName() + "/" + t->getMTerm()->getName(); }
+  static std::string net(dbNet* n) { return n ? n->getName() : std::string(); }
+  // The net's terminals as they stand: instance pins `I/P`, then ports `B` — what a timer's graph
+  // has on the net at this moment (a connect is reported after it, a disconnect before it).
+  static std::string pins(dbNet* n) {
+    std::string out;
+    if (n == nullptr) {
+      return out;
+    }
+    for (dbITerm* t : n->getITerms()) {
+      out += (out.empty() ? "" : ",") + iterm(t);
+    }
+    for (dbBTerm* b : n->getBTerms()) {
+      out += (out.empty() ? "" : ",") + b->getName();
+    }
+    return out;
+  }
+  void inDbInstCreate(dbInst* i) override { events.push_back("inst_create|" + i->getName()); }
+  void inDbInstDestroy(dbInst* i) override { events.push_back("inst_destroy|" + i->getName()); }
+  void inDbInstSwapMasterBefore(dbInst* i, odb::dbMaster* m) override {
+    events.push_back("swap_before|" + i->getName() + "|" + i->getMaster()->getName() + "|" + m->getName());
+  }
+  void inDbInstSwapMasterAfter(dbInst* i) override { events.push_back("swap_after|" + i->getName()); }
+  void inDbNetCreate(dbNet* n) override { events.push_back("net_create|" + n->getName()); }
+  void inDbNetDestroy(dbNet* n) override { events.push_back("net_destroy|" + n->getName()); }
+  void inDbNetPostMerge(dbNet* n, dbNet* removed) override { events.push_back("net_merge|" + net(n) + "|" + net(removed)); }
+  void inDbITermPostConnect(dbITerm* t) override { events.push_back("iterm_connect|" + iterm(t) + "|" + net(t->getNet()) + "|" + pins(t->getNet())); }
+  void inDbITermPreDisconnect(dbITerm* t) override { events.push_back("iterm_disconnect|" + iterm(t) + "|" + net(t->getNet()) + "|" + pins(t->getNet())); }
+  void inDbITermDestroy(dbITerm* t) override { events.push_back("iterm_destroy|" + iterm(t) + "|" + net(t->getNet())); }
+  void inDbBTermCreate(dbBTerm* b) override { events.push_back("bterm_create|" + b->getName()); }
+  void inDbBTermDestroy(dbBTerm* b) override { events.push_back("bterm_destroy|" + b->getName()); }
+  void inDbBTermPostConnect(dbBTerm* b) override { events.push_back("bterm_connect|" + b->getName() + "|" + net(b->getNet()) + "|" + pins(b->getNet())); }
+  void inDbBTermPreDisconnect(dbBTerm* b) override { events.push_back("bterm_disconnect|" + b->getName() + "|" + net(b->getNet()) + "|" + pins(b->getNet())); }
+};
+}  // namespace
+
+void edit_log_start(const OdbDb& h) {
+  dbBlock* b = require_block(h);
+  auto log = std::make_shared<EditLog>();
+  log->addOwner(b);
+  h.edit_log = log;  // the previous log (if any) is released and detaches itself
+}
+
+rust::Vec<rust::String> edit_log_take(const OdbDb& h) {
+  rust::Vec<rust::String> out;
+  auto* log = static_cast<EditLog*>(h.edit_log.get());
+  if (log) {
+    for (auto& e : log->events) {
+      out.push_back(rust::String(e));
+    }
+    log->events.clear();
+  }
   return out;
 }

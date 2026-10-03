@@ -320,6 +320,10 @@ mod ffi {
         fn make_new_net_name(db: &OdbDb, base: &str, uniquify: &str) -> Result<String>;
         /// The database half of a pin swap — see shim.h.
         fn swap_pins(db: &OdbDb, inst: &str, pin1: &str, pin2: &str) -> Result<bool>;
+        /// Record the block's edit callbacks (see shim.h); restarting clears the log.
+        fn edit_log_start(db: &OdbDb) -> Result<()>;
+        /// The recorded edit callbacks since the last take.
+        fn edit_log_take(db: &OdbDb) -> Vec<String>;
         fn bterm_create_pin(db: &OdbDb, bterm: &str, layer: &str,
                             x1: i32, y1: i32, x2: i32, y2: i32) -> Result<usize>;
         fn bterm_destroy(db: &OdbDb, bterm: &str) -> Result<()>;
@@ -586,6 +590,7 @@ pub use ffi::{
     num_insts, num_iterms, num_nets, num_obstructions, open_db, output_pin, place_bterm,
     swap_master, insert_buffer_before_loads, insert_buffer_after_driver, insert_buffer_before_load,
     visit_connected_pins, remove_buffer, net_can_merge, swap_pins, make_new_inst_name, make_new_net_name,
+    edit_log_start, edit_log_take,
     net_is_special, net_sigtype, nth_net_bterm, nth_net_iterm, nth_net_name, num_net_bterms,
     add_track_pattern_x, add_track_pattern_y,
     block_set_bus_delimiters, block_set_def_units, bterm_set_io_type, read_lef,

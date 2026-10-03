@@ -19,8 +19,24 @@ struct OdbDb {
   // libodb's own stdout sink detached, so its diagnostics reach the events trail and nothing else.
   spdlog::sink_ptr forwarder;
   bool events_only = false;
+  // The edit log (see edit_log_start): the block callbacks a timer listening to the block would
+  // get. Type-erased so this header needs no callback class.
+  mutable std::shared_ptr<void> edit_log;
   OdbDb() : db(odb::dbDatabase::create()) { db->setLogger(&logger); }
 };
+
+// ---- edit log ----------------------------------------------------------------
+// Start recording the block's edit callbacks — the ones the reference's timer and parasitics
+// estimator act on — one line each, in the order odb raises them:
+//   inst_create|I  inst_destroy|I  swap_before|I|from|to  swap_after|I
+//   net_create|N  net_destroy|N  net_merge|N|removed
+//   iterm_connect|I/P|N|pins  iterm_disconnect|I/P|N|pins  iterm_destroy|I/P|N
+//   bterm_create|B  bterm_destroy|B  bterm_connect|B|N|pins  bterm_disconnect|B|N|pins
+// where `pins` is the net's terminals at that moment (`I/P`, then ports), comma-separated.
+// Restarting clears the log. Throws without a block.
+void edit_log_start(const OdbDb& db);
+// The events since the last take (or start); the log keeps recording.
+rust::Vec<rust::String> edit_log_take(const OdbDb& db);
 
 // ---- open / read / write -----------------------------------------------------
 std::unique_ptr<OdbDb> open_db(rust::Str path);   // throws -> Rust Result
