@@ -2346,6 +2346,49 @@ int32_t block_bool_property(const OdbDb& h, rust::Str name) {
 bool db_has_hierarchy(const OdbDb& h) {
   return h.db->hasHierarchy();
 }
+// The module an instance belongs to, as the resizer's `getOwningInstanceParent` reads it: the
+// instance's dbModule when the database is hierarchical and that module is not the top one;
+// nullptr (the top) otherwise. New objects made "beside" an instance are scoped to it.
+static odb::dbModule* owning_module(const OdbDb& h, rust::Str inst) {
+  if (!h.db->hasHierarchy()) return nullptr;
+  dbBlock* b = require_block(h);
+  odb::dbModule* m = require_inst(h, inst)->getModule();
+  return (m == nullptr || m == b->getTopModule()) ? nullptr : m;
+}
+// `makeNewInstName(parent_mod_inst, base, uniquify)` in the owning module of `owner`.
+rust::String make_new_inst_name_beside(const OdbDb& h, rust::Str owner, rust::Str base, rust::Str uniquify) {
+  odb::dbModule* m = owning_module(h, owner);
+  const std::string base_s = s(base);
+  return rust::String(require_block(h)->makeNewInstName(m ? m->getModInst() : nullptr, base_s.c_str(), uniquify_type(uniquify)));
+}
+// `makeNewNetName(parent_module, base, uniquify)` in the owning module of `owner`.
+rust::String make_new_net_name_beside(const OdbDb& h, rust::Str owner, rust::Str base, rust::Str uniquify) {
+  odb::dbModule* m = owning_module(h, owner);
+  const std::string base_s = s(base);
+  return rust::String(require_block(h)->makeNewNetName(m, base_s.c_str(), uniquify_type(uniquify)));
+}
+// `dbNetwork::makeInstance(cell, name, parent)`: at the top, `dbInst::create(block, master, name)`;
+// in a module, the same with that module as the instance's parent.
+void create_inst_beside(const OdbDb& h, rust::Str master, rust::Str name, rust::Str owner) {
+  dbBlock* b = require_block(h);
+  dbMaster* mm = h.db->findMaster(s(master).c_str());
+  if (!mm) throw std::runtime_error("vyges-opendb: master not found: " + s(master));
+  odb::dbModule* m = owning_module(h, owner);
+  dbInst* i = m ? dbInst::create(b, mm, s(name).c_str(), false, m) : dbInst::create(b, mm, s(name).c_str());
+  if (!i) throw std::runtime_error("vyges-opendb: create_inst failed: " + s(name));
+}
+// The hierarchical net (`odb::dbModNet`) of `from_inst/from_pin`, also on `inst/pin` (`iterm->connect(modnet)`);
+// false when `from` has none.
+bool connect_mod_net_of(const OdbDb& h, rust::Str inst, rust::Str pin, rust::Str from_inst, rust::Str from_pin) {
+  odb::dbModNet* mn = require_iterm(h, from_inst, from_pin)->getModNet();
+  if (!mn) return false;
+  require_iterm(h, inst, pin)->connect(mn);
+  return true;
+}
+// Whether two instances have the same owning module (`getOwningInstanceParent`).
+bool same_owning_module(const OdbDb& h, rust::Str a, rust::Str b) {
+  return owning_module(h, a) == owning_module(h, b);
+}
 // A block-level double property: empty when ABSENT, else its value (`Resizer::initBlock` reads
 // `limit_sizing_area` / `limit_sizing_leakage`, which `set_opt_config` writes).
 rust::Vec<double> block_double_property(const OdbDb& h, rust::Str name) {
