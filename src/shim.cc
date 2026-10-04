@@ -20,6 +20,7 @@
 #include <iostream>
 #include <algorithm>
 #include <map>
+#include <set>
 #include <memory>
 #include <stdexcept>
 #include <string>
@@ -2389,6 +2390,424 @@ bool connect_mod_net_of(const OdbDb& h, rust::Str inst, rust::Str pin, rust::Str
 bool same_owning_module(const OdbDb& h, rust::Str a, rust::Str b) {
   return owning_module(h, a) == owning_module(h, b);
 }
+// ---- Hierarchical connection (a leaf pin to a leaf pin anywhere in the module hierarchy) ----
+//
+// The resizer's timing network keeps the module hierarchy (dbModNet / dbModBTerm / dbModITerm)
+// overlaid on the flat netlist (dbNet). Connecting a driver to a load in another module therefore
+// also punches module ports and nets up to the lowest module both share. What follows reproduces
+// that edit on the database alone, in the same order of odb calls — the order of odb's own sets
+// (a net's iterms, a modnet's moditerms) is read later, so it is part of the result.
+
+namespace hconn {
+
+// A pin of the timing network: an instance pin, a top-level port, or a module instance's pin.
+struct Pin {
+  dbITerm* iterm = nullptr;
+  dbBTerm* bterm = nullptr;
+  odb::dbModITerm* moditerm = nullptr;
+  bool operator==(const Pin& o) const { return iterm == o.iterm && bterm == o.bterm && moditerm == o.moditerm; }
+};
+// A net of the timing network: flat or hierarchical.
+struct Net {
+  dbNet* flat = nullptr;
+  odb::dbModNet* mod = nullptr;
+  bool null() const { return !flat && !mod; }
+  bool operator<(const Net& o) const { return flat != o.flat ? flat < o.flat : mod < o.mod; }
+};
+
+// The net a pin reports: an instance pin its modnet when it has one, else its flat net; a module
+// instance pin its modnet; a top port none (it is reached through its net, not as a pin).
+static Net pin_net(const Pin& p) {
+  if (p.iterm) {
+    if (odb::dbModNet* m = p.iterm->getModNet()) return {nullptr, m};
+    if (dbNet* n = p.iterm->getNet()) return {n, nullptr};
+  }
+  if (p.moditerm) {
+    if (odb::dbModNet* m = p.moditerm->getModNet()) return {nullptr, m};
+  }
+  return {};
+}
+
+// Every pin on a net, across module boundaries: a modnet's instance pins, ports and module
+// instance pins, then down through each module instance pin into the child module's net, then up
+// through each module port to the parent's module instance pin and its net; a flat net's instance
+// pins and ports. Each net once.
+template <class V>
+static void visit_connected(const Net& net, V&& visit, std::set<Net>& seen) {
+  if (net.null() || seen.count(net)) return;
+  seen.insert(net);
+  if (net.mod) {
+    odb::dbModNet* mn = net.mod;
+    for (dbITerm* it : mn->getITerms()) visit(Pin{it, nullptr, nullptr});
+    for (dbBTerm* bt : mn->getBTerms()) visit(Pin{nullptr, bt, nullptr});
+    for (odb::dbModITerm* mi : mn->getModITerms()) visit(Pin{nullptr, nullptr, mi});
+    for (odb::dbModITerm* mi : mn->getModITerms()) {
+      odb::dbModule* child = mi->getParent()->getMaster();
+      std::string name = mi->getName();
+      if (odb::dbModBTerm* mb = child->findModBTerm(name.c_str())) {
+        if (odb::dbModNet* below = mb->getModNet()) visit_connected(Net{nullptr, below}, visit, seen);
+      }
+    }
+    for (odb::dbModBTerm* mb : mn->getModBTerms()) {
+      odb::dbModule* owner = mb->getParent();
+      if (!owner) continue;
+      odb::dbModInst* inst = owner->getModInst();
+      if (!inst) continue;
+      std::string name = mb->getName();
+      if (odb::dbModITerm* above = inst->findModITerm(name.c_str())) {
+        Pin ap{nullptr, nullptr, above};
+        visit(ap);
+        Net an = pin_net(ap);
+        if (!an.null()) visit_connected(an, visit, seen);
+      }
+    }
+  } else if (net.flat) {
+    for (dbITerm* it : net.flat->getITerms()) visit(Pin{it, nullptr, nullptr});
+    for (dbBTerm* bt : net.flat->getBTerms()) visit(Pin{nullptr, bt, nullptr});
+  }
+}
+
+static dbNet* flat_net(const Pin& p) {
+  if (p.iterm) return p.iterm->getNet();
+  if (p.bterm) return p.bterm->getNet();
+  return nullptr;
+}
+static odb::dbModNet* hier_net(const Pin& p) {
+  if (p.iterm) return p.iterm->getModNet();
+  if (p.bterm) return p.bterm->getModNet();
+  if (p.moditerm) return p.moditerm->getModNet();
+  return nullptr;
+}
+// Disconnect a pin from the given kind of net only.
+static void disconnect_from(const Pin& p, const Net& n) {
+  if (p.iterm) {
+    if (n.flat) p.iterm->disconnectDbNet();
+    if (n.mod) p.iterm->disconnectDbModNet();
+  } else if (p.bterm) {
+    if (n.flat) p.bterm->disconnectDbNet();
+    if (n.mod) p.bterm->disconnectDbModNet();
+  } else if (p.moditerm) {
+    p.moditerm->disconnect();
+  }
+}
+// Disconnect a pin from everything.
+static void disconnect_all(const Pin& p) {
+  if (p.iterm) p.iterm->disconnect();
+  else if (p.bterm) p.bterm->disconnect();
+  else if (p.moditerm) p.moditerm->disconnect();
+}
+// Connect a pin to one net (flat to an instance pin or port; modnet to any).
+static void connect_one(const Pin& p, const Net& n) {
+  if (n.flat) {
+    if (p.iterm) p.iterm->connect(n.flat);
+    else if (p.bterm) p.bterm->connect(n.flat);
+    else throw std::runtime_error("vyges-opendb: a flat net on a module instance pin");
+  } else if (n.mod) {
+    if (p.iterm) p.iterm->connect(n.mod);
+    else if (p.bterm) p.bterm->connect(n.mod);
+    else if (p.moditerm) p.moditerm->connect(n.mod);
+  }
+}
+
+// The module of a flat net's driver (its first instance driver pin in the net's order), else the
+// top — consulted only when the net reaches a top port. ⚠️ The timing network takes the first of
+// its driver SET; with one driver (every net this has been measured on) the two agree.
+static odb::dbModule* flat_net_driver_module(dbBlock* b, dbNet* n) {
+  for (dbITerm* it : n->getITerms()) {
+    if (it->isOutputSignal() || it->getIoType() == odb::dbIoType::INOUT) {
+      if (odb::dbModule* m = it->getInst()->getModule()) return m;
+      break;
+    }
+  }
+  return b->getTopModule();
+}
+
+// One modnet, one flat net: every pin reached through the modnet moves to `new_flat` (from
+// `orig_flat`, or from any when that is null); every instance pin of `new_flat` in the modnet's
+// module joins the modnet. A modnet in its driver's module on a net reaching a top port takes the
+// port's name.
+static void reassociate_hier_flat(dbBlock* b, odb::dbModNet* mod, dbNet* new_flat, dbNet* orig_flat) {
+  dbBTerm* io = nullptr;
+  {
+    std::set<Net> seen;
+    visit_connected(Net{new_flat, nullptr}, [&](const Pin& p) { if (p.bterm) io = p.bterm; }, seen);
+  }
+  if (io && mod->getParent() == flat_net_driver_module(b, new_flat)) {
+    std::string name = io->getName();
+    mod->rename(name.c_str());
+  }
+  {
+    std::set<Net> seen;
+    visit_connected(Net{nullptr, mod}, [&](const Pin& p) {
+      if (p.moditerm) return;
+      dbNet* cur = flat_net(p);
+      if (cur == new_flat) return;
+      if (cur == orig_flat || orig_flat == nullptr) {
+        disconnect_from(p, Net{cur, nullptr});
+        connect_one(p, Net{new_flat, nullptr});
+      } else {
+        throw std::runtime_error("vyges-opendb: a hierarchical net with two flat nets");
+      }
+    }, seen);
+  }
+  {
+    odb::dbModule* owner = mod->getParent();
+    std::set<Net> seen;
+    visit_connected(Net{new_flat, nullptr}, [&](const Pin& p) {
+      if (p.moditerm || !p.iterm) return;
+      if (p.iterm->getInst()->getModule() != owner) return;
+      odb::dbModNet* existing = p.iterm->getModNet();
+      if (existing) {
+        if (existing == mod) return;
+        disconnect_from(p, Net{nullptr, existing});
+      }
+      connect_one(p, Net{nullptr, mod});
+    }, seen);
+  }
+}
+
+// Connect a pin to its flat net, then its modnet, then (`reassociate`) make the two one.
+static void connect_flat_and_hier(dbBlock* b, const Pin& p, dbNet* flat, odb::dbModNet* mod, bool reassociate = true) {
+  if (flat) connect_one(p, Net{flat, nullptr});
+  if (mod) {
+    connect_one(p, Net{nullptr, mod});
+    if (flat && reassociate) reassociate_hier_flat(b, mod, flat, nullptr);
+  }
+}
+
+// A pin with a modnet: disconnected from both and connected again to both (re-associated).
+static void reassociate_pin(dbBlock* b, const Pin& p) {
+  if (odb::dbModNet* mod = hier_net(p)) {
+    dbNet* flat = flat_net(p);
+    disconnect_all(p);
+    connect_flat_and_hier(b, p, flat, mod);
+  }
+}
+
+// A port/net name in `module`: `name` (with `_<io>` when given), brackets made underscores,
+// uniquified there with an underscore only if needed; its base name.
+static std::string unique_name(dbBlock* b, odb::dbModule* module, const std::string& name, const char* io) {
+  std::string base = io ? name + "_" + io : name;
+  base = odb::replaceBracketsWithUnderscores(base);
+  std::string full = b->makeNewNetName(module, base.c_str(), odb::dbNameUniquifyType::IF_NEEDED_WITH_UNDERSCORE);
+  return std::string(b->getBaseName(full.c_str()));
+}
+
+// The module chain from `m` up to the top (inclusive), bottom first.
+static std::vector<odb::dbModule*> up_chain(dbBlock* b, odb::dbModule* m) {
+  std::vector<odb::dbModule*> chain;
+  odb::dbModule* top = b->getTopModule();
+  for (odb::dbModule* cur = m; cur;) {
+    chain.push_back(cur);
+    if (cur == top) break;
+    cur = cur->getModInst() ? cur->getModInst()->getParent() : nullptr;
+  }
+  return chain;
+}
+// The last module two chains share walking down from the top (the top when they part at once).
+static odb::dbModule* lowest_common(dbBlock* b, const std::vector<odb::dbModule*>& a, const std::vector<odb::dbModule*>& c) {
+  odb::dbModule* common = b->getTopModule();
+  size_t n = std::min(a.size(), c.size());
+  for (size_t i = 0; i < n; i++) {
+    odb::dbModule* x = a[a.size() - 1 - i];
+    if (x != c[c.size() - 1 - i]) return common;
+    common = x;
+  }
+  return common;
+}
+
+// Ports and nets from `pin`'s module up to `common`: in each module a port (and its modnet, made
+// unless one of that name exists) of direction `io`, the pin joined to the first (off its old
+// modnet); in each parent a module instance pin on the port, on a new modnet — for an input, not
+// in `common` itself. Returns the last module instance pin and modnet.
+static void build_up(dbBlock* b, const Pin& pin, odb::dbModule* common, odb::dbIoType io, const std::string& name,
+                     odb::dbModNet*& top_net, odb::dbModITerm*& top_iterm) {
+  odb::dbModule* cur = pin.iterm ? pin.iterm->getInst()->getModule() : (pin.moditerm ? pin.moditerm->getParent()->getParent() : nullptr);
+  if (!cur) throw std::runtime_error("vyges-opendb: a pin without a module");
+  const char* io_s = io == odb::dbIoType::OUTPUT ? "o" : "i";
+  std::string term_name = unique_name(b, cur, name, io_s);
+  odb::dbModNet* net = nullptr;
+  int level = 0;
+  while (cur != common) {
+    odb::dbModBTerm* port = odb::dbModBTerm::create(cur, term_name.c_str());
+    net = cur->getModNet(term_name.c_str());
+    if (!net) net = odb::dbModNet::create(cur, term_name.c_str());
+    port->connect(net);
+    port->setIoType(io);
+    port->setSigType(odb::dbSigType::SIGNAL);
+    if (level == 0) {
+      if (odb::dbModNet* old = hier_net(pin)) disconnect_from(pin, Net{nullptr, old});
+      connect_one(pin, Net{nullptr, net});
+    }
+    odb::dbModInst* inst = cur->getModInst();
+    cur = inst->getParent();
+    level++;
+    odb::dbModITerm* iterm = odb::dbModITerm::create(inst, term_name.c_str(), port);
+    term_name = unique_name(b, cur, name, io_s);
+    if (io == odb::dbIoType::OUTPUT || cur != common) {
+      net = odb::dbModNet::create(cur, term_name.c_str());
+      iterm->connect(net);
+    }
+    top_iterm = iterm;
+    top_net = net;
+  }
+}
+
+static std::string base_name(dbBlock* b, const char* name) { return b->getBaseName(name); }
+
+// `src` (a driver's instance pin) to `dst` (a load's instance pin), named `connection`.
+static void connect(dbBlock* b, bool hierarchy, dbITerm* src, dbITerm* dst, const char* connection) {
+  std::string name = base_name(b, connection);
+  dbNet* src_net = src->getNet();
+  dbNet* dst_net = dst->getNet();
+  odb::dbModule* src_parent = src->getInst()->getModule();
+  odb::dbModule* top = b->getTopModule();
+  auto make_flat = [&]() {
+    odb::dbModule* scope = (src_parent == top) ? nullptr : src_parent;
+    std::string full = b->makeNewNetName(scope, name.c_str(), odb::dbNameUniquifyType::IF_NEEDED);
+    return dbNet::create(b, full.c_str(), false);
+  };
+  if (!hierarchy) {
+    if (!src_net && !dst_net) {
+      src_net = make_flat();
+      src->connect(src_net);
+    }
+    if (src_net) dst->connect(src_net);
+    else src->connect(dst_net);
+    return;
+  }
+  // The flat connection first.
+  if (!src_net) {
+    src_net = make_flat();
+    name = src_net->getConstName();
+    src->connect(src_net);
+  }
+  {
+    bool connected = false;
+    std::set<Net> seen;
+    Pin sp{src, nullptr, nullptr}, dp{dst, nullptr, nullptr};
+    visit_connected(pin_net(sp), [&](const Pin& p) { if (p == dp) connected = true; }, seen);
+    if (!connected) dst->connect(src_net);
+  }
+  odb::dbModule* src_mod = src->getInst()->getModule();
+  odb::dbModule* dst_mod = dst->getInst()->getModule();
+  odb::dbModNet* src_mod_net = src->getModNet();
+  if (src_mod == dst_mod) return;
+  // An existing way into the destination module (a module port of it on the source's net).
+  {
+    odb::dbModBTerm* way_in = nullptr;
+    std::set<Net> seen;
+    visit_connected(pin_net(Pin{src, nullptr, nullptr}), [&](const Pin& p) {
+      if (p.moditerm) {
+        odb::dbModBTerm* child = p.moditerm->getChildModBTerm();
+        if (child && child->getParent() == dst_mod) way_in = child;
+      }
+    }, seen);
+    if (way_in) {
+      if (odb::dbModNet* way_net = way_in->getModNet()) {
+        Pin dp{dst, nullptr, nullptr};
+        dbNet* flat = flat_net(dp);
+        disconnect_all(dp);
+        connect_flat_and_hier(b, dp, flat, way_net);
+        return;
+      }
+    }
+  }
+  std::vector<odb::dbModule*> src_chain = up_chain(b, src_mod);
+  std::vector<odb::dbModule*> dst_chain = up_chain(b, dst_mod);
+  odb::dbModule* common = lowest_common(b, src_chain, dst_chain);
+  odb::dbModNet* top_src_net = src_mod_net;
+  odb::dbModITerm* top_src_iterm = nullptr;
+  if (src_mod != common) {
+    build_up(b, Pin{src, nullptr, nullptr}, common, odb::dbIoType::OUTPUT, name, top_src_net, top_src_iterm);
+  }
+  odb::dbModNet* top_dst_net = nullptr;
+  odb::dbModITerm* top_dst_iterm = nullptr;
+  if (dst_mod != common) {
+    build_up(b, Pin{dst, nullptr, nullptr}, common, odb::dbIoType::INPUT, name, top_dst_net, top_dst_iterm);
+  }
+  if (top_dst_iterm) {
+    if (!top_src_net) {
+      // A modnet in the common module for the source, named after its flat net.
+      Pin sp{src, nullptr, nullptr};
+      dbNet* sflat = flat_net(sp);
+      // The flat net's name as the timing network gives it: its base name under hierarchy.
+      std::string un = unique_name(b, common, base_name(b, sflat->getConstName()), nullptr);
+      odb::dbModNet* mn = odb::dbModNet::create(common, un.c_str());
+      top_dst_iterm->connect(mn);
+      disconnect_all(sp);
+      connect_flat_and_hier(b, sp, sflat, mn);
+      top_src_net = mn;
+    } else {
+      top_dst_iterm->connect(top_src_net);
+    }
+  } else {
+    dst->connect(top_src_net);
+  }
+  reassociate_pin(b, Pin{src, nullptr, nullptr});
+  reassociate_pin(b, Pin{dst, nullptr, nullptr});
+  src_net->renameWithModNetInHighestHier();
+  // Ports and pins the edit left unused, on each module instance of either chain once.
+  std::unordered_set<odb::dbModInst*> cleaned;  // membership only: the order is the chains'
+  for (auto* chain : {&src_chain, &dst_chain}) {
+    for (odb::dbModule* m : *chain) {
+      if (odb::dbModInst* mi = m->getModInst()) {
+        if (cleaned.insert(mi).second) mi->removeUnusedPortsAndPins();
+      }
+    }
+  }
+}
+
+}  // namespace hconn
+
+// `src_inst/src_pin` (a driver) connected to `dst_inst/dst_pin` (a load) through the module
+// hierarchy, `connection` naming any port or net made.
+void hierarchical_connect(const OdbDb& h, rust::Str src_inst, rust::Str src_pin, rust::Str dst_inst, rust::Str dst_pin, rust::Str connection) {
+  dbBlock* b = require_block(h);
+  const std::string c = s(connection);
+  hconn::connect(b, h.db->hasHierarchy(), require_iterm(h, src_inst, src_pin), require_iterm(h, dst_inst, dst_pin), c.c_str());
+}
+
+// The database's two views as lines, in odb's orders (for comparing an edit with another tool's):
+// each flat net and its instance pins and ports; each module, its ports (and their modnets), its
+// modnets (and their pins), its module instances (and their pins' modnets).
+rust::Vec<rust::String> dump_hierarchy(const OdbDb& h) {
+  dbBlock* b = require_block(h);
+  rust::Vec<rust::String> out;
+  auto push = [&](const std::string& x) { out.push_back(rust::String(x)); };
+  for (dbNet* n : b->getNets()) {
+    std::string l = "net " + n->getName() + " :";
+    for (dbITerm* it : n->getITerms()) l += " " + it->getName();
+    for (dbBTerm* bt : n->getBTerms()) l += " " + bt->getName();
+    push(l);
+  }
+  for (dbBTerm* bt : b->getBTerms()) {
+    push("port " + bt->getName() + " net " + (bt->getNet() ? bt->getNet()->getName() : "-") + " modnet " + (bt->getModNet() ? bt->getModNet()->getName() : "-"));
+  }
+  for (odb::dbModule* m : b->getModules()) {
+    std::string mn = m->getName();
+    push("module " + mn);
+    for (odb::dbModBTerm* mb : m->getModBTerms()) {
+      push("  modport " + std::string(mb->getName()) + " io " + mb->getIoType().getString() + " modnet " + (mb->getModNet() ? mb->getModNet()->getName() : "-"));
+    }
+    for (odb::dbModNet* net : m->getModNets()) {
+      std::string l = "  modnet " + std::string(net->getName()) + " :";
+      for (dbITerm* it : net->getITerms()) l += " " + it->getName();
+      for (dbBTerm* bt : net->getBTerms()) l += " port:" + bt->getName();
+      for (odb::dbModITerm* mi : net->getModITerms()) l += " " + std::string(mi->getParent()->getName()) + "/" + mi->getName();
+      for (odb::dbModBTerm* mb : net->getModBTerms()) l += " modport:" + std::string(mb->getName());
+      push(l);
+    }
+    for (odb::dbModInst* mi : m->getModInsts()) {
+      push("  modinst " + std::string(mi->getName()) + " of " + mi->getMaster()->getName());
+      for (odb::dbModITerm* t : mi->getModITerms()) {
+        push("    modpin " + std::string(t->getName()) + " modnet " + (t->getModNet() ? t->getModNet()->getName() : "-"));
+      }
+    }
+  }
+  return out;
+}
+
 // A block-level double property: empty when ABSENT, else its value (`Resizer::initBlock` reads
 // `limit_sizing_area` / `limit_sizing_leakage`, which `set_opt_config` writes).
 rust::Vec<double> block_double_property(const OdbDb& h, rust::Str name) {

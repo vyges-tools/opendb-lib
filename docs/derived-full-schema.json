@@ -5,7 +5,7 @@
   "scope": "all",
   "class_count": 122,
   "method_count": 2715,
-  "bridged_count": 2006,
+  "bridged_count": 2012,
   "classes": [
     {
       "name": "dbAccessPoint",
@@ -629,7 +629,7 @@
           "params": [],
           "const": false,
           "kind": "setter",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "disconnectDbModNet",
@@ -637,7 +637,7 @@
           "params": [],
           "const": false,
           "kind": "setter",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "connect",
@@ -8063,7 +8063,7 @@
           "params": [],
           "const": false,
           "kind": "setter",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "disconnectDbModNet",
@@ -8071,7 +8071,7 @@
           "params": [],
           "const": false,
           "kind": "setter",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "getAvgXY",
@@ -11883,7 +11883,7 @@
           "params": [],
           "const": false,
           "kind": "setter",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "findHierNet",
@@ -14147,7 +14147,7 @@
           "params": [],
           "const": false,
           "kind": "setter",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "isInternalTo",

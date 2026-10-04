@@ -680,6 +680,8 @@ rust::String make_new_net_name_beside(const OdbDb& db, rust::Str owner, rust::St
 void create_inst_beside(const OdbDb& db, rust::Str master, rust::Str name, rust::Str owner);
 bool connect_mod_net_of(const OdbDb& db, rust::Str inst, rust::Str pin, rust::Str from_inst, rust::Str from_pin);
 bool same_owning_module(const OdbDb& db, rust::Str a, rust::Str b);
+void hierarchical_connect(const OdbDb& db, rust::Str src_inst, rust::Str src_pin, rust::Str dst_inst, rust::Str dst_pin, rust::Str connection);
+rust::Vec<rust::String> dump_hierarchy(const OdbDb& db);
 void block_set_double_property(const OdbDb& db, rust::Str name, double value);
 void block_set_bool_property(const OdbDb& db, rust::Str name, bool value);  // set-or-create
 int32_t iterm_bool_property(const OdbDb& db, rust::Str iterm, rust::Str name);
