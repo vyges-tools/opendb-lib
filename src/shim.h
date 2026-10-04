@@ -673,6 +673,8 @@ void net_new_swire(const OdbDb& db, rust::Str net, bool fixed);
 // Block-level bool properties (grt stamps kUseCugrProperty here). ⚠️ Tri-state: -1 = ABSENT,
 // 0/1 = present and false/true -- absent and false are different facts.
 int32_t block_bool_property(const OdbDb& db, rust::Str name);
+rust::Vec<double> block_double_property(const OdbDb& db, rust::Str name);
+void block_set_double_property(const OdbDb& db, rust::Str name, double value);
 void block_set_bool_property(const OdbDb& db, rust::Str name, bool value);  // set-or-create
 int32_t iterm_bool_property(const OdbDb& db, rust::Str iterm, rust::Str name);
 int32_t mterm_bool_property(const OdbDb& db, rust::Str master, rust::Str term, rust::Str name);

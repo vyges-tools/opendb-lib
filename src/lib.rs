@@ -91,6 +91,8 @@ mod ffi {
         fn gcell_layer_congestion(db: &OdbDb, layer: &str) -> Result<Vec<f64>>;
         fn gcell_direction_congestion(db: &OdbDb, direction: &str) -> Result<Vec<f64>>;
         fn block_bool_property(db: &OdbDb, name: &str) -> Result<i32>;
+        fn block_double_property(db: &OdbDb, name: &str) -> Result<Vec<f64>>;
+        fn block_set_double_property(db: &OdbDb, name: &str, value: f64) -> Result<()>;
         fn block_set_bool_property(db: &OdbDb, name: &str, value: bool) -> Result<()>;
         fn num_obstructions(db: &OdbDb) -> usize;
         fn clear_obstructions(db: &OdbDb) -> usize;
@@ -571,7 +573,7 @@ pub use generated_write_bridge::*;
 
 #[cfg(unix)]
 pub use ffi::{
-    add_guide, add_obstruction, block_bool_property, block_set_bool_property,
+    add_guide, add_obstruction, block_bool_property, block_double_property, block_set_bool_property, block_set_double_property,
     block_compute_core_area,
     ensure_gcell_grid, has_gcell_grid, gcell_reset_grid, gcell_reset_congestion_map,
     gcell_add_grid_pattern_x, gcell_add_grid_pattern_y, gcell_grid_x, gcell_grid_y,

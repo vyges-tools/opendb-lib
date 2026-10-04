@@ -2341,6 +2341,27 @@ int32_t block_bool_property(const OdbDb& h, rust::Str name) {
   odb::dbBoolProperty* p = odb::dbBoolProperty::find(b, s(name).c_str());
   return p ? (p->getValue() ? 1 : 0) : -1;
 }
+// A block-level double property: empty when ABSENT, else its value (`Resizer::initBlock` reads
+// `limit_sizing_area` / `limit_sizing_leakage`, which `set_opt_config` writes).
+rust::Vec<double> block_double_property(const OdbDb& h, rust::Str name) {
+  rust::Vec<double> out;
+  odb::dbBlock* b = block_of(h);
+  if (!b) return out;
+  if (odb::dbDoubleProperty* p = odb::dbDoubleProperty::find(b, s(name).c_str())) {
+    out.push_back(p->getValue());
+  }
+  return out;
+}
+// Set-or-create (`set_opt_config` writes the sizing limits this way).
+void block_set_double_property(const OdbDb& h, rust::Str name, double value) {
+  odb::dbBlock* b = require_block(h);
+  std::string n = s(name);
+  if (odb::dbDoubleProperty* p = odb::dbDoubleProperty::find(b, n.c_str())) {
+    p->setValue(value);
+  } else {
+    odb::dbDoubleProperty::create(b, n.c_str(), value);
+  }
+}
 // Set-or-create, the same order grt uses: an existing property is updated in place rather than
 // duplicated.
 void block_set_bool_property(const OdbDb& h, rust::Str name, bool value) {
