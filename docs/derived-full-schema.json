@@ -5,7 +5,7 @@
   "scope": "all",
   "class_count": 122,
   "method_count": 2715,
-  "bridged_count": 2005,
+  "bridged_count": 2006,
   "classes": [
     {
       "name": "dbAccessPoint",
@@ -5774,7 +5774,7 @@
           "params": [],
           "const": true,
           "kind": "predicate",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "setTopChip",
