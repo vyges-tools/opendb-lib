@@ -2341,6 +2341,11 @@ int32_t block_bool_property(const OdbDb& h, rust::Str name) {
   odb::dbBoolProperty* p = odb::dbBoolProperty::find(b, s(name).c_str());
   return p ? (p->getValue() ? 1 : 0) : -1;
 }
+// `dbDatabase::hasHierarchy`: the database was linked hierarchically (stored in the .odb). The
+// timer's network then names instances and nets (not pins) without their parent prefix.
+bool db_has_hierarchy(const OdbDb& h) {
+  return h.db->hasHierarchy();
+}
 // A block-level double property: empty when ABSENT, else its value (`Resizer::initBlock` reads
 // `limit_sizing_area` / `limit_sizing_leakage`, which `set_opt_config` writes).
 rust::Vec<double> block_double_property(const OdbDb& h, rust::Str name) {
