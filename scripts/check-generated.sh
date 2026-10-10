@@ -26,6 +26,12 @@ python3 "$here/scripts/generate-bindings.py"
 # is where the 3D/chiplet surface lives — so anything we bind outside the core is still visible.
 python3 "$here/scripts/derive-schema.py"
 python3 "$here/scripts/derive-schema.py" --all --out docs/derived-full-schema.json
+# The two maps summarised (docs/coverage-summary.md, gated below like every generated file).
+# COVERAGE_BLOCKS: space-separated Markdown files whose marked coverage region is also rewritten
+# (not gated; for documents kept outside this repo).
+blocks=()
+for f in ${COVERAGE_BLOCKS:-}; do blocks+=(--block "$f"); done
+python3 "$here/scripts/coverage-summary.py" ${blocks[@]+"${blocks[@]}"}
 
 fail=0
 for repo in "$here" "$opendb"; do
