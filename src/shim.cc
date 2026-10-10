@@ -2819,6 +2819,24 @@ rust::Vec<double> block_double_property(const OdbDb& h, rust::Str name) {
   }
   return out;
 }
+rust::Vec<rust::String> block_string_property(const OdbDb& h, rust::Str name) {
+  rust::Vec<rust::String> out;
+  odb::dbBlock* b = block_of(h);
+  if (!b) return out;
+  if (odb::dbStringProperty* p = odb::dbStringProperty::find(b, s(name).c_str())) {
+    out.push_back(rust::String(p->getValue()));
+  }
+  return out;
+}
+rust::Vec<int32_t> block_int_property(const OdbDb& h, rust::Str name) {
+  rust::Vec<int32_t> out;
+  odb::dbBlock* b = block_of(h);
+  if (!b) return out;
+  if (odb::dbIntProperty* p = odb::dbIntProperty::find(b, s(name).c_str())) {
+    out.push_back(p->getValue());
+  }
+  return out;
+}
 // Set-or-create (`set_opt_config` writes the sizing limits this way).
 void block_set_double_property(const OdbDb& h, rust::Str name, double value) {
   odb::dbBlock* b = require_block(h);

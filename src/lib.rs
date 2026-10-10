@@ -92,6 +92,8 @@ mod ffi {
         fn gcell_direction_congestion(db: &OdbDb, direction: &str) -> Result<Vec<f64>>;
         fn block_bool_property(db: &OdbDb, name: &str) -> Result<i32>;
         fn block_double_property(db: &OdbDb, name: &str) -> Result<Vec<f64>>;
+        fn block_string_property(db: &OdbDb, name: &str) -> Result<Vec<String>>;
+        fn block_int_property(db: &OdbDb, name: &str) -> Result<Vec<i32>>;
         fn db_has_hierarchy(db: &OdbDb) -> bool;
         fn make_new_inst_name_beside(db: &OdbDb, owner: &str, base: &str, uniquify: &str) -> Result<String>;
         fn make_new_net_name_beside(db: &OdbDb, owner: &str, base: &str, uniquify: &str) -> Result<String>;
@@ -581,7 +583,7 @@ pub use generated_write_bridge::*;
 
 #[cfg(unix)]
 pub use ffi::{
-    add_guide, add_obstruction, block_bool_property, block_double_property, db_has_hierarchy, make_new_inst_name_beside, make_new_net_name_beside, create_inst_beside, connect_mod_net_of, same_owning_module, hierarchical_connect, dump_hierarchy, block_set_bool_property, block_set_double_property,
+    add_guide, add_obstruction, block_bool_property, block_double_property, block_string_property, block_int_property, db_has_hierarchy, make_new_inst_name_beside, make_new_net_name_beside, create_inst_beside, connect_mod_net_of, same_owning_module, hierarchical_connect, dump_hierarchy, block_set_bool_property, block_set_double_property,
     block_compute_core_area,
     ensure_gcell_grid, has_gcell_grid, gcell_reset_grid, gcell_reset_congestion_map,
     gcell_add_grid_pattern_x, gcell_add_grid_pattern_y, gcell_grid_x, gcell_grid_y,

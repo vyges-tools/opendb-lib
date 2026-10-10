@@ -674,6 +674,10 @@ void net_new_swire(const OdbDb& db, rust::Str net, bool fixed);
 // 0/1 = present and false/true -- absent and false are different facts.
 int32_t block_bool_property(const OdbDb& db, rust::Str name);
 rust::Vec<double> block_double_property(const OdbDb& db, rust::Str name);
+// Block-level string and int properties (`set_global_sizing_config` stores gs_presize_mode and
+// gs_max_iterations so): empty when absent.
+rust::Vec<rust::String> block_string_property(const OdbDb& db, rust::Str name);
+rust::Vec<int32_t> block_int_property(const OdbDb& db, rust::Str name);
 bool db_has_hierarchy(const OdbDb& db);
 rust::String make_new_inst_name_beside(const OdbDb& db, rust::Str owner, rust::Str base, rust::Str uniquify);
 rust::String make_new_net_name_beside(const OdbDb& db, rust::Str owner, rust::Str base, rust::Str uniquify);
