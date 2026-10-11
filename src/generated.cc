@@ -319,6 +319,7 @@ rust::String mterm_get_const_name(const OdbDb& h, rust::Str master, rust::Str te
 rust::String mterm_get_sig_type(const OdbDb& h, rust::Str master, rust::Str term) { auto* p = gen_mterm(h, master, term); return p ? rust::String(p->getSigType().getString()) : rust::String(); }
 rust::String mterm_get_io_type(const OdbDb& h, rust::Str master, rust::Str term) { auto* p = gen_mterm(h, master, term); return p ? rust::String(p->getIoType().getString()) : rust::String(); }
 bool mterm_is_set_mark(const OdbDb& h, rust::Str master, rust::Str term) { auto* p = gen_mterm(h, master, term); return p ? p->isSetMark() : false; }
+bool mterm_is_must_join_all_ports(const OdbDb& h, rust::Str master, rust::Str term) { auto* p = gen_mterm(h, master, term); return p ? p->isMustJoinAllPorts() : false; }
 rust::String mterm_get_master(const OdbDb& h, rust::Str master, rust::Str term) { auto* p = gen_mterm(h, master, term); if (!p) return rust::String(); auto* t = p->getMaster(); return t ? rust::String(t->getConstName()) : rust::String(); }
 std::size_t num_mterm_get_m_pins(const OdbDb& h, rust::Str master, rust::Str term) { auto* p = gen_mterm(h, master, term); return p ? p->getMPins().size() : 0; }
 int32_t mterm_get_b_box_x_min(const OdbDb& h, rust::Str master, rust::Str term) { auto* p = gen_mterm(h, master, term); return p ? p->getBBox().xMin() : 0; }

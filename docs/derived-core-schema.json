@@ -4,8 +4,8 @@
   "note": "Method-based schema derived from the hand-written core classes; parallels OpenROAD's field-based codeGenerator schema for the classes it does not cover.",
   "scope": "hand-written core only",
   "class_count": 45,
-  "method_count": 1178,
-  "bridged_count": 863,
+  "method_count": 1181,
+  "bridged_count": 865,
   "classes": [
     {
       "name": "dbBPin",
@@ -2308,6 +2308,23 @@
           "const": true,
           "kind": "other",
           "bridged": true
+        },
+        {
+          "name": "getPathSegments",
+          "return": "void",
+          "params": [
+            {
+              "type": "const char*",
+              "name": "full_name"
+            },
+            {
+              "type": "std::vector<std::string_view>&",
+              "name": "segments"
+            }
+          ],
+          "const": true,
+          "kind": "setter",
+          "bridged": false
         },
         {
           "name": "getRegions",
@@ -5502,6 +5519,27 @@
           "params": [],
           "const": false,
           "kind": "predicate",
+          "bridged": true
+        },
+        {
+          "name": "isMustJoinAllPorts",
+          "return": "bool",
+          "params": [],
+          "const": false,
+          "kind": "predicate",
+          "bridged": true
+        },
+        {
+          "name": "setMustJoinAllPorts",
+          "return": "void",
+          "params": [
+            {
+              "type": "bool",
+              "name": "v"
+            }
+          ],
+          "const": false,
+          "kind": "setter",
           "bridged": true
         },
         {

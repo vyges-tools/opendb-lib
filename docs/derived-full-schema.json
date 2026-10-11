@@ -4,8 +4,8 @@
   "note": "Method-based schema derived from the hand-written core classes; parallels OpenROAD's field-based codeGenerator schema for the classes it does not cover.",
   "scope": "all",
   "class_count": 122,
-  "method_count": 2715,
-  "bridged_count": 2012,
+  "method_count": 2720,
+  "bridged_count": 2016,
   "classes": [
     {
       "name": "dbAccessPoint",
@@ -2616,6 +2616,23 @@
           "const": true,
           "kind": "other",
           "bridged": true
+        },
+        {
+          "name": "getPathSegments",
+          "return": "void",
+          "params": [
+            {
+              "type": "const char*",
+              "name": "full_name"
+            },
+            {
+              "type": "std::vector<std::string_view>&",
+              "name": "segments"
+            }
+          ],
+          "const": true,
+          "kind": "setter",
+          "bridged": false
         },
         {
           "name": "getRegions",
@@ -9972,6 +9989,27 @@
           "bridged": true
         },
         {
+          "name": "isMustJoinAllPorts",
+          "return": "bool",
+          "params": [],
+          "const": false,
+          "kind": "predicate",
+          "bridged": true
+        },
+        {
+          "name": "setMustJoinAllPorts",
+          "return": "void",
+          "params": [
+            {
+              "type": "bool",
+              "name": "v"
+            }
+          ],
+          "const": false,
+          "kind": "setter",
+          "bridged": true
+        },
+        {
           "name": "getMaster",
           "return": "dbMaster*",
           "params": [],
@@ -14607,6 +14645,14 @@
           "bridged": true
         },
         {
+          "name": "getMinSpacing",
+          "return": "int",
+          "params": [],
+          "const": true,
+          "kind": "getter",
+          "bridged": true
+        },
+        {
           "name": "getTechLayer",
           "return": "dbTechLayer*",
           "params": [],
@@ -14636,6 +14682,19 @@
           "const": false,
           "kind": "setter",
           "bridged": false
+        },
+        {
+          "name": "setMinSpacing",
+          "return": "void",
+          "params": [
+            {
+              "type": "int",
+              "name": "min_spacing"
+            }
+          ],
+          "const": false,
+          "kind": "setter",
+          "bridged": true
         }
       ],
       "hand_written": false

@@ -317,6 +317,7 @@ rust::String mterm_get_const_name(const OdbDb& db, rust::Str master, rust::Str t
 rust::String mterm_get_sig_type(const OdbDb& db, rust::Str master, rust::Str term);
 rust::String mterm_get_io_type(const OdbDb& db, rust::Str master, rust::Str term);
 bool mterm_is_set_mark(const OdbDb& db, rust::Str master, rust::Str term);
+bool mterm_is_must_join_all_ports(const OdbDb& db, rust::Str master, rust::Str term);
 rust::String mterm_get_master(const OdbDb& db, rust::Str master, rust::Str term);
 std::size_t num_mterm_get_m_pins(const OdbDb& db, rust::Str master, rust::Str term);
 int32_t mterm_get_b_box_x_min(const OdbDb& db, rust::Str master, rust::Str term);

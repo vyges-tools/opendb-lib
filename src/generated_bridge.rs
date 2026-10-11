@@ -322,6 +322,7 @@ mod ffi_gen {
         fn mterm_get_sig_type(db: &OdbDb, master: &str, term: &str) -> String;
         fn mterm_get_io_type(db: &OdbDb, master: &str, term: &str) -> String;
         fn mterm_is_set_mark(db: &OdbDb, master: &str, term: &str) -> bool;
+        fn mterm_is_must_join_all_ports(db: &OdbDb, master: &str, term: &str) -> bool;
         fn mterm_get_master(db: &OdbDb, master: &str, term: &str) -> String;
         fn num_mterm_get_m_pins(db: &OdbDb, master: &str, term: &str) -> usize;
         fn mterm_get_b_box_x_min(db: &OdbDb, master: &str, term: &str) -> i32;
@@ -2089,6 +2090,7 @@ pub use ffi_gen::{
     mterm_get_sig_type,
     mterm_has_default_antenna_model,
     mterm_has_oxide2_antenna_model,
+    mterm_is_must_join_all_ports,
     mterm_is_set_mark,
     ndr_get_const_name,
     ndr_get_hard_spacing,

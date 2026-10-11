@@ -103,6 +103,7 @@ void iterm_clear_connected(const OdbDb& db, rust::Str inst, rust::Str pin);
 void iterm_clear_pref_access_points(const OdbDb& db, rust::Str inst, rust::Str pin);
 void mterm_set_sig_type(const OdbDb& db, rust::Str master, rust::Str term, rust::Str a0);
 void mterm_set_mark(const OdbDb& db, rust::Str master, rust::Str term, uint32_t v);
+void mterm_set_must_join_all_ports(const OdbDb& db, rust::Str master, rust::Str term, bool v);
 void layer_set_wrong_way_width(const OdbDb& db, rust::Str layer, uint32_t wrong_way_width);
 void layer_set_wrong_way_min_width(const OdbDb& db, rust::Str layer, uint32_t wrong_way_min_width);
 void layer_set_layer_adjustment(const OdbDb& db, rust::Str layer, float layer_adjustment);

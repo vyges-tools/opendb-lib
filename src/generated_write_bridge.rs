@@ -108,6 +108,7 @@ mod ffi_gen_write {
         fn iterm_clear_pref_access_points(db: &OdbDb, inst: &str, pin: &str) -> Result<()>;
         fn mterm_set_sig_type(db: &OdbDb, master: &str, term: &str, a0: &str) -> Result<()>;
         fn mterm_set_mark(db: &OdbDb, master: &str, term: &str, v: u32) -> Result<()>;
+        fn mterm_set_must_join_all_ports(db: &OdbDb, master: &str, term: &str, v: bool) -> Result<()>;
         fn layer_set_wrong_way_width(db: &OdbDb, layer: &str, wrong_way_width: u32) -> Result<()>;
         fn layer_set_wrong_way_min_width(db: &OdbDb, layer: &str, wrong_way_min_width: u32) -> Result<()>;
         fn layer_set_layer_adjustment(db: &OdbDb, layer: &str, layer_adjustment: f32) -> Result<()>;
@@ -955,6 +956,7 @@ pub use ffi_gen_write::{
     module_set_mod_inst,
     mpin_clear_pin_access,
     mterm_set_mark,
+    mterm_set_must_join_all_ports,
     mterm_set_sig_type,
     ndr_set_hard_spacing,
     ndr_set_min_cuts,
