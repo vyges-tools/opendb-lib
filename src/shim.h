@@ -502,6 +502,9 @@ rust::Vec<int64_t> inst_shapes(const OdbDb& db);
 // Obstructions a pin placement clears (not system-reserved, not fill, not slot) — see shim.cc.
 rust::Vec<int64_t> pin_obstruction_boxes(const OdbDb& db);
 rust::Vec<int64_t> obstruction_boxes(const OdbDb& db);
+// The same obstructions with their DEF spacing rules and kind flags; bpin boxes likewise -- see shim.cc.
+rust::Vec<int64_t> obstruction_shapes_with_rules(const OdbDb& db);
+rust::Vec<int64_t> bpin_shapes_with_rules(const OdbDb& db);
 /// Only `+ FILLS` obstructions — see the note in shim.cc.
 rust::Vec<int64_t> fill_obstruction_boxes(const OdbDb& db);
 

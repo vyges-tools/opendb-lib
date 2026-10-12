@@ -1923,6 +1923,68 @@ rust::Vec<int64_t> pin_obstruction_boxes(const OdbDb& h) {
   return out;
 }
 
+// Every obstruction with a layer, in `getObstructions()` order, WITH the DEF spacing rules it
+// carries. Flat, 8 per obstruction: (layer number, x0, y0, x1, y1, min spacing, effective width,
+// flags). A rule the obstruction does not carry is -1, the sentinel the pin placer's
+// `BlockingShape` uses, so "absent" never reads as a zero rule. flags: 1 system-reserved,
+// 2 fill, 4 slot -- the caller filters, because the boundary pass and the top-layer pass keep
+// different subsets (the latter keeps system-reserved ones).
+rust::Vec<int64_t> obstruction_shapes_with_rules(const OdbDb& h) {
+  rust::Vec<int64_t> out;
+  dbBlock* b = block_of(h);
+  if (!b) return out;
+  for (odb::dbObstruction* o : b->getObstructions()) {
+    odb::dbBox* box = o->getBBox();
+    if (!box) continue;
+    odb::dbTechLayer* layer = box->getTechLayer();
+    if (!layer) continue;
+    out.push_back(layer->getNumber());
+    out.push_back(box->xMin());
+    out.push_back(box->yMin());
+    out.push_back(box->xMax());
+    out.push_back(box->yMax());
+    out.push_back(o->hasMinSpacing() ? o->getMinSpacing() : -1);
+    out.push_back(o->hasEffectiveWidth() ? o->getEffectiveWidth() : -1);
+    out.push_back((o->isSystemReserved() ? 1 : 0) | (o->isFillObstruction() ? 2 : 0)
+                  | (o->isSlotObstruction() ? 4 : 0));
+  }
+  return out;
+}
+// Every box of every bpin whose OWN placement status is fixed, in getBTerms / getBPins / getBoxes
+// order, WITH the bpin's DEF spacing rules. Flat, 9 per box: (layer number, x0, y0, x1, y1,
+// min spacing, effective width, first-pin-fixed, supply). Rules absent are -1. The bpin's own
+// status is the filter because a multi-bpin term can mix statuses; whether the TERM counts as
+// fixed (its first pin) and whether it is a supply are returned, not filtered, since the pin
+// placer's callers disagree on both.
+rust::Vec<int64_t> bpin_shapes_with_rules(const OdbDb& h) {
+  rust::Vec<int64_t> out;
+  dbBlock* b = block_of(h);
+  if (!b) return out;
+  for (dbBTerm* t : b->getBTerms()) {
+    const int64_t first_fixed = t->getFirstPinPlacementStatus().isFixed() ? 1 : 0;
+    const int64_t supply = t->getSigType().isSupply() ? 1 : 0;
+    for (odb::dbBPin* p : t->getBPins()) {
+      if (!p->getPlacementStatus().isFixed()) continue;
+      const int64_t ms = p->hasMinSpacing() ? p->getMinSpacing() : -1;
+      const int64_t ew = p->hasEffectiveWidth() ? p->getEffectiveWidth() : -1;
+      for (odb::dbBox* box : p->getBoxes()) {
+        odb::dbTechLayer* layer = box->getTechLayer();
+        if (!layer) continue;
+        const odb::Rect r = box->getBox();
+        out.push_back(layer->getNumber());
+        out.push_back(r.xMin());
+        out.push_back(r.yMin());
+        out.push_back(r.xMax());
+        out.push_back(r.yMax());
+        out.push_back(ms);
+        out.push_back(ew);
+        out.push_back(first_fixed);
+        out.push_back(supply);
+      }
+    }
+  }
+  return out;
+}
 rust::Vec<int64_t> obstruction_boxes(const OdbDb& h) {
   rust::Vec<int64_t> out;
   dbBlock* b = block_of(h);

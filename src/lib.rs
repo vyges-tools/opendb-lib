@@ -207,6 +207,9 @@ mod ffi {
         /// The obstructions a pin placement clears — see shim.h.
         fn pin_obstruction_boxes(db: &OdbDb) -> Result<Vec<i64>>;
         fn obstruction_boxes(db: &OdbDb) -> Result<Vec<i64>>;
+        /// Obstructions and fixed bpin boxes with their DEF spacing rules — see shim.cc.
+        fn obstruction_shapes_with_rules(db: &OdbDb) -> Result<Vec<i64>>;
+        fn bpin_shapes_with_rules(db: &OdbDb) -> Result<Vec<i64>>;
         fn fill_obstruction_boxes(db: &OdbDb) -> Result<Vec<i64>>;
         fn blockage_boxes(db: &OdbDb) -> Result<Vec<i32>>;
         fn swire_boxes(db: &OdbDb) -> Result<Vec<i64>>;
@@ -618,7 +621,7 @@ pub use ffi::{
     num_layers, nth_layer_name, layer_direction, track_grid_x, track_grid_y,
     track_patterns_x, track_patterns_y, bterm_constraint_region,
     num_bterm_groups, nth_bterm_group, nth_bterm_group_ordered,
-    blocked_regions_for_pins, fixed_bterm_shapes,
+    blocked_regions_for_pins, fixed_bterm_shapes, obstruction_shapes_with_rules, bpin_shapes_with_rules,
     bterm_top_layer_grid, bterm_top_layer_grid_layer, bterm_top_layer_grid_is_rect,
     die_area_polygon, master_obstruction_boxes, master_obstruction_rules, master_pin_boxes, master_mterms, mterm_pin_boxes,
     mterm_pin_boxes_excluding_polygons, iterm_pin_polygons, net_new_swire, iterm_bool_property, mterm_bool_property, polygon_bloat, rdl_preprocess, mpin_boxes, inst_halo,
