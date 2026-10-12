@@ -2386,6 +2386,70 @@ bool connect_mod_net_of(const OdbDb& h, rust::Str inst, rust::Str pin, rust::Str
   require_iterm(h, inst, pin)->connect(mn);
   return true;
 }
+// The netlist half of the resizer's BufferToInvertersMove (`BufferToInvertersCandidate::apply`), in
+// its order: both nets (flat and module) of buffer `inst` resolved first, its pins disconnected, the
+// buffer destroyed, then `<name>_inv1` and `<name>_inv2` (`makeNewInstName(parent, .., IF_NEEDED)`)
+// created in the buffer's module, the mid net `<name>_mid_net` (`makeNewNetName`, a flat net with
+// the input net's signal type), the chain input -> inv1 -> mid -> inv2 -> output, and the module
+// nets re-attached to inv1's input and inv2's output. `<name>` is `dbNetwork::name(instance)`: the
+// last path element inside a module, the whole name at the top.
+// Destroying before creating is what upstream does, and it is visible: odb reuses the freed slot,
+// so inv1 takes the buffer's id. Returns {inv1, inv2, mid net}; EMPTY (nothing changed) when a pin
+// has no flat net, as the candidate rejects before mutating.
+rust::Vec<rust::String> buffer_to_inverters(const OdbDb& h, rust::Str inst, rust::Str in_pin, rust::Str out_pin,
+                                            rust::Str inv_master, rust::Str inv_in, rust::Str inv_out) {
+  rust::Vec<rust::String> out;
+  dbBlock* b = require_block(h);
+  dbInst* buf = require_inst(h, inst);
+  dbMaster* mm = h.db->findMaster(s(inv_master).c_str());
+  if (!mm) throw std::runtime_error("vyges-opendb: master not found: " + s(inv_master));
+  dbITerm* in_term = require_iterm(h, inst, in_pin);
+  dbITerm* out_term = require_iterm(h, inst, out_pin);
+  dbNet* in_net = in_term->getNet();
+  dbNet* out_net = out_term->getNet();
+  if (!in_net || !out_net) return out;
+  odb::dbModNet* in_mod = in_term->getModNet();
+  odb::dbModNet* out_mod = out_term->getModNet();
+  odb::dbModule* m = owning_module(h, inst);
+  std::string name = buf->getName();
+  if (m) {
+    const size_t k = name.rfind('/');
+    if (k != std::string::npos) name = name.substr(k + 1);
+  }
+  const odb::dbSigType sig = in_net->getSigType();
+  in_term->disconnect();
+  out_term->disconnect();
+  dbInst::destroy(buf);
+  dbInst* inv[2];
+  for (int k = 0; k < 2; ++k) {
+    const std::string base = name + (k == 0 ? "_inv1" : "_inv2");
+    const std::string full = b->makeNewInstName(m ? m->getModInst() : nullptr, base.c_str(),
+                                                odb::dbNameUniquifyType::IF_NEEDED);
+    inv[k] = m ? dbInst::create(b, mm, full.c_str(), false, m) : dbInst::create(b, mm, full.c_str());
+    if (!inv[k]) throw std::runtime_error("vyges-opendb: buffer_to_inverters: create failed: " + full);
+  }
+  const std::string mid_base = name + "_mid_net";
+  const std::string mid_name = b->makeNewNetName(m, mid_base.c_str(), odb::dbNameUniquifyType::IF_NEEDED);
+  dbNet* mid = dbNet::create(b, mid_name.c_str(), false);
+  if (!mid) throw std::runtime_error("vyges-opendb: buffer_to_inverters: net create failed: " + mid_name);
+  mid->setSigType(sig);
+  const std::string a = s(inv_in), z = s(inv_out);
+  dbITerm* i1a = inv[0]->findITerm(a.c_str());
+  dbITerm* i1z = inv[0]->findITerm(z.c_str());
+  dbITerm* i2a = inv[1]->findITerm(a.c_str());
+  dbITerm* i2z = inv[1]->findITerm(z.c_str());
+  if (!i1a || !i1z || !i2a || !i2z) throw std::runtime_error("vyges-opendb: buffer_to_inverters: inverter pins");
+  i1a->connect(in_net);
+  i1z->connect(mid);
+  i2a->connect(mid);
+  i2z->connect(out_net);
+  if (in_mod) i1a->connect(in_mod);
+  if (out_mod) i2z->connect(out_mod);
+  out.push_back(rust::String(inv[0]->getName()));
+  out.push_back(rust::String(inv[1]->getName()));
+  out.push_back(rust::String(mid->getName()));
+  return out;
+}
 // Whether two instances have the same owning module (`getOwningInstanceParent`).
 bool same_owning_module(const OdbDb& h, rust::Str a, rust::Str b) {
   return owning_module(h, a) == owning_module(h, b);
