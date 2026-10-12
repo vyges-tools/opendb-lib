@@ -505,6 +505,8 @@ rust::Vec<int64_t> obstruction_boxes(const OdbDb& db);
 // The same obstructions with their DEF spacing rules and kind flags; bpin boxes likewise -- see shim.cc.
 rust::Vec<int64_t> obstruction_shapes_with_rules(const OdbDb& db);
 rust::Vec<int64_t> bpin_shapes_with_rules(const OdbDb& db);
+// Every special-net via, decomposed onto its layers -- see shim.cc.
+rust::Vec<int64_t> special_via_boxes(const OdbDb& db);
 /// Only `+ FILLS` obstructions — see the note in shim.cc.
 rust::Vec<int64_t> fill_obstruction_boxes(const OdbDb& db);
 

@@ -2106,6 +2106,38 @@ rust::String layer_direction(const OdbDb& h, rust::Str layer) {
   odb::dbTechLayer* l = t ? t->findLayer(s(layer).c_str()) : nullptr;
   return l ? rust::String(l->getDirection().getString()) : rust::String();
 }
+// The metal of every special-net VIA, decomposed onto its layers by `dbSBox::getViaBoxes` (block
+// AND tech vias, cut layers included), in getNets / getSWires / getWires / getViaBoxes order. Flat
+// (layer number, x0, y0, x1, y1). What dpl's `Grid::markBlocked` collects as via metal; the wire
+// boxes are `special_wire_boxes`. ⚠️ Not `swire_boxes`: that one asks no specialness and resolves
+// only block vias, by hand.
+rust::Vec<int64_t> special_via_boxes(const OdbDb& h) {
+  rust::Vec<int64_t> out;
+  dbBlock* b = block_of(h);
+  if (!b) return out;
+  std::vector<odb::dbShape> via_shapes;
+  for (odb::dbNet* net : b->getNets()) {
+    if (!net->isSpecial()) continue;
+    for (odb::dbSWire* sw : net->getSWires()) {
+      for (odb::dbSBox* sbox : sw->getWires()) {
+        if (!sbox->isVia()) continue;
+        via_shapes.clear();
+        sbox->getViaBoxes(via_shapes);
+        for (const odb::dbShape& vs : via_shapes) {
+          odb::dbTechLayer* layer = vs.getTechLayer();
+          if (!layer) continue;
+          const odb::Rect r = vs.getBox();
+          out.push_back(layer->getNumber());
+          out.push_back(r.xMin());
+          out.push_back(r.yMin());
+          out.push_back(r.xMax());
+          out.push_back(r.yMax());
+        }
+      }
+    }
+  }
+  return out;
+}
 rust::Vec<int64_t> swire_boxes(const OdbDb& h) {
   rust::Vec<int64_t> out;
   dbBlock* b = block_of(h);
