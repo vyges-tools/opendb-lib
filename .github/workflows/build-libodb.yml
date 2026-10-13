@@ -37,7 +37,7 @@ jobs:
           - { os: ubuntu-24.04-arm, label: linux-arm64,  base: "ubuntu-24.04" }
           - { os: macos-15,         label: macos-arm64,  base: "macos>=11.0"  }   # Apple Silicon, Xcode 16 (new enough for cxx, stable for fmt 11.0.2; macos-latest/Xcode 26.5 breaks fmt consteval)
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - name: Toolchain (Linux)
         if: runner.os == 'Linux'
@@ -141,7 +141,7 @@ jobs:
         run: cargo test --release --verbose
 
       - name: Upload prebuilt libodb bundle
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           # Extract + point VYGES_ODB_PREBUILT_DIR at it to link without a from-source build.
           name: libodb-${{ matrix.label }}
@@ -160,7 +160,7 @@ jobs:
 
       - name: Attach bundle + manifest to the Release (tags only)
         if: startsWith(github.ref, 'refs/tags/')
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@v3
         with:
           files: |
             libodb-${{ matrix.label }}.tar.gz

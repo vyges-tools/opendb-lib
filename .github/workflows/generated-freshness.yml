@@ -28,10 +28,10 @@ jobs:
     steps:
       # Sibling layout: the generator writes the safe Db API + registry into the opendb crate, so
       # both repos must be present as siblings (same layout as release-opendb.yml).
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           path: vyges-tools-opendb-lib
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           repository: vyges-tools/opendb
           path: vyges-tools-opendb
