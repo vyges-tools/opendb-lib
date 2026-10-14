@@ -231,6 +231,7 @@ rust::String log_capture_end(const OdbDb& db);
 void place_bterm(const OdbDb& db, rust::Str bterm, rust::Str layer, int32_t x1, int32_t y1, int32_t x2, int32_t y2);  // place a port pin box on a layer
 void connect(const OdbDb& db, rust::Str inst, rust::Str pin, rust::Str net);    // iterm -> net
 void disconnect(const OdbDb& db, rust::Str inst, rust::Str pin);               // iterm -> (none)
+void bterm_connect(const OdbDb& db, rust::Str bterm, rust::Str net);           // bterm -> net
 
 // ---- antenna inputs (odb substrate) ------------------------------------------
 // The numerator and denominator of the antenna ratio, read off the ROUTED database — the

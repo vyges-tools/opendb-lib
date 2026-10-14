@@ -119,6 +119,7 @@ mod ffi {
         fn place_bterm(db: &OdbDb, bterm: &str, layer: &str, x1: i32, y1: i32, x2: i32, y2: i32) -> Result<()>;
         fn connect(db: &OdbDb, inst: &str, pin: &str, net: &str) -> Result<()>;
         fn disconnect(db: &OdbDb, inst: &str, pin: &str) -> Result<()>;
+        fn bterm_connect(db: &OdbDb, bterm: &str, net: &str) -> Result<()>;
 
         // floorplan writes (vyges-ifp). Hand-written rather than generated: setDieArea takes a
         // Rect, setCoreArea a Polygon, and dbRow::create is a static factory.
@@ -603,7 +604,7 @@ pub use ffi::{
     chip_region_set_box, alignment_marker_rule_create, set_top_chip,
     bump_master_create, dbu_per_micron, fake_site_create, iterm_is_output_signal, bterm_first_pin_location, mterm_has_diff_area, mterm_has_gate_area, set_dbu_per_micron, lib_from_lef, new_db, tech_create,
     tech_from_lef,
-    connect, create_inst, create_net, disconnect, find_master, first_master_name, input_pin,
+    bterm_connect, connect, create_inst, create_net, disconnect, find_master, first_master_name, input_pin,
     inst_master, inst_x, inst_y, log_capture_begin, log_capture_end, net_of, nth_bterm_name, nth_inst_name, nth_iterm_name, num_bterms,
     num_insts, num_iterms, num_nets, num_obstructions, open_db, output_pin, place_bterm,
     swap_master, insert_buffer_before_loads, insert_buffer_after_driver, insert_buffer_before_load,

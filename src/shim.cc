@@ -637,6 +637,15 @@ void connect(const OdbDb& h, rust::Str inst, rust::Str pin, rust::Str net) {
 void disconnect(const OdbDb& h, rust::Str inst, rust::Str pin) {
   require_iterm(h, inst, pin)->disconnect();
 }
+// `dbBTerm::connect(net)`: the port moves onto `net` (off any net it was on).
+void bterm_connect(const OdbDb& h, rust::Str bterm, rust::Str net) {
+  dbBlock* b = require_block(h);
+  dbBTerm* bt = b->findBTerm(s(bterm).c_str());
+  if (!bt) throw std::runtime_error("vyges-opendb: port not found: " + s(bterm));
+  dbNet* n = b->findNet(s(net).c_str());
+  if (!n) throw std::runtime_error("vyges-opendb: net not found: " + s(net));
+  bt->connect(n);
+}
 std::size_t check_3dblox(const OdbDb& h) {
   if (!h.db->getChip()) throw std::runtime_error("vyges-opendb: no top chip to check");
   // Delegates to vyges::check_3dblox, which is compiled into libodb — see src/lint3d.h for why
