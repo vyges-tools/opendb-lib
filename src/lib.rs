@@ -252,6 +252,9 @@ mod ffi {
         fn iterm_bool_property(db: &OdbDb, iterm: &str, name: &str) -> Result<i32>;
         fn mterm_bool_property(db: &OdbDb, master: &str, term: &str, name: &str) -> Result<i32>;
         fn polygon_bloat(pts: &[i32], margin: i32) -> Result<Vec<i32>>;
+        /// The clock-tree blockage merge: placed blocks (with hard halos) and hard blockages,
+        /// bloated then shrunk by the margins; `[max dx, max dy, (x0, y0, x1, y1)...]`.
+        fn cts_merge_blockages(db: &OdbDb, bloat_w: i32, bloat_h: i32) -> Vec<i32>;
         fn rdl_preprocess(source_rects: &[i32], dest_rects: &[i32], min_dist: i32) -> Result<Vec<i32>>;
         fn mpin_boxes(db: &OdbDb, master: &str, term: &str, idx: usize) -> Result<Vec<i32>>;
         fn inst_halo(db: &OdbDb, inst: &str) -> Result<Vec<i64>>;
@@ -387,6 +390,9 @@ mod ffi {
         /// (layer, x0, y0, x1, y1). What the pin physically touches, rather than where it
         /// roughly is — proximity merges conductors that are electrically separate.
         fn iterm_pin_boxes(db: &OdbDb, inst: &str, pin: &str) -> Vec<i64>;
+        /// The non-via shapes of an instance terminal as `dbITermShapeItr` yields them, placed:
+        /// `x0, y0, x1, y1` each.
+        fn iterm_shape_boxes(db: &OdbDb, inst: &str, pin: &str) -> Vec<i32>;
 
         // Diffusion-dependent (PWL) antenna limits — the form sky130 actually states. `which`
         // is "par"|"car"|"psr"|"csr"|"area_diff_reduce"|"gate_plus_diff"; an unknown value
@@ -627,11 +633,11 @@ pub use ffi::{
     blocked_regions_for_pins, fixed_bterm_shapes, obstruction_shapes_with_rules, bpin_shapes_with_rules, special_via_boxes,
     bterm_top_layer_grid, bterm_top_layer_grid_layer, bterm_top_layer_grid_is_rect,
     die_area_polygon, master_obstruction_boxes, master_obstruction_rules, master_pin_boxes, master_mterms, mterm_pin_boxes,
-    mterm_pin_boxes_excluding_polygons, iterm_pin_polygons, net_new_swire, iterm_bool_property, mterm_bool_property, polygon_bloat, rdl_preprocess, mpin_boxes, inst_halo,
+    mterm_pin_boxes_excluding_polygons, iterm_pin_polygons, net_new_swire, iterm_bool_property, mterm_bool_property, polygon_bloat, cts_merge_blockages, rdl_preprocess, mpin_boxes, inst_halo,
     net_destroy, iterm_get_id, bterm_get_id, inst_get_id, layer_find_v55_spacing, layer_find_tw_spacing, layer_get_area, layer_v55_spacing_table, net_first_driver_term, net_swire_expanded_boxes, v54_spacing_rule_spacing, v54_spacing_rule_range, techvia_has_string_property, net_has_wire, layer_get_spacing_for, layer_min_area, tech_via_boxes, tech_via_layer, bpin_layer_boxes, region_boundaries, net_swire_shapes, net_swire_obstacles, num_v54_spacing_rules, v54_spacing_rule_eol, v54_spacing_rule_adjacent_cuts, v54_spacing_rule_adjacent_spacing, v54_spacing_rule_adjacent_except_same_pgnet, num_array_spacing_rules, array_spacing_rule_cut_class, array_spacing_rule_is_parallel_overlap, array_spacing_rule_is_long_array, array_spacing_rule_array_width, array_spacing_rule_cut_spacing, array_spacing_rule_cuts_spacing, num_cut_spacing_table_rules, cut_spacing_table_max_spacing, cut_spacing_table_spacing, cut_spacing_table_is_center_and_edge, cut_spacing_table_is_center_to_center, num_width_table_rules, width_table_rule_is_wrong_direction, width_table_rule_widths, techvialayerrule_rect, via_create_generated, swire_add_via, swire_add_box, swire_add_box_shaped, swire_add_box_octilinear, swire_clear_routed, bterm_create, bterm_create_pin, bterm_clear_unfixed_bpins, bterm_add_pin_box, bterm_destroy, layer_get_type,
     layer_thickness, mterm_antenna_gate_area, net_wire_area_on_layer, net_wire_perimeter_on_layer,
     nth_net_wire_layer, num_net_wire_layers,
     mterm_antenna_diff_area, layerantenna_diff_pwl_index, layerantenna_diff_pwl_ratio,
     layerantenna_num_diff_pwl,
-    iterm_avg_xy, iterm_pin_boxes, layer_name_by_number, net_wire_boxes, net_wire_shapes,
+    iterm_avg_xy, iterm_pin_boxes, iterm_shape_boxes, layer_name_by_number, net_wire_boxes, net_wire_shapes,
 };

@@ -1566,6 +1566,31 @@ rust::Vec<std::int64_t> iterm_pin_boxes(const OdbDb& h, rust::Str inst, rust::St
   return out;
 }
 
+// The non-via shapes `dbITermShapeItr` yields for an instance terminal, placed, as (x0, y0, x1, y1)
+// each in the iterator's own order. cts takes a clock sink's position as the mean of their centres
+// (`computeITermPosition`); `iterm_pin_boxes` keeps ROUTING layers only, which is not that set.
+rust::Vec<std::int32_t> iterm_shape_boxes(const OdbDb& h, rust::Str inst, rust::Str pin) {
+  rust::Vec<std::int32_t> out;
+  dbBlock* b = block_of(h);
+  if (!b) return out;
+  dbInst* i = b->findInst(s(inst).c_str());
+  if (!i) return out;
+  odb::dbITerm* t = i->findITerm(s(pin).c_str());
+  if (!t) return out;
+  odb::dbITermShapeItr itr;
+  odb::dbShape shape;
+  for (itr.begin(t); itr.next(shape);) {
+    if (shape.isVia()) {
+      continue;
+    }
+    out.push_back(shape.xMin());
+    out.push_back(shape.yMin());
+    out.push_back(shape.xMax());
+    out.push_back(shape.yMax());
+  }
+  return out;
+}
+
 // ---- antenna diff-ratio PWL --------------------------------------------------
 // See shim.h for why these are hand-written and what the vector-size convention means.
 
@@ -3122,6 +3147,54 @@ rust::Vec<int32_t> polygon_bloat(rust::Slice<const int32_t> pts, int32_t margin)
   for (const odb::Point& pt : polygons[0].getPoints()) {
     out.push_back(pt.x());
     out.push_back(pt.y());
+  }
+  return out;
+}
+// The clock-tree builder's blockage merge, in the reference's own loops and boost::polygon calls:
+// every placed BLOCK-master instance's box grown by its hard halo (transformed), then every hard
+// placement blockage, into one 90-degree set; bloated then shrunk by the margins (which closes gaps
+// narrower than twice them); each resulting polygon's extents in `get_polygons` order.
+// Returns `[macros max dx, macros max dy, x0, y0, x1, y1, ...]` (empty without a block).
+rust::Vec<int32_t> cts_merge_blockages(const OdbDb& h, int32_t bloat_w, int32_t bloat_h) {
+  namespace gtl = boost::polygon;
+  using boost::polygon::operators::operator+=;
+  rust::Vec<int32_t> out;
+  dbBlock* block = block_of(h);
+  if (!block) return out;
+  uint32_t max_dx = 0, max_dy = 0;
+  gtl::polygon_90_set_data<int> set;
+  for (odb::dbInst* inst : block->getInsts()) {
+    if (inst->getMaster()->getType().isBlock() && inst->getPlacementStatus().isPlaced()) {
+      odb::dbBox* halo = inst->getHalo();
+      odb::Rect th = odb::Rect();
+      if (halo != nullptr && !halo->isSoft()) {
+        th = inst->getTransformedHalo();
+      }
+      odb::Rect ib = inst->getBBox()->getBox();
+      odb::Rect box(ib.xMin() - th.xMin(), ib.yMin() - th.yMin(), ib.xMax() + th.xMax(), ib.yMax() + th.yMax());
+      max_dx = std::max(max_dx, static_cast<uint32_t>(box.dx()));
+      max_dy = std::max(max_dy, static_cast<uint32_t>(box.dy()));
+      set += box;
+    }
+  }
+  for (odb::dbBlockage* b : block->getBlockages()) {
+    if (!b->isSoft()) {
+      set += b->getBBox()->getBox();
+    }
+  }
+  gtl::bloat(set, bloat_w, bloat_w, bloat_h, bloat_h);
+  gtl::shrink(set, bloat_w, bloat_w, bloat_h, bloat_h);
+  std::vector<gtl::polygon_90_with_holes_data<int>> polys;
+  set.get_polygons(polys);
+  out.push_back(static_cast<int32_t>(max_dx));
+  out.push_back(static_cast<int32_t>(max_dy));
+  for (const auto& poly : polys) {
+    odb::Rect r;
+    gtl::extents(r, poly);
+    out.push_back(r.xMin());
+    out.push_back(r.yMin());
+    out.push_back(r.xMax());
+    out.push_back(r.yMax());
   }
   return out;
 }

@@ -332,6 +332,7 @@ bool iterm_avg_xy(const OdbDb& db, rust::Str inst, rust::Str pin, std::int32_t& 
 //
 // Layout: 5 entries per box — [layer number, x0, y0, x1, y1], DBU.
 rust::Vec<std::int64_t> iterm_pin_boxes(const OdbDb& db, rust::Str inst, rust::Str pin);
+rust::Vec<std::int32_t> iterm_shape_boxes(const OdbDb& db, rust::Str inst, rust::Str pin);
 
 std::size_t layerantenna_num_diff_pwl(const OdbDb& db, rust::Str layer, rust::Str which);
 double layerantenna_diff_pwl_index(const OdbDb& db, rust::Str layer, rust::Str which, std::size_t i);  // diffusion area at point i
@@ -699,6 +700,7 @@ void block_set_bool_property(const OdbDb& db, rust::Str name, bool value);  // s
 int32_t iterm_bool_property(const OdbDb& db, rust::Str iterm, rust::Str name);
 int32_t mterm_bool_property(const OdbDb& db, rust::Str master, rust::Str term, rust::Str name);
 rust::Vec<int32_t> polygon_bloat(rust::Slice<const int32_t> pts, int32_t margin);
+rust::Vec<int32_t> cts_merge_blockages(const OdbDb& db, int32_t bloat_w, int32_t bloat_h);
 rust::Vec<int32_t> rdl_preprocess(rust::Slice<const int32_t> source_rects,
                                   rust::Slice<const int32_t> dest_rects,
                                   int32_t min_dist);
