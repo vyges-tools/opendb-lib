@@ -70,7 +70,10 @@ int32_t bterm_y(const OdbDb& db, rust::Str bterm);                   // port fir
 void create_net(const OdbDb& db, rust::Str name);                       // throws on dup/failure
 void create_inst(const OdbDb& db, rust::Str master, rust::Str name);    // throws if master missing
 void set_inst_location(const OdbDb& db, rust::Str inst, int32_t x, int32_t y);  // + PLACED
-void set_inst_orient(const OdbDb& db, rust::Str inst, rust::Str orient);        // R0/R90/MX/…
+void set_inst_orient(const OdbDb& db, rust::Str inst, rust::Str orient);
+// dbInst::setPlacementStatus: NONE/UNPLACED/SUGGESTED/PLACED/LOCKED/FIRM/COVER. Hand-written so
+// the shipped binary (no gen-write) can fix a macro in place.
+void set_inst_placement_status(const OdbDb& db, rust::Str inst, rust::Str status);        // R0/R90/MX/…
 // `dbInst::setLocationOrient` — change the orient and keep the BOUNDING BOX's lower-left where it
 // was. `setOrient` keeps the ORIGIN instead, which moves the box whenever the flip is about an axis
 // through it; mirroring a placed cell in place (`optimize_mirroring`) needs this one.
