@@ -5,7 +5,7 @@
   "scope": "all",
   "class_count": 122,
   "method_count": 2720,
-  "bridged_count": 2016,
+  "bridged_count": 2017,
   "classes": [
     {
       "name": "dbAccessPoint",
@@ -17055,7 +17055,7 @@
           "params": [],
           "const": true,
           "kind": "getter",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "setUseMinSpacingObs",
