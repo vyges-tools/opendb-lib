@@ -256,6 +256,10 @@ void set_inst_orient(const OdbDb& h, rust::Str inst, rust::Str orient) {
 void set_inst_placement_status(const OdbDb& h, rust::Str inst, rust::Str status) {
   require_inst(h, inst)->setPlacementStatus(odb::dbPlacementStatus(s(status).c_str()));
 }
+bool tech_use_min_spacing_obs(const OdbDb& h) {
+  odb::dbTech* t = h.db ? h.db->getTech() : nullptr;
+  return t != nullptr && t->getUseMinSpacingObs() == odb::dbOnOffType::ON;
+}
 void set_inst_location_orient(const OdbDb& h, rust::Str inst, rust::Str orient) {
   require_inst(h, inst)->setLocationOrient(odb::dbOrientType(s(orient).c_str()));
 }
