@@ -173,6 +173,11 @@ void chip_path_create(const OdbDb& db, rust::Str chip, rust::Str name);
 std::unique_ptr<OdbDb> new_db();   // an empty database, for building rather than reading
 void tech_from_lef(const OdbDb& db, rust::Str name, rust::Str lef_path);
 void lib_from_lef(const OdbDb& db, rust::Str lib_name, rust::Str tech_name, rust::Str lef_path);
+// lefin::createTechAndLib: a technology AND a library from one LEF, as a 3Dblox chiplet's tech LEF
+// is read (one dbTech per process: a database holds several, found by name).
+void tech_and_lib_from_lef(const OdbDb& db, rust::Str tech_name, rust::Str lib_name, rust::Str lef_path);
+// dbDatabase::findTech != nullptr.
+bool has_tech(const OdbDb& db, rust::Str name);
 void bump_master_create(const OdbDb& db, rust::Str name, int32_t width, int32_t height);
 /// `dbITerm::isOutputSignal(io=true)` — OUTPUT or INOUT, and not a supply pin.
 bool iterm_is_output_signal(const OdbDb& db, rust::Str inst, rust::Str pin);

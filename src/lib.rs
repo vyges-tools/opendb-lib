@@ -451,6 +451,8 @@ mod ffi {
         /// stops; a bump map names cell types, and those masters come from the `LEF_file` a
         /// .3dbv already points at. Idempotent on the library name.
         fn lib_from_lef(db: &OdbDb, lib_name: &str, tech_name: &str, lef_path: &str) -> Result<()>;
+        fn tech_and_lib_from_lef(db: &OdbDb, tech_name: &str, lib_name: &str, lef_path: &str) -> Result<()>;
+        fn has_tech(db: &OdbDb, name: &str) -> bool;
         /// A placeholder bump master, for a cell type no LEF on hand defines. Pass 0 x 0 unless
         /// you know the real geometry: odb reads a bump position from the instance bbox CENTRE
         /// while a bump map records its ORIGIN, so any other size moves the bump by half the
@@ -610,7 +612,7 @@ pub use ffi::{
     chip_block_create, chip_bump_create, chip_conn_create, chip_create, chip_inst_create,
     chip_net_create, chip_net_add_bump, chip_path_create, chip_region_create,
     chip_region_set_box, alignment_marker_rule_create, set_top_chip,
-    bump_master_create, dbu_per_micron, fake_site_create, iterm_is_output_signal, bterm_first_pin_location, mterm_has_diff_area, mterm_has_gate_area, set_dbu_per_micron, lib_from_lef, new_db, tech_create,
+    bump_master_create, dbu_per_micron, fake_site_create, iterm_is_output_signal, bterm_first_pin_location, mterm_has_diff_area, mterm_has_gate_area, set_dbu_per_micron, lib_from_lef, tech_and_lib_from_lef, has_tech, new_db, tech_create,
     tech_from_lef,
     bterm_connect, connect, create_inst, create_net, disconnect, find_master, first_master_name, input_pin,
     inst_master, inst_x, inst_y, log_capture_begin, log_capture_end, net_of, nth_bterm_name, nth_inst_name, nth_iterm_name, num_bterms,

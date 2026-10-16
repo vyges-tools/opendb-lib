@@ -712,7 +712,9 @@ void chip_create(const OdbDb& h, rust::Str name, rust::Str tech, rust::Str chip_
   if (tech.empty()) {
     // A chip may legitimately have no tech — upstream creates the design top that way
     // (3dblox.cpp createDesignTopChiplet), and a geometry-only read has no LEF to give it one.
-    t = h.db->getTech();
+    // With one technology in the database it is that one (the single-process case); with several,
+    // none — `getTech()` is an error in a multi-tech database (ODB-0432), and upstream passes null.
+    t = h.db->getTechs().size() == 1 ? *h.db->getTechs().begin() : nullptr;
   } else {
     t = h.db->findTech(s(tech).c_str());
     if (!t) throw std::runtime_error("vyges-opendb: tech not found: " + s(tech));
@@ -840,6 +842,20 @@ void tech_from_lef(const OdbDb& h, rust::Str name, rust::Str lef_path) {
   if (!reader.createTech(s(name).c_str(), s(lef_path).c_str()))
     throw std::runtime_error("vyges-opendb: could not create tech `" + s(name) + "` from "
                              + s(lef_path));
+}
+
+void tech_and_lib_from_lef(const OdbDb& h, rust::Str tech_name, rust::Str lib_name, rust::Str lef_path) {
+  odb::lefin reader(h.db, const_cast<utl::Logger*>(&h.logger), /*ignore_non_routing_layers=*/false);
+  // The library is made lazily, at the LEF's first macro or site: a tech-only LEF returns no lib
+  // and still succeeded (the reference ignores the return value) — the technology is the test.
+  reader.createTechAndLib(s(tech_name).c_str(), s(lib_name).c_str(), s(lef_path).c_str());
+  if (!h.db->findTech(s(tech_name).c_str()))
+    throw std::runtime_error("vyges-opendb: could not create tech `" + s(tech_name) + "` from "
+                             + s(lef_path));
+}
+
+bool has_tech(const OdbDb& h, rust::Str name) {
+  return h.db != nullptr && h.db->findTech(s(name).c_str()) != nullptr;
 }
 
 void lib_from_lef(const OdbDb& h, rust::Str lib_name, rust::Str tech_name, rust::Str lef_path) {
