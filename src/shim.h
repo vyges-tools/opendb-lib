@@ -22,6 +22,9 @@ struct OdbDb {
   // The edit log (see edit_log_start): the block callbacks a timer listening to the block would
   // get. Type-erased so this header needs no callback class.
   mutable std::shared_ptr<void> edit_log;
+  // The observer log (see observer_log_start): a second, independent recorder — a placer's own
+  // callbacks on the block, which another tool's edit log restarting does not touch.
+  mutable std::shared_ptr<void> observer_log;
   OdbDb() : db(odb::dbDatabase::create()) { db->setLogger(&logger); }
 };
 
@@ -38,6 +41,13 @@ struct OdbDb {
 void edit_log_start(const OdbDb& db);
 // The events since the last take (or start); the log keeps recording.
 rust::Vec<rust::String> edit_log_take(const OdbDb& db);
+// A second recorder of the same events, independent of the edit log: a placer listening to the
+// block while another tool edits it (and starts and restarts its own edit log). Each net event
+// also carries the net's id (`net_create|N|id`, `net_destroy|N|pins|id`): a rename raises no
+// callback, the id survives it. Restarting it clears it. Throws without a block.
+void observer_log_start(const OdbDb& db);
+// The observer's events since the last take (or start); it keeps recording.
+rust::Vec<rust::String> observer_log_take(const OdbDb& db);
 
 // ---- open / read / write -----------------------------------------------------
 std::unique_ptr<OdbDb> open_db(rust::Str path);   // throws -> Rust Result
@@ -833,6 +843,8 @@ uint32_t bterm_get_id(const OdbDb& db, rust::Str bterm);
 
 // The same, for an instance. Maps keyed by instance iterate in this order.
 uint32_t inst_get_id(const OdbDb& db, rust::Str inst);
+// Every net's database id, in the block's net order (`getNets()`, as the block's net names list).
+rust::Vec<uint32_t> block_net_ids(const OdbDb& db);
 
 // Create a block terminal on a net. Named separately from the net because they usually differ.
 void bterm_create(const OdbDb& db, rust::Str net, rust::Str name);

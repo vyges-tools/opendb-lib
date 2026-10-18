@@ -4084,6 +4084,15 @@ std::size_t swire_clear_routed(const OdbDb& h, rust::Str net) {
   }
   return removed;
 }
+rust::Vec<uint32_t> block_net_ids(const OdbDb& h) {
+  rust::Vec<uint32_t> out;
+  dbBlock* b = block_of(h);
+  if (!b) return out;
+  for (dbNet* n : b->getNets()) {
+    out.push_back(n->getId());
+  }
+  return out;
+}
 uint32_t inst_get_id(const OdbDb& h, rust::Str inst) {
   dbBlock* b = require_block(h);
   odb::dbInst* i = b->findInst(s(inst).c_str());
@@ -4762,6 +4771,10 @@ namespace {
 class EditLog : public odb::dbBlockCallBackObj {
  public:
   std::vector<std::string> events;
+  // The observer's: each net event also carries the net's database id (`|id`), the identity a
+  // rename (which raises no callback) keeps.
+  bool with_ids = false;
+  std::string id(dbNet* n) const { return with_ids ? "|" + std::to_string(n->getId()) : std::string(); }
   static std::string iterm(dbITerm* t) { return t->getInst()->getName() + "/" + t->getMTerm()->getName(); }
   static std::string net(dbNet* n) { return n ? n->getName() : std::string(); }
   // The net's terminals as they stand: instance pins `I/P`, then ports `B` — what a timer's graph
@@ -4793,8 +4806,8 @@ class EditLog : public odb::dbBlockCallBackObj {
     events.push_back("swap_before|" + i->getName() + "|" + i->getMaster()->getName() + "|" + m->getName() + "|" + inst_pins(i));
   }
   void inDbInstSwapMasterAfter(dbInst* i) override { events.push_back("swap_after|" + i->getName() + "|" + inst_pins(i)); }
-  void inDbNetCreate(dbNet* n) override { events.push_back("net_create|" + n->getName()); }
-  void inDbNetDestroy(dbNet* n) override { events.push_back("net_destroy|" + n->getName() + "|" + pins(n)); }
+  void inDbNetCreate(dbNet* n) override { events.push_back("net_create|" + n->getName() + id(n)); }
+  void inDbNetDestroy(dbNet* n) override { events.push_back("net_destroy|" + n->getName() + "|" + pins(n) + id(n)); }
   void inDbNetPostMerge(dbNet* n, dbNet* removed) override { events.push_back("net_merge|" + net(n) + "|" + net(removed)); }
   void inDbITermPostConnect(dbITerm* t) override { events.push_back("iterm_connect|" + iterm(t) + "|" + net(t->getNet()) + "|" + pins(t->getNet())); }
   void inDbITermPreDisconnect(dbITerm* t) override { events.push_back("iterm_disconnect|" + iterm(t) + "|" + net(t->getNet()) + "|" + pins(t->getNet())); }
@@ -4811,6 +4824,26 @@ void edit_log_start(const OdbDb& h) {
   auto log = std::make_shared<EditLog>();
   log->addOwner(b);
   h.edit_log = log;  // the previous log (if any) is released and detaches itself
+}
+
+void observer_log_start(const OdbDb& h) {
+  dbBlock* b = require_block(h);
+  auto log = std::make_shared<EditLog>();
+  log->with_ids = true;
+  log->addOwner(b);
+  h.observer_log = log;  // the previous observer (if any) is released and detaches itself
+}
+
+rust::Vec<rust::String> observer_log_take(const OdbDb& h) {
+  rust::Vec<rust::String> out;
+  auto* log = static_cast<EditLog*>(h.observer_log.get());
+  if (log) {
+    for (auto& e : log->events) {
+      out.push_back(rust::String(e));
+    }
+    log->events.clear();
+  }
+  return out;
 }
 
 rust::Vec<rust::String> edit_log_take(const OdbDb& h) {

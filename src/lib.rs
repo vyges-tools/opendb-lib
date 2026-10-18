@@ -264,6 +264,8 @@ mod ffi {
         fn iterm_get_id(db: &OdbDb, inst: &str, pin: &str) -> Result<u32>;
         fn bterm_get_id(db: &OdbDb, bterm: &str) -> Result<u32>;
         fn inst_get_id(db: &OdbDb, inst: &str) -> Result<u32>;
+        /// Every net's id, in the block's net order.
+        fn block_net_ids(db: &OdbDb) -> Vec<u32>;
         fn techvialayerrule_rect(db: &OdbDb, gen_idx: usize, layer_idx: usize) -> Result<Vec<i32>>;
         fn via_create_generated(db: &OdbDb, name: &str, rule: &str, bottom: &str, cut: &str,
                                 top: &str, cut_w: i32, cut_h: i32, spacing_x: i32, spacing_y: i32,
@@ -348,6 +350,10 @@ mod ffi {
         fn edit_log_start(db: &OdbDb) -> Result<()>;
         /// The recorded edit callbacks since the last take.
         fn edit_log_take(db: &OdbDb) -> Vec<String>;
+        /// A second, independent recorder of the same callbacks (see shim.h).
+        fn observer_log_start(db: &OdbDb) -> Result<()>;
+        /// The observer's recorded callbacks since the last take.
+        fn observer_log_take(db: &OdbDb) -> Vec<String>;
         fn bterm_create_pin(db: &OdbDb, bterm: &str, layer: &str,
                             x1: i32, y1: i32, x2: i32, y2: i32) -> Result<usize>;
         fn bterm_destroy(db: &OdbDb, bterm: &str) -> Result<()>;
@@ -619,7 +625,7 @@ pub use ffi::{
     num_insts, num_iterms, num_nets, num_obstructions, open_db, output_pin, place_bterm,
     swap_master, insert_buffer_before_loads, insert_buffer_after_driver, insert_buffer_before_load,
     visit_connected_pins, remove_buffer, net_can_merge, swap_pins, make_new_inst_name, make_new_net_name,
-    edit_log_start, edit_log_take,
+    edit_log_start, edit_log_take, observer_log_start, observer_log_take,
     net_is_special, net_sigtype, nth_net_bterm, nth_net_iterm, nth_net_name, num_net_bterms,
     add_track_pattern_x, add_track_pattern_y,
     block_set_bus_delimiters, block_set_def_units, bterm_set_io_type, read_lef,
@@ -638,7 +644,7 @@ pub use ffi::{
     bterm_top_layer_grid, bterm_top_layer_grid_layer, bterm_top_layer_grid_is_rect,
     die_area_polygon, master_obstruction_boxes, master_obstruction_rules, master_pin_boxes, master_mterms, mterm_pin_boxes,
     mterm_pin_boxes_excluding_polygons, iterm_pin_polygons, net_new_swire, iterm_bool_property, mterm_bool_property, polygon_bloat, cts_merge_blockages, rdl_preprocess, mpin_boxes, inst_halo,
-    net_destroy, iterm_get_id, bterm_get_id, inst_get_id, layer_find_v55_spacing, layer_find_tw_spacing, layer_get_area, layer_v55_spacing_table, net_first_driver_term, net_swire_expanded_boxes, v54_spacing_rule_spacing, v54_spacing_rule_range, techvia_has_string_property, net_has_wire, layer_get_spacing_for, layer_min_area, tech_via_boxes, tech_via_layer, bpin_layer_boxes, region_boundaries, net_swire_shapes, net_swire_obstacles, num_v54_spacing_rules, v54_spacing_rule_eol, v54_spacing_rule_adjacent_cuts, v54_spacing_rule_adjacent_spacing, v54_spacing_rule_adjacent_except_same_pgnet, num_array_spacing_rules, array_spacing_rule_cut_class, array_spacing_rule_is_parallel_overlap, array_spacing_rule_is_long_array, array_spacing_rule_array_width, array_spacing_rule_cut_spacing, array_spacing_rule_cuts_spacing, num_cut_spacing_table_rules, cut_spacing_table_max_spacing, cut_spacing_table_spacing, cut_spacing_table_is_center_and_edge, cut_spacing_table_is_center_to_center, num_width_table_rules, width_table_rule_is_wrong_direction, width_table_rule_widths, techvialayerrule_rect, via_create_generated, swire_add_via, swire_add_box, swire_add_box_shaped, swire_add_box_octilinear, swire_clear_routed, bterm_create, bterm_create_pin, bterm_clear_unfixed_bpins, bterm_add_pin_box, bterm_destroy, layer_get_type,
+    net_destroy, iterm_get_id, bterm_get_id, inst_get_id, block_net_ids, layer_find_v55_spacing, layer_find_tw_spacing, layer_get_area, layer_v55_spacing_table, net_first_driver_term, net_swire_expanded_boxes, v54_spacing_rule_spacing, v54_spacing_rule_range, techvia_has_string_property, net_has_wire, layer_get_spacing_for, layer_min_area, tech_via_boxes, tech_via_layer, bpin_layer_boxes, region_boundaries, net_swire_shapes, net_swire_obstacles, num_v54_spacing_rules, v54_spacing_rule_eol, v54_spacing_rule_adjacent_cuts, v54_spacing_rule_adjacent_spacing, v54_spacing_rule_adjacent_except_same_pgnet, num_array_spacing_rules, array_spacing_rule_cut_class, array_spacing_rule_is_parallel_overlap, array_spacing_rule_is_long_array, array_spacing_rule_array_width, array_spacing_rule_cut_spacing, array_spacing_rule_cuts_spacing, num_cut_spacing_table_rules, cut_spacing_table_max_spacing, cut_spacing_table_spacing, cut_spacing_table_is_center_and_edge, cut_spacing_table_is_center_to_center, num_width_table_rules, width_table_rule_is_wrong_direction, width_table_rule_widths, techvialayerrule_rect, via_create_generated, swire_add_via, swire_add_box, swire_add_box_shaped, swire_add_box_octilinear, swire_clear_routed, bterm_create, bterm_create_pin, bterm_clear_unfixed_bpins, bterm_add_pin_box, bterm_destroy, layer_get_type,
     layer_thickness, mterm_antenna_gate_area, net_wire_area_on_layer, net_wire_perimeter_on_layer,
     nth_net_wire_layer, num_net_wire_layers,
     mterm_antenna_diff_area, layerantenna_diff_pwl_index, layerantenna_diff_pwl_ratio,
