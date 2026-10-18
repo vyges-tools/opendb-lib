@@ -102,6 +102,7 @@ mod ffi {
         fn create_inst_beside(db: &OdbDb, master: &str, name: &str, owner: &str) -> Result<()>;
         fn connect_mod_net_of(db: &OdbDb, inst: &str, pin: &str, from_inst: &str, from_pin: &str) -> Result<bool>;
         fn buffer_to_inverters(db: &OdbDb, inst: &str, in_pin: &str, out_pin: &str, inv_master: &str, inv_in: &str, inv_out: &str) -> Result<Vec<String>>;
+        fn destroy_pin_mod_net(db: &OdbDb, inst: &str, pin: &str) -> Result<bool>;
         fn same_owning_module(db: &OdbDb, a: &str, b: &str) -> Result<bool>;
         fn hierarchical_connect(db: &OdbDb, src_inst: &str, src_pin: &str, dst_inst: &str, dst_pin: &str, connection: &str) -> Result<()>;
         fn dump_hierarchy(db: &OdbDb) -> Result<Vec<String>>;
@@ -606,7 +607,7 @@ pub use generated_write_bridge::*;
 
 #[cfg(unix)]
 pub use ffi::{
-    add_guide, add_obstruction, block_bool_property, block_double_property, block_string_property, block_int_property, db_has_hierarchy, make_new_inst_name_beside, make_new_net_name_beside, create_inst_beside, connect_mod_net_of, buffer_to_inverters, same_owning_module, hierarchical_connect, dump_hierarchy, block_set_bool_property, block_set_double_property,
+    add_guide, add_obstruction, block_bool_property, block_double_property, block_string_property, block_int_property, db_has_hierarchy, make_new_inst_name_beside, make_new_net_name_beside, create_inst_beside, connect_mod_net_of, buffer_to_inverters, destroy_pin_mod_net, same_owning_module, hierarchical_connect, dump_hierarchy, block_set_bool_property, block_set_double_property,
     block_compute_core_area,
     ensure_gcell_grid, has_gcell_grid, gcell_reset_grid, gcell_reset_congestion_map,
     gcell_add_grid_pattern_x, gcell_add_grid_pattern_y, gcell_grid_x, gcell_grid_y,

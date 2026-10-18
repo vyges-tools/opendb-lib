@@ -713,6 +713,7 @@ void create_inst_beside(const OdbDb& db, rust::Str master, rust::Str name, rust:
 bool connect_mod_net_of(const OdbDb& db, rust::Str inst, rust::Str pin, rust::Str from_inst, rust::Str from_pin);
 rust::Vec<rust::String> buffer_to_inverters(const OdbDb& db, rust::Str inst, rust::Str in_pin, rust::Str out_pin,
                                             rust::Str inv_master, rust::Str inv_in, rust::Str inv_out);
+bool destroy_pin_mod_net(const OdbDb& db, rust::Str inst, rust::Str pin);
 bool same_owning_module(const OdbDb& db, rust::Str a, rust::Str b);
 void hierarchical_connect(const OdbDb& db, rust::Str src_inst, rust::Str src_pin, rust::Str dst_inst, rust::Str dst_pin, rust::Str connection);
 rust::Vec<rust::String> dump_hierarchy(const OdbDb& db);

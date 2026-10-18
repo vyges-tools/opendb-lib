@@ -2537,6 +2537,22 @@ bool connect_mod_net_of(const OdbDb& h, rust::Str inst, rust::Str pin, rust::Str
   require_iterm(h, inst, pin)->connect(mn);
   return true;
 }
+// `dbModNet::destroy` of the hierarchical net on pin `inst/pin` (`dbNetwork::hierNet`), or on port
+// `pin` when `inst` is empty; false when the pin has none. cts drops the clock driver's module net
+// this way once its sinks have moved to the tree (`TritonCTS::destroyClockModNet`).
+bool destroy_pin_mod_net(const OdbDb& h, rust::Str inst, rust::Str pin) {
+  odb::dbModNet* mn = nullptr;
+  if (inst.empty()) {
+    dbBTerm* bt = require_block(h)->findBTerm(s(pin).c_str());
+    if (!bt) throw std::runtime_error("vyges-opendb: port not found: " + s(pin));
+    mn = bt->getModNet();
+  } else {
+    mn = require_iterm(h, inst, pin)->getModNet();
+  }
+  if (!mn) return false;
+  odb::dbModNet::destroy(mn);
+  return true;
+}
 // The netlist half of the resizer's BufferToInvertersMove (`BufferToInvertersCandidate::apply`), in
 // its order: both nets (flat and module) of buffer `inst` resolved first, its pins disconnected, the
 // buffer destroyed, then `<name>_inv1` and `<name>_inv2` (`makeNewInstName(parent, .., IF_NEEDED)`)
