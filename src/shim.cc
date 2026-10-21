@@ -482,6 +482,19 @@ std::uint64_t total_wire_length(const OdbDb& h) {
   }
   return total;
 }
+// One entry per net, in `getNets()` order (the order `nth_net_name` counts): the net's routed
+// wire length as `dbWire::getLength` sums it — every non-via shape's |dx - dy| — or -1 when the
+// net has no wire.
+rust::Vec<int64_t> net_wire_lengths(const OdbDb& h) {
+  rust::Vec<int64_t> out;
+  dbBlock* b = block_of(h);
+  if (!b) return out;
+  for (dbNet* n : b->getNets()) {
+    odb::dbWire* w = n->getWire();
+    out.push_back(w ? static_cast<int64_t>(w->getLength()) : -1);
+  }
+  return out;
+}
 // ---- net traversal + connectivity graph (instrumentation core) ---------------
 static dbNet* find_net(const OdbDb& h, rust::Str net) {
   dbBlock* b = block_of(h);

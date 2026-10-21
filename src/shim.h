@@ -128,6 +128,7 @@ std::size_t num_obstructions(const OdbDb& db);
 std::size_t clear_obstructions(const OdbDb& db);   // destroy all obstructions, returns the count removed
 rust::String bterm_direction(const OdbDb& db, rust::Str bterm);   // port direction: INPUT/OUTPUT/INOUT/…
 uint64_t total_wire_length(const OdbDb& db);                      // sum of routed wire length over nets (DBU)
+rust::Vec<int64_t> net_wire_lengths(const OdbDb& db);             // per net in getNets() order: dbWire::getLength (DBU), -1 = no wire
 
 // ---- net traversal + connectivity graph (instrumentation core) ---------------
 rust::String nth_net_name(const OdbDb& db, std::size_t i);        // i-th net name ("" out of range)

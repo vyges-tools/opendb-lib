@@ -112,6 +112,7 @@ mod ffi {
         fn clear_obstructions(db: &OdbDb) -> usize;
         fn bterm_direction(db: &OdbDb, bterm: &str) -> String;
         fn total_wire_length(db: &OdbDb) -> u64;
+        fn net_wire_lengths(db: &OdbDb) -> Vec<i64>;
         fn nth_net_name(db: &OdbDb, i: usize) -> String;
         fn net_sigtype(db: &OdbDb, net: &str) -> String;
         fn net_is_special(db: &OdbDb, net: &str) -> bool;
@@ -630,7 +631,7 @@ pub use ffi::{
     net_is_special, net_sigtype, nth_net_bterm, nth_net_iterm, nth_net_name, num_net_bterms,
     add_track_pattern_x, add_track_pattern_y,
     block_set_bus_delimiters, block_set_def_units, bterm_set_io_type, read_lef,
-    num_net_iterms, read_def, set_inst_location, set_inst_orient, set_inst_location_orient, set_inst_placement_status, tech_use_min_spacing_obs, total_wire_length, write_db,
+    num_net_iterms, read_def, set_inst_location, set_inst_orient, set_inst_location_orient, set_inst_placement_status, tech_use_min_spacing_obs, total_wire_length, net_wire_lengths, write_db,
     write_def, OdbDb,
     clear_rows, nth_site_name, num_rows, num_sites, row_create, tech_manufacturing_grid,
     site_row_pattern_len, site_row_pattern_orient, site_row_pattern_site,
