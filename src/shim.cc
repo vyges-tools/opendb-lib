@@ -4134,6 +4134,24 @@ uint32_t net_get_id(const OdbDb& h, rust::Str net) {
   if (!n) throw std::runtime_error("no net named " + s(net));
   return n->getId();
 }
+rust::Vec<std::int64_t> net_iterm_places(const OdbDb& h, rust::Str net) {
+  rust::Vec<std::int64_t> out;
+  odb::dbNet* n = gen_net(h, net);
+  if (!n) return out;
+  for (odb::dbITerm* t : n->getITerms()) {
+    odb::dbInst* i = t->getInst();
+    int x = 0, y = 0;
+    if (!t->getAvgXY(&x, &y)) {
+      x = i->getOrigin().getX();
+      y = i->getOrigin().getY();
+    }
+    out.push_back(t->getId());
+    out.push_back(x);
+    out.push_back(y);
+    out.push_back(i->isPlaced() ? 1 : 0);
+  }
+  return out;
+}
 uint32_t iterm_get_id(const OdbDb& h, rust::Str inst, rust::Str pin) {
   dbBlock* b = require_block(h);
   odb::dbInst* i = b->findInst(s(inst).c_str());
