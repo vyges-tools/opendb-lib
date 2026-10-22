@@ -845,6 +845,7 @@ uint32_t bterm_get_id(const OdbDb& db, rust::Str bterm);
 
 // The same, for an instance. Maps keyed by instance iterate in this order.
 uint32_t inst_get_id(const OdbDb& db, rust::Str inst);
+uint32_t net_get_id(const OdbDb& db, rust::Str net);
 // Every net's database id, in the block's net order (`getNets()`, as the block's net names list).
 rust::Vec<uint32_t> block_net_ids(const OdbDb& db);
 

@@ -4128,6 +4128,12 @@ uint32_t inst_get_id(const OdbDb& h, rust::Str inst) {
   if (!i) throw std::runtime_error("no instance named " + s(inst));
   return i->getId();
 }
+uint32_t net_get_id(const OdbDb& h, rust::Str net) {
+  dbBlock* b = require_block(h);
+  odb::dbNet* n = b->findNet(s(net).c_str());
+  if (!n) throw std::runtime_error("no net named " + s(net));
+  return n->getId();
+}
 uint32_t iterm_get_id(const OdbDb& h, rust::Str inst, rust::Str pin) {
   dbBlock* b = require_block(h);
   odb::dbInst* i = b->findInst(s(inst).c_str());
