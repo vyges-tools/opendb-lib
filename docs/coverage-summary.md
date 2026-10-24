@@ -8,13 +8,13 @@ needs it. Most of what is unbound is write methods outside the generated read su
 
 | Map | Classes | Methods | Bound | Not covered |
 | --- | --- | --- | --- | --- |
-| Core (hand-written classes; the headline metric) | 45 | 1,181 | 874 (74.0%) | **307 (26.0%)** |
-| Full (every class with a schema) | 122 | 2,720 | 2,051 (75.4%) | **669 (24.6%)** |
+| Core (hand-written classes; the headline metric) | 45 | 1,181 | 875 (74.1%) | **306 (25.9%)** |
+| Full (every class with a schema) | 122 | 2,720 | 2,052 (75.4%) | **668 (24.6%)** |
 
 By kind:
 
-- **core:** read side 563/637 (88.4%): getters 251/274, predicates 116/126, iterators 61/65, relations 135/172; setters 283/475 (59.6%); other 28/69.
-- **full:** read side 1,245/1,491 (83.5%): getters 563/671, predicates 339/367, iterators 120/150, relations 223/303; setters 757/1,126 (67.2%); other 49/103.
+- **core:** read side 564/637 (88.5%): getters 251/274, predicates 116/126, iterators 62/65, relations 135/172; setters 283/475 (59.6%); other 28/69.
+- **full:** read side 1,246/1,491 (83.6%): getters 563/671, predicates 339/367, iterators 121/150, relations 223/303; setters 757/1,126 (67.2%); other 49/103.
 
 Largest gaps (core; unbound of total):
 

@@ -5,7 +5,7 @@
   "scope": "all",
   "class_count": 122,
   "method_count": 2720,
-  "bridged_count": 2051,
+  "bridged_count": 2052,
   "classes": [
     {
       "name": "dbAccessPoint",
@@ -11078,7 +11078,7 @@
           "params": [],
           "const": false,
           "kind": "iterator",
-          "bridged": false,
+          "bridged": true,
           "element": "dbPolygon"
         },
         {
