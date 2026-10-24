@@ -4910,3 +4910,69 @@ rust::Vec<rust::String> edit_log_take(const OdbDb& h) {
   }
   return out;
 }
+
+rust::Vec<rust::String> pwr_domain_elements(const OdbDb& h, rust::Str domain) {
+  rust::Vec<rust::String> out;
+  dbBlock* b = block_of(h);
+  odb::dbPowerDomain* d = b ? b->findPowerDomain(s(domain).c_str()) : nullptr;
+  if (!d) return out;
+  for (const std::string& e : d->getElements()) out.push_back(rust::String(e));
+  return out;
+}
+
+rust::String logic_port_direction(const OdbDb& h, rust::Str port) {
+  dbBlock* b = block_of(h);
+  odb::dbLogicPort* p = b ? b->findLogicPort(s(port).c_str()) : nullptr;
+  return rust::String(p ? p->getDirection() : std::string());
+}
+
+rust::Vec<rust::String> pwr_switch_records(const OdbDb& h, rust::Str sw, rust::Str field) {
+  rust::Vec<rust::String> out;
+  auto rec = [&](const std::string& a, const std::string& b, const std::string& c) {
+    out.push_back(rust::String(a));
+    out.push_back(rust::String(b));
+    out.push_back(rust::String(c));
+  };
+  const std::string f = s(field);
+  dbBlock* b = block_of(h);
+  odb::dbPowerSwitch* p = b ? b->findPowerSwitch(s(sw).c_str()) : nullptr;
+  if (f == "output") {
+    if (p) {
+      auto o = p->getOutputSupplyPort();
+      rec(o.port_name, o.supply_net_name, "");
+    }
+  } else if (f == "input") {
+    if (p) for (const auto& o : p->getInputSupplyPorts()) rec(o.port_name, o.supply_net_name, "");
+  } else if (f == "control") {
+    if (p) for (const auto& c : p->getControlPorts()) rec(c.port_name, c.net_name, "");
+  } else if (f == "on_state") {
+    if (p) for (const auto& st : p->getOnStates()) rec(st.state_name, st.input_supply_port, st.boolean_expression);
+  } else if (f == "ack") {
+    if (p) for (const auto& a : p->getAcknowledgePorts()) rec(a.port_name, a.net_name, a.boolean_expression);
+  } else if (f == "port_map") {
+    if (p) for (const auto& [port, term] : p->getPortMap()) rec(port, term ? term->getName() : std::string(), "");
+  } else {
+    throw std::runtime_error("vyges-opendb: unknown power switch field: " + f);
+  }
+  return out;
+}
+
+rust::Vec<rust::String> level_shifter_records(const OdbDb& h, rust::Str ls, rust::Str field) {
+  rust::Vec<rust::String> out;
+  const std::string f = s(field);
+  dbBlock* b = block_of(h);
+  odb::dbLevelShifter* l = b ? b->findLevelShifter(s(ls).c_str()) : nullptr;
+  if (f == "elements") {
+    if (l) for (const std::string& e : l->getElements()) out.push_back(rust::String(e));
+  } else if (f == "exclude_elements") {
+    if (l) for (const std::string& e : l->getExcludeElements()) out.push_back(rust::String(e));
+  } else if (f == "instances") {
+    if (l) for (const auto& [inst, port] : l->getInstances()) {
+      out.push_back(rust::String(inst));
+      out.push_back(rust::String(port));
+    }
+  } else {
+    throw std::runtime_error("vyges-opendb: unknown level shifter field: " + f);
+  }
+  return out;
+}

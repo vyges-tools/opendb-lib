@@ -166,6 +166,11 @@ mod ffi {
         fn inst_bbox(db: &OdbDb, inst: &str) -> Result<Vec<i32>>;
         fn master_placement_boundary(db: &OdbDb, master: &str) -> Result<Vec<i32>>;
         fn master_edge_type_names(db: &OdbDb, master: &str) -> Result<Vec<String>>;
+        // Power intent: list and struct fields the generator does not reach -- see shim.h.
+        fn pwr_domain_elements(db: &OdbDb, domain: &str) -> Result<Vec<String>>;
+        fn logic_port_direction(db: &OdbDb, port: &str) -> Result<String>;
+        fn pwr_switch_records(db: &OdbDb, sw: &str, field: &str) -> Result<Vec<String>>;
+        fn level_shifter_records(db: &OdbDb, ls: &str, field: &str) -> Result<Vec<String>>;
         fn master_edge_type_params(db: &OdbDb, master: &str) -> Result<Vec<i32>>;
         fn tech_cell_edge_spacing_types(db: &OdbDb) -> Result<Vec<String>>;
         fn tech_cell_edge_spacing_params(db: &OdbDb) -> Result<Vec<i32>>;
@@ -641,7 +646,7 @@ pub use ffi::{
     write_def, OdbDb,
     clear_rows, nth_site_name, num_rows, num_sites, row_create, tech_manufacturing_grid,
     site_row_pattern_len, site_row_pattern_orient, site_row_pattern_site,
-    block_cut_rows, block_cut_rows_at_blockages, group_get_type, has_one_site_master, nth_row_name, site_get_class, create_physical_inst, inst_bbox, master_placement_boundary, master_edge_type_names, master_edge_type_params, tech_cell_edge_spacing_types, tech_cell_edge_spacing_params, ndr_create, ndr_layer_rule_set, ndr_layer_rule_layers, ndr_layer_rule_params, ndr_add_use_via, ndr_use_vias, ndr_use_via_rules, ndr_layer_rule_wire_exts, block_access_point_count, iterm_pref_access_points, iterm_access_point_count, bpin_access_points, net_guides, net_wire_decode, layer_lef58_type, layer_rule_census, mpin_add_access_point, iterm_set_access_point, bpin_add_access_point, net_write_wire, block_create_via, block_set_gcell_grid, block_reset_gcell_grid, layer_min_enclosed_areas, num_masters, nth_master_name, master_get_type,
+    block_cut_rows, block_cut_rows_at_blockages, group_get_type, has_one_site_master, nth_row_name, site_get_class, create_physical_inst, inst_bbox, master_placement_boundary, master_edge_type_names, master_edge_type_params, pwr_domain_elements, logic_port_direction, pwr_switch_records, level_shifter_records, tech_cell_edge_spacing_types, tech_cell_edge_spacing_params, ndr_create, ndr_layer_rule_set, ndr_layer_rule_layers, ndr_layer_rule_params, ndr_add_use_via, ndr_use_vias, ndr_use_via_rules, ndr_layer_rule_wire_exts, block_access_point_count, iterm_pref_access_points, iterm_access_point_count, bpin_access_points, net_guides, net_wire_decode, layer_lef58_type, layer_rule_census, mpin_add_access_point, iterm_set_access_point, bpin_add_access_point, net_write_wire, block_create_via, block_set_gcell_grid, block_reset_gcell_grid, layer_min_enclosed_areas, num_masters, nth_master_name, master_get_type,
     nth_row_bbox, nth_row_site, nth_row_orient, nth_row_direction, destroy_inst,
     inst_shapes, pin_obstruction_boxes, obstruction_boxes, fill_obstruction_boxes, blockage_boxes, swire_boxes, special_wire_boxes, wire_shape_type_name, blockage_create, num_blockages, blockage_destroy,
     fill_create, num_fills, clear_fills,

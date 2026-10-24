@@ -5,7 +5,7 @@
   "scope": "all",
   "class_count": 122,
   "method_count": 2720,
-  "bridged_count": 2018,
+  "bridged_count": 2032,
   "classes": [
     {
       "name": "dbAccessPoint",
@@ -1449,7 +1449,7 @@
           ],
           "const": false,
           "kind": "relation",
-          "bridged": false,
+          "bridged": true,
           "target": "dbPowerDomain"
         },
         {
@@ -1463,7 +1463,7 @@
           ],
           "const": false,
           "kind": "relation",
-          "bridged": false,
+          "bridged": true,
           "target": "dbLogicPort"
         },
         {
@@ -1477,7 +1477,7 @@
           ],
           "const": false,
           "kind": "relation",
-          "bridged": false,
+          "bridged": true,
           "target": "dbPowerSwitch"
         },
         {
@@ -1505,7 +1505,7 @@
           ],
           "const": false,
           "kind": "relation",
-          "bridged": false,
+          "bridged": true,
           "target": "dbLevelShifter"
         },
         {
@@ -9602,7 +9602,7 @@
           "params": [],
           "const": true,
           "kind": "getter",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "getExcludeElements",
@@ -9610,7 +9610,7 @@
           "params": [],
           "const": true,
           "kind": "getter",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "getInstances",
@@ -9618,7 +9618,7 @@
           "params": [],
           "const": true,
           "kind": "getter",
-          "bridged": false
+          "bridged": true
         }
       ],
       "hand_written": false
@@ -14816,7 +14816,7 @@
           "params": [],
           "const": false,
           "kind": "getter",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "addPowerSwitch",
@@ -15090,7 +15090,7 @@
           "params": [],
           "const": false,
           "kind": "getter",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "getInputSupplyPorts",
@@ -15098,7 +15098,7 @@
           "params": [],
           "const": false,
           "kind": "getter",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "getOutputSupplyPort",
@@ -15106,7 +15106,7 @@
           "params": [],
           "const": false,
           "kind": "getter",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "getAcknowledgePorts",
@@ -15114,7 +15114,7 @@
           "params": [],
           "const": false,
           "kind": "getter",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "getOnStates",
@@ -15122,7 +15122,7 @@
           "params": [],
           "const": false,
           "kind": "getter",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "getLibCell",
@@ -15139,7 +15139,7 @@
           "params": [],
           "const": false,
           "kind": "getter",
-          "bridged": false
+          "bridged": true
         }
       ],
       "hand_written": false

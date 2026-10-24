@@ -1009,3 +1009,15 @@ void block_create_via(const OdbDb& db, rust::Str name, rust::Str layer1, rust::S
 void block_set_gcell_grid(const OdbDb& db, int32_t x0, int32_t nx, int32_t sx, int32_t y0, int32_t ny, int32_t sy);
 rust::Vec<int64_t> layer_min_enclosed_areas(const OdbDb& db, rust::Str layer);  // MINENCLOSEDAREA rules without a width
 void block_reset_gcell_grid(const OdbDb& db, int32_t x0, int32_t nx, int32_t sx, int32_t y0, int32_t ny, int32_t sy);  // resetGrid + one pattern per axis
+// Power intent: the list and struct fields the generator does not reach. Unknown object: empty.
+// A record is a fixed number of strings, in the database's own order:
+//   pwr_switch_records  3 per record; `field` is output | input | control | on_state | ack | port_map
+//                       (output/input: port, supply net, ""; control: port, net, "";
+//                        on_state: state, input supply port, expression; ack: port, net, expression;
+//                        port_map: model port, lib cell terminal, "" -- by model port, as the map keeps it)
+//   level_shifter_records  `field` elements | exclude_elements: 1 per record; instances: 2 (inst, port)
+// An unknown `field` throws.
+rust::Vec<rust::String> pwr_domain_elements(const OdbDb& db, rust::Str domain);
+rust::String logic_port_direction(const OdbDb& db, rust::Str port);
+rust::Vec<rust::String> pwr_switch_records(const OdbDb& db, rust::Str sw, rust::Str field);
+rust::Vec<rust::String> level_shifter_records(const OdbDb& db, rust::Str ls, rust::Str field);
