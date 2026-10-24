@@ -1104,3 +1104,5 @@ rust::Vec<int64_t> psm_net(const OdbDb& db, rust::Str net);
 rust::Vec<rust::String> psm_net_names(const OdbDb& db, rust::Str net);
 rust::Vec<int64_t> psm_short_inputs(const OdbDb& db, rust::Str net);
 rust::Vec<rust::String> psm_short_names(const OdbDb& db, rust::Str net);
+void psm_write_error_file(const OdbDb& db, rust::Str net, rust::Slice<const int64_t> v,
+                          rust::Slice<const rust::String> names, rust::Str path);

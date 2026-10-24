@@ -5,7 +5,7 @@
   "scope": "all",
   "class_count": 122,
   "method_count": 2720,
-  "bridged_count": 2052,
+  "bridged_count": 2063,
   "classes": [
     {
       "name": "dbAccessPoint",
@@ -2700,7 +2700,7 @@
           ],
           "const": false,
           "kind": "relation",
-          "bridged": false,
+          "bridged": true,
           "target": "dbMarkerCategory"
         },
         {
@@ -4902,7 +4902,7 @@
           ],
           "const": true,
           "kind": "relation",
-          "bridged": false,
+          "bridged": true,
           "target": "dbMarkerCategory"
         }
       ],
@@ -10409,7 +10409,7 @@
           ],
           "const": false,
           "kind": "setter",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "addShape",
@@ -10422,7 +10422,7 @@
           ],
           "const": false,
           "kind": "setter",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "addShape",
@@ -10435,7 +10435,7 @@
           ],
           "const": false,
           "kind": "setter",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "addShape",
@@ -10448,7 +10448,7 @@
           ],
           "const": false,
           "kind": "setter",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "addShape",
@@ -10461,7 +10461,7 @@
           ],
           "const": false,
           "kind": "setter",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "setTechLayer",
@@ -10487,7 +10487,7 @@
           ],
           "const": false,
           "kind": "setter",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "addObstructionFromBlock",
@@ -10601,7 +10601,7 @@
           ],
           "const": true,
           "kind": "relation",
-          "bridged": false,
+          "bridged": true,
           "target": "dbMarkerCategory"
         },
         {
@@ -10696,7 +10696,7 @@
           ],
           "const": true,
           "kind": "setter",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "writeTR",
@@ -10709,7 +10709,7 @@
           ],
           "const": true,
           "kind": "setter",
-          "bridged": false
+          "bridged": true
         }
       ],
       "hand_written": false

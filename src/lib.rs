@@ -460,6 +460,9 @@ mod ffi {
         fn psm_short_inputs(db: &OdbDb, net: &str) -> Result<Vec<i64>>;
         /// The names `psm_short_inputs` indexes, in its order.
         fn psm_short_names(db: &OdbDb, net: &str) -> Result<Vec<String>>;
+        /// The power-grid check's markers for one net, recorded as the check records them, then
+        /// the net's marker group written as a TR report (layout at the shim).
+        fn psm_write_error_file(db: &OdbDb, net: &str, v: &[i64], names: &[String], path: &str) -> Result<()>;
         fn iterm_avg_xy(db: &OdbDb, inst: &str, pin: &str, x: &mut i32, y: &mut i32) -> bool;
         /// The pin's own ROUTING-layer boxes in placed coordinates: 5 i64 each
         /// (layer, x0, y0, x1, y1). What the pin physically touches, rather than where it
@@ -717,5 +720,5 @@ pub use ffi::{
     mterm_antenna_diff_area, layerantenna_diff_pwl_index, layerantenna_diff_pwl_ratio,
     layerantenna_num_diff_pwl,
     iterm_avg_xy, iterm_pin_boxes, iterm_shape_boxes, layer_name_by_number, net_wire_boxes, net_wire_shapes,
-    psm_tech_layers, psm_net, psm_net_names, psm_short_inputs, psm_short_names,
+    psm_tech_layers, psm_net, psm_net_names, psm_short_inputs, psm_short_names, psm_write_error_file,
 };

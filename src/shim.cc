@@ -5593,3 +5593,120 @@ rust::Vec<rust::String> psm_short_names(const OdbDb& h, rust::Str net) {
   psm_short_walk(h, net, &names);
   return names;
 }
+
+// `psm_write_error_file`: the power-grid check's markers for one net, recorded in the database the
+// way the check records them, then that net's marker group written as a TR report to `path`
+// (nothing is written when the net ends with no group). Stream (names index `names`):
+//   [shape group made 0/1, marker count, per marker: layer number, rect]
+//   [instance group made 0/1, terminal count, per unconnected instance terminal: name] — one
+//     marker per INSTANCE of those terminals, deduplicated and in instance-id order here
+//   [short count, per short: layer number, rect, source count, per source: kind, name]
+//     kind 0 net, 1 block terminal, 2 instance terminal, 3 instance, 4 block obstruction (the
+//     value is its position in `getObstructions()`, not a name)
+// Every marker's first source is the checked net (the instance group's markers have none).
+void psm_write_error_file(const OdbDb& h, rust::Str net, rust::Slice<const int64_t> v,
+                          rust::Slice<const rust::String> names, rust::Str path) {
+  dbBlock* b = require_block(h);
+  dbNet* n = b->findNet(s(net).c_str());
+  if (!n) throw std::runtime_error("vyges-opendb: net not found: " + s(net));
+  std::size_t at = 0;
+  auto next = [&]() -> int64_t {
+    if (at >= v.size()) throw std::runtime_error("vyges-opendb: psm_write_error_file: stream ends");
+    return v[at++];
+  };
+  auto name = [&](int64_t i) -> std::string {
+    if (i < 0 || std::size_t(i) >= names.size()) throw std::runtime_error("vyges-opendb: psm_write_error_file: name index");
+    return std::string(names[i]);
+  };
+  auto rect = [&]() {
+    const int xl = next(), yl = next(), xh = next(), yh = next();
+    return odb::Rect(xl, yl, xh, yh);
+  };
+  auto layer = [&](int64_t number) -> dbTechLayer* {
+    return number < 0 ? nullptr : b->getTech()->findLayer(int(number));
+  };
+  // The check first drops what an earlier check of this net recorded.
+  if (odb::dbMarkerCategory* tool = b->findMarkerCategory("PSM")) {
+    if (odb::dbMarkerCategory* old = tool->findMarkerCategory(n->getName().c_str())) {
+      odb::dbMarkerCategory::destroy(old);
+    }
+  }
+  auto net_group = [&]() {
+    odb::dbMarkerCategory* tool = odb::dbMarkerCategory::createOrGet(b, "PSM");
+    tool->setSource("PSM");
+    return odb::dbMarkerCategory::createOrGet(tool, n->getName().c_str());
+  };
+  // Each group's count is in the stream whether or not the group is made.
+  const bool shape_group = next();
+  const int64_t shape_count = next();
+  if (shape_group || shape_count > 0) {
+    odb::dbMarkerCategory* group = odb::dbMarkerCategory::createOrReplace(net_group(), "Unconnected shape");
+    for (int64_t i = 0; i < shape_count; i++) {
+      dbTechLayer* l = layer(next());
+      const odb::Rect r = rect();
+      odb::dbMarker* m = odb::dbMarker::create(group);
+      if (!m) continue;
+      m->addSource(n);
+      m->setTechLayer(l);
+      m->addShape(r);
+    }
+  }
+  const bool inst_group = next();
+  const int64_t iterm_count = next();
+  if (inst_group || iterm_count > 0) {
+    auto by_id = [](dbInst* a, dbInst* c) { return a->getId() < c->getId(); };
+    std::set<dbInst*, decltype(by_id)> insts(by_id);
+    for (int64_t i = 0; i < iterm_count; i++) {
+      const std::string tname = name(next());
+      dbITerm* it = b->findITerm(tname.c_str());
+      if (!it) throw std::runtime_error("vyges-opendb: instance terminal not found: " + tname);
+      insts.insert(it->getInst());
+    }
+    odb::dbMarkerCategory* group = odb::dbMarkerCategory::createOrReplace(net_group(), "Unconnected instance");
+    for (dbInst* inst : insts) {
+      odb::dbMarker* m = odb::dbMarker::create(group);
+      if (!m) continue;
+      m->addSource(inst);
+      m->addShape(inst->getBBox()->getBox());
+    }
+  }
+  const int64_t shorts = next();
+  if (shorts > 0) {
+    odb::dbMarkerCategory* group = odb::dbMarkerCategory::createOrReplace(net_group(), "Shorts");
+    std::vector<dbObstruction*> obstructions(b->getObstructions().begin(), b->getObstructions().end());
+    for (int64_t i = 0; i < shorts; i++) {
+      dbTechLayer* l = layer(next());
+      const odb::Rect r = rect();
+      std::vector<odb::dbObject*> sources;
+      for (int64_t j = 0, k = next(); j < k; j++) {
+        const int64_t kind = next();
+        const int64_t value = next();
+        odb::dbObject* o = nullptr;
+        switch (kind) {
+          case 0: o = b->findNet(name(value).c_str()); break;
+          case 1: o = b->findBTerm(name(value).c_str()); break;
+          case 2: o = b->findITerm(name(value).c_str()); break;
+          case 3: o = b->findInst(name(value).c_str()); break;
+          case 4:
+            if (value >= 0 && std::size_t(value) < obstructions.size()) o = obstructions[value];
+            break;
+        }
+        if (!o) throw std::runtime_error("vyges-opendb: psm_write_error_file: source not found");
+        sources.push_back(o);
+      }
+      odb::dbMarker* m = odb::dbMarker::create(group);
+      if (!m) continue;
+      m->addSource(n);
+      for (odb::dbObject* o : sources) m->addSource(o);
+      m->setTechLayer(l);
+      m->addShape(r);
+    }
+  }
+  if (at != v.size()) throw std::runtime_error("vyges-opendb: psm_write_error_file: values left over");
+  if (path.empty()) return;
+  odb::dbMarkerCategory* tool = b->findMarkerCategory("PSM");
+  if (!tool) return;
+  odb::dbMarkerCategory* group = tool->findMarkerCategory(n->getName().c_str());
+  if (!group) return;
+  group->writeTR(s(path));
+}
