@@ -466,6 +466,8 @@ mod ffi {
         /// Scan replacement's instance walk (layout at the shim, `dft_scan_replace`): the
         /// events in order, as "kind\tinstance\tmaster".
         fn dft_scan_replace(db: &OdbDb, masters: &[String], classes: &[i64], to_masters: &[String], port_maps: &[String]) -> Result<Vec<String>>;
+        /// The scan chains `execute_dft_plan` records (layout at the shim, `dft_write_scan_chains`).
+        fn dft_write_scan_chains(db: &OdbDb, rows: &[String]) -> Result<()>;
         fn iterm_avg_xy(db: &OdbDb, inst: &str, pin: &str, x: &mut i32, y: &mut i32) -> bool;
         /// The pin's own ROUTING-layer boxes in placed coordinates: 5 i64 each
         /// (layer, x0, y0, x1, y1). What the pin physically touches, rather than where it
@@ -723,5 +725,5 @@ pub use ffi::{
     mterm_antenna_diff_area, layerantenna_diff_pwl_index, layerantenna_diff_pwl_ratio,
     layerantenna_num_diff_pwl,
     iterm_avg_xy, iterm_pin_boxes, iterm_shape_boxes, layer_name_by_number, net_wire_boxes, net_wire_shapes,
-    psm_tech_layers, psm_net, psm_net_names, psm_short_inputs, psm_short_names, psm_write_error_file, dft_scan_replace,
+    psm_tech_layers, psm_net, psm_net_names, psm_short_inputs, psm_short_names, psm_write_error_file, dft_scan_replace, dft_write_scan_chains,
 };

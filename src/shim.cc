@@ -25,6 +25,7 @@
 #include <stdexcept>
 #include <string>
 #include <vector>
+#include <variant>
 #include "boost/polygon/polygon.hpp"
 #include "odb/geom_boost.h"  // odb::geom::toPolygonSet / extractPolygons — see polygon_bloat
 
@@ -5818,4 +5819,67 @@ rust::Vec<rust::String> dft_scan_replace(const OdbDb& h, rust::Slice<const rust:
   rust::Vec<rust::String> events;
   dft_walk(h.db, top, cls, rep, events);
   return events;
+}
+
+// Scan chains as `execute_dft_plan` records them, after the stitch: per chain, in order, a
+// odb::dbScanChain (named), ONE partition "default", ONE scan list; per cell in chain order the list's
+// `add`, then bits, scan enable, access pins (scan in / scan out), scan clock and clock edge; then
+// the chain's scan enable, scan in, scan out. Rows (tab-separated; a term is three fields: "B",
+// port, "" or "I", instance, mterm):
+//   chain  name
+//   cell   inst  bits  <enable term>  <in term>  <out term>  clock  rising|falling
+//   ends   <enable term>  <in term>  <out term>      (the chain's own, after its cells)
+static std::variant<dbBTerm*, dbITerm*> dft_term(dbBlock* b, const std::vector<std::string>& f, size_t at) {
+  if (f.at(at) == "B") {
+    dbBTerm* t = b->findBTerm(f.at(at + 1).c_str());
+    if (!t) throw std::runtime_error("vyges-opendb: dft: no port " + f.at(at + 1));
+    return t;
+  }
+  dbInst* i = b->findInst(f.at(at + 1).c_str());
+  dbITerm* t = i ? i->findITerm(f.at(at + 2).c_str()) : nullptr;
+  if (!t) throw std::runtime_error("vyges-opendb: dft: no terminal " + f.at(at + 1) + "/" + f.at(at + 2));
+  return t;
+}
+
+void dft_write_scan_chains(const OdbDb& h, rust::Slice<const rust::String> rows) {
+  dbBlock* top = require_block(h);
+  odb::dbDft* dft = top->getDft();
+  odb::dbScanChain* sc = nullptr;
+  odb::dbScanList* list = nullptr;
+  for (const rust::String& row : rows) {
+    std::vector<std::string> f;
+    std::string text(row);
+    size_t at = 0;
+    for (size_t tab; (tab = text.find('\t', at)) != std::string::npos; at = tab + 1) f.push_back(text.substr(at, tab - at));
+    f.push_back(text.substr(at));
+    if (f.at(0) == "chain") {
+      if (f.size() != 2) throw std::runtime_error("vyges-opendb: dft: bad chain row: " + text);
+      sc = odb::dbScanChain::create(dft);
+      sc->setName(f[1]);
+      odb::dbScanPartition* part = odb::dbScanPartition::create(sc);
+      part->setName("default");
+      list = odb::dbScanList::create(part);
+      continue;
+    }
+    if (f.at(0) == "cell") {
+      if (f.size() != 14 || !list) throw std::runtime_error("vyges-opendb: dft: bad cell row: " + text);
+      dbInst* inst = top->findInst(f[1].c_str());
+      if (!inst) throw std::runtime_error("vyges-opendb: dft: no instance " + f[1]);
+      odb::dbScanInst* si = list->add(inst);
+      si->setBits(static_cast<uint32_t>(std::stoul(f[2])));
+      std::visit([&](auto* t) { si->setScanEnable(t); }, dft_term(top, f, 3));
+      si->setAccessPins({.scan_in = dft_term(top, f, 6), .scan_out = dft_term(top, f, 9)});
+      si->setScanClock(f[12]);
+      si->setClockEdge(f[13] == "falling" ? odb::dbScanInst::ClockEdge::Falling : odb::dbScanInst::ClockEdge::Rising);
+      continue;
+    }
+    if (f.at(0) == "ends") {
+      if (f.size() != 10 || !sc) throw std::runtime_error("vyges-opendb: dft: bad ends row: " + text);
+      std::visit([&](auto* t) { sc->setScanEnable(t); }, dft_term(top, f, 1));
+      std::visit([&](auto* t) { sc->setScanIn(t); }, dft_term(top, f, 4));
+      std::visit([&](auto* t) { sc->setScanOut(t); }, dft_term(top, f, 7));
+      continue;
+    }
+    throw std::runtime_error("vyges-opendb: dft: bad row: " + text);
+  }
 }

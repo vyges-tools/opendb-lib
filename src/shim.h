@@ -1110,3 +1110,4 @@ rust::Vec<rust::String> dft_scan_replace(const OdbDb& db, rust::Slice<const rust
                                          rust::Slice<const int64_t> classes,
                                          rust::Slice<const rust::String> to_masters,
                                          rust::Slice<const rust::String> port_maps);
+void dft_write_scan_chains(const OdbDb& db, rust::Slice<const rust::String> rows);
