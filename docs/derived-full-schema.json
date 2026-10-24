@@ -5,7 +5,7 @@
   "scope": "all",
   "class_count": 122,
   "method_count": 2720,
-  "bridged_count": 2032,
+  "bridged_count": 2046,
   "classes": [
     {
       "name": "dbAccessPoint",
@@ -1491,7 +1491,7 @@
           ],
           "const": false,
           "kind": "relation",
-          "bridged": false,
+          "bridged": true,
           "target": "dbIsolation"
         },
         {
@@ -9128,7 +9128,7 @@
           ],
           "const": false,
           "kind": "setter",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "getIsolationCells",
@@ -9564,7 +9564,7 @@
           ],
           "const": false,
           "kind": "setter",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "addExcludeElement",
@@ -9577,7 +9577,7 @@
           ],
           "const": false,
           "kind": "setter",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "addInstance",
@@ -9594,7 +9594,7 @@
           ],
           "const": false,
           "kind": "setter",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "getElements",
@@ -14808,7 +14808,7 @@
           ],
           "const": false,
           "kind": "setter",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "getElements",
@@ -14829,7 +14829,7 @@
           ],
           "const": false,
           "kind": "setter",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "addIsolation",
@@ -14842,7 +14842,7 @@
           ],
           "const": false,
           "kind": "setter",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "addLevelShifter",
@@ -14959,7 +14959,7 @@
           ],
           "const": false,
           "kind": "setter",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "setOutSupplyPort",
@@ -14993,7 +14993,7 @@
           ],
           "const": false,
           "kind": "setter",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "addAcknowledgePort",
@@ -15014,7 +15014,7 @@
           ],
           "const": false,
           "kind": "setter",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "addOnState",
@@ -15035,7 +15035,7 @@
           ],
           "const": false,
           "kind": "setter",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "setLibCell",
@@ -15065,7 +15065,7 @@
           ],
           "const": false,
           "kind": "setter",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "addPortMap",
@@ -15082,7 +15082,7 @@
           ],
           "const": false,
           "kind": "setter",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "getControlPorts",
