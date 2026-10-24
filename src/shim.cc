@@ -5014,6 +5014,8 @@ bool upf_find(const OdbDb& h, rust::Str kind, rust::Str name) {
   if (k == "power_switch") return b->findPowerSwitch(n.c_str()) != nullptr;
   if (k == "isolation") return b->findIsolation(n.c_str()) != nullptr;
   if (k == "level_shifter") return b->findLevelShifter(n.c_str()) != nullptr;
+  if (k == "inst") return b->findInst(n.c_str()) != nullptr;
+  if (k == "net") return b->findNet(n.c_str()) != nullptr;
   throw std::runtime_error("vyges-opendb: upf_find: unknown kind " + k);
 }
 bool pwr_domain_create(const OdbDb& h, rust::Str name) {
@@ -5143,6 +5145,71 @@ rust::Vec<rust::String> module_children_paths(const OdbDb& h, rust::Str module) 
     out.push_back(rust::String(mi->getMaster()->getName()));
   }
   return out;
+}
+static std::string io_name(odb::dbIoType t) {
+  return t.getString();
+}
+rust::Vec<rust::String> inst_iterm_info(const OdbDb& h, rust::Str inst) {
+  odb::dbInst* i = require_block(h)->findInst(s(inst).c_str());
+  if (!i) throw std::runtime_error("vyges-opendb: instance not found: " + s(inst));
+  rust::Vec<rust::String> out;
+  for (odb::dbITerm* t : i->getITerms()) {
+    out.push_back(rust::String(t->getMTerm()->getName()));
+    out.push_back(rust::String(io_name(t->getIoType())));
+    out.push_back(rust::String(t->getNet() ? t->getNet()->getName() : std::string()));
+  }
+  return out;
+}
+rust::Vec<rust::String> net_iterm_pairs(const OdbDb& h, rust::Str net) {
+  odb::dbNet* n = require_block(h)->findNet(s(net).c_str());
+  if (!n) throw std::runtime_error("vyges-opendb: net not found: " + s(net));
+  rust::Vec<rust::String> out;
+  for (odb::dbITerm* t : n->getITerms()) {
+    out.push_back(rust::String(t->getInst()->getName()));
+    out.push_back(rust::String(t->getMTerm()->getName()));
+  }
+  return out;
+}
+rust::Vec<rust::String> pwr_domain_isolations(const OdbDb& h, rust::Str domain) {
+  rust::Vec<rust::String> out;
+  for (odb::dbIsolation* iso : req_pd(h, domain)->getIsolations()) out.push_back(rust::String(iso->getName()));
+  return out;
+}
+rust::Vec<rust::String> pwr_domain_level_shifters(const OdbDb& h, rust::Str domain) {
+  rust::Vec<rust::String> out;
+  for (odb::dbLevelShifter* ls : req_pd(h, domain)->getLevelShifters()) out.push_back(rust::String(ls->getName()));
+  return out;
+}
+rust::Vec<rust::String> isolation_cell_masters(const OdbDb& h, rust::Str iso) {
+  rust::Vec<rust::String> out;
+  for (odb::dbMaster* m : req_iso(h, iso)->getIsolationCells()) out.push_back(rust::String(m ? m->getName() : std::string()));
+  return out;
+}
+rust::Vec<rust::String> masters_in_lib_order(const OdbDb& h) {
+  rust::Vec<rust::String> out;
+  for (odb::dbLib* lib : h.db->getLibs()) {
+    for (odb::dbMaster* m : lib->getMasters()) out.push_back(rust::String(m->getName()));
+  }
+  return out;
+}
+static odb::dbMaster* req_master(const OdbDb& h, rust::Str master) {
+  odb::dbMaster* m = h.db->findMaster(s(master).c_str());
+  if (!m) throw std::runtime_error("vyges-opendb: master not found: " + s(master));
+  return m;
+}
+rust::Vec<rust::String> master_mterm_io(const OdbDb& h, rust::Str master) {
+  rust::Vec<rust::String> out;
+  for (odb::dbMTerm* t : req_master(h, master)->getMTerms()) {
+    out.push_back(rust::String(t->getName()));
+    out.push_back(rust::String(io_name(t->getIoType())));
+  }
+  return out;
+}
+int64_t master_area(const OdbDb& h, rust::Str master) {
+  return req_master(h, master)->getArea();
+}
+bool inst_try_create(const OdbDb& h, rust::Str master, rust::Str name) {
+  return odb::dbInst::create(require_block(h), req_master(h, master), s(name).c_str()) != nullptr;
 }
 rust::Vec<rust::String> inst_module_paths(const OdbDb& h) {
   dbBlock* b = require_block(h);

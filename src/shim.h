@@ -1079,3 +1079,23 @@ bool net_try_create(const OdbDb& db, rust::Str name);
 bool bterm_try_create(const OdbDb& db, rust::Str net, rust::Str name);
 rust::Vec<rust::String> module_children_paths(const OdbDb& db, rust::Str module);
 rust::Vec<rust::String> inst_module_paths(const OdbDb& db);
+// Power intent evaluation, cell insertion: the netlist as it reads and edits it.
+//   inst_iterm_info        an instance's iterms in getITerms order: 3 per iterm (mterm name, io
+//                          type as dbIoType::getString, net or "" when unconnected)
+//   net_iterm_pairs        a net's iterms in getITerms order: 2 per iterm (instance, mterm)
+//   pwr_domain_isolations / pwr_domain_level_shifters   the domain's own lists, in its order
+//   isolation_cell_masters getIsolationCells: each cell name looked up as a master ("" when none)
+//   masters_in_lib_order   every master of every library, getLibs then getMasters order
+//   master_mterm_io        a master's mterms in order: 2 per mterm (name, io type)
+//   master_area            dbMaster::getArea: width * height in DBU^2
+//   inst_try_create        dbInst::create; false where odb returns nullptr
+// upf_find also takes `inst` and `net`.
+rust::Vec<rust::String> inst_iterm_info(const OdbDb& db, rust::Str inst);
+rust::Vec<rust::String> net_iterm_pairs(const OdbDb& db, rust::Str net);
+rust::Vec<rust::String> pwr_domain_isolations(const OdbDb& db, rust::Str domain);
+rust::Vec<rust::String> pwr_domain_level_shifters(const OdbDb& db, rust::Str domain);
+rust::Vec<rust::String> isolation_cell_masters(const OdbDb& db, rust::Str iso);
+rust::Vec<rust::String> masters_in_lib_order(const OdbDb& db);
+rust::Vec<rust::String> master_mterm_io(const OdbDb& db, rust::Str master);
+int64_t master_area(const OdbDb& db, rust::Str master);
+bool inst_try_create(const OdbDb& db, rust::Str master, rust::Str name);
