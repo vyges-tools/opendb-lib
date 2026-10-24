@@ -448,6 +448,13 @@ mod ffi {
         /// enclosure above and below, and on a net routed at met1 and up the via enclosure is
         /// the ONLY metal on li1 — where the standard-cell pins are.
         fn net_wire_boxes(db: &OdbDb, net: &str) -> Vec<i64>;
+        /// The power-grid engine's tech table, flat (layout at the shim in shim.cc).
+        fn psm_tech_layers(db: &OdbDb) -> Result<Vec<i64>>;
+        /// One supply net's swires, iterms and bpins in the database's own order, flat (layout
+        /// at the shim in shim.cc).
+        fn psm_net(db: &OdbDb, net: &str) -> Result<Vec<i64>>;
+        /// Every iterm name then every bterm name of a net, in `psm_net`'s order.
+        fn psm_net_names(db: &OdbDb, net: &str) -> Result<Vec<String>>;
         fn iterm_avg_xy(db: &OdbDb, inst: &str, pin: &str, x: &mut i32, y: &mut i32) -> bool;
         /// The pin's own ROUTING-layer boxes in placed coordinates: 5 i64 each
         /// (layer, x0, y0, x1, y1). What the pin physically touches, rather than where it
@@ -705,4 +712,5 @@ pub use ffi::{
     mterm_antenna_diff_area, layerantenna_diff_pwl_index, layerantenna_diff_pwl_ratio,
     layerantenna_num_diff_pwl,
     iterm_avg_xy, iterm_pin_boxes, iterm_shape_boxes, layer_name_by_number, net_wire_boxes, net_wire_shapes,
+    psm_tech_layers, psm_net, psm_net_names,
 };

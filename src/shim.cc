@@ -5223,3 +5223,180 @@ rust::Vec<rust::String> inst_module_paths(const OdbDb& h) {
   }
   return out;
 }
+
+// ---- Power-grid network inputs: one flat read per net, in the database's own iteration order ----
+//
+// The power-grid engine builds its network from a supply net's special wires, instance terminals and
+// block-terminal pins, walking each in its `dbSet` order. Reading them here in that order, in one call,
+// keeps the walk where the database defines it; the engine decodes the stream in the same order.
+//
+// `psm_tech_layers`: [dbus, first front-side routing layer number (-1), first back-side (-1), count],
+// then per tech layer in `getLayers()` order:
+//   id, number, routing level, pitch, direction (0 none, 1 horizontal, 2 vertical), backside,
+//   upper layer number (-1), cut-class rule count, then per rule:
+//   cuts valid, width, length valid, length, number of cuts.
+rust::Vec<int64_t> psm_tech_layers(const OdbDb& h) {
+  rust::Vec<int64_t> out;
+  dbBlock* b = require_block(h);
+  dbTech* tech = b->getTech();
+  out.push_back(b->getDbUnitsPerMicron());
+  dbTechLayer* front = tech->firstFrontsideRoutingLayer();
+  dbTechLayer* back = tech->firstBacksideRoutingLayer();
+  out.push_back(front ? front->getNumber() : -1);
+  out.push_back(back ? back->getNumber() : -1);
+  out.push_back(tech->getLayers().size());
+  for (dbTechLayer* l : tech->getLayers()) {
+    out.push_back(l->getId());
+    out.push_back(l->getNumber());
+    out.push_back(l->getRoutingLevel());
+    out.push_back(l->getPitch());
+    const auto dir = l->getDirection().getValue();
+    out.push_back(dir == odb::dbTechLayerDir::HORIZONTAL ? 1 : dir == odb::dbTechLayerDir::VERTICAL ? 2 : 0);
+    out.push_back(l->isBackside() ? 1 : 0);
+    dbTechLayer* up = l->getUpperLayer();
+    out.push_back(up ? up->getNumber() : -1);
+    auto rules = l->getTechLayerCutClassRules();
+    out.push_back(rules.size());
+    for (odb::dbTechLayerCutClassRule* r : rules) {
+      out.push_back(r->isCutsValid() ? 1 : 0);
+      out.push_back(r->getWidth());
+      out.push_back(r->isLengthValid() ? 1 : 0);
+      out.push_back(r->getLength());
+      out.push_back(r->getNumCuts());
+    }
+  }
+  return out;
+}
+
+static void psm_push_rect(rust::Vec<int64_t>& out, const odb::Rect& r) {
+  out.push_back(r.xMin());
+  out.push_back(r.yMin());
+  out.push_back(r.xMax());
+  out.push_back(r.yMax());
+}
+
+// A box's via shapes (every layer, cut included), each moved by `t`: count, then layer number + rect.
+static void psm_push_via_shapes(rust::Vec<int64_t>& out, const dbBox* box, const odb::dbTransform& t) {
+  std::vector<odb::dbShape> shapes;
+  box->getViaBoxes(shapes);
+  out.push_back(shapes.size());
+  for (const odb::dbShape& sh : shapes) {
+    dbTechLayer* l = sh.getTechLayer();
+    odb::Rect r = sh.getBox();
+    t.apply(r);
+    out.push_back(l ? l->getNumber() : -1);
+    psm_push_rect(out, r);
+  }
+}
+
+// `psm_net`: [is supply, swire count], then per swire its box count and per box:
+//   via 0: layer number, rect
+//   via 1: rect, via x, via y, top layer number, bottom layer number, via shapes (above)
+// then [iterm count] and per iterm in `getITerms()` order:
+//   id, inst placed, inst FIXED, bbox inverted, avg ok, avg x, avg y, master is backside bridge,
+//   geometry count over every mpin in order, and per geometry: is via, tech layer number (-1),
+//   rect moved by the instance transform, via shapes moved by it (count 0 when not a via)
+// then [bterm count] and per bterm its bpin count, per bpin: id, placed (any placed status),
+//   PSM_DISCONNECT set, box count, and per box: is via, tech layer number (-1), rect,
+//   PSM_DISCONNECT set, via shapes.
+rust::Vec<int64_t> psm_net(const OdbDb& h, rust::Str net) {
+  rust::Vec<int64_t> out;
+  dbBlock* b = require_block(h);
+  dbNet* n = b->findNet(s(net).c_str());
+  if (!n) throw std::runtime_error("vyges-opendb: net not found: " + s(net));
+  const odb::dbTransform identity;
+  out.push_back(n->getSigType().isSupply() ? 1 : 0);
+  out.push_back(n->getSWires().size());
+  for (odb::dbSWire* sw : n->getSWires()) {
+    out.push_back(sw->getWires().size());
+    for (odb::dbSBox* box : sw->getWires()) {
+      out.push_back(box->isVia() ? 1 : 0);
+      if (!box->isVia()) {
+        dbTechLayer* l = box->getTechLayer();
+        out.push_back(l ? l->getNumber() : -1);
+        psm_push_rect(out, box->getBox());
+        continue;
+      }
+      psm_push_rect(out, box->getBox());
+      const odb::Point xy = box->getViaXY();
+      out.push_back(xy.x());
+      out.push_back(xy.y());
+      dbTechLayer* top = nullptr;
+      dbTechLayer* bottom = nullptr;
+      if (odb::dbTechVia* tv = box->getTechVia()) {
+        top = tv->getTopLayer();
+        bottom = tv->getBottomLayer();
+      } else if (odb::dbVia* bv = box->getBlockVia()) {
+        top = bv->getTopLayer();
+        bottom = bv->getBottomLayer();
+      }
+      out.push_back(top ? top->getNumber() : -1);
+      out.push_back(bottom ? bottom->getNumber() : -1);
+      psm_push_via_shapes(out, box, identity);
+    }
+  }
+  out.push_back(n->getITerms().size());
+  for (dbITerm* it : n->getITerms()) {
+    dbInst* inst = it->getInst();
+    out.push_back(it->getId());
+    out.push_back(inst->isPlaced() ? 1 : 0);
+    out.push_back(inst->getPlacementStatus().isFixed() ? 1 : 0);
+    out.push_back(it->getBBox().isInverted() ? 1 : 0);
+    int x = 0, y = 0;
+    out.push_back(it->getAvgXY(&x, &y) ? 1 : 0);
+    out.push_back(x);
+    out.push_back(y);
+    out.push_back(inst->getMaster()->isBacksideBridge() ? 1 : 0);
+    const odb::dbTransform t = inst->getTransform();
+    std::vector<dbBox*> geoms;
+    for (odb::dbMPin* mpin : it->getMTerm()->getMPins()) {
+      for (dbBox* g : mpin->getGeometry()) geoms.push_back(g);
+    }
+    out.push_back(geoms.size());
+    for (dbBox* g : geoms) {
+      out.push_back(g->isVia() ? 1 : 0);
+      dbTechLayer* l = g->getTechLayer();
+      out.push_back(l ? l->getNumber() : -1);
+      odb::Rect r = g->getBox();
+      t.apply(r);
+      psm_push_rect(out, r);
+      if (g->isVia()) psm_push_via_shapes(out, g, t);
+      else out.push_back(0);
+    }
+  }
+  auto disconnect = [](odb::dbObject* o) -> int64_t {
+    odb::dbBoolProperty* p = odb::dbBoolProperty::find(o, "PSM_DISCONNECT");
+    return p != nullptr && p->getValue() ? 1 : 0;
+  };
+  out.push_back(n->getBTerms().size());
+  for (dbBTerm* bt : n->getBTerms()) {
+    out.push_back(bt->getBPins().size());
+    for (dbBPin* pin : bt->getBPins()) {
+      out.push_back(pin->getId());
+      out.push_back(pin->getPlacementStatus().isPlaced() ? 1 : 0);
+      out.push_back(disconnect(pin));
+      out.push_back(pin->getBoxes().size());
+      for (dbBox* g : pin->getBoxes()) {
+        out.push_back(g->isVia() ? 1 : 0);
+        dbTechLayer* l = g->getTechLayer();
+        out.push_back(l ? l->getNumber() : -1);
+        psm_push_rect(out, g->getBox());
+        out.push_back(disconnect(g));
+        if (g->isVia()) psm_push_via_shapes(out, g, identity);
+        else out.push_back(0);
+      }
+    }
+  }
+  return out;
+}
+
+// The names `psm_net` cannot carry, in its order: every iterm's name, then every bterm's.
+rust::Vec<rust::String> psm_net_names(const OdbDb& h, rust::Str net) {
+  rust::Vec<rust::String> out;
+  dbBlock* b = require_block(h);
+  dbNet* n = b->findNet(s(net).c_str());
+  if (!n) throw std::runtime_error("vyges-opendb: net not found: " + s(net));
+  for (dbITerm* it : n->getITerms()) out.push_back(rust::String(it->getName()));
+  for (dbBTerm* bt : n->getBTerms()) out.push_back(rust::String(bt->getName()));
+  return out;
+}
