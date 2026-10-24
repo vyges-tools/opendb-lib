@@ -1052,3 +1052,30 @@ bool level_shifter_create(const OdbDb& db, rust::Str name, rust::Str domain);
 void level_shifter_add_element(const OdbDb& db, rust::Str ls, rust::Str element);
 void level_shifter_add_exclude_element(const OdbDb& db, rust::Str ls, rust::Str element);
 void level_shifter_add_instance(const OdbDb& db, rust::Str ls, rust::Str inst, rust::Str port);
+// Power intent evaluation (eval_upf, before cell insertion): the reads and writes it makes, each
+// ONE odb call or one table in the database's own order.
+//   pwr_domain_area          dbPowerDomain::getArea: x1 y1 x2 y2, or empty when the area is unset
+//   region_create            dbRegion::create; false where odb returns nullptr (the name is taken)
+//   region_set_type          setRegionType: INCLUSIVE | EXCLUSIVE | SUGGESTED (else throws)
+//   region_add_boundary      dbBox::create(region, ...); false where odb returns nullptr
+//   group_create_in_region   dbGroup::create(region, name); false where the group name is taken
+//   group_set_type           setType: PHYSICAL_CLUSTER | VOLTAGE_DOMAIN | POWER_DOMAIN | VISUAL_DEBUG
+//   group_add_inst           dbGroup::addInst (moves the inst out of any group it is in; prepends)
+//   net_try_create           dbNet::create; false where odb returns nullptr (the name is taken)
+//   bterm_try_create         dbBTerm::create on the named net; false where odb returns nullptr
+//   module_children_paths    getChildren of `module` ("" = the top module), in its order: 2 per
+//                            child (hierarchical name, master module name)
+//   inst_module_paths        every block instance in getInsts order: 2 per instance (name, path):
+//                            path "" when it has no module, "." for the top module, else the
+//                            hierarchical name of its module's dbModInst
+rust::Vec<int32_t> pwr_domain_area(const OdbDb& db, rust::Str domain);
+bool region_create(const OdbDb& db, rust::Str name);
+void region_set_type(const OdbDb& db, rust::Str region, rust::Str type);
+bool region_add_boundary(const OdbDb& db, rust::Str region, int32_t x1, int32_t y1, int32_t x2, int32_t y2);
+bool group_create_in_region(const OdbDb& db, rust::Str region, rust::Str name);
+void group_set_type(const OdbDb& db, rust::Str group, rust::Str type);
+void group_add_inst(const OdbDb& db, rust::Str group, rust::Str inst);
+bool net_try_create(const OdbDb& db, rust::Str name);
+bool bterm_try_create(const OdbDb& db, rust::Str net, rust::Str name);
+rust::Vec<rust::String> module_children_paths(const OdbDb& db, rust::Str module);
+rust::Vec<rust::String> inst_module_paths(const OdbDb& db);

@@ -5071,3 +5071,88 @@ void level_shifter_add_exclude_element(const OdbDb& h, rust::Str ls, rust::Str e
 void level_shifter_add_instance(const OdbDb& h, rust::Str ls, rust::Str inst, rust::Str port) {
   req_ls(h, ls)->addInstance(s(inst), s(port));
 }
+rust::Vec<int32_t> pwr_domain_area(const OdbDb& h, rust::Str domain) {
+  rust::Vec<int32_t> out;
+  odb::Rect r;
+  if (req_pd(h, domain)->getArea(r)) {
+    out.push_back(r.xMin());
+    out.push_back(r.yMin());
+    out.push_back(r.xMax());
+    out.push_back(r.yMax());
+  }
+  return out;
+}
+static odb::dbRegion* req_region(const OdbDb& h, rust::Str n) {
+  odb::dbRegion* r = require_block(h)->findRegion(s(n).c_str());
+  if (!r) throw std::runtime_error("vyges-opendb: region not found: " + s(n));
+  return r;
+}
+static odb::dbGroup* req_group(const OdbDb& h, rust::Str n) {
+  odb::dbGroup* g = require_block(h)->findGroup(s(n).c_str());
+  if (!g) throw std::runtime_error("vyges-opendb: group not found: " + s(n));
+  return g;
+}
+bool region_create(const OdbDb& h, rust::Str name) {
+  return odb::dbRegion::create(require_block(h), s(name).c_str()) != nullptr;
+}
+void region_set_type(const OdbDb& h, rust::Str region, rust::Str type) {
+  const std::string t = s(type);
+  odb::dbRegionType v;
+  if (t == "INCLUSIVE") v = odb::dbRegionType::INCLUSIVE;
+  else if (t == "EXCLUSIVE") v = odb::dbRegionType::EXCLUSIVE;
+  else if (t == "SUGGESTED") v = odb::dbRegionType::SUGGESTED;
+  else throw std::runtime_error("vyges-opendb: unknown region type: " + t);
+  req_region(h, region)->setRegionType(v);
+}
+bool region_add_boundary(const OdbDb& h, rust::Str region, int32_t x1, int32_t y1, int32_t x2, int32_t y2) {
+  return odb::dbBox::create(req_region(h, region), x1, y1, x2, y2) != nullptr;
+}
+bool group_create_in_region(const OdbDb& h, rust::Str region, rust::Str name) {
+  return odb::dbGroup::create(req_region(h, region), s(name).c_str()) != nullptr;
+}
+void group_set_type(const OdbDb& h, rust::Str group, rust::Str type) {
+  const std::string t = s(type);
+  odb::dbGroupType v;
+  if (t == "PHYSICAL_CLUSTER") v = odb::dbGroupType::PHYSICAL_CLUSTER;
+  else if (t == "VOLTAGE_DOMAIN") v = odb::dbGroupType::VOLTAGE_DOMAIN;
+  else if (t == "POWER_DOMAIN") v = odb::dbGroupType::POWER_DOMAIN;
+  else if (t == "VISUAL_DEBUG") v = odb::dbGroupType::VISUAL_DEBUG;
+  else throw std::runtime_error("vyges-opendb: unknown group type: " + t);
+  req_group(h, group)->setType(v);
+}
+void group_add_inst(const OdbDb& h, rust::Str group, rust::Str inst) {
+  odb::dbInst* i = require_block(h)->findInst(s(inst).c_str());
+  if (!i) throw std::runtime_error("vyges-opendb: instance not found: " + s(inst));
+  req_group(h, group)->addInst(i);
+}
+bool net_try_create(const OdbDb& h, rust::Str name) {
+  return odb::dbNet::create(require_block(h), s(name).c_str()) != nullptr;
+}
+bool bterm_try_create(const OdbDb& h, rust::Str net, rust::Str name) {
+  odb::dbNet* n = require_block(h)->findNet(s(net).c_str());
+  if (!n) throw std::runtime_error("vyges-opendb: net not found: " + s(net));
+  return odb::dbBTerm::create(n, s(name).c_str()) != nullptr;
+}
+rust::Vec<rust::String> module_children_paths(const OdbDb& h, rust::Str module) {
+  dbBlock* b = require_block(h);
+  odb::dbModule* m = module.empty() ? b->getTopModule() : b->findModule(s(module).c_str());
+  if (!m) throw std::runtime_error("vyges-opendb: module not found: " + s(module));
+  rust::Vec<rust::String> out;
+  for (odb::dbModInst* mi : m->getChildren()) {
+    out.push_back(rust::String(mi->getHierarchicalName()));
+    out.push_back(rust::String(mi->getMaster()->getName()));
+  }
+  return out;
+}
+rust::Vec<rust::String> inst_module_paths(const OdbDb& h) {
+  dbBlock* b = require_block(h);
+  rust::Vec<rust::String> out;
+  for (odb::dbInst* i : b->getInsts()) {
+    odb::dbModule* m = i->getModule();
+    out.push_back(rust::String(i->getName()));
+    if (!m) out.push_back(rust::String(""));
+    else if (m == b->getTopModule()) out.push_back(rust::String("."));
+    else out.push_back(rust::String(m->getModInst()->getHierarchicalName()));
+  }
+  return out;
+}

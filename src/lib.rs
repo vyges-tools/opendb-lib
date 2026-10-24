@@ -191,6 +191,18 @@ mod ffi {
         fn level_shifter_add_element(db: &OdbDb, ls: &str, element: &str) -> Result<()>;
         fn level_shifter_add_exclude_element(db: &OdbDb, ls: &str, element: &str) -> Result<()>;
         fn level_shifter_add_instance(db: &OdbDb, ls: &str, inst: &str, port: &str) -> Result<()>;
+        // Power intent evaluation: its reads and writes, one odb call or table each -- see shim.h.
+        fn pwr_domain_area(db: &OdbDb, domain: &str) -> Result<Vec<i32>>;
+        fn region_create(db: &OdbDb, name: &str) -> Result<bool>;
+        fn region_set_type(db: &OdbDb, region: &str, kind: &str) -> Result<()>;
+        fn region_add_boundary(db: &OdbDb, region: &str, x1: i32, y1: i32, x2: i32, y2: i32) -> Result<bool>;
+        fn group_create_in_region(db: &OdbDb, region: &str, name: &str) -> Result<bool>;
+        fn group_set_type(db: &OdbDb, group: &str, kind: &str) -> Result<()>;
+        fn group_add_inst(db: &OdbDb, group: &str, inst: &str) -> Result<()>;
+        fn net_try_create(db: &OdbDb, name: &str) -> Result<bool>;
+        fn bterm_try_create(db: &OdbDb, net: &str, name: &str) -> Result<bool>;
+        fn module_children_paths(db: &OdbDb, module: &str) -> Result<Vec<String>>;
+        fn inst_module_paths(db: &OdbDb) -> Result<Vec<String>>;
         fn master_edge_type_params(db: &OdbDb, master: &str) -> Result<Vec<i32>>;
         fn tech_cell_edge_spacing_types(db: &OdbDb) -> Result<Vec<String>>;
         fn tech_cell_edge_spacing_params(db: &OdbDb) -> Result<Vec<i32>>;
@@ -666,7 +678,7 @@ pub use ffi::{
     write_def, OdbDb,
     clear_rows, nth_site_name, num_rows, num_sites, row_create, tech_manufacturing_grid,
     site_row_pattern_len, site_row_pattern_orient, site_row_pattern_site,
-    block_cut_rows, block_cut_rows_at_blockages, group_get_type, has_one_site_master, nth_row_name, site_get_class, create_physical_inst, inst_bbox, master_placement_boundary, master_edge_type_names, master_edge_type_params, pwr_domain_elements, logic_port_direction, pwr_switch_records, level_shifter_records, upf_find, pwr_domain_create, pwr_domain_add_element, pwr_domain_add_power_switch, pwr_domain_add_isolation, pwr_domain_set_area, logic_port_create, pwr_switch_create, pwr_switch_add_in_supply_port, pwr_switch_add_control_port, pwr_switch_add_acknowledge_port, pwr_switch_add_on_state, pwr_switch_add_port_map, isolation_create, isolation_add_isolation_cell, level_shifter_create, level_shifter_add_element, level_shifter_add_exclude_element, level_shifter_add_instance, tech_cell_edge_spacing_types, tech_cell_edge_spacing_params, ndr_create, ndr_layer_rule_set, ndr_layer_rule_layers, ndr_layer_rule_params, ndr_add_use_via, ndr_use_vias, ndr_use_via_rules, ndr_layer_rule_wire_exts, block_access_point_count, iterm_pref_access_points, iterm_access_point_count, bpin_access_points, net_guides, net_wire_decode, layer_lef58_type, layer_rule_census, mpin_add_access_point, iterm_set_access_point, bpin_add_access_point, net_write_wire, block_create_via, block_set_gcell_grid, block_reset_gcell_grid, layer_min_enclosed_areas, num_masters, nth_master_name, master_get_type,
+    block_cut_rows, block_cut_rows_at_blockages, group_get_type, has_one_site_master, nth_row_name, site_get_class, create_physical_inst, inst_bbox, master_placement_boundary, master_edge_type_names, master_edge_type_params, pwr_domain_elements, logic_port_direction, pwr_switch_records, level_shifter_records, upf_find, pwr_domain_create, pwr_domain_add_element, pwr_domain_add_power_switch, pwr_domain_add_isolation, pwr_domain_set_area, logic_port_create, pwr_switch_create, pwr_switch_add_in_supply_port, pwr_switch_add_control_port, pwr_switch_add_acknowledge_port, pwr_switch_add_on_state, pwr_switch_add_port_map, isolation_create, isolation_add_isolation_cell, level_shifter_create, level_shifter_add_element, level_shifter_add_exclude_element, level_shifter_add_instance, pwr_domain_area, region_create, region_set_type, region_add_boundary, group_create_in_region, group_set_type, group_add_inst, net_try_create, bterm_try_create, module_children_paths, inst_module_paths, tech_cell_edge_spacing_types, tech_cell_edge_spacing_params, ndr_create, ndr_layer_rule_set, ndr_layer_rule_layers, ndr_layer_rule_params, ndr_add_use_via, ndr_use_vias, ndr_use_via_rules, ndr_layer_rule_wire_exts, block_access_point_count, iterm_pref_access_points, iterm_access_point_count, bpin_access_points, net_guides, net_wire_decode, layer_lef58_type, layer_rule_census, mpin_add_access_point, iterm_set_access_point, bpin_add_access_point, net_write_wire, block_create_via, block_set_gcell_grid, block_reset_gcell_grid, layer_min_enclosed_areas, num_masters, nth_master_name, master_get_type,
     nth_row_bbox, nth_row_site, nth_row_orient, nth_row_direction, destroy_inst,
     inst_shapes, pin_obstruction_boxes, obstruction_boxes, fill_obstruction_boxes, blockage_boxes, swire_boxes, special_wire_boxes, wire_shape_type_name, blockage_create, num_blockages, blockage_destroy,
     fill_create, num_fills, clear_fills,

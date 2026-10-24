@@ -5,7 +5,7 @@
   "scope": "all",
   "class_count": 122,
   "method_count": 2720,
-  "bridged_count": 2046,
+  "bridged_count": 2051,
   "classes": [
     {
       "name": "dbAccessPoint",
@@ -1393,7 +1393,7 @@
           ],
           "const": false,
           "kind": "relation",
-          "bridged": false,
+          "bridged": true,
           "target": "dbModule"
         },
         {
@@ -7559,7 +7559,7 @@
           ],
           "const": false,
           "kind": "setter",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "removeInst",
@@ -12340,7 +12340,7 @@
           ],
           "const": false,
           "kind": "setter",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "getOwner",
@@ -15754,7 +15754,7 @@
           ],
           "const": false,
           "kind": "setter",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "getRegionInsts",
@@ -15819,7 +15819,7 @@
           ],
           "const": false,
           "kind": "setter",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "removeInst",
