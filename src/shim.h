@@ -1106,3 +1106,7 @@ rust::Vec<int64_t> psm_short_inputs(const OdbDb& db, rust::Str net);
 rust::Vec<rust::String> psm_short_names(const OdbDb& db, rust::Str net);
 void psm_write_error_file(const OdbDb& db, rust::Str net, rust::Slice<const int64_t> v,
                           rust::Slice<const rust::String> names, rust::Str path);
+rust::Vec<rust::String> dft_scan_replace(const OdbDb& db, rust::Slice<const rust::String> masters,
+                                         rust::Slice<const int64_t> classes,
+                                         rust::Slice<const rust::String> to_masters,
+                                         rust::Slice<const rust::String> port_maps);

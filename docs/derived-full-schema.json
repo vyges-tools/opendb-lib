@@ -5,7 +5,7 @@
   "scope": "all",
   "class_count": 122,
   "method_count": 2720,
-  "bridged_count": 2063,
+  "bridged_count": 2067,
   "classes": [
     {
       "name": "dbAccessPoint",
@@ -6559,7 +6559,7 @@
           ],
           "const": false,
           "kind": "setter",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "getTransform",
@@ -7113,7 +7113,7 @@
           ],
           "const": false,
           "kind": "setter",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "getTransform",
@@ -7337,7 +7337,7 @@
           ],
           "const": false,
           "kind": "setter",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "getTransform",
@@ -8346,7 +8346,7 @@
           ],
           "const": false,
           "kind": "setter",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "getHierTransform",

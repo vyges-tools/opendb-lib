@@ -5710,3 +5710,112 @@ void psm_write_error_file(const OdbDb& h, rust::Str net, rust::Slice<const int64
   if (!group) return;
   group->writeTR(s(path));
 }
+
+// ── dft: scan replacement's instance walk ──────────────────────────────────────────────────────
+// The library half (which masters are scan cells, and which scan master replaces which flop with
+// what port mapping) is decided by the caller; this is the design half, run in the database's own
+// order so ids, module instance lists and names come out as a replacement made there would leave
+// them. `masters[i]` is classed by `classes[i]`: 1 leave it (not sequential, or a clock gate),
+// 2 already a scan cell, 3 replace it with `to_masters[i]` mapping ports by `port_maps[i]`
+// ("from\tto" lines), 4 no scan equivalent; a master not listed has no Liberty cell. Per block
+// (then its child blocks, depth first), per instance in the block's order, skipping one made by
+// this walk, a dont_touch one, one on a dont_touch net and a hierarchical one. Events, in order,
+// as "kind\tinstance\tmaster": no-lib (a CORE master, once per master per block), already-scan,
+// no-equivalent, replaced.
+//
+// A replacement makes the new instance FIRST (named tmp_scan_flop, in the old one's module), gives
+// it the old one's transform, placement status, source type, region and group, destroys the old
+// one, connects each of the old one's FLAT nets (in its iterm order) to the mapped pin, and takes
+// the old name.
+namespace {
+struct DftReplace {
+  odb::dbMaster* to;
+  std::map<std::string, std::string> ports;
+};
+
+void dft_walk(odb::dbDatabase* db, dbBlock* block, const std::map<std::string, int64_t>& cls,
+              const std::map<std::string, DftReplace>& rep, rust::Vec<rust::String>& events) {
+  std::unordered_set<odb::dbInst*> made;
+  std::unordered_set<odb::dbMaster*> warned;
+  auto event = [&](const char* kind, const std::string& inst, const std::string& master) {
+    events.push_back(rust::String(std::string(kind) + "\t" + inst + "\t" + master));
+  };
+  for (odb::dbInst* inst : block->getInsts()) {
+    if (made.count(inst) || inst->isDoNotTouch()) continue;
+    bool dont_touch_net = false;
+    for (dbITerm* it : inst->getITerms()) {
+      if (it->getNet() && it->getNet()->isDoNotTouch()) dont_touch_net = true;
+    }
+    if (dont_touch_net || inst->isHierarchical()) continue;
+    odb::dbMaster* master = inst->getMaster();
+    auto c = cls.find(master->getName());
+    if (c == cls.end()) {
+      if (master->getType() == odb::dbMasterType::CORE && warned.insert(master).second) {
+        event("no-lib", inst->getName(), master->getName());
+      }
+      continue;
+    }
+    if (c->second == 1) continue;
+    if (c->second == 2) { event("already-scan", inst->getName(), master->getName()); continue; }
+    if (c->second == 4) { event("no-equivalent", inst->getName(), master->getName()); continue; }
+    const DftReplace& r = rep.at(master->getName());
+    std::vector<std::pair<std::string, dbNet*>> nets;
+    for (dbITerm* it : inst->getITerms()) nets.emplace_back(it->getMTerm()->getName(), it->getNet());
+    const std::string name = inst->getName();
+    odb::dbInst* fresh = odb::dbInst::create(block, r.to, "tmp_scan_flop", false, inst->getModule());
+    if (!fresh) throw std::runtime_error("vyges-opendb: could not create the scan instance for " + name);
+    fresh->setTransform(inst->getTransform());
+    fresh->setPlacementStatus(inst->getPlacementStatus());
+    fresh->setSourceType(inst->getSourceType());
+    if (odb::dbRegion* region = inst->getRegion()) region->addInst(fresh);
+    if (odb::dbGroup* group = inst->getGroup()) group->addInst(fresh);
+    odb::dbInst::destroy(inst);
+    for (const auto& [port, net] : nets) {
+      if (!net) continue;
+      auto to = r.ports.find(port);
+      if (to == r.ports.end()) throw std::runtime_error("vyges-opendb: no scan pin mapped for " + name + "/" + port);
+      dbITerm* pin = fresh->findITerm(to->second.c_str());
+      if (!pin) throw std::runtime_error("vyges-opendb: scan master has no pin " + to->second);
+      pin->connect(net);
+    }
+    fresh->rename(name.c_str());
+    made.insert(fresh);
+    event("replaced", name, r.to->getName());
+  }
+  for (dbBlock* child : block->getChildren()) dft_walk(db, child, cls, rep, events);
+}
+}  // namespace
+
+rust::Vec<rust::String> dft_scan_replace(const OdbDb& h, rust::Slice<const rust::String> masters,
+                                         rust::Slice<const int64_t> classes,
+                                         rust::Slice<const rust::String> to_masters,
+                                         rust::Slice<const rust::String> port_maps) {
+  dbBlock* top = require_block(h);
+  if (classes.size() != masters.size() || to_masters.size() != masters.size() || port_maps.size() != masters.size()) {
+    throw std::runtime_error("vyges-opendb: dft_scan_replace: one class, target and port map per master");
+  }
+  std::map<std::string, int64_t> cls;
+  std::map<std::string, DftReplace> rep;
+  for (size_t i = 0; i < masters.size(); ++i) {
+    const std::string m(masters[i]);
+    cls[m] = classes[i];
+    if (classes[i] != 3) continue;
+    DftReplace r{h.db->findMaster(std::string(to_masters[i]).c_str()), {}};
+    if (!r.to) throw std::runtime_error("vyges-opendb: no master " + std::string(to_masters[i]));
+    std::string text(port_maps[i]);
+    size_t at = 0;
+    while (at < text.size()) {
+      size_t end = text.find('\n', at);
+      if (end == std::string::npos) end = text.size();
+      const std::string line = text.substr(at, end - at);
+      const size_t tab = line.find('\t');
+      if (tab == std::string::npos) throw std::runtime_error("vyges-opendb: bad port map line: " + line);
+      r.ports[line.substr(0, tab)] = line.substr(tab + 1);
+      at = end + 1;
+    }
+    rep[m] = r;
+  }
+  rust::Vec<rust::String> events;
+  dft_walk(h.db, top, cls, rep, events);
+  return events;
+}
