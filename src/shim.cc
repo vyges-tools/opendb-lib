@@ -4976,3 +4976,98 @@ rust::Vec<rust::String> level_shifter_records(const OdbDb& h, rust::Str ls, rust
   }
   return out;
 }
+
+// ---- power intent: creates and adders (see shim.h) ----
+
+static odb::dbPowerDomain* req_pd(const OdbDb& h, rust::Str n) {
+  odb::dbPowerDomain* p = require_block(h)->findPowerDomain(s(n).c_str());
+  if (!p) throw std::runtime_error("vyges-opendb: power domain not found: " + s(n));
+  return p;
+}
+static odb::dbPowerSwitch* req_ps(const OdbDb& h, rust::Str n) {
+  odb::dbPowerSwitch* p = require_block(h)->findPowerSwitch(s(n).c_str());
+  if (!p) throw std::runtime_error("vyges-opendb: power switch not found: " + s(n));
+  return p;
+}
+static odb::dbIsolation* req_iso(const OdbDb& h, rust::Str n) {
+  odb::dbIsolation* p = require_block(h)->findIsolation(s(n).c_str());
+  if (!p) throw std::runtime_error("vyges-opendb: isolation not found: " + s(n));
+  return p;
+}
+static odb::dbLevelShifter* req_ls(const OdbDb& h, rust::Str n) {
+  odb::dbLevelShifter* p = require_block(h)->findLevelShifter(s(n).c_str());
+  if (!p) throw std::runtime_error("vyges-opendb: level shifter not found: " + s(n));
+  return p;
+}
+
+bool upf_find(const OdbDb& h, rust::Str kind, rust::Str name) {
+  const std::string k = s(kind), n = s(name);
+  if (k == "master") {
+    for (odb::dbLib* lib : h.db->getLibs()) {
+      if (lib->findMaster(n.c_str())) return true;
+    }
+    return false;
+  }
+  dbBlock* b = require_block(h);
+  if (k == "power_domain") return b->findPowerDomain(n.c_str()) != nullptr;
+  if (k == "logic_port") return b->findLogicPort(n.c_str()) != nullptr;
+  if (k == "power_switch") return b->findPowerSwitch(n.c_str()) != nullptr;
+  if (k == "isolation") return b->findIsolation(n.c_str()) != nullptr;
+  if (k == "level_shifter") return b->findLevelShifter(n.c_str()) != nullptr;
+  throw std::runtime_error("vyges-opendb: upf_find: unknown kind " + k);
+}
+bool pwr_domain_create(const OdbDb& h, rust::Str name) {
+  return odb::dbPowerDomain::create(require_block(h), s(name).c_str()) != nullptr;
+}
+void pwr_domain_add_element(const OdbDb& h, rust::Str domain, rust::Str element) {
+  req_pd(h, domain)->addElement(s(element));
+}
+void pwr_domain_add_power_switch(const OdbDb& h, rust::Str domain, rust::Str sw) {
+  req_pd(h, domain)->addPowerSwitch(req_ps(h, sw));
+}
+void pwr_domain_add_isolation(const OdbDb& h, rust::Str domain, rust::Str iso) {
+  req_pd(h, domain)->addIsolation(req_iso(h, iso));
+}
+void pwr_domain_set_area(const OdbDb& h, rust::Str domain, int32_t x1, int32_t y1, int32_t x2, int32_t y2) {
+  req_pd(h, domain)->setArea(odb::Rect(x1, y1, x2, y2));
+}
+bool logic_port_create(const OdbDb& h, rust::Str name, rust::Str direction) {
+  return odb::dbLogicPort::create(require_block(h), s(name).c_str(), s(direction)) != nullptr;
+}
+bool pwr_switch_create(const OdbDb& h, rust::Str name) {
+  return odb::dbPowerSwitch::create(require_block(h), s(name).c_str()) != nullptr;
+}
+void pwr_switch_add_in_supply_port(const OdbDb& h, rust::Str sw, rust::Str port, rust::Str net) {
+  req_ps(h, sw)->addInSupplyPort(s(port), s(net));
+}
+void pwr_switch_add_control_port(const OdbDb& h, rust::Str sw, rust::Str port, rust::Str net) {
+  req_ps(h, sw)->addControlPort(s(port), s(net));
+}
+void pwr_switch_add_acknowledge_port(const OdbDb& h, rust::Str sw, rust::Str port, rust::Str net, rust::Str expr) {
+  req_ps(h, sw)->addAcknowledgePort(s(port), s(net), s(expr));
+}
+void pwr_switch_add_on_state(const OdbDb& h, rust::Str sw, rust::Str state, rust::Str port, rust::Str expr) {
+  req_ps(h, sw)->addOnState(s(state), s(port), s(expr));
+}
+void pwr_switch_add_port_map(const OdbDb& h, rust::Str sw, rust::Str model_port, rust::Str switch_port) {
+  req_ps(h, sw)->addPortMap(s(model_port), s(switch_port));
+}
+bool isolation_create(const OdbDb& h, rust::Str name) {
+  return odb::dbIsolation::create(require_block(h), s(name).c_str()) != nullptr;
+}
+void isolation_add_isolation_cell(const OdbDb& h, rust::Str iso, rust::Str cell) {
+  req_iso(h, iso)->addIsolationCell(s(cell));
+}
+bool level_shifter_create(const OdbDb& h, rust::Str name, rust::Str domain) {
+  dbBlock* b = require_block(h);
+  return odb::dbLevelShifter::create(b, s(name).c_str(), b->findPowerDomain(s(domain).c_str())) != nullptr;
+}
+void level_shifter_add_element(const OdbDb& h, rust::Str ls, rust::Str element) {
+  req_ls(h, ls)->addElement(s(element));
+}
+void level_shifter_add_exclude_element(const OdbDb& h, rust::Str ls, rust::Str element) {
+  req_ls(h, ls)->addExcludeElement(s(element));
+}
+void level_shifter_add_instance(const OdbDb& h, rust::Str ls, rust::Str inst, rust::Str port) {
+  req_ls(h, ls)->addInstance(s(inst), s(port));
+}

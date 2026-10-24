@@ -1021,3 +1021,34 @@ rust::Vec<rust::String> pwr_domain_elements(const OdbDb& db, rust::Str domain);
 rust::String logic_port_direction(const OdbDb& db, rust::Str port);
 rust::Vec<rust::String> pwr_switch_records(const OdbDb& db, rust::Str sw, rust::Str field);
 rust::Vec<rust::String> level_shifter_records(const OdbDb& db, rust::Str ls, rust::Str field);
+// Power intent: the creates and adders the generator does not emit (static factories and list
+// appends), each ONE odb call addressed by name, so a UPF reader makes the same calls in the same
+// order as the reference's. The field setters (`pwr_domain_set_voltage`, `isolation_set_*`,
+// `level_shifter_set_*`, `pwr_switch_set_lib_cell`, ...) are generated.
+//   upf_find            does the object exist? `kind`: power_domain | logic_port | power_switch |
+//                       isolation | level_shifter | master (any library, in the database's order)
+//   *_create            false where odb returns nullptr (the name is taken; a level shifter's
+//                       domain is missing), exactly the reference's failure test
+//   pwr_switch_add_port_map  dbPowerSwitch::addPortMap(model port, switch port): the switch port
+//                       is a terminal of the mapped cell; odb's own errors (no cell, ODB-0153; no
+//                       such terminal, ODB-0154) throw
+// Every other call throws when its object is missing: the caller has already looked it up.
+bool upf_find(const OdbDb& db, rust::Str kind, rust::Str name);
+bool pwr_domain_create(const OdbDb& db, rust::Str name);
+void pwr_domain_add_element(const OdbDb& db, rust::Str domain, rust::Str element);
+void pwr_domain_add_power_switch(const OdbDb& db, rust::Str domain, rust::Str sw);
+void pwr_domain_add_isolation(const OdbDb& db, rust::Str domain, rust::Str iso);
+void pwr_domain_set_area(const OdbDb& db, rust::Str domain, int32_t x1, int32_t y1, int32_t x2, int32_t y2);
+bool logic_port_create(const OdbDb& db, rust::Str name, rust::Str direction);
+bool pwr_switch_create(const OdbDb& db, rust::Str name);
+void pwr_switch_add_in_supply_port(const OdbDb& db, rust::Str sw, rust::Str port, rust::Str net);
+void pwr_switch_add_control_port(const OdbDb& db, rust::Str sw, rust::Str port, rust::Str net);
+void pwr_switch_add_acknowledge_port(const OdbDb& db, rust::Str sw, rust::Str port, rust::Str net, rust::Str expr);
+void pwr_switch_add_on_state(const OdbDb& db, rust::Str sw, rust::Str state, rust::Str port, rust::Str expr);
+void pwr_switch_add_port_map(const OdbDb& db, rust::Str sw, rust::Str model_port, rust::Str switch_port);
+bool isolation_create(const OdbDb& db, rust::Str name);
+void isolation_add_isolation_cell(const OdbDb& db, rust::Str iso, rust::Str cell);
+bool level_shifter_create(const OdbDb& db, rust::Str name, rust::Str domain);
+void level_shifter_add_element(const OdbDb& db, rust::Str ls, rust::Str element);
+void level_shifter_add_exclude_element(const OdbDb& db, rust::Str ls, rust::Str element);
+void level_shifter_add_instance(const OdbDb& db, rust::Str ls, rust::Str inst, rust::Str port);
