@@ -5400,3 +5400,196 @@ rust::Vec<rust::String> psm_net_names(const OdbDb& h, rust::Str net) {
   for (dbBTerm* bt : n->getBTerms()) out.push_back(rust::String(bt->getName()));
   return out;
 }
+
+// `psm_short_inputs`: everything the power-grid short check walks besides the net itself, in the
+// database's own order. Names go to `psm_short_names` (same call order); the stream holds indices
+// into it (-1 for none). Layers are by number (-1 for none). A "via shapes" list is a count, then
+// layer + rect per shape (every layer, cut included).
+//
+//   [net sig type, other-net count], per other net in `getNets()` order:
+//     name, bterm count, per bterm: name, bpin count, per bpin: placed, fixed, box count, per box:
+//       is via, layer, rect, via shapes
+//     swire box count (all swires in order), per box: octilinear, is via, layer, rect, via shapes
+//     wire shape count, per shape of `dbWireShapeItr`: is via, layer, rect, via shapes
+//   [inst count], per inst in `getInsts()` order:
+//     name, placed, fixed, master index, orient, offset x, offset y, iterm count, per iterm in
+//     `getITerms()` order: name, on the checked net, net name (-1 none), sig type, mterm index
+//   [master count], per master in first-use order:
+//     placement boundary rect, mterm count, per mterm: box count, per box of every mpin's
+//     `getGeometry(false)` (polygons NOT decomposed): is via, layer, rect, via shapes; polygon
+//     count, per polygon of every mpin's `getPolygonGeometry()`: layer, point count, x y per point;
+//     obstruction box count, per box of `getObstructions(false)`: is via, layer, rect, via shapes;
+//     obstruction polygon count, per polygon of `getPolygonObstructions()`: as the pin polygons
+//   [block obstruction count], per obstruction: except-PG-nets, slot, fill, layer, rect, inst name
+//   [fill count], per fill: layer, rect, mask number
+static void psm_push_box(rust::Vec<int64_t>& out, dbBox* g) {
+  out.push_back(g->isVia() ? 1 : 0);
+  dbTechLayer* l = g->getTechLayer();
+  out.push_back(l ? l->getNumber() : -1);
+  psm_push_rect(out, g->getBox());
+  if (g->isVia()) psm_push_via_shapes(out, g, odb::dbTransform());
+  else out.push_back(0);
+}
+
+static void psm_push_polygon(rust::Vec<int64_t>& out, odb::dbPolygon* p) {
+  dbTechLayer* l = p->getTechLayer();
+  out.push_back(l ? l->getNumber() : -1);
+  const std::vector<odb::Point> pts = p->getPolygon().getPoints();
+  out.push_back(pts.size());
+  for (const odb::Point& pt : pts) {
+    out.push_back(pt.x());
+    out.push_back(pt.y());
+  }
+}
+
+static rust::Vec<int64_t> psm_short_walk(const OdbDb& h, rust::Str net, rust::Vec<rust::String>* names) {
+  rust::Vec<int64_t> out;
+  dbBlock* b = require_block(h);
+  dbNet* n = b->findNet(s(net).c_str());
+  if (!n) throw std::runtime_error("vyges-opendb: net not found: " + s(net));
+  // Both calls walk the same order, so the n-th name is index n in either.
+  int64_t next_name = 0;
+  auto name = [&](const std::string& v) -> int64_t {
+    if (names) names->push_back(rust::String(v));
+    return next_name++;
+  };
+  out.push_back(n->getSigType().getValue());
+  out.push_back(int64_t(b->getNets().size()) - 1);
+  for (dbNet* other : b->getNets()) {
+    if (other == n) continue;
+    out.push_back(name(other->getName()));
+    out.push_back(other->getBTerms().size());
+    for (dbBTerm* bt : other->getBTerms()) {
+      out.push_back(name(bt->getName()));
+      out.push_back(bt->getBPins().size());
+      for (dbBPin* pin : bt->getBPins()) {
+        out.push_back(pin->getPlacementStatus().isPlaced() ? 1 : 0);
+        out.push_back(pin->getPlacementStatus().isFixed() ? 1 : 0);
+        out.push_back(pin->getBoxes().size());
+        for (dbBox* g : pin->getBoxes()) psm_push_box(out, g);
+      }
+    }
+    std::vector<odb::dbSBox*> sboxes;
+    for (odb::dbSWire* sw : other->getSWires()) {
+      for (odb::dbSBox* sb : sw->getWires()) sboxes.push_back(sb);
+    }
+    out.push_back(sboxes.size());
+    for (odb::dbSBox* sb : sboxes) {
+      out.push_back(sb->getDirection() == odb::dbSBox::OCTILINEAR ? 1 : 0);
+      psm_push_box(out, sb);
+    }
+    std::vector<odb::dbShape> shapes;
+    if (odb::dbWire* w = other->getWire()) {
+      odb::dbWireShapeItr itr;
+      itr.begin(w);
+      odb::dbShape sh;
+      while (itr.next(sh)) shapes.push_back(sh);
+    }
+    out.push_back(shapes.size());
+    for (const odb::dbShape& sh : shapes) {
+      out.push_back(sh.isVia() ? 1 : 0);
+      dbTechLayer* l = sh.getTechLayer();
+      out.push_back(l ? l->getNumber() : -1);
+      psm_push_rect(out, sh.getBox());
+      if (sh.isVia()) {
+        std::vector<odb::dbShape> vb;
+        odb::dbShape::getViaBoxes(sh, vb);
+        out.push_back(vb.size());
+        for (const odb::dbShape& v : vb) {
+          dbTechLayer* vl = v.getTechLayer();
+          out.push_back(vl ? vl->getNumber() : -1);
+          psm_push_rect(out, v.getBox());
+        }
+      } else {
+        out.push_back(0);
+      }
+    }
+  }
+  // A lookup only (the order is first use). Not by id: a master's id is only unique in its library.
+  std::map<std::uintptr_t, int64_t> master_index;
+  std::vector<dbMaster*> masters;
+  out.push_back(b->getInsts().size());
+  for (dbInst* inst : b->getInsts()) {
+    out.push_back(name(inst->getName()));
+    out.push_back(inst->getPlacementStatus().isPlaced() ? 1 : 0);
+    out.push_back(inst->getPlacementStatus().isFixed() ? 1 : 0);
+    dbMaster* m = inst->getMaster();
+    auto found = master_index.find(reinterpret_cast<std::uintptr_t>(m));
+    if (found == master_index.end()) {
+      found = master_index.emplace(reinterpret_cast<std::uintptr_t>(m), int64_t(masters.size())).first;
+      masters.push_back(m);
+    }
+    out.push_back(found->second);
+    const odb::dbTransform t = inst->getTransform();
+    out.push_back(t.getOrient().getValue());
+    out.push_back(t.getOffset().x());
+    out.push_back(t.getOffset().y());
+    out.push_back(inst->getITerms().size());
+    for (dbITerm* it : inst->getITerms()) {
+      out.push_back(name(it->getName()));
+      out.push_back(it->getNet() == n ? 1 : 0);
+      out.push_back(it->getNet() ? name(it->getNet()->getName()) : -1);
+      out.push_back(it->getSigType().getValue());
+      int64_t idx = 0;
+      for (odb::dbMTerm* mt : m->getMTerms()) {
+        if (mt == it->getMTerm()) break;
+        idx++;
+      }
+      out.push_back(idx);
+    }
+  }
+  out.push_back(masters.size());
+  for (dbMaster* m : masters) {
+    odb::Rect boundary;
+    m->getPlacementBoundary(boundary);
+    psm_push_rect(out, boundary);
+    out.push_back(m->getMTerms().size());
+    for (odb::dbMTerm* mt : m->getMTerms()) {
+      std::vector<dbBox*> boxes;
+      std::vector<odb::dbPolygon*> polygons;
+      for (odb::dbMPin* mpin : mt->getMPins()) {
+        for (dbBox* g : mpin->getGeometry(false)) boxes.push_back(g);
+        for (odb::dbPolygon* p : mpin->getPolygonGeometry()) polygons.push_back(p);
+      }
+      out.push_back(boxes.size());
+      for (dbBox* g : boxes) psm_push_box(out, g);
+      out.push_back(polygons.size());
+      for (odb::dbPolygon* p : polygons) psm_push_polygon(out, p);
+    }
+    out.push_back(m->getObstructions(false).size());
+    for (dbBox* g : m->getObstructions(false)) psm_push_box(out, g);
+    out.push_back(m->getPolygonObstructions().size());
+    for (odb::dbPolygon* p : m->getPolygonObstructions()) psm_push_polygon(out, p);
+  }
+  out.push_back(b->getObstructions().size());
+  for (dbObstruction* obs : b->getObstructions()) {
+    out.push_back(obs->isExceptPGNetsObstruction() ? 1 : 0);
+    out.push_back(obs->isSlotObstruction() ? 1 : 0);
+    out.push_back(obs->isFillObstruction() ? 1 : 0);
+    dbBox* box = obs->getBBox();
+    dbTechLayer* l = box->getTechLayer();
+    out.push_back(l ? l->getNumber() : -1);
+    psm_push_rect(out, box->getBox());
+    out.push_back(obs->getInstance() ? name(obs->getInstance()->getName()) : -1);
+  }
+  out.push_back(b->getFills().size());
+  for (odb::dbFill* f : b->getFills()) {
+    dbTechLayer* l = f->getTechLayer();
+    out.push_back(l ? l->getNumber() : -1);
+    odb::Rect r;
+    f->getRect(r);
+    psm_push_rect(out, r);
+    out.push_back(f->maskNumber());
+  }
+  return out;
+}
+
+rust::Vec<int64_t> psm_short_inputs(const OdbDb& h, rust::Str net) {
+  return psm_short_walk(h, net, nullptr);
+}
+
+rust::Vec<rust::String> psm_short_names(const OdbDb& h, rust::Str net) {
+  rust::Vec<rust::String> names;
+  psm_short_walk(h, net, &names);
+  return names;
+}

@@ -1102,3 +1102,5 @@ bool inst_try_create(const OdbDb& db, rust::Str master, rust::Str name);
 rust::Vec<int64_t> psm_tech_layers(const OdbDb& db);
 rust::Vec<int64_t> psm_net(const OdbDb& db, rust::Str net);
 rust::Vec<rust::String> psm_net_names(const OdbDb& db, rust::Str net);
+rust::Vec<int64_t> psm_short_inputs(const OdbDb& db, rust::Str net);
+rust::Vec<rust::String> psm_short_names(const OdbDb& db, rust::Str net);
