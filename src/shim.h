@@ -1100,6 +1100,7 @@ rust::Vec<rust::String> master_mterm_io(const OdbDb& db, rust::Str master);
 int64_t master_area(const OdbDb& db, rust::Str master);
 bool inst_try_create(const OdbDb& db, rust::Str master, rust::Str name);
 rust::Vec<int64_t> psm_tech_layers(const OdbDb& db);
+rust::Vec<double> psm_solve_inputs(const OdbDb& db, rust::Str net);
 rust::Vec<int64_t> psm_net(const OdbDb& db, rust::Str net);
 rust::Vec<rust::String> psm_net_names(const OdbDb& db, rust::Str net);
 rust::Vec<int64_t> psm_short_inputs(const OdbDb& db, rust::Str net);

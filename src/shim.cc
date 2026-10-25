@@ -5269,6 +5269,40 @@ rust::Vec<int64_t> psm_tech_layers(const OdbDb& h) {
   return out;
 }
 
+// `psm_solve_inputs`: die area, core area (x0 y0 x1 y1 each), the tech layer count, then per tech
+// layer in `getLayers()` order: type (1 ROUTING, 2 CUT, 0 other), width, database resistance; then
+// the net's sig type (1 POWER, 2 GROUND, 0 other), its iterm count and per iterm in `getITerms()`
+// order the instance's id.
+rust::Vec<double> psm_solve_inputs(const OdbDb& h, rust::Str net_name) {
+  rust::Vec<double> out;
+  dbBlock* b = require_block(h);
+  dbNet* net = b->findNet(std::string(net_name).c_str());
+  if (net == nullptr) {
+    throw std::runtime_error("net not found: " + std::string(net_name));
+  }
+  for (const odb::Rect& r : {b->getDieArea(), b->getCoreArea()}) {
+    out.push_back(r.xMin());
+    out.push_back(r.yMin());
+    out.push_back(r.xMax());
+    out.push_back(r.yMax());
+  }
+  dbTech* tech = b->getTech();
+  out.push_back(tech->getLayers().size());
+  for (dbTechLayer* l : tech->getLayers()) {
+    const auto type = l->getType().getValue();
+    out.push_back(type == odb::dbTechLayerType::ROUTING ? 1 : type == odb::dbTechLayerType::CUT ? 2 : 0);
+    out.push_back(l->getWidth());
+    out.push_back(l->getResistance());
+  }
+  const auto sig = net->getSigType().getValue();
+  out.push_back(sig == odb::dbSigType::POWER ? 1 : sig == odb::dbSigType::GROUND ? 2 : 0);
+  out.push_back(net->getITerms().size());
+  for (dbITerm* it : net->getITerms()) {
+    out.push_back(it->getInst()->getId());
+  }
+  return out;
+}
+
 static void psm_push_rect(rust::Vec<int64_t>& out, const odb::Rect& r) {
   out.push_back(r.xMin());
   out.push_back(r.yMin());

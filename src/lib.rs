@@ -450,6 +450,8 @@ mod ffi {
         fn net_wire_boxes(db: &OdbDb, net: &str) -> Vec<i64>;
         /// The power-grid engine's tech table, flat (layout at the shim in shim.cc).
         fn psm_tech_layers(db: &OdbDb) -> Result<Vec<i64>>;
+        /// The power-grid solve's database inputs, flat (layout at the shim in shim.cc).
+        fn psm_solve_inputs(db: &OdbDb, net: &str) -> Result<Vec<f64>>;
         /// One supply net's swires, iterms and bpins in the database's own order, flat (layout
         /// at the shim in shim.cc).
         fn psm_net(db: &OdbDb, net: &str) -> Result<Vec<i64>>;
@@ -725,5 +727,5 @@ pub use ffi::{
     mterm_antenna_diff_area, layerantenna_diff_pwl_index, layerantenna_diff_pwl_ratio,
     layerantenna_num_diff_pwl,
     iterm_avg_xy, iterm_pin_boxes, iterm_shape_boxes, layer_name_by_number, net_wire_boxes, net_wire_shapes,
-    psm_tech_layers, psm_net, psm_net_names, psm_short_inputs, psm_short_names, psm_write_error_file, dft_scan_replace, dft_write_scan_chains,
+    psm_tech_layers, psm_solve_inputs, psm_net, psm_net_names, psm_short_inputs, psm_short_names, psm_write_error_file, dft_scan_replace, dft_write_scan_chains,
 };
