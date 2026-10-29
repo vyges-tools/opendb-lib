@@ -24,7 +24,7 @@ permissions:
 
 jobs:
   check:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-${{ vars.VYGES_UBUNTU_VERSION || '24.04' }}
     steps:
       # Sibling layout: the generator writes the safe Db API + registry into the opendb crate, so
       # both repos must be present as siblings (same layout as release-opendb.yml).
