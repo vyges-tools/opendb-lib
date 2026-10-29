@@ -5,6 +5,7 @@
 #include <cstddef>
 #include <cstdint>
 #include <memory>
+#include <vector>
 
 #include "rust/cxx.h"
 #include "odb/db.h"
@@ -25,6 +26,9 @@ struct OdbDb {
   // The observer log (see observer_log_start): a second, independent recorder — a placer's own
   // callbacks on the block, which another tool's edit log restarting does not touch.
   mutable std::shared_ptr<void> observer_log;
+  // GDS libraries made in this database (gds_read / gds_create_lib), indexed by the handle the
+  // gds_* calls take. odb has no accessor from dbDatabase back to its dbGDSLib table.
+  mutable std::vector<odb::dbGDSLib*> gds_libs;
   OdbDb() : db(odb::dbDatabase::create()) { db->setLogger(&logger); }
 };
 
@@ -1112,3 +1116,36 @@ rust::Vec<rust::String> dft_scan_replace(const OdbDb& db, rust::Slice<const rust
                                          rust::Slice<const rust::String> to_masters,
                                          rust::Slice<const rust::String> port_maps);
 void dft_write_scan_chains(const OdbDb& db, rust::Slice<const rust::String> rows);
+
+// ---- GDS (odb gdsin / gdsout) ----------------------------------------------------------------
+// OpenDB's own GDS model (dbGDSLib / dbGDSStructure / dbGDS* elements) and its reader and writer,
+// unchanged: gds_read is GDSReader::read_gds, gds_write is GDSWriter::write_gds, and
+// gds_create_lib is createEmptyGDSLib. A library handle is an index into OdbDb::gds_libs.
+//
+// A structure's elements cross the boundary in one flat encoding, used both ways (gds_elements
+// returns it, gds_add consumes it), in the writer's element order: boundaries, boxes, paths,
+// srefs, arefs, texts. Per element, in `ints`:
+//   0 boundary: layer datatype npts x y ...
+//   1 box:      layer datatype x0 y0 x1 y1
+//   2 path:     layer datatype pathtype width npts x y ...
+//   3 sref:     x y                                     (+ reals flipX mag angle, + strs name)
+//   4 aref:     x y lrx lry ulx uly rows columns        (+ reals flipX mag angle, + strs name)
+//   5 text:     layer datatype x y vpres hpres          (+ reals flipX mag angle, + strs text)
+// then nprops followed by each property's attribute number, its value in `strs`.
+std::size_t gds_read(const OdbDb& db, rust::Str path);
+void gds_write(const OdbDb& db, std::size_t lib, rust::Str path);
+std::size_t gds_create_lib(const OdbDb& db, rust::Str name);
+rust::String gds_lib_name(const OdbDb& db, std::size_t lib);
+// (user units per database unit, database units in metres)
+rust::Vec<double> gds_lib_units(const OdbDb& db, std::size_t lib);
+void gds_lib_set_units(const OdbDb& db, std::size_t lib, double uu_per_dbu, double dbu_per_meter);
+// getGDSStructures order.
+rust::Vec<rust::String> gds_structure_names(const OdbDb& db, std::size_t lib);
+void gds_structure_create(const OdbDb& db, std::size_t lib, rust::Str name);
+void gds_structure_destroy(const OdbDb& db, std::size_t lib, rust::Str name);
+rust::Vec<int64_t> gds_elements(const OdbDb& db, std::size_t lib, rust::Str structure,
+                                rust::Vec<double>& reals, rust::Vec<rust::String>& strs);
+// Create the encoded elements in `structure`, in order. An sref/aref names a structure that
+// must already exist in the library.
+void gds_add(const OdbDb& db, std::size_t lib, rust::Str structure, rust::Slice<const int64_t> ints,
+             rust::Slice<const double> reals, rust::Slice<const rust::String> strs);

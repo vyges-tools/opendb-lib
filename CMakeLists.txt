@@ -50,7 +50,8 @@ FetchContent_MakeAvailable(spdlog)
 # LEF/DEF parser libs). We do NOT use OpenROAD's per-sub-lib CMakeLists via add_subdirectory —
 # they call OpenROAD-only macros (swig_lib, messages) and assume the OpenROAD project layout — so
 # we glob the sources into one static lib ourselves, as we already do for db+utl.
-# Still deliberately excluded: Tcl, SWIG, or-tools, engines, GDS/CDL/3dblox (add later if needed).
+# Still deliberately excluded: Tcl, SWIG, or-tools, engines, CDL/3dblox (add later if needed).
+# GDS (gdsin/gdsout + gdsUtil) is IN: odb's own reader and writer over its dbGDS* model.
 set(ODB "${OPENROAD_SRC}/src/odb/src")
 
 # The si2 LEF/DEF parsers are BISON-generated (their lexers are hand-written — no flex).
@@ -73,7 +74,8 @@ file(GLOB IO_SRC CONFIGURE_DEPENDS
      "${ODB}/defin/*.cpp" "${ODB}/defout/*.cpp"
      "${ODB}/lefin/*.cpp" "${ODB}/lefout/*.cpp"
      "${ODB}/lef/lef/*.cpp" "${ODB}/lef/lefzlib/*.cpp"
-     "${ODB}/def/def/*.cpp" "${ODB}/def/defzlib/*.cpp")
+     "${ODB}/def/def/*.cpp" "${ODB}/def/defzlib/*.cpp"
+     "${ODB}/gdsin/*.cpp" "${ODB}/gdsout/*.cpp")
 
 # The 3D structural linter (check_3dblox). ONLY checker.cpp from src/3dblox — the rest of that
 # directory links yaml-cpp (the .3dbv/.3dbx parsers) and OpenSTA (3dblox.cpp's Verilog/Liberty

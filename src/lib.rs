@@ -470,6 +470,22 @@ mod ffi {
         fn dft_scan_replace(db: &OdbDb, masters: &[String], classes: &[i64], to_masters: &[String], port_maps: &[String]) -> Result<Vec<String>>;
         /// The scan chains `execute_dft_plan` records (layout at the shim, `dft_write_scan_chains`).
         fn dft_write_scan_chains(db: &OdbDb, rows: &[String]) -> Result<()>;
+
+        /// OpenDB's GDS model and its own reader/writer (odb `gdsin` / `gdsout`), unchanged.
+        /// `gds_read` is `GDSReader::read_gds`, `gds_write` is `GDSWriter::write_gds`,
+        /// `gds_create_lib` is `createEmptyGDSLib`; a library is addressed by the index these
+        /// return. Elements cross in one flat encoding both ways — see shim.h.
+        fn gds_read(db: &OdbDb, path: &str) -> Result<usize>;
+        fn gds_write(db: &OdbDb, lib: usize, path: &str) -> Result<()>;
+        fn gds_create_lib(db: &OdbDb, name: &str) -> Result<usize>;
+        fn gds_lib_name(db: &OdbDb, lib: usize) -> Result<String>;
+        fn gds_lib_units(db: &OdbDb, lib: usize) -> Result<Vec<f64>>;
+        fn gds_lib_set_units(db: &OdbDb, lib: usize, uu_per_dbu: f64, dbu_per_meter: f64) -> Result<()>;
+        fn gds_structure_names(db: &OdbDb, lib: usize) -> Result<Vec<String>>;
+        fn gds_structure_create(db: &OdbDb, lib: usize, name: &str) -> Result<()>;
+        fn gds_structure_destroy(db: &OdbDb, lib: usize, name: &str) -> Result<()>;
+        fn gds_elements(db: &OdbDb, lib: usize, structure: &str, reals: &mut Vec<f64>, strs: &mut Vec<String>) -> Result<Vec<i64>>;
+        fn gds_add(db: &OdbDb, lib: usize, structure: &str, ints: &[i64], reals: &[f64], strs: &[String]) -> Result<()>;
         fn iterm_avg_xy(db: &OdbDb, inst: &str, pin: &str, x: &mut i32, y: &mut i32) -> bool;
         /// The pin's own ROUTING-layer boxes in placed coordinates: 5 i64 each
         /// (layer, x0, y0, x1, y1). What the pin physically touches, rather than where it
@@ -727,5 +743,7 @@ pub use ffi::{
     mterm_antenna_diff_area, layerantenna_diff_pwl_index, layerantenna_diff_pwl_ratio,
     layerantenna_num_diff_pwl,
     iterm_avg_xy, iterm_pin_boxes, iterm_shape_boxes, layer_name_by_number, net_wire_boxes, net_wire_shapes,
+    gds_read, gds_write, gds_create_lib, gds_lib_name, gds_lib_units, gds_lib_set_units, gds_structure_names,
+    gds_structure_create, gds_structure_destroy, gds_elements, gds_add,
     psm_tech_layers, psm_solve_inputs, psm_net, psm_net_names, psm_short_inputs, psm_short_names, psm_write_error_file, dft_scan_replace, dft_write_scan_chains,
 };

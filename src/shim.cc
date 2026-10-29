@@ -11,6 +11,9 @@
 #include "odb/dbWireCodec.h"  // dbWireEncoder (writing a net's routing)
 #include "odb/defin.h"   // LEF/DEF I/O (libodb v1)
 #include "odb/defout.h"
+#include "odb/gdsUtil.h"  // GDS: createEmptyGDSLib
+#include "odb/gdsin.h"
+#include "odb/gdsout.h"
 #include "odb/dbBlockCallBackObj.h"
 #include "spdlog/sinks/callback_sink.h"   // forward libodb's utl::Logger -> Rust -> vyges-events
 #include "vyges-opendb-lib/src/lib.rs.h"  // odb_forward_log (extern "Rust")
@@ -5915,5 +5918,190 @@ void dft_write_scan_chains(const OdbDb& h, rust::Slice<const rust::String> rows)
       continue;
     }
     throw std::runtime_error("vyges-opendb: dft: bad row: " + text);
+  }
+}
+
+// ---- GDS (odb gdsin / gdsout) ----------------------------------------------------------------
+namespace {
+odb::dbGDSLib* gds_lib(const OdbDb& h, std::size_t lib) {
+  if (lib >= h.gds_libs.size()) throw std::runtime_error("vyges-opendb: no GDS library " + std::to_string(lib));
+  return h.gds_libs[lib];
+}
+odb::dbGDSStructure* gds_str(const OdbDb& h, std::size_t lib, rust::Str name) {
+  odb::dbGDSStructure* s = gds_lib(h, lib)->findGDSStructure(std::string(name).c_str());
+  if (!s) throw std::runtime_error("vyges-opendb: no GDS structure " + std::string(name));
+  return s;
+}
+void gds_put_xy(rust::Vec<int64_t>& v, const std::vector<odb::Point>& xy) {
+  v.push_back(static_cast<int64_t>(xy.size()));
+  for (const odb::Point& p : xy) { v.push_back(p.x()); v.push_back(p.y()); }
+}
+void gds_put_trans(rust::Vec<double>& r, const odb::dbGDSSTrans& t) {
+  r.push_back(t.flipX_ ? 1.0 : 0.0); r.push_back(t.mag_); r.push_back(t.angle_);
+}
+template <typename T>
+void gds_put_props(rust::Vec<int64_t>& v, rust::Vec<rust::String>& s, T* el) {
+  const auto& props = el->getPropattr();
+  v.push_back(static_cast<int64_t>(props.size()));
+  for (const auto& [attr, value] : props) { v.push_back(attr); s.push_back(rust::String(value)); }
+}
+// A cursor over gds_add's three input streams; running off the end throws.
+struct GdsIn {
+  rust::Slice<const int64_t> ints; rust::Slice<const double> reals; rust::Slice<const rust::String> strs;
+  std::size_t i = 0, r = 0, s = 0;
+  int64_t next() {
+    if (i >= ints.size()) throw std::runtime_error("vyges-opendb: gds_add: ints truncated");
+    return ints[i++];
+  }
+  double real() {
+    if (r >= reals.size()) throw std::runtime_error("vyges-opendb: gds_add: reals truncated");
+    return reals[r++];
+  }
+  std::string str() {
+    if (s >= strs.size()) throw std::runtime_error("vyges-opendb: gds_add: strs truncated");
+    return std::string(strs[s++]);
+  }
+  odb::Point point() { const int x = next(); return {x, static_cast<int>(next())}; }
+  std::vector<odb::Point> xy() {
+    const int64_t n = next();
+    std::vector<odb::Point> pts;
+    for (int64_t k = 0; k < n; ++k) pts.push_back(point());
+    return pts;
+  }
+  odb::dbGDSSTrans trans() { const bool f = real() != 0.0; const double m = real(); return {f, m, real()}; }
+  template <typename T> void props(T* el) {
+    const int64_t n = next();
+    for (int64_t k = 0; k < n; ++k) { const auto attr = static_cast<int16_t>(next()); el->addPropattr(attr, str()); }
+  }
+};
+}  // namespace
+
+std::size_t gds_read(const OdbDb& h, rust::Str path) {
+  odb::gds::GDSReader reader(const_cast<utl::Logger*>(&h.logger));
+  h.gds_libs.push_back(reader.read_gds(std::string(path), h.db));
+  return h.gds_libs.size() - 1;
+}
+void gds_write(const OdbDb& h, std::size_t lib, rust::Str path) {
+  odb::gds::GDSWriter writer(const_cast<utl::Logger*>(&h.logger));
+  writer.write_gds(gds_lib(h, lib), std::string(path));
+}
+std::size_t gds_create_lib(const OdbDb& h, rust::Str name) {
+  h.gds_libs.push_back(odb::gds::createEmptyGDSLib(h.db, std::string(name)));
+  return h.gds_libs.size() - 1;
+}
+rust::String gds_lib_name(const OdbDb& h, std::size_t lib) { return rust::String(gds_lib(h, lib)->getLibname()); }
+rust::Vec<double> gds_lib_units(const OdbDb& h, std::size_t lib) {
+  const auto [uu, m] = gds_lib(h, lib)->getUnits();
+  rust::Vec<double> v; v.push_back(uu); v.push_back(m);
+  return v;
+}
+void gds_lib_set_units(const OdbDb& h, std::size_t lib, double uu_per_dbu, double dbu_per_meter) {
+  gds_lib(h, lib)->setUnits(uu_per_dbu, dbu_per_meter);
+}
+rust::Vec<rust::String> gds_structure_names(const OdbDb& h, std::size_t lib) {
+  rust::Vec<rust::String> v;
+  for (odb::dbGDSStructure* s : gds_lib(h, lib)->getGDSStructures()) v.push_back(rust::String(s->getName()));
+  return v;
+}
+void gds_structure_create(const OdbDb& h, std::size_t lib, rust::Str name) {
+  // dbGDSStructure::create returns null for a name already in the library.
+  if (!odb::dbGDSStructure::create(gds_lib(h, lib), std::string(name).c_str()))
+    throw std::runtime_error("vyges-opendb: GDS structure exists: " + std::string(name));
+}
+void gds_structure_destroy(const OdbDb& h, std::size_t lib, rust::Str name) {
+  odb::dbGDSStructure::destroy(gds_str(h, lib, name));
+}
+rust::Vec<int64_t> gds_elements(const OdbDb& h, std::size_t lib, rust::Str structure,
+                                rust::Vec<double>& reals, rust::Vec<rust::String>& strs) {
+  odb::dbGDSStructure* str = gds_str(h, lib, structure);
+  rust::Vec<int64_t> v;
+  for (odb::dbGDSBoundary* b : str->getGDSBoundaries()) {
+    v.push_back(0); v.push_back(b->getLayer()); v.push_back(b->getDatatype());
+    gds_put_xy(v, b->getXY()); gds_put_props(v, strs, b);
+  }
+  for (odb::dbGDSBox* b : str->getGDSBoxs()) {
+    const odb::Rect r = b->getBounds();
+    v.push_back(1); v.push_back(b->getLayer()); v.push_back(b->getDatatype());
+    v.push_back(r.xMin()); v.push_back(r.yMin()); v.push_back(r.xMax()); v.push_back(r.yMax());
+    gds_put_props(v, strs, b);
+  }
+  for (odb::dbGDSPath* p : str->getGDSPaths()) {
+    v.push_back(2); v.push_back(p->getLayer()); v.push_back(p->getDatatype());
+    v.push_back(p->getPathType()); v.push_back(p->getWidth());
+    gds_put_xy(v, p->getXY()); gds_put_props(v, strs, p);
+  }
+  for (odb::dbGDSSRef* s : str->getGDSSRefs()) {
+    v.push_back(3); v.push_back(s->getOrigin().x()); v.push_back(s->getOrigin().y());
+    gds_put_trans(reals, s->getTransform()); strs.push_back(rust::String(s->getStructure()->getName()));
+    gds_put_props(v, strs, s);
+  }
+  for (odb::dbGDSARef* a : str->getGDSARefs()) {
+    v.push_back(4);
+    for (const odb::Point& p : {a->getOrigin(), a->getLr(), a->getUl()}) { v.push_back(p.x()); v.push_back(p.y()); }
+    v.push_back(a->getNumRows()); v.push_back(a->getNumColumns());
+    gds_put_trans(reals, a->getTransform()); strs.push_back(rust::String(a->getStructure()->getName()));
+    gds_put_props(v, strs, a);
+  }
+  for (odb::dbGDSText* t : str->getGDSTexts()) {
+    v.push_back(5); v.push_back(t->getLayer()); v.push_back(t->getDatatype());
+    v.push_back(t->getOrigin().x()); v.push_back(t->getOrigin().y());
+    v.push_back(t->getPresentation().v_pres_); v.push_back(t->getPresentation().h_pres_);
+    gds_put_trans(reals, t->getTransform()); strs.push_back(rust::String(t->getText()));
+    gds_put_props(v, strs, t);
+  }
+  return v;
+}
+void gds_add(const OdbDb& h, std::size_t lib, rust::Str structure, rust::Slice<const int64_t> ints,
+             rust::Slice<const double> reals, rust::Slice<const rust::String> strs) {
+  odb::dbGDSStructure* str = gds_str(h, lib, structure);
+  GdsIn in{ints, reals, strs};
+  while (in.i < ints.size()) {
+    switch (in.next()) {
+      case 0: {
+        auto* b = odb::dbGDSBoundary::create(str);
+        b->setLayer(static_cast<int16_t>(in.next())); b->setDatatype(static_cast<int16_t>(in.next()));
+        b->setXy(in.xy()); in.props(b);
+        break;
+      }
+      case 1: {
+        auto* b = odb::dbGDSBox::create(str);
+        b->setLayer(static_cast<int16_t>(in.next())); b->setDatatype(static_cast<int16_t>(in.next()));
+        const odb::Point lo = in.point(); const odb::Point hi = in.point();
+        b->setBounds(odb::Rect(lo, hi)); in.props(b);
+        break;
+      }
+      case 2: {
+        auto* p = odb::dbGDSPath::create(str);
+        p->setLayer(static_cast<int16_t>(in.next())); p->setDatatype(static_cast<int16_t>(in.next()));
+        p->setPathType(static_cast<int16_t>(in.next())); p->setWidth(static_cast<int>(in.next()));
+        p->setXy(in.xy()); in.props(p);
+        break;
+      }
+      case 3: {
+        const odb::Point o = in.point(); const odb::dbGDSSTrans t = in.trans();
+        auto* s = odb::dbGDSSRef::create(str, gds_str(h, lib, in.str()));
+        s->setOrigin(o); s->setTransform(t); in.props(s);
+        break;
+      }
+      case 4: {
+        const odb::Point o = in.point(); const odb::Point lr = in.point(); const odb::Point ul = in.point();
+        const auto rows = static_cast<int16_t>(in.next()); const auto cols = static_cast<int16_t>(in.next());
+        const odb::dbGDSSTrans t = in.trans();
+        auto* a = odb::dbGDSARef::create(str, gds_str(h, lib, in.str()));
+        a->setOrigin(o); a->setLr(lr); a->setUl(ul); a->setNumRows(rows); a->setNumColumns(cols);
+        a->setTransform(t); in.props(a);
+        break;
+      }
+      case 5: {
+        auto* t = odb::dbGDSText::create(str);
+        t->setLayer(static_cast<int16_t>(in.next())); t->setDatatype(static_cast<int16_t>(in.next()));
+        t->setOrigin(in.point());
+        const auto vp = static_cast<odb::dbGDSTextPres::VPres>(in.next());
+        t->setPresentation(odb::dbGDSTextPres(vp, static_cast<odb::dbGDSTextPres::HPres>(in.next())));
+        t->setTransform(in.trans()); t->setText(in.str()); in.props(t);
+        break;
+      }
+      default: throw std::runtime_error("vyges-opendb: gds_add: bad element kind");
+    }
   }
 }
