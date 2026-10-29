@@ -5,7 +5,7 @@
   "scope": "hand-written core only",
   "class_count": 45,
   "method_count": 1181,
-  "bridged_count": 878,
+  "bridged_count": 883,
   "classes": [
     {
       "name": "dbBPin",
@@ -3918,7 +3918,7 @@
           "params": [],
           "const": true,
           "kind": "getter",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "setUnits",
@@ -3935,7 +3935,7 @@
           ],
           "const": false,
           "kind": "setter",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "getUnits",
@@ -3943,7 +3943,7 @@
           "params": [],
           "const": true,
           "kind": "getter",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "findGDSStructure",
@@ -3956,7 +3956,7 @@
           ],
           "const": true,
           "kind": "relation",
-          "bridged": false,
+          "bridged": true,
           "target": "dbGDSStructure"
         },
         {
@@ -3965,7 +3965,7 @@
           "params": [],
           "const": false,
           "kind": "iterator",
-          "bridged": false,
+          "bridged": true,
           "element": "dbGDSStructure"
         }
       ],
