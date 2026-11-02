@@ -1,0 +1,99 @@
+# SPDX-License-Identifier: Apache-2.0
+# Nightly: build + test libodb and the cxx bridge against OpenROAD MASTER HEAD, not the pin.
+#
+# The pin only moves monthly, so upstream API changes reach us all at once at the repin. This
+# job surfaces each one the day it lands. Found 2026-11-02: upstream 6c9cd4571 (2026-10-09)
+# moved dbNet::{is,set}WireOrdered to dbWire::{is,set}Ordered; nothing told us for 24 days.
+# ⛔ RED HERE IS NOT A BROKEN BUILD. Releases build at the pin (build-libodb.yml); this job
+# says what the NEXT repin has to port. Linux x86_64 only — arch coverage is build-libodb's.
+#
+# The pin is retargeted by rewriting the `commit:` line of openroad-pin.yaml IN THE CI
+# WORKSPACE ONLY: build.rs, fetch-odb-src.sh and the OPENROAD_PIN constant all read that one
+# file, so the whole build moves together and no override hook exists in the build code.
+name: nightly-master
+
+on:
+  schedule:
+    - cron: '0 7 * * *'   # 07:00 UTC daily, an hour after vyges-openroad's nightly
+  workflow_dispatch:
+    inputs:
+      commit:
+        description: OpenROAD commit to build against (empty = master HEAD)
+        type: string
+        default: ''
+
+jobs:
+  master:
+    runs-on: ubuntu-${{ vars.VYGES_UBUNTU_VERSION || '24.04' }}
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Retarget pin to OpenROAD master
+        id: or
+        env:
+          REQ: ${{ inputs.commit }}
+        run: |
+          PIN=$(awk '/^[[:space:]]*commit:/{print $2; exit}' openroad-pin.yaml)
+          COMMIT="$REQ"
+          [ -n "$COMMIT" ] || COMMIT=$(git ls-remote https://github.com/The-OpenROAD-Project/OpenROAD.git HEAD | awk '{print $1}')
+          [ -n "$COMMIT" ] || { echo "could not resolve OpenROAD master"; exit 1; }
+          sed -i -E "s/^([[:space:]]*commit:[[:space:]]*)[0-9a-f]{40}/\1$COMMIT/" openroad-pin.yaml
+          grep -q "commit: $COMMIT" openroad-pin.yaml || { echo "pin rewrite failed"; exit 1; }
+          echo "commit=$COMMIT" >> "$GITHUB_OUTPUT"
+          { echo "### libodb vs OpenROAD master"
+            echo "- pin: \`$PIN\`"
+            echo "- built against: \`$COMMIT\`"; } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Toolchain
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y cmake g++ git binutils bison libboost-dev libboost-iostreams-dev libbz2-dev zlib1g-dev
+
+      - uses: dtolnay/rust-toolchain@stable
+
+      - name: Fetch odb subtree (sparse) at master
+        run: |
+          scripts/fetch-odb-src.sh
+          git -C vendor/OpenROAD log --oneline -1 >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Build libodb + odb_smoke
+        run: |
+          cmake -S . -B build -DCMAKE_BUILD_TYPE=Release -DVYGES_ODB_SMOKE=ON
+          cmake --build build --target odb_smoke --parallel "$(nproc)"
+
+      - name: Smoke (round-trip a real .odb)
+        run: ./build/odb_smoke test/fixtures/counter.odb /tmp/rt.odb
+
+      - name: Conformance gate (OpenROAD's odb GTests vs our libodb)
+        run: |
+          cmake -S . -B build -DVYGES_ODB_GTEST=ON >/dev/null
+          cmake --build build --target odb_gtest --parallel "$(nproc)"
+          ./build/odb_gtest
+
+      - name: Assemble prebuilt (VYGES_ODB_PREBUILT_DIR layout)
+        run: |
+          mkdir -p prebuilt/lib prebuilt/include
+          cp build/libodb.a prebuilt/lib/
+          find build/_deps -name '*.a' -exec cp {} prebuilt/lib/ \;
+          cp -R vendor/OpenROAD/src/odb/include/odb   prebuilt/include/
+          cp -R vendor/OpenROAD/src/utl/include/utl   prebuilt/include/
+          cp -R build/_deps/fmt-src/include/fmt       prebuilt/include/
+          cp -R build/_deps/spdlog-src/include/spdlog prebuilt/include/
+          cp -R build/_deps/absl-src/absl             prebuilt/include/
+
+      - name: cargo test (cxx bridge + shim against master headers)
+        env:
+          VYGES_ODB_PREBUILT_DIR: ${{ github.workspace }}/prebuilt
+        run: |
+          set -o pipefail
+          cargo test --release 2>&1 | tee cargo-test.log
+      - name: Report API drift
+        if: failure()
+        run: |
+          {
+            echo "### ❌ fails against OpenROAD master — port at the next repin"
+            echo '```'
+            grep -hE "error: |error\[|FAILED|panicked" cargo-test.log 2>/dev/null | sort -u | head -40 || true
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
