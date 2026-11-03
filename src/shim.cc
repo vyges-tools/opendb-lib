@@ -4667,7 +4667,9 @@ void net_write_wire(const OdbDb& h, rust::Str net, rust::Slice<const int32_t> op
     }
   }
   enc.end();
-  n->setWireOrdered(false);
+  // Rewritten wire contents are no longer normalized. Since upstream 6c9cd4571 the flag lives on
+  // the dbWire (the normalizer skips a wire already marked), not on the dbNet; c52e84234 renamed it.
+  if (odb::dbWire* w = n->getWire()) w->setNormalizedConnectivity(false);
 }
 
 void block_create_via(const OdbDb& h, rust::Str name, rust::Str layer1, rust::Str cut, rust::Str layer2, rust::Slice<const int32_t> boxes) {

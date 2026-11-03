@@ -174,9 +174,6 @@ rust::String net_get_sig_type(const OdbDb& h, rust::Str net) { auto* p = gen_net
 bool net_is_marked(const OdbDb& h, rust::Str net) { auto* p = gen_net(h, net); return p ? p->isMarked() : false; }
 bool net_is_mark_1ed(const OdbDb& h, rust::Str net) { auto* p = gen_net(h, net); return p ? p->isMark_1ed() : false; }
 bool net_is_select(const OdbDb& h, rust::Str net) { auto* p = gen_net(h, net); return p ? p->isSelect() : false; }
-bool net_is_wire_ordered(const OdbDb& h, rust::Str net) { auto* p = gen_net(h, net); return p ? p->isWireOrdered() : false; }
-bool net_is_disconnected(const OdbDb& h, rust::Str net) { auto* p = gen_net(h, net); return p ? p->isDisconnected() : false; }
-bool net_is_wire_altered(const OdbDb& h, rust::Str net) { auto* p = gen_net(h, net); return p ? p->isWireAltered() : false; }
 bool net_is_r_cgraph(const OdbDb& h, rust::Str net) { auto* p = gen_net(h, net); return p ? p->isRCgraph() : false; }
 bool net_is_extracted(const OdbDb& h, rust::Str net) { auto* p = gen_net(h, net); return p ? p->isExtracted() : false; }
 bool net_is_spef(const OdbDb& h, rust::Str net) { auto* p = gen_net(h, net); return p ? p->isSpef() : false; }
@@ -504,6 +501,7 @@ uint32_t gcell_get_y_idx(const OdbDb& h, int32_t y) { auto* p = gen_gcellgrid(h)
 rust::String wire_get_block(const OdbDb& h, rust::Str net) { auto* p = gen_wire(h, net); if (!p) return rust::String(); auto* t = p->getBlock(); return t ? rust::String(t->getConstName()) : rust::String(); }
 rust::String wire_get_net(const OdbDb& h, rust::Str net) { auto* p = gen_wire(h, net); if (!p) return rust::String(); auto* t = p->getNet(); return t ? rust::String(t->getConstName()) : rust::String(); }
 bool wire_is_global_wire(const OdbDb& h, rust::Str net) { auto* p = gen_wire(h, net); return p ? p->isGlobalWire() : false; }
+bool wire_has_normalized_connectivity(const OdbDb& h, rust::Str net) { auto* p = gen_wire(h, net); return p ? p->hasNormalizedConnectivity() : false; }
 uint32_t wire_length(const OdbDb& h, rust::Str net) { auto* p = gen_wire(h, net); return p ? p->length() : 0; }
 uint32_t wire_count(const OdbDb& h, rust::Str net) { auto* p = gen_wire(h, net); return p ? p->count() : 0; }
 uint32_t wire_get_term_shape_junction_id(const OdbDb& h, rust::Str net, int32_t term_id) { auto* p = gen_wire(h, net); return p ? p->getTermShapeJunctionId(term_id) : uint32_t{}; }

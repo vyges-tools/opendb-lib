@@ -177,9 +177,6 @@ mod ffi_gen {
         fn net_is_marked(db: &OdbDb, net: &str) -> bool;
         fn net_is_mark_1ed(db: &OdbDb, net: &str) -> bool;
         fn net_is_select(db: &OdbDb, net: &str) -> bool;
-        fn net_is_wire_ordered(db: &OdbDb, net: &str) -> bool;
-        fn net_is_disconnected(db: &OdbDb, net: &str) -> bool;
-        fn net_is_wire_altered(db: &OdbDb, net: &str) -> bool;
         fn net_is_r_cgraph(db: &OdbDb, net: &str) -> bool;
         fn net_is_extracted(db: &OdbDb, net: &str) -> bool;
         fn net_is_spef(db: &OdbDb, net: &str) -> bool;
@@ -507,6 +504,7 @@ mod ffi_gen {
         fn wire_get_block(db: &OdbDb, net: &str) -> String;
         fn wire_get_net(db: &OdbDb, net: &str) -> String;
         fn wire_is_global_wire(db: &OdbDb, net: &str) -> bool;
+        fn wire_has_normalized_connectivity(db: &OdbDb, net: &str) -> bool;
         fn wire_length(db: &OdbDb, net: &str) -> u32;
         fn wire_count(db: &OdbDb, net: &str) -> u32;
         fn wire_get_term_shape_junction_id(db: &OdbDb, net: &str, term_id: i32) -> u32;
@@ -2144,7 +2142,6 @@ pub use ffi_gen::{
     net_has_jumpers,
     net_is_auto_taper_enabled,
     net_is_connected_by_abutment,
-    net_is_disconnected,
     net_is_do_not_touch,
     net_is_extracted,
     net_is_i_o,
@@ -2155,8 +2152,6 @@ pub use ffi_gen::{
     net_is_select,
     net_is_spef,
     net_is_wild_connected,
-    net_is_wire_altered,
-    net_is_wire_ordered,
     net_max_internal_cap_num,
     nth_block_get_b_terms,
     nth_block_get_children,
@@ -2604,6 +2599,7 @@ pub use ffi_gen::{
     wire_get_data,
     wire_get_net,
     wire_get_term_shape_junction_id,
+    wire_has_normalized_connectivity,
     wire_is_global_wire,
     wire_length,
     wrongdirspacingrule_get_length,

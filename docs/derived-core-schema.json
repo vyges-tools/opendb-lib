@@ -4,8 +4,8 @@
   "note": "Method-based schema derived from the hand-written core classes; parallels OpenROAD's field-based codeGenerator schema for the classes it does not cover.",
   "scope": "hand-written core only",
   "class_count": 45,
-  "method_count": 1181,
-  "bridged_count": 883,
+  "method_count": 1176,
+  "bridged_count": 879,
   "classes": [
     {
       "name": "dbBPin",
@@ -2232,19 +2232,6 @@
           "const": false,
           "kind": "setter",
           "bridged": true
-        },
-        {
-          "name": "getWireUpdatedNets",
-          "return": "void",
-          "params": [
-            {
-              "type": "std::vector<dbNet*>&",
-              "name": "nets"
-            }
-          ],
-          "const": false,
-          "kind": "setter",
-          "bridged": false
         },
         {
           "name": "makeNewNetName",
@@ -6633,69 +6620,6 @@
           ],
           "const": false,
           "kind": "setter",
-          "bridged": true
-        },
-        {
-          "name": "isWireOrdered",
-          "return": "bool",
-          "params": [],
-          "const": false,
-          "kind": "predicate",
-          "bridged": true
-        },
-        {
-          "name": "setWireOrdered",
-          "return": "void",
-          "params": [
-            {
-              "type": "bool",
-              "name": "value"
-            }
-          ],
-          "const": false,
-          "kind": "setter",
-          "bridged": true
-        },
-        {
-          "name": "isDisconnected",
-          "return": "bool",
-          "params": [],
-          "const": false,
-          "kind": "predicate",
-          "bridged": true
-        },
-        {
-          "name": "setDisconnected",
-          "return": "void",
-          "params": [
-            {
-              "type": "bool",
-              "name": "value"
-            }
-          ],
-          "const": false,
-          "kind": "setter",
-          "bridged": true
-        },
-        {
-          "name": "setWireAltered",
-          "return": "void",
-          "params": [
-            {
-              "type": "bool",
-              "name": "value"
-            }
-          ],
-          "const": false,
-          "kind": "setter",
-          "bridged": true
-        },
-        {
-          "name": "isWireAltered",
-          "return": "bool",
-          "params": [],
-          "const": false,
-          "kind": "predicate",
           "bridged": true
         },
         {
@@ -13488,6 +13412,27 @@
           "params": [],
           "const": false,
           "kind": "predicate",
+          "bridged": true
+        },
+        {
+          "name": "hasNormalizedConnectivity",
+          "return": "bool",
+          "params": [],
+          "const": false,
+          "kind": "predicate",
+          "bridged": true
+        },
+        {
+          "name": "setNormalizedConnectivity",
+          "return": "void",
+          "params": [
+            {
+              "type": "bool",
+              "name": "normalized_connectivity"
+            }
+          ],
+          "const": false,
+          "kind": "setter",
           "bridged": true
         },
         {

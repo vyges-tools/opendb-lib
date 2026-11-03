@@ -47,9 +47,6 @@ mod ffi_gen_write {
         fn net_set_mark(db: &OdbDb, net: &str, value: bool) -> Result<()>;
         fn net_set_mark_1(db: &OdbDb, net: &str, value: bool) -> Result<()>;
         fn net_set_select(db: &OdbDb, net: &str, value: bool) -> Result<()>;
-        fn net_set_wire_ordered(db: &OdbDb, net: &str, value: bool) -> Result<()>;
-        fn net_set_disconnected(db: &OdbDb, net: &str, value: bool) -> Result<()>;
-        fn net_set_wire_altered(db: &OdbDb, net: &str, value: bool) -> Result<()>;
         fn net_set_r_cgraph(db: &OdbDb, net: &str, value: bool) -> Result<()>;
         fn net_set_extracted(db: &OdbDb, net: &str, value: bool) -> Result<()>;
         fn net_set_spef(db: &OdbDb, net: &str, value: bool) -> Result<()>;
@@ -163,6 +160,7 @@ mod ffi_gen_write {
         fn guide_set_is_connected_to_term(db: &OdbDb, net: &str, idx: usize, is_connected: bool) -> Result<()>;
         fn gcell_set_capacity(db: &OdbDb, layer: &str, x_idx: u32, y_idx: u32, capacity: f32) -> Result<()>;
         fn gcell_set_usage(db: &OdbDb, layer: &str, x_idx: u32, y_idx: u32, a3: f32) -> Result<()>;
+        fn wire_set_normalized_connectivity(db: &OdbDb, net: &str, normalized_connectivity: bool) -> Result<()>;
         fn wire_set_property(db: &OdbDb, net: &str, jid: i32, property: i32) -> Result<()>;
         fn box_set_soft(db: &OdbDb, idx: usize, value: bool) -> Result<()>;
         fn box_set_layer_mask(db: &OdbDb, idx: usize, mask: u32) -> Result<()>;
@@ -972,7 +970,6 @@ pub use ffi_gen_write::{
     net_set_cc_calib_factor,
     net_set_cc_match_ratio,
     net_set_db_cc,
-    net_set_disconnected,
     net_set_do_not_touch,
     net_set_extracted,
     net_set_fixed_bump,
@@ -993,8 +990,6 @@ pub use ffi_gen_write::{
     net_set_term_ext_ids,
     net_set_weight,
     net_set_wild_connected,
-    net_set_wire_altered,
-    net_set_wire_ordered,
     net_set_wire_type,
     net_set_x_talk_class,
     obs_set_effective_width,
@@ -1125,6 +1120,7 @@ pub use ffi_gen_write::{
     via_set_pattern,
     widthtablerule_set_orthogonal,
     widthtablerule_set_wrong_direction,
+    wire_set_normalized_connectivity,
     wire_set_property,
     wrongdirspacingrule_set_length,
     wrongdirspacingrule_set_length_valid,

@@ -42,9 +42,6 @@ void net_set_sig_type(const OdbDb& db, rust::Str net, rust::Str sig_type);
 void net_set_mark(const OdbDb& db, rust::Str net, bool value);
 void net_set_mark_1(const OdbDb& db, rust::Str net, bool value);
 void net_set_select(const OdbDb& db, rust::Str net, bool value);
-void net_set_wire_ordered(const OdbDb& db, rust::Str net, bool value);
-void net_set_disconnected(const OdbDb& db, rust::Str net, bool value);
-void net_set_wire_altered(const OdbDb& db, rust::Str net, bool value);
 void net_set_r_cgraph(const OdbDb& db, rust::Str net, bool value);
 void net_set_extracted(const OdbDb& db, rust::Str net, bool value);
 void net_set_spef(const OdbDb& db, rust::Str net, bool value);
@@ -158,6 +155,7 @@ void guide_set_is_jumper(const OdbDb& db, rust::Str net, std::size_t idx, bool j
 void guide_set_is_connected_to_term(const OdbDb& db, rust::Str net, std::size_t idx, bool is_connected);
 void gcell_set_capacity(const OdbDb& db, rust::Str layer, uint32_t x_idx, uint32_t y_idx, float capacity);
 void gcell_set_usage(const OdbDb& db, rust::Str layer, uint32_t x_idx, uint32_t y_idx, float a3);
+void wire_set_normalized_connectivity(const OdbDb& db, rust::Str net, bool normalized_connectivity);
 void wire_set_property(const OdbDb& db, rust::Str net, int32_t jid, int32_t property);
 void box_set_soft(const OdbDb& db, std::size_t idx, bool value);
 void box_set_layer_mask(const OdbDb& db, std::size_t idx, uint32_t mask);

@@ -46,9 +46,6 @@ void net_set_sig_type(const OdbDb& h, rust::Str net, rust::Str sig_type) { auto*
 void net_set_mark(const OdbDb& h, rust::Str net, bool value) { auto* p = gen_net(h, net); if (!p) throw std::runtime_error("vyges-opendb: dbNet not found"); p->setMark(value); }
 void net_set_mark_1(const OdbDb& h, rust::Str net, bool value) { auto* p = gen_net(h, net); if (!p) throw std::runtime_error("vyges-opendb: dbNet not found"); p->setMark_1(value); }
 void net_set_select(const OdbDb& h, rust::Str net, bool value) { auto* p = gen_net(h, net); if (!p) throw std::runtime_error("vyges-opendb: dbNet not found"); p->setSelect(value); }
-void net_set_wire_ordered(const OdbDb& h, rust::Str net, bool value) { auto* p = gen_net(h, net); if (!p) throw std::runtime_error("vyges-opendb: dbNet not found"); p->setWireOrdered(value); }
-void net_set_disconnected(const OdbDb& h, rust::Str net, bool value) { auto* p = gen_net(h, net); if (!p) throw std::runtime_error("vyges-opendb: dbNet not found"); p->setDisconnected(value); }
-void net_set_wire_altered(const OdbDb& h, rust::Str net, bool value) { auto* p = gen_net(h, net); if (!p) throw std::runtime_error("vyges-opendb: dbNet not found"); p->setWireAltered(value); }
 void net_set_r_cgraph(const OdbDb& h, rust::Str net, bool value) { auto* p = gen_net(h, net); if (!p) throw std::runtime_error("vyges-opendb: dbNet not found"); p->setRCgraph(value); }
 void net_set_extracted(const OdbDb& h, rust::Str net, bool value) { auto* p = gen_net(h, net); if (!p) throw std::runtime_error("vyges-opendb: dbNet not found"); p->setExtracted(value); }
 void net_set_spef(const OdbDb& h, rust::Str net, bool value) { auto* p = gen_net(h, net); if (!p) throw std::runtime_error("vyges-opendb: dbNet not found"); p->setSpef(value); }
@@ -162,6 +159,7 @@ void guide_set_is_jumper(const OdbDb& h, rust::Str net, std::size_t idx, bool ju
 void guide_set_is_connected_to_term(const OdbDb& h, rust::Str net, std::size_t idx, bool is_connected) { auto* p = gen_guide(h, net, idx); if (!p) throw std::runtime_error("vyges-opendb: dbGuide not found"); p->setIsConnectedToTerm(is_connected); }
 void gcell_set_capacity(const OdbDb& h, rust::Str layer, uint32_t x_idx, uint32_t y_idx, float capacity) { auto* p = gen_gcellgrid(h); if (!p) throw std::runtime_error("vyges-opendb: dbGCellGrid not found"); p->setCapacity(gen_req(gen_techlayer(h, layer), "dbTechLayer"), x_idx, y_idx, capacity); }
 void gcell_set_usage(const OdbDb& h, rust::Str layer, uint32_t x_idx, uint32_t y_idx, float a3) { auto* p = gen_gcellgrid(h); if (!p) throw std::runtime_error("vyges-opendb: dbGCellGrid not found"); p->setUsage(gen_req(gen_techlayer(h, layer), "dbTechLayer"), x_idx, y_idx, a3); }
+void wire_set_normalized_connectivity(const OdbDb& h, rust::Str net, bool normalized_connectivity) { auto* p = gen_wire(h, net); if (!p) throw std::runtime_error("vyges-opendb: dbWire not found"); p->setNormalizedConnectivity(normalized_connectivity); }
 void wire_set_property(const OdbDb& h, rust::Str net, int32_t jid, int32_t property) { auto* p = gen_wire(h, net); if (!p) throw std::runtime_error("vyges-opendb: dbWire not found"); p->setProperty(jid, property); }
 void box_set_soft(const OdbDb& h, std::size_t idx, bool value) { auto* p = gen_box(h, idx); if (!p) throw std::runtime_error("vyges-opendb: dbBox not found"); p->setSoft(value); }
 void box_set_layer_mask(const OdbDb& h, std::size_t idx, uint32_t mask) { auto* p = gen_box(h, idx); if (!p) throw std::runtime_error("vyges-opendb: dbBox not found"); p->setLayerMask(mask); }

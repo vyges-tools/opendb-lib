@@ -3,7 +3,7 @@
 # Bump deliberately (manual), then re-run the build workflow.
 upstream:
   source: https://github.com/The-OpenROAD-Project/OpenROAD
-  commit: 27288f5c90265ae5296b2f5a9fa6e8714fa191ad   # nightly-27288f5c9026, 2026-10-01 (26Q4 + 6 neutral)
+  commit: 4155ac31014923e0fa721b691d222511adc7d8c3   # nightly-4155ac310149, 2026-11-03
   subtree:                                            # only these are sparse-checked-out
     - src/odb
     - src/utl
