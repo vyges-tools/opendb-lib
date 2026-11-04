@@ -457,6 +457,9 @@ mod ffi {
         fn psm_net(db: &OdbDb, net: &str) -> Result<Vec<i64>>;
         /// Every iterm name then every bterm name of a net, in `psm_net`'s order.
         fn psm_net_names(db: &OdbDb, net: &str) -> Result<Vec<String>>;
+        /// A supply net's octilinear swire points and non-decomposed pin polygons, in `psm_net`'s
+        /// order (layout at the shim in shim.cc).
+        fn psm_net_45(db: &OdbDb, net: &str) -> Result<Vec<i64>>;
         /// Everything the power-grid short check walks besides the net itself: the other nets,
         /// the instances with their masters, block obstructions and fill (layout at the shim).
         fn psm_short_inputs(db: &OdbDb, net: &str) -> Result<Vec<i64>>;
@@ -745,5 +748,5 @@ pub use ffi::{
     iterm_avg_xy, iterm_pin_boxes, iterm_shape_boxes, layer_name_by_number, net_wire_boxes, net_wire_shapes,
     gds_read, gds_write, gds_create_lib, gds_lib_name, gds_lib_units, gds_lib_set_units, gds_structure_names,
     gds_structure_create, gds_structure_destroy, gds_elements, gds_add,
-    psm_tech_layers, psm_solve_inputs, psm_net, psm_net_names, psm_short_inputs, psm_short_names, psm_write_error_file, dft_scan_replace, dft_write_scan_chains,
+    psm_tech_layers, psm_solve_inputs, psm_net, psm_net_names, psm_net_45, psm_short_inputs, psm_short_names, psm_write_error_file, dft_scan_replace, dft_write_scan_chains,
 };

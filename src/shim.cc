@@ -5430,6 +5430,67 @@ rust::Vec<int64_t> psm_net(const OdbDb& h, rust::Str net) {
   return out;
 }
 
+// `psm_net_45`: what `psm_net` leaves out for shapes with 45 degree edges, in its order.
+//   [swire count], per swire its box count and per box: octilinear, and for an octilinear box
+//     the point count, then x y per point of `getOct().getPoints()` (closed)
+//   [iterm count], per iterm in `getITerms()` order: mpin count, per mpin: its `getGeometry()`
+//     box count, then polygon count, per polygon of `getPolygonGeometry()`: tech layer number
+//     (-1), point count, x y per point moved by the instance transform, then the count of the
+//     polygon's own boxes and the position of each in the mpin's `getGeometry()`
+rust::Vec<int64_t> psm_net_45(const OdbDb& h, rust::Str net) {
+  rust::Vec<int64_t> out;
+  dbBlock* b = require_block(h);
+  dbNet* n = b->findNet(s(net).c_str());
+  if (!n) throw std::runtime_error("vyges-opendb: net not found: " + s(net));
+  out.push_back(n->getSWires().size());
+  for (odb::dbSWire* sw : n->getSWires()) {
+    out.push_back(sw->getWires().size());
+    for (odb::dbSBox* box : sw->getWires()) {
+      const bool oct = box->getDirection() == odb::dbSBox::OCTILINEAR;
+      out.push_back(oct ? 1 : 0);
+      if (!oct) continue;
+      const std::vector<odb::Point> pts = box->getOct().getPoints();
+      out.push_back(pts.size());
+      for (const odb::Point& pt : pts) {
+        out.push_back(pt.x());
+        out.push_back(pt.y());
+      }
+    }
+  }
+  out.push_back(n->getITerms().size());
+  for (dbITerm* it : n->getITerms()) {
+    const odb::dbTransform t = it->getInst()->getTransform();
+    out.push_back(it->getMTerm()->getMPins().size());
+    for (odb::dbMPin* mpin : it->getMTerm()->getMPins()) {
+      std::vector<dbBox*> geoms;
+      for (dbBox* g : mpin->getGeometry()) geoms.push_back(g);
+      out.push_back(geoms.size());
+      out.push_back(mpin->getPolygonGeometry().size());
+      for (odb::dbPolygon* poly : mpin->getPolygonGeometry()) {
+        dbTechLayer* l = poly->getTechLayer();
+        out.push_back(l ? l->getNumber() : -1);
+        odb::Polygon polygon = poly->getPolygon();
+        t.apply(polygon);
+        const std::vector<odb::Point> pts = polygon.getPoints();
+        out.push_back(pts.size());
+        for (const odb::Point& pt : pts) {
+          out.push_back(pt.x());
+          out.push_back(pt.y());
+        }
+        std::vector<int64_t> at;
+        for (dbBox* g : poly->getGeometry()) {
+          for (std::size_t i = 0; i < geoms.size(); i++) {
+            if (geoms[i] == g) at.push_back(int64_t(i));
+          }
+        }
+        out.push_back(at.size());
+        for (int64_t i : at) out.push_back(i);
+      }
+    }
+  }
+  return out;
+}
+
 // The names `psm_net` cannot carry, in its order: every iterm's name, then every bterm's.
 rust::Vec<rust::String> psm_net_names(const OdbDb& h, rust::Str net) {
   rust::Vec<rust::String> out;
