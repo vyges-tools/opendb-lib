@@ -115,11 +115,14 @@ fn an_obstruction_does_not_roll_back() {
 #[test]
 fn a_row_does_not_roll_back() {
     // ⛔ Floorplan initialisation rebuilds rows rather than rolling them back.
+    // The spacing is the site width: since upstream f7bbb8b4de3 `dbRow::create` refuses a spacing
+    // smaller than the site extent along the row (ODB-1221, overlapping sites).
     assert!(!rolls_back(
         |db| odb::num_rows(db).unwrap() as i64,
         |db| {
             let site = odb::nth_site_name(db, 0).unwrap();
-            odb::row_create(db, "vyges_eco_probe_row", &site, 0, 0, "R0", "HORIZONTAL", 10, 200).unwrap();
+            let w = odb::site_get_width(db, &site);
+            odb::row_create(db, "vyges_eco_probe_row", &site, 0, 0, "R0", "HORIZONTAL", 10, w).unwrap();
         }
     ));
 }
