@@ -3989,8 +3989,10 @@ int32_t cut_spacing_table_max_spacing(const OdbDb& h, rust::Str layer, std::size
                                       rust::Str cls) {
   auto* r = cst_rule(h, layer, idx);
   if (!r) return 0;
+  // pdn's square-cut pitch (`ViaGenerator::determineCutSpacing`): the LARGER of the class pair's
+  // two values (upstream b68d654714, in the pin 4155ac31; MIN at 27288f5).
   return r->getMaxSpacing(s(cls), s(cls),
-                          odb::dbTechLayerCutSpacingTableDefRule::MIN);
+                          odb::dbTechLayerCutSpacingTableDefRule::MAX);
 }
 
 int32_t cut_spacing_table_spacing(const OdbDb& h, rust::Str layer, std::size_t idx,

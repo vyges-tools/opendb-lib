@@ -119,3 +119,15 @@ fn the_above_below_split_matches_what_the_reference_reports() {
     assert_eq!(above, below, "V4's rules split evenly, as the reference's 2 and 2 imply");
     assert!(above >= 2, "at least the two the reference selects, before cut-class filtering");
 }
+
+/// Upstream rule (`ViaGenerator::determineCutSpacing`, b68d654714, in the pin): a square cut's
+/// pitch takes the LARGER of its spacing-table pair (`getMaxSpacing(class, class, MAX)`), not the
+/// smaller (27288f5's `MIN`). 🔑 The reference's own answers on this fixture (its Tcl API, at
+/// 4155ac31): FIRST 50, SECOND 80, MAX 80, MIN 50.
+#[test]
+fn a_square_cut_takes_the_larger_value_of_its_spacing_table_pair() {
+    let db = odb::new_db();
+    odb::read_lef(&db, "test/fixtures/cut_spacing_pair.lef").expect("lef");
+    assert_eq!(odb::num_cut_spacing_table_rules(&db, "V1").expect("count"), 1);
+    assert_eq!(odb::cut_spacing_table_max_spacing(&db, "V1", 0, "VA").expect("rule"), 80);
+}
