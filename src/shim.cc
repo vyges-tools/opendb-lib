@@ -5836,6 +5836,26 @@ struct DftReplace {
   std::map<std::string, std::string> ports;
 };
 
+void dft_copy_properties(odb::dbInst* from, odb::dbInst* to) {
+  for (odb::dbProperty* prop : odb::dbProperty::getProperties(from)) {
+    const std::string name = prop->getName();
+    switch (prop->getType()) {
+      case odb::dbProperty::STRING_PROP:
+        odb::dbStringProperty::create(to, name.c_str(), static_cast<odb::dbStringProperty*>(prop)->getValue().c_str());
+        break;
+      case odb::dbProperty::BOOL_PROP:
+        odb::dbBoolProperty::create(to, name.c_str(), static_cast<odb::dbBoolProperty*>(prop)->getValue());
+        break;
+      case odb::dbProperty::INT_PROP:
+        odb::dbIntProperty::create(to, name.c_str(), static_cast<odb::dbIntProperty*>(prop)->getValue());
+        break;
+      case odb::dbProperty::DOUBLE_PROP:
+        odb::dbDoubleProperty::create(to, name.c_str(), static_cast<odb::dbDoubleProperty*>(prop)->getValue());
+        break;
+    }
+  }
+}
+
 void dft_walk(odb::dbDatabase* db, dbBlock* block, const std::map<std::string, int64_t>& cls,
               const std::map<std::string, DftReplace>& rep, rust::Vec<rust::String>& events) {
   std::unordered_set<odb::dbInst*> made;
@@ -5872,6 +5892,10 @@ void dft_walk(odb::dbDatabase* db, dbBlock* block, const std::map<std::string, i
     fresh->setSourceType(inst->getSourceType());
     if (odb::dbRegion* region = inst->getRegion()) region->addInst(fresh);
     if (odb::dbGroup* group = inst->getGroup()) group->addInst(fresh);
+    // Every property of the old instance is copied (upstream 4dcac1a1e0 for `src`, generalised by
+    // d7de4fc0e9 at the pin, unchanged 4155ac31..a6e7f507): string, bool, int and double, in the
+    // old instance's property order.
+    dft_copy_properties(inst, fresh);
     odb::dbInst::destroy(inst);
     for (const auto& [port, net] : nets) {
       if (!net) continue;
