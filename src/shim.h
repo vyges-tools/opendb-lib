@@ -1021,6 +1021,7 @@ rust::Vec<int32_t> net_wire_box_masks(const OdbDb& db, rust::Str net);
 // A layer's LEF58_TYPE ("NWELL", "PWELL", "DIFFUSION", ...; "NONE" when it has none).
 rust::String layer_lef58_type(const OdbDb& db, rust::Str layer);
 // Which rule families a layer carries, as "family=count" for each present (see shim.cc).
+rust::Vec<rust::String> layer_string_properties(const OdbDb& db, rust::Str layer);
 rust::Vec<rust::String> layer_rule_census(const OdbDb& db, rust::Str layer);
 // Writing access points — what a pin-access analysis stores (`io::Writer::updateDbAccessPoints`):
 // per master pin and unique-class index, every access point (`dbAccessPoint::create(block, mpin,

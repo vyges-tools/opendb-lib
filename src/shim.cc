@@ -5087,6 +5087,22 @@ rust::String layer_lef58_type(const OdbDb& h, rust::Str layer) {
   return rust::String(l->getLef58TypeString());
 }
 
+// A layer's string properties, read-only, as "name\tvalue" in the order odb returns them. lefin
+// stores every LEF layer PROPERTY this way, parsed or not, so a consumer can list the ones odb
+// left unparsed (its ODB-0388 INFO) from the database alone.
+rust::Vec<rust::String> layer_string_properties(const OdbDb& h, rust::Str layer) {
+  rust::Vec<rust::String> out;
+  odb::dbTech* tech = h.db->getTech();
+  odb::dbTechLayer* l = tech ? tech->findLayer(s(layer).c_str()) : nullptr;
+  if (!l) return out;
+  for (odb::dbProperty* prop : odb::dbProperty::getProperties(l)) {
+    if (prop->getType() == odb::dbProperty::STRING_PROP) {
+      out.push_back(rust::String(prop->getName() + "\t" + static_cast<odb::dbStringProperty*>(prop)->getValue()));
+    }
+  }
+  return out;
+}
+
 // The rule families a layer carries, for a consumer to refuse what it does not model: each
 // family present, as "family=count". LEF 5.4 cut spacing rules are split by their clauses (a
 // plain rule is "cut_spacing"); the technology-wide width-via map is reported on every layer it
