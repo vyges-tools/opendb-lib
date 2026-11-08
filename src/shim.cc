@@ -2262,6 +2262,48 @@ rust::Vec<int64_t> swire_boxes(const OdbDb& h) {
   }
   return out;
 }
+// The same walk and the same skips as swire_boxes, so the masks and nets line up with its boxes.
+template <typename Emit>
+static void walk_swire_boxes(const OdbDb& h, Emit emit) {
+  dbBlock* b = block_of(h);
+  if (!b) return;
+  std::vector<odb::dbShape> via_shapes;
+  for (odb::dbNet* net : b->getNets()) {
+    for (odb::dbSWire* sw : net->getSWires()) {
+      for (odb::dbSBox* sbox : sw->getWires()) {
+        if (sbox->isVia()) {
+          odb::dbVia* via = sbox->getBlockVia();
+          if (!via) continue;
+          odb::dbShape shape;
+          shape.setVia(via, sbox->getBox());
+          via_shapes.clear();
+          odb::dbShape::getViaBoxes(shape, via_shapes);
+          for (const odb::dbShape& vs : via_shapes) {
+            odb::dbTechLayer* l = vs.getTechLayer();
+            if (!l) continue;
+            const uint32_t m = l == via->getBottomLayer() ? sbox->getViaBottomLayerMask()
+                               : l == via->getTopLayer()  ? sbox->getViaTopLayerMask()
+                                                          : sbox->getViaCutLayerMask();
+            emit(net, static_cast<int32_t>(m));
+          }
+        } else {
+          if (!sbox->getTechLayer()) continue;
+          emit(net, static_cast<int32_t>(sbox->getLayerMask()));
+        }
+      }
+    }
+  }
+}
+rust::Vec<int32_t> swire_box_masks(const OdbDb& h) {
+  rust::Vec<int32_t> out;
+  walk_swire_boxes(h, [&out](odb::dbNet*, int32_t m) { out.push_back(m); });
+  return out;
+}
+rust::Vec<rust::String> swire_box_nets(const OdbDb& h) {
+  rust::Vec<rust::String> out;
+  walk_swire_boxes(h, [&out](odb::dbNet* n, int32_t) { out.push_back(rust::String(n->getName())); });
+  return out;
+}
 rust::Vec<int64_t> special_wire_boxes(const OdbDb& h) {
   rust::Vec<int64_t> out;
   dbBlock* b = block_of(h);
@@ -3576,6 +3618,23 @@ rust::Vec<int32_t> bpin_layer_boxes(const OdbDb& h, rust::Str bterm, std::size_t
       out.push_back(box->yMin());
       out.push_back(box->xMax());
       out.push_back(box->yMax());
+    }
+    break;
+  }
+  return out;
+}
+
+rust::Vec<int32_t> bpin_layer_box_masks(const OdbDb& h, rust::Str bterm, std::size_t pin) {
+  rust::Vec<int32_t> out;
+  dbBlock* b = require_block(h);
+  odb::dbBTerm* bt = b->findBTerm(s(bterm).c_str());
+  if (!bt) return out;
+  std::size_t k = 0;
+  for (odb::dbBPin* bp : bt->getBPins()) {
+    if (k++ != pin) continue;
+    for (odb::dbBox* box : bp->getBoxes()) {
+      if (box->getTechLayer() == nullptr) continue;  // as bpin_layer_boxes skips it
+      out.push_back(static_cast<int32_t>(box->getLayerMask()));
     }
     break;
   }

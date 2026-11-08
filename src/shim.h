@@ -594,6 +594,11 @@ rust::String layer_direction(const OdbDb& db, rust::Str layer);   // HORIZONTAL/
 // Special wires are the power grid — rails and straps — and they are a separate collection from
 // routed signal wires. Density fill that misses them fills straight over the PDN.
 rust::Vec<int64_t> swire_boxes(const OdbDb& db);
+// The mask of each box swire_boxes returns, box for box (0 none): a wire's dbSBox layer mask; a
+// via's boxes its bottom, cut or top layer mask by the layer the box is on. Hand-written.
+rust::Vec<int32_t> swire_box_masks(const OdbDb& db);
+// The net of each box swire_boxes returns, box for box. Hand-written.
+rust::Vec<rust::String> swire_box_nets(const OdbDb& db);
 
 // The WIRE (non-via) boxes of every SPECIAL net, 6 i64 each: (layer_number, x_min, y_min, x_max,
 // y_max, wire_shape_type) — the last is `dbWireShapeType::Value`, named by `wire_shape_type_name`.
@@ -795,6 +800,8 @@ int32_t layer_find_tw_spacing(const OdbDb& db, rust::Str layer, int32_t width1, 
 int64_t layer_min_area(const OdbDb& db, rust::Str layer);
 rust::Vec<int32_t> tech_via_boxes(const OdbDb& db, rust::Str via);
 rust::Vec<int32_t> bpin_layer_boxes(const OdbDb& db, rust::Str bterm, std::size_t pin);
+// The DEF mask of each box bpin_layer_boxes returns, box for box (dbBox::getLayerMask, 0 none).
+rust::Vec<int32_t> bpin_layer_box_masks(const OdbDb& db, rust::Str bterm, std::size_t pin);
 rust::Vec<int32_t> region_boundaries(const OdbDb& db, rust::Str region);
 rust::Vec<int64_t> net_swire_shapes(const OdbDb& db, rust::Str net);
 rust::Vec<int64_t> net_swire_obstacles(const OdbDb& db, rust::Str net);
