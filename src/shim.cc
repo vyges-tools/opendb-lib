@@ -6515,3 +6515,57 @@ void gds_add(const OdbDb& h, std::size_t lib, rust::Str structure, rust::Slice<c
     }
   }
 }
+
+// The markers of one top-level marker category and of every category under it, in the order
+// dbMarkerCategory::getAllMarkers gives them (an id-ordered set: a marker id is per category, so
+// equal ids from sibling categories sit together, ordered by their category). The category is
+// found as dbBlock::findMarkerCategory finds it (by name on the chip); none gives empty lists.
+// Per marker, 6 values: [has a layer (0/1), x0, y0, x1, y1 (the marker bbox), number of NET
+// sources]. marker_category_all_layers gives each marker layer name ("" for none), and
+// marker_category_all_source_nets the net sources of every marker in turn, each in
+// dbMarker::getSources order, other source kinds (instances, terminals, obstructions) left out.
+// Read-only.
+static odb::dbMarkerCategory* top_marker_category(const OdbDb& h, rust::Str name) {
+  dbBlock* b = block_of(h);
+  return b ? b->findMarkerCategory(s(name).c_str()) : nullptr;
+}
+rust::Vec<int64_t> marker_category_all_records(const OdbDb& h, rust::Str name) {
+  rust::Vec<int64_t> out;
+  odb::dbMarkerCategory* c = top_marker_category(h, name);
+  if (!c) return out;
+  for (odb::dbMarker* m : c->getAllMarkers()) {
+    const odb::Rect r = m->getBBox();
+    int64_t nets = 0;
+    for (odb::dbObject* src : m->getSources()) {
+      if (src->getObjectType() == odb::dbNetObj) ++nets;
+    }
+    for (int64_t v : {static_cast<int64_t>(m->getTechLayer() != nullptr), static_cast<int64_t>(r.xMin()),
+                      static_cast<int64_t>(r.yMin()), static_cast<int64_t>(r.xMax()), static_cast<int64_t>(r.yMax()), nets}) {
+      out.push_back(v);
+    }
+  }
+  return out;
+}
+rust::Vec<rust::String> marker_category_all_layers(const OdbDb& h, rust::Str name) {
+  rust::Vec<rust::String> out;
+  odb::dbMarkerCategory* c = top_marker_category(h, name);
+  if (!c) return out;
+  for (odb::dbMarker* m : c->getAllMarkers()) {
+    odb::dbTechLayer* l = m->getTechLayer();
+    out.push_back(rust::String(l ? l->getName() : std::string()));
+  }
+  return out;
+}
+rust::Vec<rust::String> marker_category_all_source_nets(const OdbDb& h, rust::Str name) {
+  rust::Vec<rust::String> out;
+  odb::dbMarkerCategory* c = top_marker_category(h, name);
+  if (!c) return out;
+  for (odb::dbMarker* m : c->getAllMarkers()) {
+    for (odb::dbObject* src : m->getSources()) {
+      if (src->getObjectType() == odb::dbNetObj) {
+        out.push_back(rust::String(static_cast<odb::dbNet*>(src)->getName()));
+      }
+    }
+  }
+  return out;
+}

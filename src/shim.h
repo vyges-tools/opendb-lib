@@ -615,6 +615,10 @@ rust::Vec<int64_t> special_via_records(const OdbDb& db);
 rust::Vec<rust::String> special_via_record_nets(const OdbDb& db);
 void sbox_set_via_masks(const OdbDb& db, rust::Str net, std::size_t swire_idx, std::size_t sbox_idx, uint32_t bottom, uint32_t cut, uint32_t top);
 rust::String wire_shape_type_name(int32_t value);   // e.g. "STRIPE", "DRCFILL"
+// Every marker of a top-level marker category and its subcategories (getAllMarkers order); see shim.cc.
+rust::Vec<int64_t> marker_category_all_records(const OdbDb& db, rust::Str name);
+rust::Vec<rust::String> marker_category_all_layers(const OdbDb& db, rust::Str name);
+rust::Vec<rust::String> marker_category_all_source_nets(const OdbDb& db, rust::Str name);
 
 // Routing track coordinates for a layer — the positions pins and wires may legally sit on.
 //
