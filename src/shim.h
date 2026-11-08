@@ -981,6 +981,16 @@ rust::Vec<rust::String> net_guides(const OdbDb& db, rust::Str net);
 // extension `|x|y|ext`; 6 block via, 7 tech via: `|name|bottom layer|top layer`; 8 rect
 // `|l|b|r|t`; 9 iterm, 10 bterm, 11 rule), ending `12`. Empty for a net without a wire.
 rust::Vec<rust::String> net_wire_decode(const OdbDb& db, rust::Str net);
+// The mask-colour state at each record of `net_wire_decode`, two ints per record, the same records
+// in the same order (the `T|` header included, as 0 0): the metal colour (1..3, 0 none) and the
+// via colour packed as bottom << 4 | cut << 2 | top (0 none) -- what dbWireDecoder::getColor and
+// getViaColor answer at that op. The state is the decoder's: a colour holds until the stream sets
+// another, and the encoder clears the metal colour after every via it adds. Hand-written.
+rust::Vec<int32_t> net_wire_decode_masks(const OdbDb& db, rust::Str net);
+// The mask of each box `net_wire_boxes` returns, one int per box in the same order (0 none): a
+// wire segment or patch takes the metal colour in force at its op; a via's boxes take its via
+// colour, the bottom, cut or top digit by the layer the box is on. Hand-written.
+rust::Vec<int32_t> net_wire_box_masks(const OdbDb& db, rust::Str net);
 // A layer's LEF58_TYPE ("NWELL", "PWELL", "DIFFUSION", ...; "NONE" when it has none).
 rust::String layer_lef58_type(const OdbDb& db, rust::Str layer);
 // Which rule families a layer carries, as "family=count" for each present (see shim.cc).
@@ -1004,6 +1014,11 @@ void bpin_add_access_point(const OdbDb& db, rust::Str bterm, std::size_t pin, in
 //   3 via              the tech via names[via]
 //   4 via              the block via names[via]
 //   5 xl yl xh yh      a rectangle about the last point (a patch)
+//   6 c                the mask colour (1..3) of the shapes that follow (dbWireEncoder::setColor)
+//   7                  no mask colour for the shapes that follow (clearColor)
+//   8 b c t            the via mask colours (0..3 each: bottom metal, cut, top metal) of the vias
+//                      that follow (setViaColor)
+//   9                  no via mask colour for the vias that follow (clearViaColor)
 void net_write_wire(const OdbDb& db, rust::Str net, rust::Slice<const int32_t> ops, rust::Slice<const rust::String> names);
 // A via the router made, as a default block via (none when it exists): boxes as records
 // (0 layer1 / 1 cut / 2 layer2, xl, yl, xh, yh), created in the order given.

@@ -4517,6 +4517,80 @@ rust::Vec<rust::String> net_wire_decode(const OdbDb& h, rust::Str net) {
   return out;
 }
 
+// ---- Mask colour on a routed wire (see shim.h) ----------------------------------------------------
+static int32_t pack_via_color(const std::optional<odb::dbWireDecoder::ViaColor>& vc) {
+  if (!vc) return 0;
+  return (static_cast<int32_t>(vc->bottom_color) << 4) | (static_cast<int32_t>(vc->cut_color) << 2) | vc->top_color;
+}
+
+// The same walk as net_wire_decode, record for record, so the two line up by index.
+rust::Vec<int32_t> net_wire_decode_masks(const OdbDb& h, rust::Str net) {
+  rust::Vec<int32_t> out;
+  odb::dbNet* n = require_block(h)->findNet(s(net).c_str());
+  if (!n || !n->getWire()) return out;
+  odb::dbWireDecoder d;
+  d.begin(n->getWire());
+  odb::dbWireDecoder::OpCode op = d.next();
+  out.push_back(0);  // the `T|` header
+  out.push_back(0);
+  while (true) {
+    out.push_back(d.getColor().value_or(0));
+    out.push_back(pack_via_color(d.getViaColor()));
+    if (op == odb::dbWireDecoder::END_DECODE) break;
+    op = d.next();
+  }
+  return out;
+}
+
+// dbWireShapeItr skips the colour ops, so the colour of each shape is looked up by its shape id:
+// both the iterator (shape_id_) and the decoder (jct_id_) number a shape by the index of the op
+// that made it, taken after any colour ops before it are consumed.
+rust::Vec<int32_t> net_wire_box_masks(const OdbDb& h, rust::Str net) {
+  rust::Vec<int32_t> out;
+  dbNet* n = find_net(h, net);
+  if (!n) return out;
+  odb::dbWire* w = n->getWire();
+  if (!w) return out;
+  // op index -> (metal colour, packed via colour). (dbWire::length() is the path LENGTH, not
+  // the op count, so this is a map rather than a vector sized by it.)
+  std::map<int, std::pair<int32_t, int32_t>> state;
+  odb::dbWireDecoder d;
+  d.begin(w);
+  for (auto op = d.next(); op != odb::dbWireDecoder::END_DECODE; op = d.next()) {
+    state[d.getJunctionId()] = {d.getColor().value_or(0), pack_via_color(d.getViaColor())};
+  }
+  // The same iteration and the same skips as net_wire_boxes, so the two line up by index.
+  odb::dbWireShapeItr it;
+  odb::dbShape shape;
+  std::vector<odb::dbShape> via_boxes;
+  for (it.begin(w); it.next(shape);) {
+    const auto at = state.find(it.getShapeId());
+    const int32_t metal = at == state.end() ? 0 : at->second.first;
+    const int32_t vc = at == state.end() ? 0 : at->second.second;
+    if (shape.isVia()) {
+      odb::dbTechLayer* bottom = nullptr;
+      odb::dbTechLayer* top = nullptr;
+      if (odb::dbTechVia* tv = shape.getTechVia()) {
+        bottom = tv->getBottomLayer();
+        top = tv->getTopLayer();
+      } else if (odb::dbVia* bv = shape.getVia()) {
+        bottom = bv->getBottomLayer();
+        top = bv->getTopLayer();
+      }
+      odb::dbShape::getViaBoxes(shape, via_boxes);
+      for (const odb::dbShape& b : via_boxes) {
+        odb::dbTechLayer* l = b.getTechLayer();
+        if (!l) continue;
+        out.push_back(l == bottom ? (vc >> 4) & 3 : l == top ? vc & 3 : (vc >> 2) & 3);
+      }
+    } else {
+      if (!shape.getTechLayer()) continue;
+      out.push_back(metal);
+    }
+  }
+  return out;
+}
+
 // ---- Writing access points (see shim.h) ----------------------------------------------------------
 static void fill_access_point(const OdbDb& h, odb::dbAccessPoint* ap, int32_t x, int32_t y, rust::Str layer, uint8_t accesses,
                               int32_t low_type, int32_t high_type, rust::Slice<const rust::String> vias,
@@ -4662,6 +4736,35 @@ void net_write_wire(const OdbDb& h, rust::Str net, rust::Slice<const int32_t> op
         need(4);
         enc.addRect(ops[i], ops[i + 1], ops[i + 2], ops[i + 3]);
         i += 4;
+        break;
+      // Mask colour: state ops in the wire's stream, as the DEF reader writes them
+      // (definNet::pathColor / pathViaColor). Ranges checked here so a bad value is an error
+      // naming the op rather than a logger error from inside the encoder.
+      case 6:
+        need(1);
+        if (ops[i] < 1 || ops[i] > 3) {
+          enc.clear();
+          throw std::runtime_error("net_write_wire: mask colour " + std::to_string(ops[i]) + " is not 1..3");
+        }
+        enc.setColor(static_cast<uint8_t>(ops[i]));
+        i += 1;
+        break;
+      case 7:
+        enc.clearColor();
+        break;
+      case 8:
+        need(3);
+        for (int k = 0; k < 3; k++) {
+          if (ops[i + k] < 0 || ops[i + k] > 3) {
+            enc.clear();
+            throw std::runtime_error("net_write_wire: via mask colour " + std::to_string(ops[i + k]) + " is not 0..3");
+          }
+        }
+        enc.setViaColor(static_cast<uint8_t>(ops[i]), static_cast<uint8_t>(ops[i + 1]), static_cast<uint8_t>(ops[i + 2]));
+        i += 3;
+        break;
+      case 9:
+        enc.clearViaColor();
         break;
       default:
         enc.clear();
