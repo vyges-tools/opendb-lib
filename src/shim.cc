@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 #include "shim.h"
 
+#include <array>
 #include <unordered_set>
 #include "odb/util.h"  // odb::cutRows / odb::hasOneSiteMaster (tap delegates row cutting)
 #include "odb/lefin.h"
@@ -2326,6 +2327,119 @@ rust::Vec<int64_t> special_wire_boxes(const OdbDb& h) {
     }
   }
   return out;
+}
+// The non-via boxes of every net's special wiring, each with the address the setter below takes:
+// per box [swire index, sbox index, layer number, x0, y0, x1, y1, layer mask, shape type value].
+// Same walk as swire_boxes (every net, its swires, their boxes), vias skipped.
+rust::Vec<int64_t> special_sbox_records(const OdbDb& h) {
+  rust::Vec<int64_t> out;
+  dbBlock* b = block_of(h);
+  if (!b) return out;
+  for (odb::dbNet* net : b->getNets()) {
+    int64_t wi = 0;
+    for (odb::dbSWire* sw : net->getSWires()) {
+      int64_t bi = 0;
+      for (odb::dbSBox* sbox : sw->getWires()) {
+        odb::dbTechLayer* layer = sbox->isVia() ? nullptr : sbox->getTechLayer();
+        if (layer) {
+          const odb::Rect r = sbox->getBox();
+          for (int64_t v : {wi, bi, static_cast<int64_t>(layer->getNumber()), static_cast<int64_t>(r.xMin()),
+                            static_cast<int64_t>(r.yMin()), static_cast<int64_t>(r.xMax()), static_cast<int64_t>(r.yMax()),
+                            static_cast<int64_t>(sbox->getLayerMask()),
+                            static_cast<int64_t>(sbox->getWireShapeType().getValue())}) {
+            out.push_back(v);
+          }
+        }
+        ++bi;
+      }
+      ++wi;
+    }
+  }
+  return out;
+}
+// The net of each record special_sbox_records returns, record for record.
+rust::Vec<rust::String> special_sbox_record_nets(const OdbDb& h) {
+  rust::Vec<rust::String> out;
+  dbBlock* b = block_of(h);
+  if (!b) return out;
+  for (odb::dbNet* net : b->getNets()) {
+    for (odb::dbSWire* sw : net->getSWires()) {
+      for (odb::dbSBox* sbox : sw->getWires()) {
+        if (!sbox->isVia() && sbox->getTechLayer()) {
+          out.push_back(rust::String(net->getName()));
+        }
+      }
+    }
+  }
+  return out;
+}
+// The layer mask of one non-via special box (dbBox::setLayerMask, which dbSBox inherits), addressed
+// as special_sbox_records lists it. A via box is refused: its masks are per layer.
+void sbox_set_layer_mask(const OdbDb& h, rust::Str net, std::size_t swire_idx, std::size_t sbox_idx, uint32_t mask) {
+  odb::dbSBox* p = gen_sbox(h, net, swire_idx, sbox_idx);
+  if (!p) throw std::runtime_error("vyges-opendb: dbSBox not found");
+  if (p->isVia()) throw std::runtime_error("vyges-opendb: sbox_set_layer_mask on a via box; use sbox_set_via_layer_mask");
+  if (mask > 3) throw std::runtime_error("vyges-opendb: a layer mask is 0..3");
+  p->setLayerMask(mask);
+}
+// Every block-via special box, one 16-value record each: [swire idx, sbox idx, bottom layer number,
+// bottom x0, y0, x1, y1, top layer number, top x0, y0, x1, y1, bottom mask, cut mask, top mask, 0].
+// A layer's rect is the bounding box of the via's shapes on that layer (its landing metal).
+template <typename Emit>
+static void walk_special_vias(const OdbDb& h, Emit emit) {
+  dbBlock* b = block_of(h);
+  if (!b) return;
+  std::vector<odb::dbShape> via_shapes;
+  for (odb::dbNet* net : b->getNets()) {
+    int64_t wi = 0;
+    for (odb::dbSWire* sw : net->getSWires()) {
+      int64_t bi = 0;
+      for (odb::dbSBox* sbox : sw->getWires()) {
+        odb::dbVia* via = sbox->isVia() ? sbox->getBlockVia() : nullptr;
+        if (via && via->getBottomLayer() && via->getTopLayer()) {
+          odb::dbShape shape;
+          shape.setVia(via, sbox->getBox());
+          via_shapes.clear();
+          odb::dbShape::getViaBoxes(shape, via_shapes);
+          odb::Rect bot, top;
+          bot.mergeInit();
+          top.mergeInit();
+          for (const odb::dbShape& vs : via_shapes) {
+            if (vs.getTechLayer() == via->getBottomLayer()) bot.merge(vs.getBox());
+            if (vs.getTechLayer() == via->getTopLayer()) top.merge(vs.getBox());
+          }
+          emit(net, std::array<int64_t, 16>{wi, bi, via->getBottomLayer()->getNumber(), bot.xMin(), bot.yMin(),
+                                            bot.xMax(), bot.yMax(), via->getTopLayer()->getNumber(), top.xMin(),
+                                            top.yMin(), top.xMax(), top.yMax(), sbox->getViaBottomLayerMask(),
+                                            sbox->getViaCutLayerMask(), sbox->getViaTopLayerMask(), 0});
+        }
+        ++bi;
+      }
+      ++wi;
+    }
+  }
+}
+rust::Vec<int64_t> special_via_records(const OdbDb& h) {
+  rust::Vec<int64_t> out;
+  walk_special_vias(h, [&out](odb::dbNet*, const std::array<int64_t, 16>& r) {
+    for (int64_t v : r) out.push_back(v);
+  });
+  return out;
+}
+rust::Vec<rust::String> special_via_record_nets(const OdbDb& h) {
+  rust::Vec<rust::String> out;
+  walk_special_vias(h, [&out](odb::dbNet* n, const std::array<int64_t, 16>&) { out.push_back(rust::String(n->getName())); });
+  return out;
+}
+// The three layer masks of one via special box (dbSBox::setViaLayerMask), addressed as
+// special_via_records lists it.
+void sbox_set_via_masks(const OdbDb& h, rust::Str net, std::size_t swire_idx, std::size_t sbox_idx, uint32_t bottom,
+                        uint32_t cut, uint32_t top) {
+  odb::dbSBox* p = gen_sbox(h, net, swire_idx, sbox_idx);
+  if (!p) throw std::runtime_error("vyges-opendb: dbSBox not found");
+  if (!p->isVia()) throw std::runtime_error("vyges-opendb: sbox_set_via_masks on a non-via box; use sbox_set_layer_mask");
+  if (bottom > 3 || cut > 3 || top > 3) throw std::runtime_error("vyges-opendb: a layer mask is 0..3");
+  p->setViaLayerMask(bottom, cut, top);
 }
 rust::String wire_shape_type_name(int32_t value) {
   return rust::String(

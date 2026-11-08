@@ -608,6 +608,12 @@ rust::Vec<rust::String> swire_box_nets(const OdbDb& db);
 // `Grid::markBlocked` asks all three the other way — `net->isSpecial()`, `!sbox->isVia()`, and
 // `DRCFILL` skipped — and a caller cannot recover that selection from the fill-oriented list.
 rust::Vec<int64_t> special_wire_boxes(const OdbDb& db);
+rust::Vec<int64_t> special_sbox_records(const OdbDb& db);
+rust::Vec<rust::String> special_sbox_record_nets(const OdbDb& db);
+void sbox_set_layer_mask(const OdbDb& db, rust::Str net, std::size_t swire_idx, std::size_t sbox_idx, uint32_t mask);
+rust::Vec<int64_t> special_via_records(const OdbDb& db);
+rust::Vec<rust::String> special_via_record_nets(const OdbDb& db);
+void sbox_set_via_masks(const OdbDb& db, rust::Str net, std::size_t swire_idx, std::size_t sbox_idx, uint32_t bottom, uint32_t cut, uint32_t top);
 rust::String wire_shape_type_name(int32_t value);   // e.g. "STRIPE", "DRCFILL"
 
 // Routing track coordinates for a layer — the positions pins and wires may legally sit on.

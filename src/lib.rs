@@ -275,6 +275,12 @@ mod ffi {
         fn swire_box_masks(db: &OdbDb) -> Result<Vec<i32>>;
         fn swire_box_nets(db: &OdbDb) -> Result<Vec<String>>;
         fn special_wire_boxes(db: &OdbDb) -> Result<Vec<i64>>;
+        fn special_sbox_records(db: &OdbDb) -> Result<Vec<i64>>;
+        fn special_sbox_record_nets(db: &OdbDb) -> Result<Vec<String>>;
+        fn sbox_set_layer_mask(db: &OdbDb, net: &str, swire_idx: usize, sbox_idx: usize, mask: u32) -> Result<()>;
+        fn special_via_records(db: &OdbDb) -> Result<Vec<i64>>;
+        fn special_via_record_nets(db: &OdbDb) -> Result<Vec<String>>;
+        fn sbox_set_via_masks(db: &OdbDb, net: &str, swire_idx: usize, sbox_idx: usize, bottom: u32, cut: u32, top: u32) -> Result<()>;
         fn wire_shape_type_name(value: i32) -> Result<String>;
         #[allow(clippy::too_many_arguments)]
         fn blockage_create(db: &OdbDb, x1: i32, y1: i32, x2: i32, y2: i32,
@@ -741,7 +747,7 @@ pub use ffi::{
     site_row_pattern_len, site_row_pattern_orient, site_row_pattern_site,
     block_cut_rows, block_cut_rows_at_blockages, group_get_type, has_one_site_master, nth_row_name, site_get_class, create_physical_inst, inst_bbox, master_placement_boundary, master_edge_type_names, master_edge_type_params, pwr_domain_elements, logic_port_direction, pwr_switch_records, level_shifter_records, upf_find, pwr_domain_create, pwr_domain_add_element, pwr_domain_add_power_switch, pwr_domain_add_isolation, pwr_domain_set_area, logic_port_create, pwr_switch_create, pwr_switch_add_in_supply_port, pwr_switch_add_control_port, pwr_switch_add_acknowledge_port, pwr_switch_add_on_state, pwr_switch_add_port_map, isolation_create, isolation_add_isolation_cell, level_shifter_create, level_shifter_add_element, level_shifter_add_exclude_element, level_shifter_add_instance, pwr_domain_area, region_create, region_set_type, region_add_boundary, group_create_in_region, group_set_type, group_add_inst, net_try_create, bterm_try_create, module_children_paths, inst_module_paths, inst_iterm_info, net_iterm_pairs, pwr_domain_isolations, pwr_domain_level_shifters, isolation_cell_masters, masters_in_lib_order, master_mterm_io, master_area, inst_try_create, tech_cell_edge_spacing_types, tech_cell_edge_spacing_params, ndr_create, ndr_layer_rule_set, ndr_layer_rule_layers, ndr_layer_rule_params, ndr_add_use_via, ndr_use_vias, ndr_use_via_rules, ndr_layer_rule_wire_exts, block_access_point_count, iterm_pref_access_points, iterm_access_point_count, bpin_access_points, net_guides, net_wire_decode, net_wire_decode_masks, net_wire_box_masks, layer_lef58_type, layer_rule_census, mpin_add_access_point, iterm_set_access_point, bpin_add_access_point, net_write_wire, block_create_via, block_set_gcell_grid, block_reset_gcell_grid, layer_min_enclosed_areas, num_masters, nth_master_name, master_get_type,
     nth_row_bbox, nth_row_site, nth_row_orient, nth_row_direction, destroy_inst,
-    inst_shapes, pin_obstruction_boxes, obstruction_boxes, fill_obstruction_boxes, blockage_boxes, swire_boxes, swire_box_masks, swire_box_nets, special_wire_boxes, wire_shape_type_name, blockage_create, num_blockages, blockage_destroy,
+    inst_shapes, pin_obstruction_boxes, obstruction_boxes, fill_obstruction_boxes, blockage_boxes, swire_boxes, swire_box_masks, swire_box_nets, special_wire_boxes, special_sbox_records, special_sbox_record_nets, sbox_set_layer_mask, special_via_records, special_via_record_nets, sbox_set_via_masks, wire_shape_type_name, blockage_create, num_blockages, blockage_destroy,
     fill_create, num_fills, clear_fills,
     num_layers, nth_layer_name, layer_direction, track_grid_x, track_grid_y,
     track_patterns_x, track_patterns_y, track_pattern_masks_x, track_pattern_masks_y, bterm_constraint_region,
