@@ -103,6 +103,12 @@ void add_track_pattern_x(const OdbDb& db, rust::Str layer, int32_t origin, int32
                          int32_t step);  // find-or-create the layer's dbTrackGrid
 void add_track_pattern_y(const OdbDb& db, rust::Str layer, int32_t origin, int32_t count,
                          int32_t step);
+// The same with a DEF track mask (`TRACKS ... MASK first_mask [SAMEMASK]`, odb's
+// addGridPatternX/Y(origin, count, step, first_mask, samemask)); first_mask 0 is no mask.
+void add_track_pattern_x_masked(const OdbDb& db, rust::Str layer, int32_t origin, int32_t count,
+                                int32_t step, int32_t first_mask, bool samemask);
+void add_track_pattern_y_masked(const OdbDb& db, rust::Str layer, int32_t origin, int32_t count,
+                                int32_t step, int32_t first_mask, bool samemask);
 void add_obstruction(const OdbDb& db, rust::Str layer, int32_t x1, int32_t y1, int32_t x2, int32_t y2);  // routing/PDN obstruction rect on a layer (throws if layer missing)
 void add_guide(const OdbDb& db, rust::Str net, rust::Str layer, rust::Str via_layer, int32_t x1, int32_t y1, int32_t x2, int32_t y2, bool is_congested);  // global-route guide on a net (pass layer twice for a wire segment; throws if net/layer missing)
 bool reverse_guides(const OdbDb& db, rust::Str net);  // ⛔ back into CREATION order -- saveGuides' last act
@@ -615,6 +621,10 @@ rust::Vec<int32_t> track_grid_y(const OdbDb& db, rust::Str layer);
 // values through out-parameters, so the schema generator cannot express it.
 rust::Vec<int32_t> track_patterns_x(const OdbDb& db, rust::Str layer);
 rust::Vec<int32_t> track_patterns_y(const OdbDb& db, rust::Str layer);
+// The DEF track mask of each pattern, in the order track_patterns_x/_y give them: two ints per
+// pattern, the first track's mask (0: none) and SAMEMASK (0/1). Hand-written.
+rust::Vec<int32_t> track_pattern_masks_x(const OdbDb& db, rust::Str layer);
+rust::Vec<int32_t> track_pattern_masks_y(const OdbDb& db, rust::Str layer);
 
 // A block port's CONSTRAINT REGION: 4 i32 (x0, y0, x1, y1), or empty when the port has none.
 //

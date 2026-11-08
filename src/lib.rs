@@ -72,6 +72,8 @@ mod ffi {
         fn tech_use_min_spacing_obs(db: &OdbDb) -> bool;
         fn add_track_pattern_x(db: &OdbDb, layer: &str, origin: i32, count: i32, step: i32) -> Result<()>;
         fn add_track_pattern_y(db: &OdbDb, layer: &str, origin: i32, count: i32, step: i32) -> Result<()>;
+        fn add_track_pattern_x_masked(db: &OdbDb, layer: &str, origin: i32, count: i32, step: i32, first_mask: i32, samemask: bool) -> Result<()>;
+        fn add_track_pattern_y_masked(db: &OdbDb, layer: &str, origin: i32, count: i32, step: i32, first_mask: i32, samemask: bool) -> Result<()>;
         fn add_obstruction(db: &OdbDb, layer: &str, x1: i32, y1: i32, x2: i32, y2: i32) -> Result<()>;
         fn add_guide(db: &OdbDb, net: &str, layer: &str, via_layer: &str, x1: i32, y1: i32, x2: i32, y2: i32, is_congested: bool) -> Result<()>;
         fn reverse_guides(db: &OdbDb, net: &str) -> Result<bool>;
@@ -428,6 +430,8 @@ mod ffi {
         fn nth_bterm_group_ordered(db: &OdbDb, i: usize) -> Result<bool>;
         fn track_patterns_x(db: &OdbDb, layer: &str) -> Result<Vec<i32>>;
         fn track_patterns_y(db: &OdbDb, layer: &str) -> Result<Vec<i32>>;
+        fn track_pattern_masks_x(db: &OdbDb, layer: &str) -> Result<Vec<i32>>;
+        fn track_pattern_masks_y(db: &OdbDb, layer: &str) -> Result<Vec<i32>>;
 
         // antenna inputs (odb substrate) — numerator per routing layer, denominator per pin.
         // Consumed by vyges-ant; see shim.h for the v0 double-counting bound.
@@ -726,7 +730,7 @@ pub use ffi::{
     visit_connected_pins, remove_buffer, net_can_merge, swap_pins, make_new_inst_name, make_new_net_name,
     edit_log_start, edit_log_take, observer_log_start, observer_log_take,
     net_is_special, net_sigtype, nth_net_bterm, nth_net_iterm, nth_net_name, num_net_bterms,
-    add_track_pattern_x, add_track_pattern_y,
+    add_track_pattern_x, add_track_pattern_y, add_track_pattern_x_masked, add_track_pattern_y_masked,
     block_set_bus_delimiters, block_set_def_units, bterm_set_io_type, read_lef,
     num_net_iterms, read_def, set_inst_location, set_inst_orient, set_inst_location_orient, set_inst_placement_status, tech_use_min_spacing_obs, total_wire_length, net_wire_lengths, write_db,
     write_def, OdbDb,
@@ -737,7 +741,7 @@ pub use ffi::{
     inst_shapes, pin_obstruction_boxes, obstruction_boxes, fill_obstruction_boxes, blockage_boxes, swire_boxes, special_wire_boxes, wire_shape_type_name, blockage_create, num_blockages, blockage_destroy,
     fill_create, num_fills, clear_fills,
     num_layers, nth_layer_name, layer_direction, track_grid_x, track_grid_y,
-    track_patterns_x, track_patterns_y, bterm_constraint_region,
+    track_patterns_x, track_patterns_y, track_pattern_masks_x, track_pattern_masks_y, bterm_constraint_region,
     num_bterm_groups, nth_bterm_group, nth_bterm_group_ordered,
     blocked_regions_for_pins, fixed_bterm_shapes, obstruction_shapes_with_rules, bpin_shapes_with_rules, special_via_boxes,
     bterm_top_layer_grid, bterm_top_layer_grid_layer, bterm_top_layer_grid_is_rect,

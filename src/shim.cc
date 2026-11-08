@@ -291,6 +291,22 @@ void add_track_pattern_y(const OdbDb& h, rust::Str layer, int32_t origin, int32_
                          int32_t step) {
   grid_for(h, layer)->addGridPatternY(origin, count, step);
 }
+// A track mask is 1..3 (LEF/DEF allow three masks), or 0 for none.
+static void check_track_mask(int32_t first_mask) {
+  if (first_mask < 0 || first_mask > 3) {
+    throw std::runtime_error("vyges-opendb: track mask " + std::to_string(first_mask) + " is not 0..3");
+  }
+}
+void add_track_pattern_x_masked(const OdbDb& h, rust::Str layer, int32_t origin, int32_t count,
+                                int32_t step, int32_t first_mask, bool samemask) {
+  check_track_mask(first_mask);
+  grid_for(h, layer)->addGridPatternX(origin, count, step, first_mask, samemask);
+}
+void add_track_pattern_y_masked(const OdbDb& h, rust::Str layer, int32_t origin, int32_t count,
+                                int32_t step, int32_t first_mask, bool samemask) {
+  check_track_mask(first_mask);
+  grid_for(h, layer)->addGridPatternY(origin, count, step, first_mask, samemask);
+}
 void add_obstruction(const OdbDb& h, rust::Str layer, int32_t x1, int32_t y1, int32_t x2,
                      int32_t y2) {
   dbBlock* b = require_block(h);
@@ -2320,6 +2336,35 @@ static rust::Vec<int32_t> track_patterns(const OdbDb& h, rust::Str layer, bool h
     out.push_back(step);
   }
   return out;
+}
+static rust::Vec<int32_t> track_pattern_masks(const OdbDb& h, rust::Str layer, bool horizontal) {
+  rust::Vec<int32_t> out;
+  dbBlock* b = block_of(h);
+  odb::dbTech* tech = h.db->getTech();
+  if (!b || !tech) return out;
+  odb::dbTechLayer* l = tech->findLayer(s(layer).c_str());
+  if (!l) return out;
+  odb::dbTrackGrid* g = b->findTrackGrid(l);
+  if (!g) return out;
+  const int n = horizontal ? g->getNumGridPatternsY() : g->getNumGridPatternsX();
+  for (int i = 0; i < n; i++) {
+    int origin = 0, count = 0, step = 0, first_mask = 0;
+    bool samemask = false;
+    if (horizontal) {
+      g->getGridPatternY(i, origin, count, step, first_mask, samemask);
+    } else {
+      g->getGridPatternX(i, origin, count, step, first_mask, samemask);
+    }
+    out.push_back(first_mask);
+    out.push_back(samemask ? 1 : 0);
+  }
+  return out;
+}
+rust::Vec<int32_t> track_pattern_masks_x(const OdbDb& h, rust::Str layer) {
+  return track_pattern_masks(h, layer, false);
+}
+rust::Vec<int32_t> track_pattern_masks_y(const OdbDb& h, rust::Str layer) {
+  return track_pattern_masks(h, layer, true);
 }
 rust::Vec<int32_t> track_patterns_x(const OdbDb& h, rust::Str layer) {
   return track_patterns(h, layer, false);
