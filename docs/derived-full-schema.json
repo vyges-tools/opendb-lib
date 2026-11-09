@@ -5,7 +5,7 @@
   "scope": "all",
   "class_count": 122,
   "method_count": 2716,
-  "bridged_count": 2134,
+  "bridged_count": 2137,
   "classes": [
     {
       "name": "dbAccessPoint",
@@ -18163,7 +18163,7 @@
           ],
           "const": true,
           "kind": "other",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "getTwoWidthsSpacingTableHasPRL",
@@ -18189,7 +18189,7 @@
           ],
           "const": true,
           "kind": "other",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "getTwoWidthsSpacingTableEntry",
@@ -18206,7 +18206,7 @@
           ],
           "const": true,
           "kind": "other",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "initTwoWidths",

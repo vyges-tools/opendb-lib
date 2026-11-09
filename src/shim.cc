@@ -3945,6 +3945,29 @@ rust::Vec<uint32_t> layer_v55_spacing_table(const OdbDb& h, rust::Str layer) {
   return out;
 }
 
+// A layer's classic TWOWIDTHS spacing table as its getters return it, flattened:
+//   [has, n, widths..., prls..., table row-major (n x n)...]
+// `has` is `hasTwoWidthsSpacingRules` (index rows present AND a non-empty matrix); without it the
+// rest is empty. A row without PRL keeps odb's -1 (lefin's default for a width with no PRL).
+rust::Vec<int32_t> layer_two_widths_spacing_table(const OdbDb& h, rust::Str layer) {
+  rust::Vec<int32_t> out;
+  odb::dbTech* tech = h.db->getTech();
+  odb::dbTechLayer* l = tech ? tech->findLayer(s(layer).c_str()) : nullptr;
+  if (l == nullptr || !l->hasTwoWidthsSpacingRules()) {
+    out.push_back(0);
+    return out;
+  }
+  const uint32_t n = l->getTwoWidthsSpacingTableNumWidths();
+  out.push_back(1);
+  out.push_back(static_cast<int32_t>(n));
+  for (uint32_t i = 0; i < n; i++) out.push_back(static_cast<int32_t>(l->getTwoWidthsSpacingTableWidth(i)));
+  for (uint32_t i = 0; i < n; i++) out.push_back(static_cast<int32_t>(l->getTwoWidthsSpacingTablePRL(i)));
+  for (uint32_t i = 0; i < n; i++) {
+    for (uint32_t j = 0; j < n; j++) out.push_back(static_cast<int32_t>(l->getTwoWidthsSpacingTableEntry(i, j)));
+  }
+  return out;
+}
+
 // `dbNet::getFirstDriverTerm`, by name: "I:<inst>/<mterm>" for an instance terminal, "B:<bterm>"
 // for a block terminal, "" when there is none (a supply net, or no driving terminal).
 rust::String net_first_driver_term(const OdbDb& h, rust::Str net) {

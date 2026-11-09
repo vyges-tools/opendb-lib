@@ -818,6 +818,7 @@ rust::Vec<int64_t> net_swire_obstacles(const OdbDb& db, rust::Str net);
 rust::String tech_via_layer(const OdbDb& db, rust::Str via, rust::Str which);
 int64_t layer_get_area(const OdbDb& db, rust::Str layer);
 rust::Vec<uint32_t> layer_v55_spacing_table(const OdbDb& db, rust::Str layer);
+rust::Vec<int32_t> layer_two_widths_spacing_table(const OdbDb& db, rust::Str layer);
 rust::String net_first_driver_term(const OdbDb& db, rust::Str net);
 rust::Vec<int64_t> net_swire_expanded_boxes(const OdbDb& db, rust::Str net);
 std::size_t num_v54_spacing_rules(const OdbDb& h, rust::Str layer);
