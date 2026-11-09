@@ -268,6 +268,7 @@ mod ffi_gen {
         fn master_get_origin_y(db: &OdbDb, master: &str) -> i32;
         fn master_get_width(db: &OdbDb, master: &str) -> u32;
         fn master_get_height(db: &OdbDb, master: &str) -> u32;
+        fn master_get_area(db: &OdbDb, master: &str) -> i64;
         fn master_is_filler(db: &OdbDb, master: &str) -> bool;
         fn master_is_block(db: &OdbDb, master: &str) -> bool;
         fn master_is_core(db: &OdbDb, master: &str) -> bool;
@@ -347,6 +348,7 @@ mod ffi_gen {
         fn num_layer_get_tech_layer_max_spacing_rules(db: &OdbDb, layer: &str) -> usize;
         fn num_layer_get_tech_layer_width_table_rules(db: &OdbDb, layer: &str) -> usize;
         fn num_layer_get_tech_layer_min_cut_rules(db: &OdbDb, layer: &str) -> usize;
+        fn num_layer_get_tech_layer_area_rules(db: &OdbDb, layer: &str) -> usize;
         fn num_layer_get_tech_layer_wrong_dir_spacing_rules(db: &OdbDb, layer: &str) -> usize;
         fn num_layer_get_tech_layer_two_wires_forbidden_spc_rules(db: &OdbDb, layer: &str) -> usize;
         fn layer_is_rect_only(db: &OdbDb, layer: &str) -> bool;
@@ -918,6 +920,7 @@ mod ffi_gen {
         fn cutspacingrule_get_two_cuts(db: &OdbDb, layer: &str, idx: usize) -> u32;
         fn cutspacingrule_get_prl(db: &OdbDb, layer: &str, idx: usize) -> u32;
         fn cutspacingrule_get_par_length(db: &OdbDb, layer: &str, idx: usize) -> u32;
+        fn cutspacingrule_get_cut_area(db: &OdbDb, layer: &str, idx: usize) -> i64;
         fn cutspacingrule_is_center_to_center(db: &OdbDb, layer: &str, idx: usize) -> bool;
         fn cutspacingrule_is_same_net(db: &OdbDb, layer: &str, idx: usize) -> bool;
         fn cutspacingrule_is_same_metal(db: &OdbDb, layer: &str, idx: usize) -> bool;
@@ -1127,6 +1130,7 @@ mod ffi_gen {
         fn mincutrule_get_within_cut_dist(db: &OdbDb, layer: &str, idx: usize) -> i32;
         fn mincutrule_get_length(db: &OdbDb, layer: &str, idx: usize) -> i32;
         fn mincutrule_get_length_within_dist(db: &OdbDb, layer: &str, idx: usize) -> i32;
+        fn mincutrule_get_area(db: &OdbDb, layer: &str, idx: usize) -> i64;
         fn mincutrule_get_area_within_dist(db: &OdbDb, layer: &str, idx: usize) -> i32;
         fn mincutrule_is_per_cut_class(db: &OdbDb, layer: &str, idx: usize) -> bool;
         fn mincutrule_is_within_cut_dist_valid(db: &OdbDb, layer: &str, idx: usize) -> bool;
@@ -1165,6 +1169,20 @@ mod ffi_gen {
         fn wrongdirspacingrule_get_prl_length(db: &OdbDb, layer: &str, idx: usize) -> i32;
         fn wrongdirspacingrule_is_noneol_valid(db: &OdbDb, layer: &str, idx: usize) -> bool;
         fn wrongdirspacingrule_is_length_valid(db: &OdbDb, layer: &str, idx: usize) -> bool;
+        fn arearule_get_area(db: &OdbDb, layer: &str, idx: usize) -> i64;
+        fn arearule_get_except_min_width(db: &OdbDb, layer: &str, idx: usize) -> i32;
+        fn arearule_get_except_edge_length(db: &OdbDb, layer: &str, idx: usize) -> i32;
+        fn arearule_get_except_edge_lengths_first(db: &OdbDb, layer: &str, idx: usize) -> i32;
+        fn arearule_get_except_edge_lengths_second(db: &OdbDb, layer: &str, idx: usize) -> i32;
+        fn arearule_get_except_min_size_first(db: &OdbDb, layer: &str, idx: usize) -> i32;
+        fn arearule_get_except_min_size_second(db: &OdbDb, layer: &str, idx: usize) -> i32;
+        fn arearule_get_except_step_first(db: &OdbDb, layer: &str, idx: usize) -> i32;
+        fn arearule_get_except_step_second(db: &OdbDb, layer: &str, idx: usize) -> i32;
+        fn arearule_get_mask(db: &OdbDb, layer: &str, idx: usize) -> i32;
+        fn arearule_get_rect_width(db: &OdbDb, layer: &str, idx: usize) -> i32;
+        fn arearule_is_except_rectangle(db: &OdbDb, layer: &str, idx: usize) -> bool;
+        fn arearule_get_overlap(db: &OdbDb, layer: &str, idx: usize) -> u32;
+        fn arearule_get_trim_layer(db: &OdbDb, layer: &str, idx: usize) -> String;
         fn layerantenna_is_valid(db: &OdbDb, layer: &str) -> bool;
         fn layerantenna_has_area_factor(db: &OdbDb, layer: &str) -> bool;
         fn layerantenna_has_side_area_factor(db: &OdbDb, layer: &str) -> bool;
@@ -1381,6 +1399,20 @@ pub use ffi_gen::{
     all_tech_get_via_rules,
     all_tech_get_vias,
     all_unfoldedchip_get_chip_inst_path,
+    arearule_get_area,
+    arearule_get_except_edge_length,
+    arearule_get_except_edge_lengths_first,
+    arearule_get_except_edge_lengths_second,
+    arearule_get_except_min_size_first,
+    arearule_get_except_min_size_second,
+    arearule_get_except_min_width,
+    arearule_get_except_step_first,
+    arearule_get_except_step_second,
+    arearule_get_mask,
+    arearule_get_overlap,
+    arearule_get_rect_width,
+    arearule_get_trim_layer,
+    arearule_is_except_rectangle,
     block_get_chip,
     block_get_const_name,
     block_get_core_area_dx,
@@ -1643,6 +1675,7 @@ pub use ffi_gen::{
     cutspacingrule_get_above_width,
     cutspacingrule_get_adj_enclosure,
     cutspacingrule_get_adjacent_cuts,
+    cutspacingrule_get_cut_area,
     cutspacingrule_get_cut_class,
     cutspacingrule_get_cut_spacing,
     cutspacingrule_get_edge_enclosure,
@@ -1970,6 +2003,7 @@ pub use ffi_gen::{
     marker_is_visible,
     marker_is_visited,
     marker_is_waived,
+    master_get_area,
     master_get_const_name,
     master_get_e_e_q,
     master_get_height,
@@ -2000,6 +2034,7 @@ pub use ffi_gen::{
     maxspacingrule_get_cut_class,
     maxspacingrule_get_max_spacing,
     maxspacingrule_has_cut_class,
+    mincutrule_get_area,
     mincutrule_get_area_within_dist,
     mincutrule_get_length,
     mincutrule_get_length_within_dist,
@@ -2275,6 +2310,7 @@ pub use ffi_gen::{
     num_inst_get_i_terms,
     num_isolation_get_isolation_cells,
     num_layer_get_min_cut_rules,
+    num_layer_get_tech_layer_area_rules,
     num_layer_get_tech_layer_corner_spacing_rules,
     num_layer_get_tech_layer_cut_class_rules,
     num_layer_get_tech_layer_cut_enclosure_rules,

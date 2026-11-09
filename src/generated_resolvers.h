@@ -190,6 +190,9 @@ inline odb::dbTechLayerWidthTableRule* gen_widthtablerule(const OdbDb& h, rust::
 inline odb::dbTechLayerWrongDirSpacingRule* gen_wrongdirspacingrule(const OdbDb& h, rust::Str layer, std::size_t i) {
   odb::dbTechLayer* l = gen_techlayer(h, layer); if (!l) return nullptr;
   std::size_t k = 0; for (odb::dbTechLayerWrongDirSpacingRule* r : l->getTechLayerWrongDirSpacingRules()) { if (k++ == i) return r; } return nullptr; }
+inline odb::dbTechLayerAreaRule* gen_arearule(const OdbDb& h, rust::Str layer, std::size_t i) {
+  odb::dbTechLayer* l = gen_techlayer(h, layer); if (!l) return nullptr;
+  std::size_t k = 0; for (odb::dbTechLayerAreaRule* r : l->getTechLayerAreaRules()) { if (k++ == i) return r; } return nullptr; }
 inline odb::dbTechLayerAntennaRule* gen_layerantenna(const OdbDb& h, rust::Str layer) {
   odb::dbTechLayer* l = gen_techlayer(h, layer); return l ? l->getDefaultAntennaRule() : nullptr; }
 inline odb::dbTechAntennaPinModel* gen_antennapinmodel(const OdbDb& h, rust::Str master, rust::Str term) {

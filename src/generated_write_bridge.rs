@@ -534,6 +534,14 @@ mod ffi_gen_write {
         fn wrongdirspacingrule_set_prl_length(db: &OdbDb, layer: &str, idx: usize, prl_length: i32) -> Result<()>;
         fn wrongdirspacingrule_set_noneol_valid(db: &OdbDb, layer: &str, idx: usize, noneol_valid: bool) -> Result<()>;
         fn wrongdirspacingrule_set_length_valid(db: &OdbDb, layer: &str, idx: usize, length_valid: bool) -> Result<()>;
+        fn arearule_set_area(db: &OdbDb, layer: &str, idx: usize, area: i64) -> Result<()>;
+        fn arearule_set_except_min_width(db: &OdbDb, layer: &str, idx: usize, except_min_width: i32) -> Result<()>;
+        fn arearule_set_except_edge_length(db: &OdbDb, layer: &str, idx: usize, except_edge_length: i32) -> Result<()>;
+        fn arearule_set_mask(db: &OdbDb, layer: &str, idx: usize, mask: i32) -> Result<()>;
+        fn arearule_set_rect_width(db: &OdbDb, layer: &str, idx: usize, rect_width: i32) -> Result<()>;
+        fn arearule_set_except_rectangle(db: &OdbDb, layer: &str, idx: usize, except_rectangle: bool) -> Result<()>;
+        fn arearule_set_overlap(db: &OdbDb, layer: &str, idx: usize, overlap: u32) -> Result<()>;
+        fn arearule_set_trim_layer(db: &OdbDb, layer: &str, idx: usize, trim_layer: &str) -> Result<()>;
         fn layerantenna_set_gate_plus_diff_factor(db: &OdbDb, layer: &str, factor: f64) -> Result<()>;
         fn layerantenna_set_area_minus_diff_factor(db: &OdbDb, layer: &str, factor: f64) -> Result<()>;
         fn layerantenna_set_area_factor(db: &OdbDb, layer: &str, factor: f64, diffuse: bool) -> Result<()>;
@@ -570,6 +578,14 @@ mod ffi_gen_write {
 }
 
 pub use ffi_gen_write::{
+    arearule_set_area,
+    arearule_set_except_edge_length,
+    arearule_set_except_min_width,
+    arearule_set_except_rectangle,
+    arearule_set_mask,
+    arearule_set_overlap,
+    arearule_set_rect_width,
+    arearule_set_trim_layer,
     block_clear,
     block_clear_global_connect,
     block_clear_user_inst_flags,

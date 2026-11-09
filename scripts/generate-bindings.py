@@ -118,6 +118,8 @@ TARGETS = {
     "dbTechLayerTwoWiresForbiddenSpcRule": {"key": "twowiresforbiddenrule", "args": ["layer", {"name": "idx", "type": "idx"}], "resolve": "gen_twowiresforbiddenrule(h, layer, idx)"},
     "dbTechLayerWidthTableRule":          {"key": "widthtablerule",       "args": ["layer", {"name": "idx", "type": "idx"}], "resolve": "gen_widthtablerule(h, layer, idx)"},
     "dbTechLayerWrongDirSpacingRule":     {"key": "wrongdirspacingrule",  "args": ["layer", {"name": "idx", "type": "idx"}], "resolve": "gen_wrongdirspacingrule(h, layer, idx)"},
+    # LEF58_AREA on routing layers: drt's check reads it (`checkMetalShape_lef58Area`).
+    "dbTechLayerAreaRule":                {"key": "arearule",             "args": ["layer", {"name": "idx", "type": "idx"}], "resolve": "gen_arearule(h, layer, idx)"},
     "dbTechLayerAntennaRule": {"key": "layerantenna",     "args": ["layer"], "resolve": "gen_layerantenna(h, layer)"},
     "dbTechAntennaPinModel":  {"key": "antennapinmodel",  "args": ["master", "term"], "resolve": "gen_antennapinmodel(h, master, term)"},
     # via cut geometry (value-struct via dbVia::getViaParams(), stashed thread-local) — see resolver.
@@ -194,6 +196,8 @@ SCALAR = {
     "uint": ("u32", "uint32_t", "0"),
     "uint32_t": ("u32", "uint32_t", "0"),
     "unsigned": ("u32", "uint32_t", "0"),
+    # dbTechLayerAreaRule::getArea (an area in DBU squared).
+    "int64_t": ("i64", "int64_t", "0"),
     "bool": ("bool", "bool", "false"),
     "float": ("f32", "float", "0.0f"),
     "double": ("f64", "double", "0.0"),
@@ -866,6 +870,33 @@ class Emit:
                     return True
                 self.skipped += 1
                 return False
+            elif nret == "std::pair<int,int>":
+                # an int pair returned by value (dbTechLayerAreaRule's EXCEPTMINSIZE, EXCEPTSTEP,
+                # EXCEPTEDGELENGTH min max) -> two i32 sub-fields, `_first` and `_second`.
+                emitted = 0
+                for suffix in ("first", "second"):
+                    sub = f"{fn}_{suffix}"
+                    if sub in seen or sub in reserved_fn or sub in reserved_db:
+                        continue
+                    self.h.append(f"int32_t {sub}(const OdbDb& db{c_params});")
+                    self.cc.append(
+                        f"int32_t {sub}(const OdbDb& h{c_params}) {{ auto* p = {resolve}; "
+                        f"return p ? p->{name}().{suffix} : 0; }}")
+                    self.bridge.append(f"        fn {sub}(db: &OdbDb{r_params}) -> i32;")
+                    self.api.append(
+                        f"    pub fn {sub}(&self{rust_args_sig}) -> i32 "
+                        f"{{ sys::{sub}(self.r(){rust_fwd}) }}")
+                    self.reexport.append(sub)
+                    seen.add(sub)
+                    subarm = (f'        ("{cls}", "{field}_{suffix}") => '
+                              f"Ok(serde_json::json!(db.{sub}({key_call}))),")
+                    self.reg.append((cls, f"{field}_{suffix}", "i32", keys_desc, subarm))
+                    emitted += 1
+                if emitted:
+                    self.per_class[cls] = self.per_class.get(cls, 0) + 1
+                    return True
+                self.skipped += 1
+                return False
             else:
                 self.skipped += 1
                 return False
@@ -1222,6 +1253,9 @@ def main() -> int:
         "static odb::dbTechLayerWrongDirSpacingRule* gen_wrongdirspacingrule(const OdbDb& h, rust::Str layer, std::size_t i) {\n"
         "  odb::dbTechLayer* l = gen_techlayer(h, layer); if (!l) return nullptr;\n"
         "  std::size_t k = 0; for (odb::dbTechLayerWrongDirSpacingRule* r : l->getTechLayerWrongDirSpacingRules()) { if (k++ == i) return r; } return nullptr; }\n"
+        "static odb::dbTechLayerAreaRule* gen_arearule(const OdbDb& h, rust::Str layer, std::size_t i) {\n"
+        "  odb::dbTechLayer* l = gen_techlayer(h, layer); if (!l) return nullptr;\n"
+        "  std::size_t k = 0; for (odb::dbTechLayerAreaRule* r : l->getTechLayerAreaRules()) { if (k++ == i) return r; } return nullptr; }\n"
         "static odb::dbTechLayerAntennaRule* gen_layerantenna(const OdbDb& h, rust::Str layer) {\n"
         "  odb::dbTechLayer* l = gen_techlayer(h, layer); return l ? l->getDefaultAntennaRule() : nullptr; }\n"
         "static odb::dbTechAntennaPinModel* gen_antennapinmodel(const OdbDb& h, rust::Str master, rust::Str term) {\n"

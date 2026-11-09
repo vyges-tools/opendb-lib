@@ -5,7 +5,7 @@
   "scope": "all",
   "class_count": 122,
   "method_count": 2716,
-  "bridged_count": 2137,
+  "bridged_count": 2154,
   "classes": [
     {
       "name": "dbAccessPoint",
@@ -19446,7 +19446,7 @@
           ],
           "const": false,
           "kind": "setter",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "getExceptMinWidth",
@@ -19454,7 +19454,7 @@
           "params": [],
           "const": true,
           "kind": "getter",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "setExceptEdgeLength",
@@ -19467,7 +19467,7 @@
           ],
           "const": false,
           "kind": "setter",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "getExceptEdgeLength",
@@ -19475,7 +19475,7 @@
           "params": [],
           "const": true,
           "kind": "getter",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "setExceptEdgeLengths",
@@ -19496,7 +19496,7 @@
           "params": [],
           "const": true,
           "kind": "getter",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "setExceptMinSize",
@@ -19517,7 +19517,7 @@
           "params": [],
           "const": true,
           "kind": "getter",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "setExceptStep",
@@ -19538,7 +19538,7 @@
           "params": [],
           "const": true,
           "kind": "getter",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "setMask",
@@ -19551,7 +19551,7 @@
           ],
           "const": false,
           "kind": "setter",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "getMask",
@@ -19559,7 +19559,7 @@
           "params": [],
           "const": true,
           "kind": "getter",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "setRectWidth",
@@ -19572,7 +19572,7 @@
           ],
           "const": false,
           "kind": "setter",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "getRectWidth",
@@ -19580,7 +19580,7 @@
           "params": [],
           "const": true,
           "kind": "getter",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "setExceptRectangle",
@@ -19614,7 +19614,7 @@
           ],
           "const": false,
           "kind": "setter",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "getOverlap",
@@ -19622,7 +19622,7 @@
           "params": [],
           "const": true,
           "kind": "getter",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "setTrimLayer",
@@ -19635,7 +19635,7 @@
           ],
           "const": false,
           "kind": "setter",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "getTrimLayer",
@@ -19643,7 +19643,7 @@
           "params": [],
           "const": true,
           "kind": "relation",
-          "bridged": false,
+          "bridged": true,
           "target": "dbTechLayer"
         }
       ],
@@ -21790,7 +21790,7 @@
           "params": [],
           "const": true,
           "kind": "getter",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "setCenterToCenter",
@@ -27106,7 +27106,7 @@
           "params": [],
           "const": true,
           "kind": "getter",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "setSameNetPgOnly",

@@ -265,6 +265,7 @@ int32_t master_get_origin_x(const OdbDb& h, rust::Str master) { auto* p = gen_ma
 int32_t master_get_origin_y(const OdbDb& h, rust::Str master) { auto* p = gen_master(h, master); return p ? p->getOrigin().getY() : 0; }
 uint32_t master_get_width(const OdbDb& h, rust::Str master) { auto* p = gen_master(h, master); return p ? p->getWidth() : 0; }
 uint32_t master_get_height(const OdbDb& h, rust::Str master) { auto* p = gen_master(h, master); return p ? p->getHeight() : 0; }
+int64_t master_get_area(const OdbDb& h, rust::Str master) { auto* p = gen_master(h, master); return p ? p->getArea() : 0; }
 bool master_is_filler(const OdbDb& h, rust::Str master) { auto* p = gen_master(h, master); return p ? p->isFiller() : false; }
 bool master_is_block(const OdbDb& h, rust::Str master) { auto* p = gen_master(h, master); return p ? p->isBlock() : false; }
 bool master_is_core(const OdbDb& h, rust::Str master) { auto* p = gen_master(h, master); return p ? p->isCore() : false; }
@@ -344,6 +345,7 @@ std::size_t num_layer_get_tech_layer_eol_keep_out_rules(const OdbDb& h, rust::St
 std::size_t num_layer_get_tech_layer_max_spacing_rules(const OdbDb& h, rust::Str layer) { auto* p = gen_techlayer(h, layer); return p ? p->getTechLayerMaxSpacingRules().size() : 0; }
 std::size_t num_layer_get_tech_layer_width_table_rules(const OdbDb& h, rust::Str layer) { auto* p = gen_techlayer(h, layer); return p ? p->getTechLayerWidthTableRules().size() : 0; }
 std::size_t num_layer_get_tech_layer_min_cut_rules(const OdbDb& h, rust::Str layer) { auto* p = gen_techlayer(h, layer); return p ? p->getTechLayerMinCutRules().size() : 0; }
+std::size_t num_layer_get_tech_layer_area_rules(const OdbDb& h, rust::Str layer) { auto* p = gen_techlayer(h, layer); return p ? p->getTechLayerAreaRules().size() : 0; }
 std::size_t num_layer_get_tech_layer_wrong_dir_spacing_rules(const OdbDb& h, rust::Str layer) { auto* p = gen_techlayer(h, layer); return p ? p->getTechLayerWrongDirSpacingRules().size() : 0; }
 std::size_t num_layer_get_tech_layer_two_wires_forbidden_spc_rules(const OdbDb& h, rust::Str layer) { auto* p = gen_techlayer(h, layer); return p ? p->getTechLayerTwoWiresForbiddenSpcRules().size() : 0; }
 bool layer_is_rect_only(const OdbDb& h, rust::Str layer) { auto* p = gen_techlayer(h, layer); return p ? p->isRectOnly() : false; }
@@ -915,6 +917,7 @@ int32_t cutspacingrule_get_second_within(const OdbDb& h, rust::Str layer, std::s
 uint32_t cutspacingrule_get_two_cuts(const OdbDb& h, rust::Str layer, std::size_t idx) { auto* p = gen_cutspacingrule(h, layer, idx); return p ? p->getTwoCuts() : 0; }
 uint32_t cutspacingrule_get_prl(const OdbDb& h, rust::Str layer, std::size_t idx) { auto* p = gen_cutspacingrule(h, layer, idx); return p ? p->getPrl() : 0; }
 uint32_t cutspacingrule_get_par_length(const OdbDb& h, rust::Str layer, std::size_t idx) { auto* p = gen_cutspacingrule(h, layer, idx); return p ? p->getParLength() : 0; }
+int64_t cutspacingrule_get_cut_area(const OdbDb& h, rust::Str layer, std::size_t idx) { auto* p = gen_cutspacingrule(h, layer, idx); return p ? p->getCutArea() : 0; }
 bool cutspacingrule_is_center_to_center(const OdbDb& h, rust::Str layer, std::size_t idx) { auto* p = gen_cutspacingrule(h, layer, idx); return p ? p->isCenterToCenter() : false; }
 bool cutspacingrule_is_same_net(const OdbDb& h, rust::Str layer, std::size_t idx) { auto* p = gen_cutspacingrule(h, layer, idx); return p ? p->isSameNet() : false; }
 bool cutspacingrule_is_same_metal(const OdbDb& h, rust::Str layer, std::size_t idx) { auto* p = gen_cutspacingrule(h, layer, idx); return p ? p->isSameMetal() : false; }
@@ -1124,6 +1127,7 @@ int32_t mincutrule_get_width(const OdbDb& h, rust::Str layer, std::size_t idx) {
 int32_t mincutrule_get_within_cut_dist(const OdbDb& h, rust::Str layer, std::size_t idx) { auto* p = gen_mincutrule(h, layer, idx); return p ? p->getWithinCutDist() : 0; }
 int32_t mincutrule_get_length(const OdbDb& h, rust::Str layer, std::size_t idx) { auto* p = gen_mincutrule(h, layer, idx); return p ? p->getLength() : 0; }
 int32_t mincutrule_get_length_within_dist(const OdbDb& h, rust::Str layer, std::size_t idx) { auto* p = gen_mincutrule(h, layer, idx); return p ? p->getLengthWithinDist() : 0; }
+int64_t mincutrule_get_area(const OdbDb& h, rust::Str layer, std::size_t idx) { auto* p = gen_mincutrule(h, layer, idx); return p ? p->getArea() : 0; }
 int32_t mincutrule_get_area_within_dist(const OdbDb& h, rust::Str layer, std::size_t idx) { auto* p = gen_mincutrule(h, layer, idx); return p ? p->getAreaWithinDist() : 0; }
 bool mincutrule_is_per_cut_class(const OdbDb& h, rust::Str layer, std::size_t idx) { auto* p = gen_mincutrule(h, layer, idx); return p ? p->isPerCutClass() : false; }
 bool mincutrule_is_within_cut_dist_valid(const OdbDb& h, rust::Str layer, std::size_t idx) { auto* p = gen_mincutrule(h, layer, idx); return p ? p->isWithinCutDistValid() : false; }
@@ -1162,6 +1166,20 @@ int32_t wrongdirspacingrule_get_length(const OdbDb& h, rust::Str layer, std::siz
 int32_t wrongdirspacingrule_get_prl_length(const OdbDb& h, rust::Str layer, std::size_t idx) { auto* p = gen_wrongdirspacingrule(h, layer, idx); return p ? p->getPrlLength() : 0; }
 bool wrongdirspacingrule_is_noneol_valid(const OdbDb& h, rust::Str layer, std::size_t idx) { auto* p = gen_wrongdirspacingrule(h, layer, idx); return p ? p->isNoneolValid() : false; }
 bool wrongdirspacingrule_is_length_valid(const OdbDb& h, rust::Str layer, std::size_t idx) { auto* p = gen_wrongdirspacingrule(h, layer, idx); return p ? p->isLengthValid() : false; }
+int64_t arearule_get_area(const OdbDb& h, rust::Str layer, std::size_t idx) { auto* p = gen_arearule(h, layer, idx); return p ? p->getArea() : 0; }
+int32_t arearule_get_except_min_width(const OdbDb& h, rust::Str layer, std::size_t idx) { auto* p = gen_arearule(h, layer, idx); return p ? p->getExceptMinWidth() : 0; }
+int32_t arearule_get_except_edge_length(const OdbDb& h, rust::Str layer, std::size_t idx) { auto* p = gen_arearule(h, layer, idx); return p ? p->getExceptEdgeLength() : 0; }
+int32_t arearule_get_except_edge_lengths_first(const OdbDb& h, rust::Str layer, std::size_t idx) { auto* p = gen_arearule(h, layer, idx); return p ? p->getExceptEdgeLengths().first : 0; }
+int32_t arearule_get_except_edge_lengths_second(const OdbDb& h, rust::Str layer, std::size_t idx) { auto* p = gen_arearule(h, layer, idx); return p ? p->getExceptEdgeLengths().second : 0; }
+int32_t arearule_get_except_min_size_first(const OdbDb& h, rust::Str layer, std::size_t idx) { auto* p = gen_arearule(h, layer, idx); return p ? p->getExceptMinSize().first : 0; }
+int32_t arearule_get_except_min_size_second(const OdbDb& h, rust::Str layer, std::size_t idx) { auto* p = gen_arearule(h, layer, idx); return p ? p->getExceptMinSize().second : 0; }
+int32_t arearule_get_except_step_first(const OdbDb& h, rust::Str layer, std::size_t idx) { auto* p = gen_arearule(h, layer, idx); return p ? p->getExceptStep().first : 0; }
+int32_t arearule_get_except_step_second(const OdbDb& h, rust::Str layer, std::size_t idx) { auto* p = gen_arearule(h, layer, idx); return p ? p->getExceptStep().second : 0; }
+int32_t arearule_get_mask(const OdbDb& h, rust::Str layer, std::size_t idx) { auto* p = gen_arearule(h, layer, idx); return p ? p->getMask() : 0; }
+int32_t arearule_get_rect_width(const OdbDb& h, rust::Str layer, std::size_t idx) { auto* p = gen_arearule(h, layer, idx); return p ? p->getRectWidth() : 0; }
+bool arearule_is_except_rectangle(const OdbDb& h, rust::Str layer, std::size_t idx) { auto* p = gen_arearule(h, layer, idx); return p ? p->isExceptRectangle() : false; }
+uint32_t arearule_get_overlap(const OdbDb& h, rust::Str layer, std::size_t idx) { auto* p = gen_arearule(h, layer, idx); return p ? p->getOverlap() : 0; }
+rust::String arearule_get_trim_layer(const OdbDb& h, rust::Str layer, std::size_t idx) { auto* p = gen_arearule(h, layer, idx); if (!p) return rust::String(); auto* t = p->getTrimLayer(); return t ? rust::String(t->getConstName()) : rust::String(); }
 bool layerantenna_is_valid(const OdbDb& h, rust::Str layer) { auto* p = gen_layerantenna(h, layer); return p ? p->isValid() : false; }
 bool layerantenna_has_area_factor(const OdbDb& h, rust::Str layer) { auto* p = gen_layerantenna(h, layer); return p ? p->hasAreaFactor() : false; }
 bool layerantenna_has_side_area_factor(const OdbDb& h, rust::Str layer) { auto* p = gen_layerantenna(h, layer); return p ? p->hasSideAreaFactor() : false; }

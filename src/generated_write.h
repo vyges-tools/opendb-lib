@@ -529,6 +529,14 @@ void wrongdirspacingrule_set_length(const OdbDb& db, rust::Str layer, std::size_
 void wrongdirspacingrule_set_prl_length(const OdbDb& db, rust::Str layer, std::size_t idx, int32_t prl_length);
 void wrongdirspacingrule_set_noneol_valid(const OdbDb& db, rust::Str layer, std::size_t idx, bool noneol_valid);
 void wrongdirspacingrule_set_length_valid(const OdbDb& db, rust::Str layer, std::size_t idx, bool length_valid);
+void arearule_set_area(const OdbDb& db, rust::Str layer, std::size_t idx, int64_t area);
+void arearule_set_except_min_width(const OdbDb& db, rust::Str layer, std::size_t idx, int32_t except_min_width);
+void arearule_set_except_edge_length(const OdbDb& db, rust::Str layer, std::size_t idx, int32_t except_edge_length);
+void arearule_set_mask(const OdbDb& db, rust::Str layer, std::size_t idx, int32_t mask);
+void arearule_set_rect_width(const OdbDb& db, rust::Str layer, std::size_t idx, int32_t rect_width);
+void arearule_set_except_rectangle(const OdbDb& db, rust::Str layer, std::size_t idx, bool except_rectangle);
+void arearule_set_overlap(const OdbDb& db, rust::Str layer, std::size_t idx, uint32_t overlap);
+void arearule_set_trim_layer(const OdbDb& db, rust::Str layer, std::size_t idx, rust::Str trim_layer);
 void layerantenna_set_gate_plus_diff_factor(const OdbDb& db, rust::Str layer, double factor);
 void layerantenna_set_area_minus_diff_factor(const OdbDb& db, rust::Str layer, double factor);
 void layerantenna_set_area_factor(const OdbDb& db, rust::Str layer, double factor, bool diffuse);
