@@ -24,6 +24,19 @@ routed `.odb`, walks the model, and writes it back — linking none of the engin
 - **`.github/workflows/build-libodb.yml`** builds + smoke-tests + publishes `libodb.a`
   per-arch, on demand (`workflow_dispatch`).
 
+## Fixes on top of upstream
+
+libodb is compiled from the pinned upstream source **unmodified**. Where upstream reads a rule
+differently from what the LEF/DEF text says and we have reported it, the fix is made in OUR layer,
+after upstream's code has run, using public odb API only. It is recorded here and in each bundle's
+`manifest.json` (`fixes`), and removed once upstream merges its own fix.
+
+| Fix | Upstream | Where | Pinned by |
+|---|---|---|---|
+| A `LEF58_MINIMUMCUT` rule written per `CUTCLASS` reads back as per-cut-class (`isPerCutClass`); upstream records the class counts but never sets the flag | [OpenROAD #12176](https://github.com/The-OpenROAD-Project/OpenROAD/issues/12176) | every LEF read that creates a tech (`read_lef`, `tech_from_lef`, `tech_and_lib_from_lef`) | `tests/mincut_per_cut_class.rs` |
+
+⚠️ So on these fields our reading differs from upstream OpenROAD as shipped, by design.
+
 ## Two ways to get libodb
 
 - **Prebuilt (fast, no toolchain-heavy build):** download the per-arch bundle the

@@ -129,6 +129,7 @@ jobs:
             "cxx_standard": "20",
             "openroad_commit": "$OR_SHA",
             "deps_from_source": { "fmt": "$FMT", "abseil": "$ABSL", "spdlog": "$SPD" },
+            "fixes": ["OpenROAD#12176: LEF58_MINIMUMCUT per CUTCLASS reads back per-cut-class (in our LEF read, not a source patch; see README)"],
             "static": ["libodb", "fmt", "spdlog", "abseil"],
             "dynamic": ["glibc", "libstdc++", "zlib"]
           }

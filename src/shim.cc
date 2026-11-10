@@ -611,6 +611,30 @@ void block_set_def_units(const OdbDb& h, int32_t units) {
   require_block(h)->setDefUnits(units);
 }
 
+// ⛔ **OUR FIX FOR OpenROAD #12176, in our layer — not a source patch, and not upstream's behaviour.**
+// The rule, as LEF58_MINIMUMCUT writes it: a rule given as `MINIMUMCUT CUTCLASS <class> <n> ...`
+// counts cuts PER CUT CLASS. upstream's LEF reader (the pinned odb) records each class's count on
+// the rule but never sets the rule's per-cut-class flag, so any reader that asks
+// `isPerCutClass()` (the reference router's tech conversion does) treats it as a plain rule.
+// The fix sets the flag exactly when the reader recorded at least one class count, i.e. exactly
+// where the reader parsed a CUTCLASS. Same result as the fix patch we carry in the -vyges
+// OpenROAD build (upstream-fix 0003), done with public odb API so no upstream source ships.
+//
+// 🔑 **Only for a tech THIS read created.** lefin reads LAYER statements only while it is creating
+// a tech; a library-only read touches no layer rule, and a tech that came from an `.odb` keeps
+// what the tool that wrote it decided.
+// ⚠️ A divergence from the CLEAN reference on one field: a gate that dumps `isPerCutClass` for
+// such a rule must be scored against the fixed build. Remove when upstream merges a fix.
+// Pinned by tests/mincut_per_cut_class.rs.
+static void fix_min_cut_per_cut_class(odb::dbTech* tech) {
+  if (tech == nullptr) return;
+  for (odb::dbTechLayer* layer : tech->getLayers()) {
+    for (odb::dbTechLayerMinCutRule* rule : layer->getTechLayerMinCutRules()) {
+      if (!rule->getCutClassCutsMap().empty()) rule->setPerCutClass(true);
+    }
+  }
+}
+
 void read_lef(const OdbDb& h, rust::Str lef_path) {
   odb::dbDatabase* db = h.db;
   std::string path = s(lef_path);
@@ -631,6 +655,7 @@ void read_lef(const OdbDb& h, rust::Str lef_path) {
     reader.createTechAndLib(base.c_str(), base.c_str(), path.c_str());
     if (!db->getTech())
       throw std::runtime_error("vyges-opendb: could not read tech from LEF: " + path);
+    fix_min_cut_per_cut_class(db->getTech());
   } else {
     reader.createLib(tech, base.c_str(), path.c_str());
   }
@@ -876,6 +901,7 @@ void tech_from_lef(const OdbDb& h, rust::Str name, rust::Str lef_path) {
   if (!reader.createTech(s(name).c_str(), s(lef_path).c_str()))
     throw std::runtime_error("vyges-opendb: could not create tech `" + s(name) + "` from "
                              + s(lef_path));
+  fix_min_cut_per_cut_class(h.db->findTech(s(name).c_str()));
 }
 
 void tech_and_lib_from_lef(const OdbDb& h, rust::Str tech_name, rust::Str lib_name, rust::Str lef_path) {
@@ -886,6 +912,7 @@ void tech_and_lib_from_lef(const OdbDb& h, rust::Str tech_name, rust::Str lib_na
   if (!h.db->findTech(s(tech_name).c_str()))
     throw std::runtime_error("vyges-opendb: could not create tech `" + s(tech_name) + "` from "
                              + s(lef_path));
+  fix_min_cut_per_cut_class(h.db->findTech(s(tech_name).c_str()));
 }
 
 bool has_tech(const OdbDb& h, rust::Str name) {
