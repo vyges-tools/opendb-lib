@@ -5091,6 +5091,19 @@ rust::Vec<int64_t> layer_min_enclosed_areas(const OdbDb& h, rust::Str layer) {
   return out;
 }
 
+// A LEF58_MINIMUMCUT rule's per-cut-class counts (MINIMUMCUT CUTCLASS c n ...), read-only, as
+// "class\tcount" in odb's map order (by class name), the order a reader that walks
+// getCutClassCutsMap sees them. Empty for a rule written without CUTCLASS, or one not found.
+rust::Vec<rust::String> mincutrule_cut_class_cuts(const OdbDb& h, rust::Str layer, std::size_t idx) {
+  rust::Vec<rust::String> out;
+  odb::dbTechLayerMinCutRule* r = gen_mincutrule(h, layer, idx);
+  if (!r) return out;
+  for (const auto& [cls, n] : r->getCutClassCutsMap()) {
+    out.push_back(rust::String(cls + "\t" + std::to_string(n)));
+  }
+  return out;
+}
+
 std::size_t block_access_point_count(const OdbDb& h) {
   dbBlock* b = require_block(h);
   std::size_t n = 0;

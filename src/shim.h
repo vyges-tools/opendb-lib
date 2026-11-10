@@ -1056,6 +1056,7 @@ void block_create_via(const OdbDb& db, rust::Str name, rust::Str layer1, rust::S
 // when absent, kept when identical, refused when different (libodb cannot remove one).
 void block_set_gcell_grid(const OdbDb& db, int32_t x0, int32_t nx, int32_t sx, int32_t y0, int32_t ny, int32_t sy);
 rust::Vec<int64_t> layer_min_enclosed_areas(const OdbDb& db, rust::Str layer);  // MINENCLOSEDAREA rules without a width
+rust::Vec<rust::String> mincutrule_cut_class_cuts(const OdbDb& db, rust::Str layer, std::size_t idx);  // LEF58_MINIMUMCUT per-class counts, "class\tcount"
 void block_reset_gcell_grid(const OdbDb& db, int32_t x0, int32_t nx, int32_t sx, int32_t y0, int32_t ny, int32_t sy);  // resetGrid + one pattern per axis
 // Power intent: the list and struct fields the generator does not reach. Unknown object: empty.
 // A record is a fixed number of strings, in the database's own order:
