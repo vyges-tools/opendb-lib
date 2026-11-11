@@ -757,6 +757,21 @@ class Emit:
         arm = f'        ("{cls}", "{field}") => Ok(serde_json::json!(db.{fn}({key_call}))),'
         reg_kind = None
 
+        # A std::vector<int> returned by value (`dbTechLayerWidthTableRule::getWidthTable`) -> one
+        # Vec<i32>, in odb's order (the out-param form is `add_vector_outparam_getter`).
+        if kind == "getter" and re.fullmatch(r"std::vector<\s*int\s*>", ret.strip()):
+            self.h.append(f"rust::Vec<int32_t> {fn}(const OdbDb& db{c_params});")
+            self.cc.append(
+                f"rust::Vec<int32_t> {fn}(const OdbDb& h{c_params}) {{ rust::Vec<int32_t> out; "
+                f"auto* p = {resolve}; if (p) {{ for (int x : p->{name}()) out.push_back(x); }} return out; }}")
+            self.bridge.append(f"        fn {fn}(db: &OdbDb{r_params}) -> Vec<i32>;")
+            self.api.append(f"    pub fn {fn}(&self{rust_args_sig}) -> Vec<i32> {{ sys::{fn}(self.r(){rust_fwd}) }}")
+            self.reexport.append(fn)
+            seen.add(fn)
+            self.reg.append((cls, field, "list", keys_desc, arm))
+            self.per_class[cls] = self.per_class.get(cls, 0) + 1
+            return True
+
         # std::vector<dbFoo*> getters marshal exactly like a dbSet iterator (count + nth-name).
         vec_m = re.match(r"^(?:const\s+)?std::vector<\s*(db[A-Za-z0-9_]+)\s*\*\s*>\s*&?$", ret.strip())
         if kind == "getter" and vec_m:

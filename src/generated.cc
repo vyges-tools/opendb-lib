@@ -1160,6 +1160,7 @@ bool twowiresforbiddenrule_is_min_exact_span_length(const OdbDb& h, rust::Str la
 bool twowiresforbiddenrule_is_max_exact_span_length(const OdbDb& h, rust::Str layer, std::size_t idx) { auto* p = gen_twowiresforbiddenrule(h, layer, idx); return p ? p->isMaxExactSpanLength() : false; }
 bool widthtablerule_is_wrong_direction(const OdbDb& h, rust::Str layer, std::size_t idx) { auto* p = gen_widthtablerule(h, layer, idx); return p ? p->isWrongDirection() : false; }
 bool widthtablerule_is_orthogonal(const OdbDb& h, rust::Str layer, std::size_t idx) { auto* p = gen_widthtablerule(h, layer, idx); return p ? p->isOrthogonal() : false; }
+rust::Vec<int32_t> widthtablerule_get_width_table(const OdbDb& h, rust::Str layer, std::size_t idx) { rust::Vec<int32_t> out; auto* p = gen_widthtablerule(h, layer, idx); if (p) { for (int x : p->getWidthTable()) out.push_back(x); } return out; }
 int32_t wrongdirspacingrule_get_wrongdir_space(const OdbDb& h, rust::Str layer, std::size_t idx) { auto* p = gen_wrongdirspacingrule(h, layer, idx); return p ? p->getWrongdirSpace() : 0; }
 int32_t wrongdirspacingrule_get_noneol_width(const OdbDb& h, rust::Str layer, std::size_t idx) { auto* p = gen_wrongdirspacingrule(h, layer, idx); return p ? p->getNoneolWidth() : 0; }
 int32_t wrongdirspacingrule_get_length(const OdbDb& h, rust::Str layer, std::size_t idx) { auto* p = gen_wrongdirspacingrule(h, layer, idx); return p ? p->getLength() : 0; }

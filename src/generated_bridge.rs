@@ -1163,6 +1163,7 @@ mod ffi_gen {
         fn twowiresforbiddenrule_is_max_exact_span_length(db: &OdbDb, layer: &str, idx: usize) -> bool;
         fn widthtablerule_is_wrong_direction(db: &OdbDb, layer: &str, idx: usize) -> bool;
         fn widthtablerule_is_orthogonal(db: &OdbDb, layer: &str, idx: usize) -> bool;
+        fn widthtablerule_get_width_table(db: &OdbDb, layer: &str, idx: usize) -> Vec<i32>;
         fn wrongdirspacingrule_get_wrongdir_space(db: &OdbDb, layer: &str, idx: usize) -> i32;
         fn wrongdirspacingrule_get_noneol_width(db: &OdbDb, layer: &str, idx: usize) -> i32;
         fn wrongdirspacingrule_get_length(db: &OdbDb, layer: &str, idx: usize) -> i32;
@@ -2628,6 +2629,7 @@ pub use ffi_gen::{
     via_params_get_y_origin,
     via_params_get_y_top_enclosure,
     via_params_get_y_top_offset,
+    widthtablerule_get_width_table,
     widthtablerule_is_orthogonal,
     widthtablerule_is_wrong_direction,
     wire_count,

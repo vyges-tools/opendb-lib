@@ -1158,6 +1158,7 @@ bool twowiresforbiddenrule_is_min_exact_span_length(const OdbDb& db, rust::Str l
 bool twowiresforbiddenrule_is_max_exact_span_length(const OdbDb& db, rust::Str layer, std::size_t idx);
 bool widthtablerule_is_wrong_direction(const OdbDb& db, rust::Str layer, std::size_t idx);
 bool widthtablerule_is_orthogonal(const OdbDb& db, rust::Str layer, std::size_t idx);
+rust::Vec<int32_t> widthtablerule_get_width_table(const OdbDb& db, rust::Str layer, std::size_t idx);
 int32_t wrongdirspacingrule_get_wrongdir_space(const OdbDb& db, rust::Str layer, std::size_t idx);
 int32_t wrongdirspacingrule_get_noneol_width(const OdbDb& db, rust::Str layer, std::size_t idx);
 int32_t wrongdirspacingrule_get_length(const OdbDb& db, rust::Str layer, std::size_t idx);
