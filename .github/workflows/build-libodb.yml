@@ -51,7 +51,7 @@ jobs:
         if: runner.os == 'macOS'
         run: brew install cmake boost bison   # bison for the LEF/DEF parsers; NOT fmt/spdlog/abseil
 
-      - uses: dtolnay/rust-toolchain@stable
+      - uses: dtolnay/rust-toolchain@1.100.0
 
       - name: Fetch pinned odb subtree (sparse)
         run: scripts/fetch-odb-src.sh
