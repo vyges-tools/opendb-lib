@@ -580,6 +580,7 @@ void fill_create(const OdbDb& db, bool needs_opc, uint32_t mask, rust::Str layer
                  int32_t x1, int32_t y1, int32_t x2, int32_t y2);
 std::size_t num_fills(const OdbDb& db);
 std::size_t clear_fills(const OdbDb& db);   // returns the count removed
+rust::Vec<int64_t> fill_records(const OdbDb& db);
 
 // Layer enumeration + routing direction. `layer_get_*` accessors are generated and address a
 // layer by name, but nothing enumerated them, and the DIRECTION (which decides how fill shapes

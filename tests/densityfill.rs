@@ -38,6 +38,12 @@ fn fills_can_be_created_counted_and_cleared() {
     odb::fill_create(&db, false, 0, &layer, 0, 0, 100, 100).expect("created");
     odb::fill_create(&db, true, 2, &layer, 200, 0, 300, 100).expect("created with a mask");
     assert_eq!(odb::num_fills(&db).unwrap(), 2);
+    // The fills read back with layer, mask and rectangle, in creation order.
+    let num = odb::inst_shapes(&db).unwrap()[0];
+    assert_eq!(
+        odb::fill_records(&db).unwrap(),
+        vec![num, 0, 0, 0, 100, 100, num, 2, 200, 0, 300, 100]
+    );
 
     assert_eq!(
         odb::clear_fills(&db).unwrap(),

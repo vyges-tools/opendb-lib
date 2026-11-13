@@ -2277,6 +2277,26 @@ std::size_t clear_fills(const OdbDb& h) {
   for (odb::dbFill* f : fills) odb::dbFill::destroy(f);
   return fills.size();
 }
+// Every fill of the block as flat (layer number, mask, x0, y0, x1, y1), in getFills() order. The
+// mask is dbFill::maskNumber() (0: none). A fill without a tech layer is skipped.
+rust::Vec<int64_t> fill_records(const OdbDb& h) {
+  rust::Vec<int64_t> out;
+  dbBlock* b = block_of(h);
+  if (!b) return out;
+  for (odb::dbFill* f : b->getFills()) {
+    odb::dbTechLayer* layer = f->getTechLayer();
+    if (!layer) continue;
+    odb::Rect r;
+    f->getRect(r);
+    out.push_back(layer->getNumber());
+    out.push_back(f->maskNumber());
+    out.push_back(r.xMin());
+    out.push_back(r.yMin());
+    out.push_back(r.xMax());
+    out.push_back(r.yMax());
+  }
+  return out;
+}
 std::size_t num_layers(const OdbDb& h) {
   odb::dbTech* t = h.db->getTech();
   return t ? t->getLayers().size() : 0;
