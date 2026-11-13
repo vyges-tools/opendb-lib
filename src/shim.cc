@@ -1252,6 +1252,76 @@ static dbITerm* require_iterm(dbBlock* b, const std::string& inst, const std::st
   return it;
 }
 
+// Resizer::eliminateDeadLogic(clean_nets), on the flat db (rsz/src/Resizer.cc). Mark and sweep:
+//   roots  = the first driver of each top port's net (ports on a special supply net hidden, as
+//            dbNetwork's pin iterator hides them); every leaf whose master is not CORE (macros, pads,
+//            CORE_* subtypes) or is dont-touch, or that has a pin on a dont-touch net;
+//   mark   = LIFO: for each kept instance, the first driver of every non-supply pin's net;
+//   sweep  = unmarked leaves destroyed in block order; then, with clean_nets, every net that is not
+//            dont-touch, not special, and has no iterm and no bterm.
+// "Driver" is dbNetwork::drivers(net): ONE pin, dbNet::getFirstDriverTerm() (odb's own: not a supply
+// net; first non-supply, non-clocked OUTPUT/INOUT iterm, else first INPUT/INOUT bterm).
+// Refused on a hierarchical block: the reference walks dbModNets there, which is not modelled.
+static bool edl_pg_supply_net(dbNet* n) { return n && n->isSpecial() && n->getSigType().isSupply(); }
+static bool edl_pg_supply(dbITerm* it) { return it->getSigType().isSupply() || edl_pg_supply_net(it->getNet()); }
+
+rust::Vec<int64_t> eliminate_dead_logic(const OdbDb& h, bool clean_nets) {
+  dbBlock* b = require_block(h);
+  if (!b->getTopModule()->getChildren().empty())
+    throw std::runtime_error("vyges-opendb: eliminate_dead_logic: hierarchical block (module instances) not modelled");
+  std::unordered_set<dbInst*> kept;
+  std::vector<dbInst*> queue;
+  auto keep = [&](dbInst* i) { if (i && kept.insert(i).second) queue.push_back(i); };
+  // A net's driver cannot change during the mark, so each net is resolved once: getFirstDriverTerm
+  // scans the net's pins, and resolving it per sink pin is quadratic on reset/clock nets.
+  std::unordered_set<dbNet*> resolved;
+  auto keep_driver_of = [&](dbNet* n) {
+    if (!n || !resolved.insert(n).second) return;
+    odb::dbObject* d = n->getFirstDriverTerm();
+    if (d && d->getObjectType() == odb::dbITermObj) keep(static_cast<dbITerm*>(d)->getInst());
+  };
+  for (dbBTerm* bt : b->getBTerms()) {
+    if (!bt->getSigType().isSupply() && edl_pg_supply_net(bt->getNet())) continue;  // isSupplyOnlyByNet
+    keep_driver_of(bt->getNet());
+  }
+  for (dbInst* i : b->getInsts()) {
+    if (i->getMaster()->getType() != odb::dbMasterType::CORE || i->isDoNotTouch()) {
+      keep(i);
+      continue;
+    }
+    for (dbITerm* it : i->getITerms()) {
+      if (edl_pg_supply(it)) continue;
+      dbNet* n = it->getNet();
+      if (n && n->isDoNotTouch()) { keep(i); break; }
+    }
+  }
+  while (!queue.empty()) {
+    dbInst* i = queue.back();
+    queue.pop_back();
+    for (dbITerm* it : i->getITerms()) {
+      if (edl_pg_supply(it)) continue;
+      keep_driver_of(it->getNet());
+    }
+  }
+  std::vector<dbInst*> dead;
+  for (dbInst* i : b->getInsts()) if (!kept.count(i)) dead.push_back(i);
+  for (dbInst* i : dead) dbInst::destroy(i);
+  int64_t nets_removed = 0;
+  if (clean_nets) {
+    // The reference destroys while iterating block nets; collecting first removes the same set.
+    std::vector<dbNet*> empty;
+    for (dbNet* n : b->getNets())
+      if (!n->isDoNotTouch() && !n->isSpecial() && n->getITerms().empty() && n->getBTerms().empty())
+        empty.push_back(n);
+    for (dbNet* n : empty) dbNet::destroy(n);
+    nets_removed = static_cast<int64_t>(empty.size());
+  }
+  rust::Vec<int64_t> r;
+  r.push_back(static_cast<int64_t>(dead.size()));
+  r.push_back(nets_removed);
+  return r;
+}
+
 rust::String remove_buffer(const OdbDb& h, rust::Str inst, rust::Str in_pin, rust::Str out_pin) {
   dbBlock* b = require_block(h);
   const std::string inst_name = s(inst);

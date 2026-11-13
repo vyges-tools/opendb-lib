@@ -927,6 +927,8 @@ rust::Vec<rust::String> visit_connected_pins(const OdbDb& db, rust::Str inst, ru
 // nets are merged alongside. With no net on the output pin, only the instance goes. Returns the
 // survivor's name after the rename (empty when only the instance was destroyed).
 rust::String remove_buffer(const OdbDb& db, rust::Str inst, rust::Str in_pin, rust::Str out_pin);
+// Resizer::eliminateDeadLogic on the flat db; returns {instances removed, nets removed}.
+rust::Vec<int64_t> eliminate_dead_logic(const OdbDb& db, bool clean_nets);
 
 // odb's own name uniquifiers at the top scope (`dbBlock::makeNewInstName(nullptr, …)` /
 // `makeNewNetName(nullptr, …)`): the block's instance / net counter advances as odb advances it, so

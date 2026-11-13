@@ -418,6 +418,8 @@ mod ffi {
         fn visit_connected_pins(db: &OdbDb, inst: &str, pin: &str) -> Result<Vec<String>>;
         /// The database half of a buffer removal (net merge, instance destroy) — see shim.h.
         fn remove_buffer(db: &OdbDb, inst: &str, in_pin: &str, out_pin: &str) -> Result<String>;
+        /// `Resizer::eliminateDeadLogic(clean_nets)` on the flat db — see shim.h. {insts, nets} removed.
+        fn eliminate_dead_logic(db: &OdbDb, clean_nets: bool) -> Result<Vec<i64>>;
         /// `dbNet::canMergeNet` (odb's own) — see shim.h.
         fn net_can_merge(db: &OdbDb, survivor: &str, removed: &str) -> Result<bool>;
         /// odb's own name uniquifiers at the top scope — see shim.h.
@@ -746,7 +748,7 @@ pub use ffi::{
     inst_master, inst_x, inst_y, log_capture_begin, log_capture_end, net_of, nth_bterm_name, nth_inst_name, nth_iterm_name, num_bterms,
     num_insts, num_iterms, num_nets, num_obstructions, open_db, output_pin, place_bterm,
     swap_master, insert_buffer_before_loads, insert_buffer_after_driver, insert_buffer_before_load,
-    visit_connected_pins, remove_buffer, net_can_merge, swap_pins, make_new_inst_name, make_new_net_name,
+    visit_connected_pins, remove_buffer, eliminate_dead_logic, net_can_merge, swap_pins, make_new_inst_name, make_new_net_name,
     edit_log_start, edit_log_take, observer_log_start, observer_log_take,
     net_is_special, net_sigtype, nth_net_bterm, nth_net_iterm, nth_net_name, num_net_bterms,
     add_track_pattern_x, add_track_pattern_y, add_track_pattern_x_masked, add_track_pattern_y_masked,
