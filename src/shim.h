@@ -757,7 +757,13 @@ void module_unreverse_lists(const OdbDb& db, rust::Str module);
 void create_string_property(const OdbDb& db, rust::Str kind, rust::Str owner, rust::Str name, rust::Str value);
 void create_int_property(const OdbDb& db, rust::Str kind, rust::Str owner, rust::Str name, int32_t value);
 void create_mod_inst_string_property(const OdbDb& db, rust::Str parent, rust::Str name, rust::Str key, rust::Str value);
-rust::Vec<rust::String> dump_modules(const OdbDb& db);
+rust::Vec<rust::String> dump_modules(const OdbDb& db, bool ports);
+// Module ports / module-instance pins (Verilog2db::makeModBTerms / makeModITerms, -hier).
+void mod_bterm_create(const OdbDb& db, rust::Str module, rust::Str name, rust::Str io);
+void bus_port_create(const OdbDb& db, rust::Str module, rust::Str root, int32_t from, int32_t to);
+void bus_port_set_member(const OdbDb& db, rust::Str module, rust::Str root, rust::Str member, bool last);
+void module_reverse_mod_bterms(const OdbDb& db, rust::Str module);
+void mod_iterm_create(const OdbDb& db, rust::Str parent, rust::Str modinst, rust::Str name);
 void block_set_double_property(const OdbDb& db, rust::Str name, double value);
 void block_set_bool_property(const OdbDb& db, rust::Str name, bool value);  // set-or-create
 int32_t iterm_bool_property(const OdbDb& db, rust::Str iterm, rust::Str name);

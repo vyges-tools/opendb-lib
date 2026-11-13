@@ -3420,6 +3420,55 @@ void module_unreverse_lists(const OdbDb& h, rust::Str module) {
     m->getInsts().reverse();
   }
 }
+// ---- Module ports and module-instance pins (`Verilog2db::makeModBTerms` / `makeModITerms`, -hier) ----
+static odb::dbIoType io_type_of(rust::Str io) {
+  const std::string t = s(io);
+  if (t == "INPUT") return odb::dbIoType::INPUT;
+  if (t == "OUTPUT") return odb::dbIoType::OUTPUT;
+  if (t == "INOUT") return odb::dbIoType::INOUT;
+  throw std::runtime_error("vyges-opendb: unknown io type: " + t);
+}
+static odb::dbModBTerm* require_mod_bterm(odb::dbModule* m, rust::Str name) {
+  odb::dbModBTerm* t = m->findModBTerm(s(name).c_str());
+  if (!t) throw std::runtime_error("vyges-opendb: module port not found: " + s(name) + " of " + m->getName());
+  return t;
+}
+// `dbModBTerm::create(module, name)`, then `setIoType`.
+void mod_bterm_create(const OdbDb& h, rust::Str module, rust::Str name, rust::Str io) {
+  odb::dbModule* m = module_or_top(h, module);
+  odb::dbModBTerm* t = odb::dbModBTerm::create(m, s(name).c_str());
+  if (!t) throw std::runtime_error("vyges-opendb: module port not created: " + s(name));
+  t->setIoType(io_type_of(io));
+}
+// `dbBusPort::create(module, root, from, to)`, then `root->setBusPort`.
+void bus_port_create(const OdbDb& h, rust::Str module, rust::Str root, int32_t from, int32_t to) {
+  odb::dbModule* m = module_or_top(h, module);
+  odb::dbModBTerm* r = require_mod_bterm(m, root);
+  odb::dbBusPort* bp = odb::dbBusPort::create(m, r, from, to);
+  if (!bp) throw std::runtime_error("vyges-opendb: bus port not created: " + s(root));
+  r->setBusPort(bp);
+}
+// The bus port of `root`: `setMembers` (first) or `setLast` (last) to `member`.
+void bus_port_set_member(const OdbDb& h, rust::Str module, rust::Str root, rust::Str member, bool last) {
+  odb::dbModule* m = module_or_top(h, module);
+  odb::dbBusPort* bp = require_mod_bterm(m, root)->getBusPort();
+  if (!bp) throw std::runtime_error("vyges-opendb: not a bus port: " + s(root));
+  odb::dbModBTerm* t = require_mod_bterm(m, member);
+  if (last) bp->setLast(t); else bp->setMembers(t);
+}
+// `module->getModBTerms().reverse()` (the end of `makeModBTerms`).
+void module_reverse_mod_bterms(const OdbDb& h, rust::Str module) {
+  module_or_top(h, module)->getModBTerms().reverse();
+}
+// `dbModITerm::create(modinst, name, child modbterm)`; the module instance is `name` of `parent`.
+void mod_iterm_create(const OdbDb& h, rust::Str parent, rust::Str modinst, rust::Str name) {
+  odb::dbModInst* mi = module_or_top(h, parent)->findModInst(s(modinst).c_str());
+  if (!mi) throw std::runtime_error("vyges-opendb: module instance not found: " + s(modinst));
+  odb::dbModBTerm* child = require_mod_bterm(mi->getMaster(), name);
+  if (!odb::dbModITerm::create(mi, s(name).c_str(), child)) {
+    throw std::runtime_error("vyges-opendb: module instance pin not created: " + s(name));
+  }
+}
 // The owner of a property: "block" (owner ignored), "inst" (flat name), "module" (name, "" = top).
 static odb::dbObject* property_owner(const OdbDb& h, rust::Str kind, rust::Str owner) {
   dbBlock* b = require_block(h);
@@ -3478,8 +3527,9 @@ static std::string property_list(odb::dbObject* o) {
 }
 // The module view and the properties as lines, the format of the reference-side gate dump
 // (hierarchical-import probes): modules in block order with their properties, child module
-// instances and instances; module instances; block and instance properties; child blocks.
-rust::Vec<rust::String> dump_modules(const OdbDb& h) {
+// instances and instances (and with `ports`, their dbModBTerms); module instances (with `ports`,
+// their dbModITerms); block and instance properties; child blocks.
+rust::Vec<rust::String> dump_modules(const OdbDb& h, bool ports) {
   dbBlock* b = require_block(h);
   rust::Vec<rust::String> out;
   auto push = [&](const std::string& x) { out.push_back(rust::String(x)); };
@@ -3498,10 +3548,26 @@ rust::Vec<rust::String> dump_modules(const OdbDb& h) {
     c.clear();
     for (dbInst* x : m->getInsts()) c.push_back(x->getName());
     push("  INSTS " + join(c));
+    if (ports) {
+      for (odb::dbModBTerm* x : m->getModBTerms()) {
+        odb::dbBusPort* bp = x->getBusPort();
+        std::string bus = "-";
+        if (bp) {
+          bus = std::to_string(bp->getFrom()) + ":" + std::to_string(bp->getTo()) + ":" + (bp->getMembers() ? bp->getMembers()->getName() : "NULL") + ":" + (bp->getLast() ? bp->getLast()->getName() : "NULL");
+        }
+        odb::dbModITerm* pm = x->getParentModITerm();
+        push("  MODBTERM " + std::string(x->getName()) + " " + x->getIoType().getString() + " busport=" + (x->isBusPort() ? "1" : "0") + " bus=" + bus + " parent_moditerm=" + (pm ? pm->getName() : "-"));
+      }
+    }
   }
   push("== MODINSTS");
   for (odb::dbModInst* m : b->getModInsts()) {
     push("MODINST " + m->getHierarchicalName() + " master=" + m->getMaster()->getName() + " parent=" + m->getParent()->getName() + " props=" + property_list(m));
+    if (ports) {
+      for (odb::dbModITerm* x : m->getModITerms()) {
+        push("  MODITERM " + std::string(x->getName()) + " child=" + (x->getChildModBTerm() ? x->getChildModBTerm()->getName() : "NULL"));
+      }
+    }
   }
   push("== PROPS");
   push("BLOCK props=" + property_list(b));
