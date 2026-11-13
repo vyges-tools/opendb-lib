@@ -5,7 +5,7 @@
   "scope": "hand-written core only",
   "class_count": 45,
   "method_count": 1176,
-  "bridged_count": 880,
+  "bridged_count": 881,
   "classes": [
     {
       "name": "dbBPin",
@@ -1099,7 +1099,7 @@
           ],
           "const": false,
           "kind": "relation",
-          "bridged": false,
+          "bridged": true,
           "target": "dbModInst"
         },
         {

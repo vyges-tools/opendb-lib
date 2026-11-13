@@ -748,6 +748,16 @@ bool destroy_pin_mod_net(const OdbDb& db, rust::Str inst, rust::Str pin);
 bool same_owning_module(const OdbDb& db, rust::Str a, rust::Str b);
 void hierarchical_connect(const OdbDb& db, rust::Str src_inst, rust::Str src_pin, rust::Str dst_inst, rust::Str dst_pin, rust::Str connection);
 rust::Vec<rust::String> dump_hierarchy(const OdbDb& db);
+// Hierarchy kept by the Verilog link (Verilog2db::makeDbModule / makeChildInsts); "" = top module.
+void module_create(const OdbDb& db, rust::Str name);
+void mod_inst_create(const OdbDb& db, rust::Str parent, rust::Str module, rust::Str name);
+void create_inst_in_module(const OdbDb& db, rust::Str master, rust::Str name, rust::Str module);
+void module_unreverse_lists(const OdbDb& db, rust::Str module);
+// Property creation on "block" / "inst" / "module" owners (module instances by parent + local name).
+void create_string_property(const OdbDb& db, rust::Str kind, rust::Str owner, rust::Str name, rust::Str value);
+void create_int_property(const OdbDb& db, rust::Str kind, rust::Str owner, rust::Str name, int32_t value);
+void create_mod_inst_string_property(const OdbDb& db, rust::Str parent, rust::Str name, rust::Str key, rust::Str value);
+rust::Vec<rust::String> dump_modules(const OdbDb& db);
 void block_set_double_property(const OdbDb& db, rust::Str name, double value);
 void block_set_bool_property(const OdbDb& db, rust::Str name, bool value);  // set-or-create
 int32_t iterm_bool_property(const OdbDb& db, rust::Str iterm, rust::Str name);

@@ -8,14 +8,14 @@ needs it. Most of what is unbound is write methods outside the generated read su
 
 | Map | Classes | Methods | Bound | Not covered |
 | --- | --- | --- | --- | --- |
-| Core (hand-written classes; the headline metric) | 45 | 1,176 | 880 (74.8%) | **296 (25.2%)** |
-| Full (every class with a schema) | 122 | 2,716 | 2,155 (79.3%) | **561 (20.7%)** |
+| Core (hand-written classes; the headline metric) | 45 | 1,176 | 881 (74.9%) | **295 (25.1%)** |
+| Full (every class with a schema) | 122 | 2,716 | 2,157 (79.4%) | **559 (20.6%)** |
 
 By kind:
 
-- **core:** read side 569/635 (89.6%): getters 254/274, predicates 114/124, iterators 63/65, relations 138/172; setters 283/472 (60.0%); other 28/69.
-- **full:** read side 1,295/1,490 (86.9%): getters 598/671, predicates 337/365, iterators 128/150, relations 232/304; setters 808/1,123 (72.0%); other 52/103.
+- **core:** read side 570/635 (89.8%): getters 254/274, predicates 114/124, iterators 63/65, relations 139/172; setters 283/472 (60.0%); other 28/69.
+- **full:** read side 1,297/1,490 (87.0%): getters 598/671, predicates 337/365, iterators 128/150, relations 234/304; setters 808/1,123 (72.0%); other 52/103.
 
 Largest gaps (core; unbound of total):
 
-`dbBlock` 58/156 · `dbNet` 49/153 · `dbTechLayerSpacingRule` 27/41 · `dbRSeg` 24/42 · `dbCapNode` 23/56 · `dbCCSeg` 16/25 · `dbTech` 16/46 · `dbMTerm` 13/32 · `dbWire` 11/24 · `dbInst` 7/73
+`dbBlock` 57/156 · `dbNet` 49/153 · `dbTechLayerSpacingRule` 27/41 · `dbRSeg` 24/42 · `dbCapNode` 23/56 · `dbCCSeg` 16/25 · `dbTech` 16/46 · `dbMTerm` 13/32 · `dbWire` 11/24 · `dbInst` 7/73

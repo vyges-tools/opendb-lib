@@ -108,6 +108,14 @@ mod ffi {
         fn same_owning_module(db: &OdbDb, a: &str, b: &str) -> Result<bool>;
         fn hierarchical_connect(db: &OdbDb, src_inst: &str, src_pin: &str, dst_inst: &str, dst_pin: &str, connection: &str) -> Result<()>;
         fn dump_hierarchy(db: &OdbDb) -> Result<Vec<String>>;
+        fn module_create(db: &OdbDb, name: &str) -> Result<()>;
+        fn mod_inst_create(db: &OdbDb, parent: &str, module: &str, name: &str) -> Result<()>;
+        fn create_inst_in_module(db: &OdbDb, master: &str, name: &str, module: &str) -> Result<()>;
+        fn module_unreverse_lists(db: &OdbDb, module: &str) -> Result<()>;
+        fn create_string_property(db: &OdbDb, kind: &str, owner: &str, name: &str, value: &str) -> Result<()>;
+        fn create_int_property(db: &OdbDb, kind: &str, owner: &str, name: &str, value: i32) -> Result<()>;
+        fn create_mod_inst_string_property(db: &OdbDb, parent: &str, name: &str, key: &str, value: &str) -> Result<()>;
+        fn dump_modules(db: &OdbDb) -> Result<Vec<String>>;
         fn block_set_double_property(db: &OdbDb, name: &str, value: f64) -> Result<()>;
         fn block_set_bool_property(db: &OdbDb, name: &str, value: bool) -> Result<()>;
         fn num_obstructions(db: &OdbDb) -> usize;
@@ -732,7 +740,7 @@ pub use generated_write_bridge::*;
 
 #[cfg(unix)]
 pub use ffi::{
-    add_guide, add_obstruction, block_bool_property, block_double_property, block_string_property, block_int_property, db_has_hierarchy, make_new_inst_name_beside, make_new_net_name_beside, create_inst_beside, connect_mod_net_of, buffer_to_inverters, destroy_pin_mod_net, same_owning_module, hierarchical_connect, dump_hierarchy, block_set_bool_property, block_set_double_property,
+    add_guide, add_obstruction, block_bool_property, block_double_property, block_string_property, block_int_property, db_has_hierarchy, make_new_inst_name_beside, make_new_net_name_beside, create_inst_beside, connect_mod_net_of, buffer_to_inverters, destroy_pin_mod_net, same_owning_module, hierarchical_connect, dump_hierarchy, block_set_bool_property, module_create, mod_inst_create, create_inst_in_module, module_unreverse_lists, create_string_property, create_int_property, create_mod_inst_string_property, dump_modules, block_set_double_property,
     block_compute_core_area,
     ensure_gcell_grid, has_gcell_grid, gcell_reset_grid, gcell_reset_congestion_map,
     gcell_add_grid_pattern_x, gcell_add_grid_pattern_y, gcell_grid_x, gcell_grid_y,

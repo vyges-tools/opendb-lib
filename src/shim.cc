@@ -3374,6 +3374,148 @@ rust::Vec<rust::String> dump_hierarchy(const OdbDb& h) {
   return out;
 }
 
+// ---- Hierarchy kept by the Verilog link (`Verilog2db::makeDbModule` / `makeChildInsts`) ----
+//
+// The link names each module itself (the unique-name rule is unit-tested at its site in the
+// linker) and creates it here; every call is addressed by name and refuses when odb refuses, so a
+// divergence from odb's own rules is an error, not a silently different database.
+static odb::dbModule* module_or_top(const OdbDb& h, rust::Str module) {
+  dbBlock* b = require_block(h);
+  odb::dbModule* m = module.empty() ? b->getTopModule() : b->findModule(s(module).c_str());
+  if (!m) throw std::runtime_error("vyges-opendb: module not found: " + s(module));
+  return m;
+}
+// `dbModule::create(block, name)`; fails when the name is taken.
+void module_create(const OdbDb& h, rust::Str name) {
+  if (!odb::dbModule::create(require_block(h), s(name).c_str())) {
+    throw std::runtime_error("vyges-opendb: module name taken: " + s(name));
+  }
+}
+// `dbModInst::create(parent, master, name)`; "" is the top module.
+void mod_inst_create(const OdbDb& h, rust::Str parent, rust::Str module, rust::Str name) {
+  odb::dbModule* p = module_or_top(h, parent);
+  odb::dbModule* m = module_or_top(h, module);
+  if (!odb::dbModInst::create(p, m, s(name).c_str())) {
+    throw std::runtime_error("vyges-opendb: module instance not created: " + s(name) + " of " + s(module));
+  }
+}
+// `dbInst::create(block, master, name, false, module)`: the instance owned by `module` ("" = top).
+void create_inst_in_module(const OdbDb& h, rust::Str master, rust::Str name, rust::Str module) {
+  dbBlock* b = require_block(h);
+  dbMaster* mm = h.db->findMaster(s(master).c_str());
+  if (!mm) throw std::runtime_error("vyges-opendb: master not found: " + s(master));
+  odb::dbModule* m = module_or_top(h, module);
+  if (!dbInst::create(b, mm, s(name).c_str(), false, m)) {
+    throw std::runtime_error("vyges-opendb: create_inst failed: " + s(name));
+  }
+}
+// The end of `makeChildInsts`: a module's child and instance lists put back in creation order
+// when odb holds them reversed.
+void module_unreverse_lists(const OdbDb& h, rust::Str module) {
+  odb::dbModule* m = module_or_top(h, module);
+  if (m->getChildren().reversible() && m->getChildren().orderReversed()) {
+    m->getChildren().reverse();
+  }
+  if (m->getInsts().reversible() && m->getInsts().orderReversed()) {
+    m->getInsts().reverse();
+  }
+}
+// The owner of a property: "block" (owner ignored), "inst" (flat name), "module" (name, "" = top).
+static odb::dbObject* property_owner(const OdbDb& h, rust::Str kind, rust::Str owner) {
+  dbBlock* b = require_block(h);
+  const std::string k = s(kind);
+  odb::dbObject* o = nullptr;
+  if (k == "block") {
+    o = b;
+  } else if (k == "inst") {
+    o = b->findInst(s(owner).c_str());
+  } else if (k == "module") {
+    o = owner.empty() ? b->getTopModule() : b->findModule(s(owner).c_str());
+  } else {
+    throw std::runtime_error("vyges-opendb: unknown property owner kind: " + k);
+  }
+  if (!o) throw std::runtime_error("vyges-opendb: " + k + " not found: " + s(owner));
+  return o;
+}
+// `dbStringProperty::create(owner, name, value)`; fails when the owner already has `name`.
+void create_string_property(const OdbDb& h, rust::Str kind, rust::Str owner, rust::Str name, rust::Str value) {
+  if (!odb::dbStringProperty::create(property_owner(h, kind, owner), s(name).c_str(), s(value).c_str())) {
+    throw std::runtime_error("vyges-opendb: property exists: " + s(name) + " on " + s(owner));
+  }
+}
+// `dbStringProperty::create` on module instance `name` of module `parent` ("" = top), found by its
+// local name (`dbModule::findModInst`), so an escaped `/` in a name needs no path parsing.
+void create_mod_inst_string_property(const OdbDb& h, rust::Str parent, rust::Str name, rust::Str key, rust::Str value) {
+  odb::dbModInst* mi = module_or_top(h, parent)->findModInst(s(name).c_str());
+  if (!mi) throw std::runtime_error("vyges-opendb: module instance not found: " + s(name));
+  if (!odb::dbStringProperty::create(mi, s(key).c_str(), s(value).c_str())) {
+    throw std::runtime_error("vyges-opendb: property exists: " + s(key) + " on " + s(name));
+  }
+}
+// `dbIntProperty::create(owner, name, value)`; fails when the owner already has `name`.
+void create_int_property(const OdbDb& h, rust::Str kind, rust::Str owner, rust::Str name, int32_t value) {
+  if (!odb::dbIntProperty::create(property_owner(h, kind, owner), s(name).c_str(), value)) {
+    throw std::runtime_error("vyges-opendb: property exists: " + s(name) + " on " + s(owner));
+  }
+}
+// Every property of an object in odb's list order, `name:<s|b|i|d>=value`, space separated.
+static std::string property_list(odb::dbObject* o) {
+  std::string r;
+  for (odb::dbProperty* p : odb::dbProperty::getProperties(o)) {
+    std::string n = p->getName();
+    std::string v;
+    char t = '?';
+    switch (p->getType()) {
+      case odb::dbProperty::STRING_PROP: t = 's'; v = ((odb::dbStringProperty*) p)->getValue(); break;
+      case odb::dbProperty::BOOL_PROP: t = 'b'; v = ((odb::dbBoolProperty*) p)->getValue() ? "1" : "0"; break;
+      case odb::dbProperty::INT_PROP: t = 'i'; v = std::to_string(((odb::dbIntProperty*) p)->getValue()); break;
+      case odb::dbProperty::DOUBLE_PROP: t = 'd'; v = std::to_string(((odb::dbDoubleProperty*) p)->getValue()); break;
+    }
+    if (!r.empty()) r += " ";
+    r += n + ":" + t + "=" + v;
+  }
+  return r;
+}
+// The module view and the properties as lines, the format of the reference-side gate dump
+// (hierarchical-import probes): modules in block order with their properties, child module
+// instances and instances; module instances; block and instance properties; child blocks.
+rust::Vec<rust::String> dump_modules(const OdbDb& h) {
+  dbBlock* b = require_block(h);
+  rust::Vec<rust::String> out;
+  auto push = [&](const std::string& x) { out.push_back(rust::String(x)); };
+  auto join = [](const std::vector<std::string>& v) {
+    std::string r;
+    for (size_t i = 0; i < v.size(); i++) { if (i) r += " "; r += v[i]; }
+    return r;
+  };
+  push("== MODULES");
+  for (odb::dbModule* m : b->getModules()) {
+    odb::dbModInst* mi = m->getModInst();
+    push("MODULE " + std::string(m->getName()) + " modinst=" + (mi ? mi->getHierarchicalName() : std::string("-")) + " props=" + property_list(m));
+    std::vector<std::string> c;
+    for (odb::dbModInst* x : m->getChildren()) c.push_back(x->getName());
+    push("  CHILDREN " + join(c));
+    c.clear();
+    for (dbInst* x : m->getInsts()) c.push_back(x->getName());
+    push("  INSTS " + join(c));
+  }
+  push("== MODINSTS");
+  for (odb::dbModInst* m : b->getModInsts()) {
+    push("MODINST " + m->getHierarchicalName() + " master=" + m->getMaster()->getName() + " parent=" + m->getParent()->getName() + " props=" + property_list(m));
+  }
+  push("== PROPS");
+  push("BLOCK props=" + property_list(b));
+  for (dbInst* i : b->getInsts()) {
+    std::string p = property_list(i);
+    if (!p.empty()) push("IPROP " + i->getName() + " " + p);
+  }
+  push("== CHILD_BLOCKS");
+  for (dbBlock* c : b->getChildren()) {
+    push("CHILD " + c->getName() + " insts=" + std::to_string(c->getInsts().size()) + " modules=" + std::to_string(c->getModules().size()));
+  }
+  return out;
+}
+
 // A block-level double property: empty when ABSENT, else its value (`Resizer::initBlock` reads
 // `limit_sizing_area` / `limit_sizing_leakage`, which `set_opt_config` writes).
 rust::Vec<double> block_double_property(const OdbDb& h, rust::Str name) {
