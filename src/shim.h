@@ -757,7 +757,10 @@ void module_unreverse_lists(const OdbDb& db, rust::Str module);
 void create_string_property(const OdbDb& db, rust::Str kind, rust::Str owner, rust::Str name, rust::Str value);
 void create_int_property(const OdbDb& db, rust::Str kind, rust::Str owner, rust::Str name, int32_t value);
 void create_mod_inst_string_property(const OdbDb& db, rust::Str parent, rust::Str name, rust::Str key, rust::Str value);
-rust::Vec<rust::String> dump_modules(const OdbDb& db, bool ports);
+rust::Vec<rust::String> dump_modules(const OdbDb& db, bool ports, bool nets);
+// Module nets (Verilog2db::constructModNet, -hier).
+bool mod_net_find_or_create(const OdbDb& db, rust::Str module, rust::Str name);
+void mod_net_connect(const OdbDb& db, rust::Str module, rust::Str net, rust::Str kind, rust::Str a, rust::Str b);
 // Module ports / module-instance pins (Verilog2db::makeModBTerms / makeModITerms, -hier).
 void mod_bterm_create(const OdbDb& db, rust::Str module, rust::Str name, rust::Str io);
 void bus_port_create(const OdbDb& db, rust::Str module, rust::Str root, int32_t from, int32_t to);

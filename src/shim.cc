@@ -3469,6 +3469,41 @@ void mod_iterm_create(const OdbDb& h, rust::Str parent, rust::Str modinst, rust:
     throw std::runtime_error("vyges-opendb: module instance pin not created: " + s(name));
   }
 }
+// ---- Module nets (`Verilog2db::constructModNet` / `makeModNetsForSubmodule`, -hier) ----
+// `module->getModNet(name)`, else `dbModNet::create(module, name)`; true when created.
+bool mod_net_find_or_create(const OdbDb& h, rust::Str module, rust::Str name) {
+  odb::dbModule* m = module_or_top(h, module);
+  const std::string n = s(name);
+  if (m->getModNet(n.c_str())) return false;
+  if (!odb::dbModNet::create(m, n.c_str())) throw std::runtime_error("vyges-opendb: module net not created: " + n);
+  return true;
+}
+// `<terminal>->connect(modnet)` for module net `net` of `module`. kind: "iterm" (a = instance,
+// b = pin), "bterm" (a = port), "moditerm" (a = module instance of `module`, b = its pin),
+// "modbterm" (a = port of `module`).
+void mod_net_connect(const OdbDb& h, rust::Str module, rust::Str net, rust::Str kind, rust::Str a, rust::Str b) {
+  odb::dbModule* m = module_or_top(h, module);
+  odb::dbModNet* mn = m->getModNet(s(net).c_str());
+  if (!mn) throw std::runtime_error("vyges-opendb: module net not found: " + s(net) + " in " + m->getName());
+  const std::string k = s(kind);
+  if (k == "iterm") {
+    require_iterm(h, a, b)->connect(mn);
+  } else if (k == "bterm") {
+    dbBTerm* bt = require_block(h)->findBTerm(s(a).c_str());
+    if (!bt) throw std::runtime_error("vyges-opendb: port not found: " + s(a));
+    bt->connect(mn);
+  } else if (k == "moditerm") {
+    odb::dbModInst* mi = m->findModInst(s(a).c_str());
+    if (!mi) throw std::runtime_error("vyges-opendb: module instance not found: " + s(a));
+    odb::dbModITerm* t = mi->findModITerm(s(b).c_str());
+    if (!t) throw std::runtime_error("vyges-opendb: module instance pin not found: " + s(a) + "/" + s(b));
+    t->connect(mn);
+  } else if (k == "modbterm") {
+    require_mod_bterm(m, a)->connect(mn);
+  } else {
+    throw std::runtime_error("vyges-opendb: unknown terminal kind: " + k);
+  }
+}
 // The owner of a property: "block" (owner ignored), "inst" (flat name), "module" (name, "" = top).
 static odb::dbObject* property_owner(const OdbDb& h, rust::Str kind, rust::Str owner) {
   dbBlock* b = require_block(h);
@@ -3527,9 +3562,10 @@ static std::string property_list(odb::dbObject* o) {
 }
 // The module view and the properties as lines, the format of the reference-side gate dump
 // (hierarchical-import probes): modules in block order with their properties, child module
-// instances and instances (and with `ports`, their dbModBTerms); module instances (with `ports`,
-// their dbModITerms); block and instance properties; child blocks.
-rust::Vec<rust::String> dump_modules(const OdbDb& h, bool ports) {
+// instances and instances (with `nets`, their dbModNets and members; with `ports`, their
+// dbModBTerms); module instances (with `ports`, their dbModITerms); block and instance
+// properties; child blocks.
+rust::Vec<rust::String> dump_modules(const OdbDb& h, bool ports, bool nets) {
   dbBlock* b = require_block(h);
   rust::Vec<rust::String> out;
   auto push = [&](const std::string& x) { out.push_back(rust::String(x)); };
@@ -3548,6 +3584,16 @@ rust::Vec<rust::String> dump_modules(const OdbDb& h, bool ports) {
     c.clear();
     for (dbInst* x : m->getInsts()) c.push_back(x->getName());
     push("  INSTS " + join(c));
+    if (nets) {
+      for (odb::dbModNet* n : m->getModNets()) {
+        std::vector<std::string> it, bt, mi, mb;
+        for (dbITerm* x : n->getITerms()) it.push_back(x->getInst()->getName() + "/" + x->getMTerm()->getName());
+        for (dbBTerm* x : n->getBTerms()) bt.push_back(x->getName());
+        for (odb::dbModITerm* x : n->getModITerms()) mi.push_back(std::string(x->getParent()->getName()) + "/" + x->getName());
+        for (odb::dbModBTerm* x : n->getModBTerms()) mb.push_back(x->getName());
+        push("  MODNET " + std::string(n->getName()) + " iterms=" + join(it) + " bterms=" + join(bt) + " moditerms=" + join(mi) + " modbterms=" + join(mb));
+      }
+    }
     if (ports) {
       for (odb::dbModBTerm* x : m->getModBTerms()) {
         odb::dbBusPort* bp = x->getBusPort();

@@ -115,7 +115,9 @@ mod ffi {
         fn create_string_property(db: &OdbDb, kind: &str, owner: &str, name: &str, value: &str) -> Result<()>;
         fn create_int_property(db: &OdbDb, kind: &str, owner: &str, name: &str, value: i32) -> Result<()>;
         fn create_mod_inst_string_property(db: &OdbDb, parent: &str, name: &str, key: &str, value: &str) -> Result<()>;
-        fn dump_modules(db: &OdbDb, ports: bool) -> Result<Vec<String>>;
+        fn dump_modules(db: &OdbDb, ports: bool, nets: bool) -> Result<Vec<String>>;
+        fn mod_net_find_or_create(db: &OdbDb, module: &str, name: &str) -> Result<bool>;
+        fn mod_net_connect(db: &OdbDb, module: &str, net: &str, kind: &str, a: &str, b: &str) -> Result<()>;
         fn mod_bterm_create(db: &OdbDb, module: &str, name: &str, io: &str) -> Result<()>;
         fn bus_port_create(db: &OdbDb, module: &str, root: &str, from: i32, to: i32) -> Result<()>;
         fn bus_port_set_member(db: &OdbDb, module: &str, root: &str, member: &str, last: bool) -> Result<()>;
@@ -745,7 +747,7 @@ pub use generated_write_bridge::*;
 
 #[cfg(unix)]
 pub use ffi::{
-    add_guide, add_obstruction, block_bool_property, block_double_property, block_string_property, block_int_property, db_has_hierarchy, make_new_inst_name_beside, make_new_net_name_beside, create_inst_beside, connect_mod_net_of, buffer_to_inverters, destroy_pin_mod_net, same_owning_module, hierarchical_connect, dump_hierarchy, block_set_bool_property, module_create, mod_inst_create, create_inst_in_module, module_unreverse_lists, create_string_property, create_int_property, create_mod_inst_string_property, dump_modules, mod_bterm_create, bus_port_create, bus_port_set_member, module_reverse_mod_bterms, mod_iterm_create, block_set_double_property,
+    add_guide, add_obstruction, block_bool_property, block_double_property, block_string_property, block_int_property, db_has_hierarchy, make_new_inst_name_beside, make_new_net_name_beside, create_inst_beside, connect_mod_net_of, buffer_to_inverters, destroy_pin_mod_net, same_owning_module, hierarchical_connect, dump_hierarchy, block_set_bool_property, module_create, mod_inst_create, create_inst_in_module, module_unreverse_lists, create_string_property, create_int_property, create_mod_inst_string_property, dump_modules, mod_bterm_create, bus_port_create, bus_port_set_member, module_reverse_mod_bterms, mod_iterm_create, mod_net_find_or_create, mod_net_connect, block_set_double_property,
     block_compute_core_area,
     ensure_gcell_grid, has_gcell_grid, gcell_reset_grid, gcell_reset_congestion_map,
     gcell_add_grid_pattern_x, gcell_add_grid_pattern_y, gcell_grid_x, gcell_grid_y,

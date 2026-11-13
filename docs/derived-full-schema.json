@@ -5,7 +5,7 @@
   "scope": "all",
   "class_count": 122,
   "method_count": 2716,
-  "bridged_count": 2157,
+  "bridged_count": 2165,
   "classes": [
     {
       "name": "dbAccessPoint",
@@ -3163,7 +3163,7 @@
           "params": [],
           "const": true,
           "kind": "getter",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "getTo",
@@ -3171,7 +3171,7 @@
           "params": [],
           "const": true,
           "kind": "getter",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "getPort",
@@ -3193,7 +3193,7 @@
           ],
           "const": false,
           "kind": "setter",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "getMembers",
@@ -3201,7 +3201,7 @@
           "params": [],
           "const": true,
           "kind": "relation",
-          "bridged": false,
+          "bridged": true,
           "target": "dbModBTerm"
         },
         {
@@ -3215,7 +3215,7 @@
           ],
           "const": false,
           "kind": "setter",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "getLast",
@@ -3223,7 +3223,7 @@
           "params": [],
           "const": true,
           "kind": "relation",
-          "bridged": false,
+          "bridged": true,
           "target": "dbModBTerm"
         },
         {
@@ -11726,7 +11726,7 @@
           ],
           "const": false,
           "kind": "setter",
-          "bridged": false
+          "bridged": true
         },
         {
           "name": "getBusPort",
@@ -11734,7 +11734,7 @@
           "params": [],
           "const": true,
           "kind": "relation",
-          "bridged": false,
+          "bridged": true,
           "target": "dbBusPort"
         },
         {
