@@ -5597,30 +5597,120 @@ class EditLog : public odb::dbBlockCallBackObj {
     }
     return out;
   }
-  // An instance's terminals with their nets and each net's terminals: `T=net=pins;…`.
-  static std::string inst_pins(dbInst* i) {
+  // The net's terminals that can drive it: every instance pin the LEF does not call INPUT, every
+  // port it does not call OUTPUT — a superset of the drivers, which the timer narrows by its own
+  // directions. A swap's readers take only a term net's drivers from it (an input pin's
+  // capacitance change invalidates them), so listing every terminal made a resize of an instance
+  // on a clock net copy that whole net, per callback, per resize. Kept per net as the timer keeps
+  // `Network::drivers(net)` (OpenSTA's `net_drvr_pin_map_`): dropped when a terminal of the net
+  // that can drive it connects, disconnects or goes, the net goes, or an instance on it changes
+  // the direction of a terminal.
+  // by the net's id (odb orders no container by pointer); a destroyed net's id is dropped with it
+  std::map<uint32_t, std::string> drivers_kept;
+  void drivers_invalid(dbNet* n) {
+    if (n != nullptr) {
+      drivers_kept.erase(n->getId());
+    }
+  }
+  std::string driver_pins(dbNet* n) {
+    if (n == nullptr) {
+      return std::string();
+    }
+    if (auto kept = drivers_kept.find(n->getId()); kept != drivers_kept.end()) {
+      return kept->second;
+    }
+    std::string out;
+    for (dbITerm* t : n->getITerms()) {
+      if (t->getIoType() != odb::dbIoType::INPUT) {
+        out += (out.empty() ? "" : ",") + iterm(t);
+      }
+    }
+    for (dbBTerm* b : n->getBTerms()) {
+      if (b->getIoType() != odb::dbIoType::OUTPUT) {
+        out += (out.empty() ? "" : ",") + b->getName();
+      }
+    }
+    drivers_kept.emplace(n->getId(), out);
+    return out;
+  }
+  // An instance's terminals with their nets and each net's driving terminals: `T=net=drivers;…`.
+  // A power or ground terminal lists none: it is no timing port (a `pg_pin`), so no reader takes
+  // its drivers, and its net's would be every cell's supply pin — the whole design, per resize.
+  std::string inst_pins(dbInst* i) {
     std::string out;
     for (dbITerm* t : i->getITerms()) {
-      out += (out.empty() ? "" : ";") + t->getMTerm()->getName() + "=" + net(t->getNet()) + "=" + pins(t->getNet());
+      odb::dbSigType sig = t->getMTerm()->getSigType();
+      bool supply = sig == odb::dbSigType::POWER || sig == odb::dbSigType::GROUND;
+      out += (out.empty() ? "" : ";") + t->getMTerm()->getName() + "=" + net(t->getNet()) + "=" + (supply ? std::string() : driver_pins(t->getNet()));
     }
     return out;
   }
   void inDbInstCreate(dbInst* i) override { events.push_back("inst_create|" + i->getName() + "|" + i->getMaster()->getName()); }
   void inDbInstDestroy(dbInst* i) override { events.push_back("inst_destroy|" + i->getName()); }
+  // A swap keeps the kept drivers when every terminal keeps its direction (a resize does).
+  bool swap_keeps_io = true;
   void inDbInstSwapMasterBefore(dbInst* i, odb::dbMaster* m) override {
+    swap_keeps_io = true;
+    for (dbITerm* t : i->getITerms()) {
+      odb::dbMTerm* to = m->findMTerm(t->getMTerm()->getName().c_str());
+      swap_keeps_io = swap_keeps_io && to != nullptr && to->getIoType() == t->getIoType();
+    }
     events.push_back("swap_before|" + i->getName() + "|" + i->getMaster()->getName() + "|" + m->getName() + "|" + inst_pins(i));
   }
-  void inDbInstSwapMasterAfter(dbInst* i) override { events.push_back("swap_after|" + i->getName() + "|" + inst_pins(i)); }
+  void inDbInstSwapMasterAfter(dbInst* i) override {
+    for (dbITerm* t : i->getITerms()) {
+      if (!swap_keeps_io) {
+        drivers_invalid(t->getNet());
+      }
+    }
+    events.push_back("swap_after|" + i->getName() + "|" + inst_pins(i));
+  }
   void inDbNetCreate(dbNet* n) override { events.push_back("net_create|" + n->getName() + id(n)); }
-  void inDbNetDestroy(dbNet* n) override { events.push_back("net_destroy|" + n->getName() + "|" + pins(n) + id(n)); }
-  void inDbNetPostMerge(dbNet* n, dbNet* removed) override { events.push_back("net_merge|" + net(n) + "|" + net(removed)); }
-  void inDbITermPostConnect(dbITerm* t) override { events.push_back("iterm_connect|" + iterm(t) + "|" + net(t->getNet()) + "|" + pins(t->getNet())); }
-  void inDbITermPreDisconnect(dbITerm* t) override { events.push_back("iterm_disconnect|" + iterm(t) + "|" + net(t->getNet()) + "|" + pins(t->getNet())); }
-  void inDbITermDestroy(dbITerm* t) override { events.push_back("iterm_destroy|" + iterm(t) + "|" + net(t->getNet())); }
+  void inDbNetDestroy(dbNet* n) override {
+    drivers_invalid(n);
+    events.push_back("net_destroy|" + n->getName() + "|" + pins(n) + id(n));
+  }
+  void inDbNetPostMerge(dbNet* n, dbNet* removed) override {
+    drivers_invalid(n);
+    drivers_invalid(removed);
+    events.push_back("net_merge|" + net(n) + "|" + net(removed));
+  }
+  // Whether a terminal can drive its net (the drivers listed above): only its coming or going
+  // changes them.
+  static bool drives(dbITerm* t) { return t->getIoType() != odb::dbIoType::INPUT; }
+  static bool drives(dbBTerm* b) { return b->getIoType() != odb::dbIoType::OUTPUT; }
+  // A connect's or disconnect's terminal list: every terminal of the net for one that can drive
+  // (its loads gain or lose a wire from it), the net's drivers for a load (its wires come from
+  // them only). Listing the whole net for each load made a fanout repair O(fanout^2) in time and
+  // in the log it fills.
+  std::string connect_pins(dbNet* n, bool driver) { return driver ? pins(n) : driver_pins(n); }
+  void inDbITermPostConnect(dbITerm* t) override {
+    if (drives(t)) drivers_invalid(t->getNet());
+    events.push_back("iterm_connect|" + iterm(t) + "|" + net(t->getNet()) + "|" + connect_pins(t->getNet(), drives(t)));
+  }
+  void inDbITermPreDisconnect(dbITerm* t) override {
+    std::string listed = connect_pins(t->getNet(), drives(t));
+    if (drives(t)) drivers_invalid(t->getNet());
+    events.push_back("iterm_disconnect|" + iterm(t) + "|" + net(t->getNet()) + "|" + listed);
+  }
+  void inDbITermDestroy(dbITerm* t) override {
+    if (drives(t)) drivers_invalid(t->getNet());
+    events.push_back("iterm_destroy|" + iterm(t) + "|" + net(t->getNet()));
+  }
   void inDbBTermCreate(dbBTerm* b) override { events.push_back("bterm_create|" + b->getName()); }
-  void inDbBTermDestroy(dbBTerm* b) override { events.push_back("bterm_destroy|" + b->getName()); }
-  void inDbBTermPostConnect(dbBTerm* b) override { events.push_back("bterm_connect|" + b->getName() + "|" + net(b->getNet()) + "|" + pins(b->getNet())); }
-  void inDbBTermPreDisconnect(dbBTerm* b) override { events.push_back("bterm_disconnect|" + b->getName() + "|" + net(b->getNet()) + "|" + pins(b->getNet())); }
+  void inDbBTermDestroy(dbBTerm* b) override {
+    if (drives(b)) drivers_invalid(b->getNet());
+    events.push_back("bterm_destroy|" + b->getName());
+  }
+  void inDbBTermPostConnect(dbBTerm* b) override {
+    if (drives(b)) drivers_invalid(b->getNet());
+    events.push_back("bterm_connect|" + b->getName() + "|" + net(b->getNet()) + "|" + connect_pins(b->getNet(), drives(b)));
+  }
+  void inDbBTermPreDisconnect(dbBTerm* b) override {
+    std::string listed = connect_pins(b->getNet(), drives(b));
+    if (drives(b)) drivers_invalid(b->getNet());
+    events.push_back("bterm_disconnect|" + b->getName() + "|" + net(b->getNet()) + "|" + listed);
+  }
 };
 }  // namespace
 
