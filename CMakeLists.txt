@@ -13,6 +13,11 @@ set(CMAKE_POSITION_INDEPENDENT_CODE ON) # so the .a can go into a Rust cdylib la
 if(NOT CMAKE_BUILD_TYPE)
   set(CMAKE_BUILD_TYPE Release)
 endif()
+# No FMA contraction anywhere (libodb, fmt/spdlog/abseil, the tests), as the reference's Bazel
+# build passes on all of its C++. Compilers that contract by default (Clang on arm64, GCC on
+# aarch64) fuse a*b+c into one rounding, which can move a coordinate. Set before FetchContent so
+# the fetched deps inherit it; build.rs and both bundle workflows configure through this file.
+add_compile_options(-ffp-contract=off)
 
 set(OPENROAD_SRC "${CMAKE_SOURCE_DIR}/vendor/OpenROAD"
     CACHE PATH "Root of the sparse OpenROAD subtree (src/odb, src/utl)")

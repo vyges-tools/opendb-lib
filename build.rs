@@ -38,7 +38,16 @@ fn main() {
             (ordered_archives(collect_archives(&p.join("lib"))), vec![p.join("include")])
         } else {
             let src = source_tree();
-            let dst = cmake::Config::new(".")
+            let mut cfg = cmake::Config::new(".");
+            // ⚠️ Release (-O3), always. Left to itself the cmake crate picks RelWithDebInfo (-O2)
+            // whenever Cargo debug info is on, so a perf build with debug info compiled the
+            // database at a lower level than the shipped one. The reference compiles it -O3
+            // (Bazel `build:opt --copt=-O3`); debug info, when asked for, is added on its own.
+            cfg.profile("Release");
+            if std::env::var("DEBUG").map(|d| d != "false" && d != "0" && d != "none").unwrap_or(false) {
+                cfg.cflag("-g").cxxflag("-g");
+            }
+            let dst = cfg
                 .define("VYGES_ODB_SMOKE", "OFF")
                 .define("OPENROAD_SRC", &src)
                 .build_target("odb")
@@ -75,6 +84,10 @@ fn main() {
     }
     let mut b = cxx_build::bridges(&bridges);
     b.file("src/shim.cc").file("src/generated.cc").std("c++20").include("src");
+    // No FMA contraction, as the reference passes on all of its C++ and CMakeLists.txt passes for
+    // libodb: Clang on arm64 contracts a*b+c into one fused op by default, which rounds once
+    // instead of twice and so can move a coordinate.
+    b.flag("-ffp-contract=off");
     if gen_write {
         b.file("src/generated_write.cc");
     }
