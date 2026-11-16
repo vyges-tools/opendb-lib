@@ -5,19 +5,17 @@
 # The source layout is pinned (see openroad-pin.yaml); scripts/fetch-odb-src.sh
 # sparse-checks-out src/odb + src/utl into vendor/OpenROAD.
 cmake_minimum_required(VERSION 3.20)
+# Shared flags, a synced copy of vyges-tools/build-config cmake/vyges-flags.cmake (edit it there,
+# then copy it here; CI checks the copy against the pinned build-config tag). Before project(), so
+# the macOS deployment target is known when the compiler is probed, and before FetchContent, so
+# fmt/spdlog/abseil inherit it all:
+#   C++20 (odb headers use operator<=> and <numbers>), PIC (the .a can go into a Rust cdylib),
+#   default Release (-O3), -ffp-contract=off on every C/C++ source (libodb, the fetched deps, the
+#   tests: compilers that contract by default, Clang on arm64 and GCC on aarch64, fuse a*b+c into
+#   one rounding, which can move a coordinate), macOS minimum 15.0.
+# build.rs and the bundle workflow configure through this file.
+include(${CMAKE_CURRENT_LIST_DIR}/build-config/vyges-flags.cmake)
 project(vyges_odb LANGUAGES CXX)
-
-set(CMAKE_CXX_STANDARD 20)              # odb headers use operator<=> and <numbers>
-set(CMAKE_CXX_STANDARD_REQUIRED ON)
-set(CMAKE_POSITION_INDEPENDENT_CODE ON) # so the .a can go into a Rust cdylib later
-if(NOT CMAKE_BUILD_TYPE)
-  set(CMAKE_BUILD_TYPE Release)
-endif()
-# No FMA contraction anywhere (libodb, fmt/spdlog/abseil, the tests), as the reference's Bazel
-# build passes on all of its C++. Compilers that contract by default (Clang on arm64, GCC on
-# aarch64) fuse a*b+c into one rounding, which can move a coordinate. Set before FetchContent so
-# the fetched deps inherit it; build.rs and both bundle workflows configure through this file.
-add_compile_options(-ffp-contract=off)
 
 set(OPENROAD_SRC "${CMAKE_SOURCE_DIR}/vendor/OpenROAD"
     CACHE PATH "Root of the sparse OpenROAD subtree (src/odb, src/utl)")

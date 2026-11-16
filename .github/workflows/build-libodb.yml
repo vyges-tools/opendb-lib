@@ -33,9 +33,9 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - { os: "ubuntu-${{ vars.VYGES_UBUNTU_VERSION || '24.04' }}",    label: linux-x86_64, base: "ubuntu-24.04" }
-          - { os: "ubuntu-${{ vars.VYGES_UBUNTU_VERSION || '24.04' }}-arm", label: linux-arm64,  base: "ubuntu-24.04" }
-          - { os: "macos-${{ vars.VYGES_MACOS_VERSION || '15' }}",         label: macos-arm64,  base: "macos>=11.0"  }   # Apple Silicon, Xcode 16 (new enough for cxx, stable for fmt 11.0.2; macos-latest/Xcode 26.5 breaks fmt consteval)
+          - { os: "ubuntu-${{ vars.VYGES_UBUNTU_VERSION || '24.04' }}",    label: linux-x86_64, base: "ubuntu-${{ vars.VYGES_UBUNTU_VERSION || '24.04' }}" }
+          - { os: "ubuntu-${{ vars.VYGES_UBUNTU_VERSION || '24.04' }}-arm", label: linux-arm64,  base: "ubuntu-${{ vars.VYGES_UBUNTU_VERSION || '24.04' }}" }
+          - { os: "macos-${{ vars.VYGES_MACOS_VERSION || '15' }}",         label: macos-arm64,  base: "macos>=15.0"  }   # Apple Silicon, Xcode 16 (new enough for cxx, stable for fmt 11.0.2; macos-latest/Xcode 26.5 breaks fmt consteval)
     steps:
       - uses: actions/checkout@v7
 
@@ -60,7 +60,8 @@ jobs:
         run: |
           OSX=""
           if [ "${{ runner.os }}" = "macOS" ]; then
-            OSX="-DCMAKE_OSX_DEPLOYMENT_TARGET=11.0 -DCMAKE_PREFIX_PATH=$(brew --prefix)"
+            # Deployment target: build-config/vyges-flags.cmake (macOS 15.0), not set here.
+            OSX="-DCMAKE_PREFIX_PATH=$(brew --prefix)"
             export PATH="$(brew --prefix bison)/bin:$PATH"  # brew bison is keg-only + newer than macOS's 2.x
           fi
           cmake -S . -B build -DCMAKE_BUILD_TYPE=Release -DVYGES_ODB_SMOKE=ON $OSX
@@ -95,7 +96,7 @@ jobs:
             FLOOR=$(objdump -T build/odb_smoke | grep -oE 'GLIBC_[0-9]+\.[0-9]+' | sort -V | uniq | tail -1)
             echo "glibc_floor=${FLOOR#GLIBC_}" >> "$GITHUB_OUTPUT"
           else
-            echo "glibc_floor=n/a (macos>=11.0)" >> "$GITHUB_OUTPUT"
+            echo "glibc_floor=n/a (macos>=15.0)" >> "$GITHUB_OUTPUT"
           fi
 
       - name: Assemble bundle (VYGES_ODB_PREBUILT_DIR layout) + provenance manifest

@@ -151,6 +151,7 @@ fn main() {
     println!("cargo:rerun-if-changed=src/generated_write.cc");
     println!("cargo:rerun-if-changed=src/generated_write.h");
     println!("cargo:rerun-if-changed=CMakeLists.txt");
+    println!("cargo:rerun-if-changed=build-config");
 }
 
 /// Recursively collect `*.a` under `dir`.
