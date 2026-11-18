@@ -5029,6 +5029,25 @@ rust::Vec<int32_t> iterm_pref_access_points(const OdbDb& h, rust::Str inst, rust
   return out;
 }
 
+// EVERY access point of an instance terminal (`dbITerm::getAccessPoints`), in that map's order:
+// master pins ascending by id (the map compares by object id), each pin's points in stored order,
+// for the instance's pin-access index. Flattened as x, y, routing level per point; the point is
+// as stored -- relative to the instance's location.
+rust::Vec<int32_t> iterm_access_points(const OdbDb& h, rust::Str inst, rust::Str pin) {
+  rust::Vec<int32_t> out;
+  dbITerm* t = require_inst(h, inst)->findITerm(s(pin).c_str());
+  if (!t) return out;
+  for (const auto& [mpin, aps] : t->getAccessPoints()) {
+    for (odb::dbAccessPoint* ap : aps) {
+      const odb::Point p = ap->getPoint();
+      out.push_back(p.x());
+      out.push_back(p.y());
+      out.push_back(ap->getLayer() != nullptr ? ap->getLayer()->getRoutingLevel() : 0);
+    }
+  }
+  return out;
+}
+
 // How many access points an instance terminal has over ALL its master pins (`getAccessPoints`).
 std::size_t iterm_access_point_count(const OdbDb& h, rust::Str inst, rust::Str pin) {
   dbITerm* t = require_inst(h, inst)->findITerm(s(pin).c_str());
