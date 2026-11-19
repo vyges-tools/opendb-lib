@@ -59,8 +59,8 @@ fn main() {
             (
                 ordered_archives(libs),
                 vec![
-                    src.join("src/odb/include"),
-                    src.join("src/utl/include"),
+                    or_pkg(&src).join("odb/include"),
+                    or_pkg(&src).join("utl/include"),
                     deps.join("fmt-src/include"),
                     deps.join("spdlog-src/include"),
                     deps.join("absl-src"),
@@ -192,7 +192,7 @@ fn source_tree() -> PathBuf {
     // compiling against a vendor tree that sits at a different commit is how you get
     // generated.cc calling methods the headers do not declare.
     let vendor = PathBuf::from("vendor/OpenROAD");
-    if vendor.join("src/odb/include/odb/db.h").exists() {
+    if has_odb(&vendor) {
         match tree_sha(&vendor) {
             Some(got) if got != sha => panic!(
                 "vendor/OpenROAD is at {got}, but openroad-pin.yaml pins {sha}.\n\
@@ -215,17 +215,30 @@ fn source_tree() -> PathBuf {
     // isConnectedToInputPort` — the three getters the pin had just added. The Mac did not
     // reproduce it, because there vendor/ exists and short-circuits above. A cached
     // artifact keyed on presence rather than identity is invisible to every gate we have.
-    let stale = dest.join("src/odb/include/odb/db.h").exists() && tree_sha(&dest).as_deref() != Some(sha.as_str());
+    let stale = has_odb(&dest) && tree_sha(&dest).as_deref() != Some(sha.as_str());
     if stale {
         println!("cargo:warning=vyges-opendb-lib: cached OpenROAD subtree is not at {sha}; re-fetching");
     }
-    if !dest.join("src/odb/include/odb/db.h").exists() || stale {
+    if !has_odb(&dest) || stale {
         fetch_openroad(&dest);
     }
     dest
 }
 
-/// Blobless, cone-sparse checkout of only src/odb + src/utl + cmake at the pinned commit.
+/// The directory of an OpenROAD tree that holds `odb/` and `utl/`. Upstream renamed `src/` to
+/// `openroad/` on 2026-11-17 (37a84d0a3e); trees before that keep `src/`. Keep in step with
+/// `OR_PKG` in CMakeLists.txt.
+fn or_pkg(root: &Path) -> PathBuf {
+    let new = root.join("openroad");
+    if new.join("odb/include/odb/db.h").exists() { new } else { root.join("src") }
+}
+
+/// Whether `root` holds the odb sources, in either layout.
+fn has_odb(root: &Path) -> bool {
+    or_pkg(root).join("odb/include/odb/db.h").exists()
+}
+
+/// Blobless, cone-sparse checkout of only odb + utl at the pinned commit.
 /// The pinned OpenROAD commit, read from the one file that defines it.
 ///
 /// 🔑 **`openroad-pin.yaml` is the single definition of the pin for the whole programme.** It is
@@ -266,7 +279,9 @@ fn fetch_openroad(dest: &Path) {
     // alone fails on a re-pin. Fetch the exact SHA first; on a fresh clone this is a no-op.
     run(&["fetch", "--quiet", "--filter=blob:none", "origin", &sha], Some(dest));
     // `cmake` is deliberately not in the set — upstream is retiring its CMake build and our
-    // CMakeLists reads only src/odb and src/utl. Keep in step with scripts/fetch-odb-src.sh.
-    run(&["sparse-checkout", "set", "--cone", "src/odb", "src/utl"], Some(dest));
+    // CMakeLists reads only odb and utl. Both layouts are named (src/ before upstream's
+    // 2026-11-17 rename, openroad/ after); a cone that does not exist checks out nothing.
+    // Keep in step with scripts/fetch-odb-src.sh.
+    run(&["sparse-checkout", "set", "--cone", "src/odb", "src/utl", "openroad/odb", "openroad/utl"], Some(dest));
     run(&["checkout", "--quiet", &sha], Some(dest));
 }

@@ -13,7 +13,7 @@ here="$(cd "$(dirname "$0")/.." && pwd)"
 opendb="$(cd "$here/../vyges-tools-opendb" && pwd)"
 
 # db.h must be present (the pinned OpenROAD odb subtree); fetch it if a fresh checkout.
-if [ ! -f "$here/vendor/OpenROAD/src/odb/include/odb/db.h" ]; then
+if [ ! -f "$here/vendor/OpenROAD/openroad/odb/include/odb/db.h" ] && [ ! -f "$here/vendor/OpenROAD/src/odb/include/odb/db.h" ]; then
   echo "== fetching pinned OpenROAD odb subtree (for db.h) =="
   "$here/scripts/fetch-odb-src.sh"
 fi

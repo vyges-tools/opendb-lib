@@ -28,7 +28,10 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent.parent
 LIB = ROOT                                   # vyges-opendb-lib
 API = ROOT.parent / "vyges-tools-opendb"     # sibling vyges-opendb crate
-DB_H = LIB / "vendor/OpenROAD/src/odb/include/odb/db.h"
+# src/ before upstream renamed it to openroad/ (2026-11-17, 37a84d0a3e), openroad/ after.
+DB_H = next((p for p in (LIB / "vendor/OpenROAD/openroad/odb/include/odb/db.h",
+                         LIB / "vendor/OpenROAD/src/odb/include/odb/db.h") if p.exists()),
+            LIB / "vendor/OpenROAD/src/odb/include/odb/db.h")
 
 # Name-addressable core classes: (db.h class name) -> resolver.
 #   key:     short prefix for the generated function/method names

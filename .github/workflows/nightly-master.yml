@@ -76,8 +76,9 @@ jobs:
           mkdir -p prebuilt/lib prebuilt/include
           cp build/libodb.a prebuilt/lib/
           find build/_deps -name '*.a' -exec cp {} prebuilt/lib/ \;
-          cp -R vendor/OpenROAD/src/odb/include/odb   prebuilt/include/
-          cp -R vendor/OpenROAD/src/utl/include/utl   prebuilt/include/
+          P=vendor/OpenROAD/openroad; [ -d "$P/odb" ] || P=vendor/OpenROAD/src   # src/ before the 2026-11-17 rename
+          cp -R "$P/odb/include/odb"   prebuilt/include/
+          cp -R "$P/utl/include/utl"   prebuilt/include/
           cp -R build/_deps/fmt-src/include/fmt       prebuilt/include/
           cp -R build/_deps/spdlog-src/include/spdlog prebuilt/include/
           cp -R build/_deps/absl-src/absl             prebuilt/include/

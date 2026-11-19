@@ -20,7 +20,7 @@ generator can emit cxx shims for the core classes the way OpenROAD generates the
 Usage:
   scripts/derive-schema.py [--odb <path-to-odb>] [--out <file.json>] [--all]
 
-  --odb   path to src/odb (default: vendor/OpenROAD/src/odb)
+  --odb   path to odb (default: vendor/OpenROAD/openroad/odb, else vendor/OpenROAD/src/odb)
   --out   output JSON path (default: docs/derived-core-schema.json)
   --all   include classes that already have an upstream schema (default: core only)
 """
@@ -230,12 +230,16 @@ def parse_class(name: str, base: str, body: str, bridged: set[str]) -> dict:
 
 def main() -> int:
     ap = argparse.ArgumentParser()
-    ap.add_argument("--odb", default="vendor/OpenROAD/src/odb")
+    # src/ before upstream renamed it to openroad/ (2026-11-17, 37a84d0a3e), openroad/ after.
+    ap.add_argument("--odb", default=None)
     ap.add_argument("--out", default="docs/derived-core-schema.json")
     ap.add_argument("--all", action="store_true")
     args = ap.parse_args()
 
     root = Path(__file__).resolve().parent.parent
+    if args.odb is None:
+        new = root / "vendor/OpenROAD/openroad/odb"
+        args.odb = str(new if new.is_dir() else root / "vendor/OpenROAD/src/odb")
     odb = (root / args.odb).resolve()
     db_h = odb / "include" / "odb" / "db.h"
     if not db_h.is_file():

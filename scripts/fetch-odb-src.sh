@@ -16,6 +16,8 @@ if [ ! -d "$dest/.git" ]; then
   git clone --quiet --filter=blob:none --no-checkout "$src" "$dest"
 fi
 cd "$dest"
-git sparse-checkout set --cone src/odb src/utl
+# Both layouts: src/ before upstream renamed it to openroad/ (2026-11-17, 37a84d0a3e), openroad/ after.
+# A cone that does not exist at the pinned commit checks out nothing.
+git sparse-checkout set --cone src/odb src/utl openroad/odb openroad/utl
 git checkout --quiet "$sha"
 echo "OpenROAD odb subtree @ $(git rev-parse --short HEAD) -> $dest ($(du -sh . | cut -f1))"

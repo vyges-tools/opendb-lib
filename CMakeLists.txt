@@ -18,8 +18,15 @@ include(${CMAKE_CURRENT_LIST_DIR}/build-config/vyges-flags.cmake)
 project(vyges_odb LANGUAGES CXX)
 
 set(OPENROAD_SRC "${CMAKE_SOURCE_DIR}/vendor/OpenROAD"
-    CACHE PATH "Root of the sparse OpenROAD subtree (src/odb, src/utl)")
-if(NOT EXISTS "${OPENROAD_SRC}/src/odb/include/odb/db.h")
+    CACHE PATH "Root of the sparse OpenROAD subtree (odb, utl)")
+# OR_PKG: the directory that holds odb/ and utl/. Upstream renamed src/ to openroad/ on
+# 2026-11-17 (37a84d0a3e); trees before that keep src/. Every path below goes through OR_PKG.
+if(EXISTS "${OPENROAD_SRC}/openroad/odb/include/odb/db.h")
+  set(OR_PKG "${OPENROAD_SRC}/openroad")
+else()
+  set(OR_PKG "${OPENROAD_SRC}/src")
+endif()
+if(NOT EXISTS "${OR_PKG}/odb/include/odb/db.h")
   message(FATAL_ERROR
     "OpenROAD odb source not found at ${OPENROAD_SRC}.\n"
     "Run: scripts/fetch-odb-src.sh   (sparse-checkout of the pinned SHA)")
@@ -55,7 +62,7 @@ FetchContent_MakeAvailable(spdlog)
 # we glob the sources into one static lib ourselves, as we already do for db+utl.
 # Still deliberately excluded: Tcl, SWIG, or-tools, engines, CDL/3dblox (add later if needed).
 # GDS (gdsin/gdsout + gdsUtil) is IN: odb's own reader and writer over its dbGDS* model.
-set(ODB "${OPENROAD_SRC}/src/odb/src")
+set(ODB "${OR_PKG}/odb/src")
 
 # The si2 LEF/DEF parsers are BISON-generated (their lexers are hand-written — no flex).
 find_package(BISON REQUIRED)
@@ -66,8 +73,8 @@ bison_target(def_parser "${ODB}/def/def/def.y" "${CMAKE_CURRENT_BINARY_DIR}/def_
 
 file(GLOB DB_SRC  CONFIGURE_DEPENDS "${ODB}/db/*.cpp")
 file(GLOB UTL_SRC CONFIGURE_DEPENDS
-     "${OPENROAD_SRC}/src/utl/src/*.cpp"
-     "${OPENROAD_SRC}/src/utl/src/prometheus/*.cpp")  # Logger.cpp references it unconditionally
+     "${OR_PKG}/utl/src/*.cpp"
+     "${OR_PKG}/utl/src/prometheus/*.cpp")  # Logger.cpp references it unconditionally
 # Drop the Tcl-glue files (need tcl.h; unused in a tcl-free libodb).
 list(FILTER UTL_SRC EXCLUDE REGEX "/(MakeLogger|decode)\\.cpp$")
 # LEF/DEF readers/writers + the parser libs. For lef/def, ONLY the lef/ + lefzlib/ (resp. def/ +
@@ -98,8 +105,8 @@ add_library(odb STATIC ${DB_SRC} ${UTL_SRC} ${IO_SRC} ${LINT_SRC}
 # downstream inherits a dependency on odb's internal layout.
 target_include_directories(odb PRIVATE "${ODB}/3dblox" "${CMAKE_CURRENT_SOURCE_DIR}/src")
 target_include_directories(odb PUBLIC
-  "${OPENROAD_SRC}/src/odb/include"
-  "${OPENROAD_SRC}/src/utl/include"
+  "${OR_PKG}/odb/include"
+  "${OR_PKG}/utl/include"
   "${ODB}/lef/lef" "${ODB}/lef/lefzlib"
   "${ODB}/def/def" "${ODB}/def/defzlib"
   "${CMAKE_CURRENT_BINARY_DIR}")            # generated lef_parser.hpp / def_parser.hpp
@@ -232,7 +239,7 @@ if(VYGES_ODB_GTEST)
                        GIT_TAG v1.15.2 GIT_SHALLOW TRUE)
   set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
   FetchContent_MakeAvailable(googletest)
-  set(ODB_TEST "${OPENROAD_SRC}/src/odb/test/cpp")
+  set(ODB_TEST "${OR_PKG}/odb/test/cpp")
   add_executable(odb_gtest "${ODB_TEST}/TestGeom.cpp")   # Point/Rect/Oct/Polygon geometry
   target_link_libraries(odb_gtest PRIVATE odb GTest::gtest GTest::gtest_main GTest::gmock)
 endif()
