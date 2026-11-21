@@ -15,6 +15,13 @@ cmake_minimum_required(VERSION 3.20)
 #   one rounding, which can move a coordinate), macOS minimum 15.0.
 # build.rs and the bundle workflow configure through this file.
 include(${CMAKE_CURRENT_LIST_DIR}/build-config/vyges-flags.cmake)
+# libc++ "fast" hardening, as the reference compiles every OpenROAD C++ file from pin f11b4276
+# (.bazelrc, upstream c61724d15f): cheap bounds and precondition checks (operator[], front/back on an
+# empty container, span/string_view/optional access) trap instead of running on with undefined
+# behaviour. ABI-neutral. Here, before FetchContent, so libodb and the pinned deps agree, as there.
+# Effective where the C++ library is libc++ (macOS, any clang -stdlib=libc++ build); with GCC and
+# libstdc++ the macro is inert. User decision 2026-11-21 (repin record f11b4276).
+add_compile_definitions(_LIBCPP_HARDENING_MODE=_LIBCPP_HARDENING_MODE_FAST)
 project(vyges_odb LANGUAGES CXX)
 
 set(OPENROAD_SRC "${CMAKE_SOURCE_DIR}/vendor/OpenROAD"

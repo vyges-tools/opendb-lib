@@ -3,9 +3,9 @@
   "source": "OpenDB public headers (src/odb/include/odb/db.h)",
   "note": "Method-based schema derived from the hand-written core classes; parallels OpenROAD's field-based codeGenerator schema for the classes it does not cover.",
   "scope": "all",
-  "class_count": 122,
-  "method_count": 2716,
-  "bridged_count": 2165,
+  "class_count": 123,
+  "method_count": 2725,
+  "bridged_count": 2168,
   "classes": [
     {
       "name": "dbAccessPoint",
@@ -6095,6 +6095,14 @@
           "kind": "iterator",
           "bridged": false,
           "element": "dbScanChain"
+        },
+        {
+          "name": "reset",
+          "return": "void",
+          "params": [],
+          "const": false,
+          "kind": "setter",
+          "bridged": false
         }
       ],
       "hand_written": false
@@ -16448,6 +16456,14 @@
           "kind": "relation",
           "bridged": true,
           "target": "dbScanInst"
+        },
+        {
+          "name": "clear",
+          "return": "void",
+          "params": [],
+          "const": false,
+          "kind": "setter",
+          "bridged": true
         }
       ],
       "hand_written": false
@@ -17537,6 +17553,15 @@
           "kind": "iterator",
           "bridged": true,
           "element": "dbTechLayerCutEnclosureRule"
+        },
+        {
+          "name": "getTechLayerCutEnclosureTableDefRules",
+          "return": "dbSet<dbTechLayerCutEnclosureTableDefRule>",
+          "params": [],
+          "const": true,
+          "kind": "iterator",
+          "bridged": false,
+          "element": "dbTechLayerCutEnclosureTableDefRule"
         },
         {
           "name": "getTechLayerEolExtensionRules",
@@ -21317,6 +21342,87 @@
           "const": true,
           "kind": "getter",
           "bridged": true
+        }
+      ],
+      "hand_written": false
+    },
+    {
+      "name": "dbTechLayerCutEnclosureTableDefRule",
+      "parent": "dbObject",
+      "methods": [
+        {
+          "name": "setCutClass",
+          "return": "void",
+          "params": [
+            {
+              "type": "dbTechLayerCutClassRule*",
+              "name": "cut_class"
+            }
+          ],
+          "const": false,
+          "kind": "setter",
+          "bridged": true
+        },
+        {
+          "name": "getCutClass",
+          "return": "dbTechLayerCutClassRule*",
+          "params": [],
+          "const": true,
+          "kind": "relation",
+          "bridged": true,
+          "target": "dbTechLayerCutClassRule"
+        },
+        {
+          "name": "addDefaultRow",
+          "return": "void",
+          "params": [
+            {
+              "type": "const DefaultRow&",
+              "name": "row"
+            }
+          ],
+          "const": false,
+          "kind": "setter",
+          "bridged": false
+        },
+        {
+          "name": "addWidthRow",
+          "return": "void",
+          "params": [
+            {
+              "type": "const WidthRow&",
+              "name": "row"
+            }
+          ],
+          "const": false,
+          "kind": "setter",
+          "bridged": false
+        },
+        {
+          "name": "getDefaultRows",
+          "return": "void",
+          "params": [
+            {
+              "type": "std::vector<DefaultRow>&",
+              "name": "rows"
+            }
+          ],
+          "const": true,
+          "kind": "setter",
+          "bridged": false
+        },
+        {
+          "name": "getWidthRows",
+          "return": "void",
+          "params": [
+            {
+              "type": "std::vector<WidthRow>&",
+              "name": "rows"
+            }
+          ],
+          "const": true,
+          "kind": "setter",
+          "bridged": false
         }
       ],
       "hand_written": false

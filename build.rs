@@ -88,6 +88,9 @@ fn main() {
     // libodb: Clang on arm64 contracts a*b+c into one fused op by default, which rounds once
     // instead of twice and so can move a coordinate.
     b.flag("-ffp-contract=off");
+    // libc++ fast hardening, as CMakeLists.txt sets for libodb (the reference's .bazelrc from pin
+    // f11b4276): the shim must see the same library configuration as the archive it links.
+    b.define("_LIBCPP_HARDENING_MODE", "_LIBCPP_HARDENING_MODE_FAST");
     if gen_write {
         b.file("src/generated_write.cc");
     }
